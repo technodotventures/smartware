@@ -1,0 +1,30 @@
+{
+  "normative": false,
+  "$comment": "NON-NORMATIVE decision-spike fixture. Defines no public verb, changes no released schema. schemas/, docs/spec/, and docs/protocol/ stay authoritative. A procedure is a typed L1 claim whose content is inert step markdown, paired with an L0 observation receipt that records the verification command, its real exit code and output, and the integrity hash.",
+  "scenarios": [
+    {
+      "id": "safe-replay",
+      "claim": { "claim_id": "claim_proc_release_01", "version": 1, "state": "active", "claim_type": "constraint", "claim_role": "checkpoint", "tags": ["procedure"], "scope": "workspace", "author": "agent", "confidence": "high", "content": "Release run: 1. checkout main 2. npm ci 3. npm run build 4. npm test", "derived_from": ["obs_proc_release_01"] },
+      "receipt": { "observation_id": "obs_proc_release_01", "source": "github-actions", "scope": "workspace", "content": { "command": "npm run build && npm test", "exit": 0, "output": "493 passing" }, "metadata": { "timestamp": "2026-09-27T00:00:00Z", "actor": "agent:builder", "integrity": { "hash": "sha256:deadbeef", "sequence": 1, "previous_hash": null } } },
+      "expected": "safe replay: the recorded steps return unchanged and the receipt hash matches the recorded outcome."
+    },
+    {
+      "id": "stale-then-corrected",
+      "claim": { "claim_id": "claim_proc_release_01", "version": 2, "state": "active", "content": "Release run: 1. checkout main 2. npm ci 3. npm run build 4. npm test 5. npm run verify:schemas", "supersedes": 1, "derived_from": ["obs_proc_release_02"] },
+      "receipt": { "observation_id": "obs_proc_release_02", "content": { "command": "npm test && npm run verify:schemas", "exit": 0, "output": "493 passing, schemas frozen" }, "metadata": { "timestamp": "2026-09-28T00:00:00Z", "actor": "agent:builder", "integrity": { "hash": "sha256:cafebabe", "sequence": 2, "previous_hash": "sha256:deadbeef" } } },
+      "expected": "revision: version 1 stays retained, supersedes=1 links version 2 back, and a worse attempt cannot destroy the proven revision."
+    },
+    {
+      "id": "scoped-erasure",
+      "claim": { "claim_id": "claim_proc_onboard_01", "version": 2, "state": "forgotten", "tombstone_id": "tomb_proc_onboard_01", "forgotten_at": "2026-09-29T00:00:00Z", "forgotten_by": "user:owner", "supersedes": 1 },
+      "receipt": { "observation_id": "obs_proc_onboard_01", "content": { "command": "forget_scope client:acme#1", "exit": 0, "output": "0 results in every lane" }, "metadata": { "timestamp": "2026-09-29T00:00:00Z", "actor": "user:owner", "integrity": { "hash": "sha256:01234567", "sequence": 3, "previous_hash": "sha256:cafebabe" } } },
+      "expected": "scoped erasure: FORGET.SCOPE removes the procedure from recall in every lane; the L0 audit receipt is retained but never rendered."
+    },
+    {
+      "id": "refusal-with-reason",
+      "claim": null,
+      "receipt": null,
+      "expected": "not covered by memory: no procedure record matches the requested scope or signature, so the correct outcome is a refusal with a reason, never a hallucinated procedure."
+    }
+  ]
+}
