@@ -1,0 +1,10 @@
+{
+  "name": "C",
+  "memory_lane": "full_skill",
+  "description": "Full skill/manual in context: the entire procedure manual and worked examples.",
+  "context": {
+    "injected_tokens": 1400,
+    "total_tokens": 1440,
+    "manual": "Full coding-skill manual with worked examples of off-by-one fixes, delimiter parsing, and date formatting, plus the complete fixture walkthrough."
+  }
+}

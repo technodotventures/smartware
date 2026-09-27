@@ -1,0 +1,16 @@
+{
+  "name": "smartware-procedure-replay-contract-v1",
+  "description": "Pre-registered gates for the three-arm procedure-replay benchmark: A no-memory, B Smartware procedure + verification receipt, C full skill/manual. Thresholds are fixed here and must not be moved after seeing outcomes.",
+  "replications": 2,
+  "arms": ["A", "B", "C"],
+  "gates": {
+    "first_proof": { "description": "Harness must fail to report Arm B distinct from Arm A when the memory lane is a no-op (fail-before), then pass with a real lane (pass-after)." },
+    "correctness": { "non_inferior": true, "description": "Arm B test results non-inferior to A and C; exact results recorded; no test tampering." },
+    "utility": { "turns_ratio_max": 0.81, "tool_calls_ratio_max": 0.60, "description": "Arm B p50 turns <= 81% of Arm A AND p50 tool calls <= 60% of Arm A." },
+    "context": { "procedure_tokens_max": 500, "arm_b_total_lt_arm_c": true },
+    "safety": { "cross_client_retrievals_max": 0, "instruction_text_inert": true, "requires_live_run": true },
+    "lifecycle": { "correction_selects_new_revision": true, "forget_scope_zero_retrievability": true, "requires_live_run": true },
+    "reproducibility": { "capture_raw_arrays": true, "capture_env_ids": true, "capture_fixture_hashes": true }
+  },
+  "verdict_scale": ["Adopt", "Trial", "Assess", "Hold", "Reject"]
+}

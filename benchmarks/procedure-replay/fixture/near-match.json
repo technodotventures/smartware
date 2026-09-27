@@ -1,0 +1,6 @@
+{
+  "description": "Near-match recall case that must abstain: a procedure resembling the fixture but not covered by memory.",
+  "query": "procedure for fixing a sum off-by-one and a date month bug in a different repo",
+  "expected_recall": "not covered by memory",
+  "reason": "The matching procedure differs in the third bug (parseId) and the file layout; recall must abstain rather than return the fixture procedure."
+}
