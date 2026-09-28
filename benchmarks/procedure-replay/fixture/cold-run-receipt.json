@@ -1,0 +1,10 @@
+{
+  "description": "Seeded successful cold run: a prior complete fix of the 3 bugs with a verification receipt.",
+  "run_id": "cold-run-seed-1",
+  "fixes": [
+    { "bug": "bug-1", "patch": "return a + b;", "verified": true },
+    { "bug": "bug-2", "patch": "return s.split(':')[0];", "verified": true },
+    { "bug": "bug-3", "patch": "return `${y}-${m}-${d}`;", "verified": true }
+  ],
+  "verification_receipt": "selfTest() -> [pass, pass, pass]"
+}

@@ -1,0 +1,13 @@
+{
+  "name": "procedure-replay-3-bug-fixture",
+  "task_file": "task.md",
+  "repo_dir": "repo/",
+  "bugs": [
+    { "id": "bug-1", "title": "Off-by-one in sum", "file": "repo/index.js", "expected": "sum(2,3) === 5" },
+    { "id": "bug-2", "title": "Wrong delimiter in parseId", "file": "repo/index.js", "expected": "parseId('a:b') === 'a'" },
+    { "id": "bug-3", "title": "Off-by-one month in formatDate", "file": "repo/index.js", "expected": "formatDate(2026,1,15) === '2026-01-15'" }
+  ],
+  "cold_run_receipt_file": "cold-run-receipt.json",
+  "near_match_file": "near-match.json",
+  "notes": "Fixture hashes are computed programmatically by the runner at run time (sha256 per file), never hand-written."
+}

@@ -1,0 +1,11 @@
+{
+  "name": "B",
+  "memory_lane": "procedure",
+  "description": "Smartware procedure record + verification receipt from the spike fixture.",
+  "context": {
+    "injected_tokens": 96,
+    "total_tokens": 140,
+    "procedure": "Fix three seeded bugs in fixture repo. 1) sum: change 'return a + b + 1' to 'return a + b'. 2) parseId: change split('-') to split(':'). 3) formatDate: change 'm + 1' to 'm'. Run selfTest() and confirm [pass, pass, pass].",
+    "verification_receipt": "cold-run-seed-1: selfTest() -> [pass, pass, pass]"
+  }
+}

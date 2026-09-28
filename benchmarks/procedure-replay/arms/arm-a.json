@@ -1,0 +1,6 @@
+{
+  "name": "A",
+  "memory_lane": "none",
+  "description": "No memory: task statement only.",
+  "context": { "injected_tokens": 0, "total_tokens": 40 }
+}
