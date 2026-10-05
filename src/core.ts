@@ -1294,17 +1294,32 @@ export class SmartwareCore {
     return runCompileBatch(ctx, opts);
   }
 
-  /** Queue ledger + freshness surface for the compile payload contract. */
+  /**
+   * Queue ledger, freshness and timing surface for the compile payload contract.
+   *
+   * `timing` is the half that names a stalled drain. A queue with work waiting and a queue whose
+   * drain has stopped are identical in the counts alone, and only the age of the oldest pending job
+   * separates them. It is exposed here because embedding hosts read the core rather than this
+   * package's own health route, and the queue lives behind this method: without it a host can see
+   * that work is waiting but cannot tell whether anything is draining it. A host that wants a
+   * derived age computes it against its own clock from `oldest_pending_at`.
+   */
   compileQueueStats(): {
     statuses: Record<CompileJobStatus, number>;
     pending_count: number;
     freshness: { unverified: number; extracted: number; failed: number };
+    timing: {
+      oldest_pending_at: string | null;
+      last_completed_at: string | null;
+      last_failed_at: string | null;
+    };
   } | null {
     if (!this.compileQueue) return null;
     return {
       statuses: this.compileQueue.stats(),
       pending_count: this.compileQueue.countPending(),
       freshness: this.searchIndex.countObservationsByFreshness(),
+      timing: this.compileQueue.timingStats(),
     };
   }
 
