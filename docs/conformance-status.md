@@ -26,12 +26,17 @@ Specification v1.6.16 conformance.
 
 ## Release identity
 
-- The package version is **0.7.0**; `package.json` and `src/version.ts` are kept
+- The package version is **0.8.1**; `package.json` and `src/version.ts` are kept
   in sync and are the single source of truth for the version string.
-- 0.7.0 carries the v0.5.0 protocol surface. The earlier published `0.6.3` on
-  the npm registry **predates that surface** and does not contain
-  `schemas/v0.5.0`; integrators following the v0.5.0 documentation must not
-  pin `0.6.3`.
+- 0.8.1 carries the v0.5.0 protocol surface, and adds queue **timing** to the
+  core's `compileQueueStats()` (`oldest_pending_at`, `last_completed_at`,
+  `last_failed_at`, read from the queue's existing `timingStats()`). An
+  embedding host can age the queue instead of inferring a stalled drain from
+  counts that do not move, which is how a queue stalled for two days with
+  nothing to alert on. The change is additive; existing callers are unaffected.
+- The earlier published `0.6.3` on the npm registry **predates the v0.5.0
+  surface** and does not contain `schemas/v0.5.0`; integrators following the
+  v0.5.0 documentation must not pin `0.6.3`.
 
 ## Verified baseline
 

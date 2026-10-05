@@ -1,6 +1,6 @@
 {
   "name": "smartware",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "description": "An open, user-owned memory protocol for every app and agent, with provenance, bitemporal truth, policy-first retrieval, and safe fallback.",
   "type": "module",
   "main": "dist/core.js",
