@@ -23,30 +23,40 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      # node 24 (npm 11.6+) is required for OIDC trusted publishing. Node 22's
-      # npm 10.x cannot perform the OIDC exchange at all.
+      # node 24 (npm 11.5.1+) is required for OIDC trusted publishing; node 22's
+      # npm 10.x cannot perform the exchange at all. The bundled version is
+      # checked below rather than assumed.
       #
-      # registry-url is deliberately NOT set, and that is not an oversight. With
-      # it, setup-node writes an .npmrc containing
-      # `//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}` and exports a
-      # placeholder value for that variable when one is not supplied. npm then
-      # finds a credential for the registry, prefers it over the OIDC exchange,
-      # and sends the placeholder: the publish goes out anonymous and the registry
-      # answers 404 "could not be found or you do not have permission", not 401.
-      # The provenance step still succeeds in that state, which is what makes an
-      # unauthenticated publish read like a permissions problem rather than a
-      # missing credential. See actions/setup-node#1440.
+      # registry-url is set to match the documented trusted-publishing example.
+      # Note what that means: setup-node writes an .npmrc containing
+      # `//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}` and, historically,
+      # exported a placeholder value for that variable (actions/setup-node#1440).
+      # npm runs the OIDC exchange before it reads that credential, so the
+      # exchange decides the outcome; the step below prints whether the variable
+      # is present so a failure on the fallback path cannot be mistaken for the
+      # exchange failing.
       - uses: actions/setup-node@v6
         with:
           node-version: 24
+          registry-url: https://registry.npmjs.org
           package-manager-cache: false   # never cache in release builds
 
-      # Fail loudly here rather than as a misleading 404 at the publish step.
+      # Fail loudly here rather than as a misleading 404 or ENEEDAUTH at publish.
       - name: Assert npm supports trusted publishing (>= 11.5.1)
         run: |
           V=$(npm --version)
           echo "npm $V"
           node -e "const [a,b]=process.argv[1].split('.').map(Number); if (a<11||(a===11&&b<5)) { console.error('npm ' + process.argv[1] + ' is below 11.5.1 and cannot perform the OIDC exchange'); process.exit(1) }" "$V"
+
+      # npm's oidc module never throws. It returns silently and reports its reason
+      # only at verbose level, after which the publish fails as a plain
+      # "need auth" or a 404 that points at permissions rather than at the
+      # exchange. Print the environment facts here so the two failure modes stay
+      # distinguishable: missing id-token permission versus an exchange the
+      # registry refused.
+      - name: OIDC environment check
+        run: |
+          node -e "['ACTIONS_ID_TOKEN_REQUEST_URL','ACTIONS_ID_TOKEN_REQUEST_TOKEN','NPM_ID_TOKEN','NODE_AUTH_TOKEN','GITHUB_REPOSITORY','GITHUB_REPOSITORY_OWNER','GITHUB_WORKFLOW_REF','GITHUB_REF'].forEach(n => { const v = process.env[n]; console.log(n + ':', v === undefined ? 'ABSENT' : (n.endsWith('TOKEN') ? 'present' : v)) })"
 
       - run: npm ci
 
@@ -56,6 +66,12 @@ jobs:
       - run: npm run verify:saas
 
       - name: Publish with provenance
+        env:
+          # Surface npm's oidc diagnostics: "Skipped because incorrect
+          # permissions for id-token within GitHub workflow", or "Failed token
+          # exchange request with body message: <registry reason>". npm redacts
+          # credentials from its own log output.
+          NPM_CONFIG_LOGLEVEL: verbose
         run: |
           VERSION=$(node -p "require('./package.json').version")
           TAG_VERSION=${GITHUB_REF_NAME#v}
