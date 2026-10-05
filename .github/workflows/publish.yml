@@ -24,14 +24,29 @@ jobs:
       - uses: actions/checkout@v6
 
       # node 24 (npm 11.6+) is required for OIDC trusted publishing. Node 22's
-      # npm 10.x cannot perform the OIDC exchange, so it sends setup-node's
-      # placeholder NODE_AUTH_TOKEN instead and the registry rejects the publish
-      # with a 404. See docs.npmjs.com/trusted-publishers.
+      # npm 10.x cannot perform the OIDC exchange at all.
+      #
+      # registry-url is deliberately NOT set, and that is not an oversight. With
+      # it, setup-node writes an .npmrc containing
+      # `//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}` and exports a
+      # placeholder value for that variable when one is not supplied. npm then
+      # finds a credential for the registry, prefers it over the OIDC exchange,
+      # and sends the placeholder: the publish goes out anonymous and the registry
+      # answers 404 "could not be found or you do not have permission", not 401.
+      # The provenance step still succeeds in that state, which is what makes an
+      # unauthenticated publish read like a permissions problem rather than a
+      # missing credential. See actions/setup-node#1440.
       - uses: actions/setup-node@v6
         with:
           node-version: 24
-          registry-url: https://registry.npmjs.org
           package-manager-cache: false   # never cache in release builds
+
+      # Fail loudly here rather than as a misleading 404 at the publish step.
+      - name: Assert npm supports trusted publishing (>= 11.5.1)
+        run: |
+          V=$(npm --version)
+          echo "npm $V"
+          node -e "const [a,b]=process.argv[1].split('.').map(Number); if (a<11||(a===11&&b<5)) { console.error('npm ' + process.argv[1] + ' is below 11.5.1 and cannot perform the OIDC exchange'); process.exit(1) }" "$V"
 
       - run: npm ci
 
