@@ -41,7 +41,8 @@ REGISTRY = {
     "memoryos": "baselines.memoryos:MemoryOS",
     "bm25": "baselines.reference:BM25Only",
     "dense": "baselines.reference:DenseOnly",
-    "orp": "orp.engine:ORPSystem",
+    "orp": "bench.orp_variants:ORPLtr",
+    "orp-rrf": "bench.orp_variants:ORPRrf",
 }
 
 _TASKS = {}

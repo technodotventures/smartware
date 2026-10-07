@@ -290,6 +290,14 @@ If any channel, index or model is unavailable, the response MUST list it in `deg
 
 Given the same request and `snapshot`, an engine MUST return the same pack. `snapshot` identifies the index state used.
 
+### 5.10 Declared rankers
+
+If an engine uses a learned or model-based ranker, `capabilities` MUST name it with a version (`ranker: "orp-gbdt-1"`), list its input features, and state what data it was fitted on. Engines SHOULD also offer an unlearned mode (`mode: fast`) so clients can compare. Learned rankers MUST NOT use features that bypass admissibility (e.g. statistics computed over inadmissible memories).
+
+### 5.11 Multi-scope recall (SaaS)
+
+A single recall MAY span several scopes the principal can read (organisation, team, channel, user, agent). Engines MUST rank all admissible candidates on one scale rather than merging per-scope result lists by raw score, MUST return each item's `scope`, and SHOULD honour `scope.prefer` as a soft prior. Per-scope quotas, when needed, are expressed with `kinds`-style quota maps on scopes.
+
 ## 6. Access control and governance
 
 ### 6.1 Principals and tokens
@@ -396,13 +404,13 @@ Rules: pinned dataset versions; dev/test splits with all tuning on dev; per-cate
 
 ## Appendix B. Reference engine recall algorithm
 
-The reference engine (`orp/engine.py`) implements §5 without any language model:
+The reference engine (`orp/engine.py`) implements §5 without any language model. It ships two declared rankers: `rrf` (weighted reciprocal-rank fusion plus multiplicative features, hand-tuned on public dev splits) and `gbdt` (a gradient-boosted tree ensemble, exported as JSON, over the 39 declared features in `Engine.FEATURES`, fitted only on public dev splits). Steps:
 
 1. Admissibility mask (§5.1, §5.2).
 2. Query analysis: content terms, named entities resolved against known actors and entities, temporal intent (window, order, current, when, count, span) relative to `as_of`, role intent.
 3. Channels, each nominating its own top 200: BM25 over units; BM25 over three-unit windows; BM25 over two-sentence segments max-pooled to units; dense over units, windows and segments; thread relevance (BM25 + dense over whole threads, rank-fused); entity match with hub damping; temporal window; RM3 pseudo-relevance feedback.
-4. Weighted reciprocal-rank fusion (declared weights, `k` declared).
-5. Features: query-term coverage over the unit and its prompt, actor match, role match, order/current intent among strong candidates.
+4. Weighted reciprocal-rank fusion (declared weights, `k` declared) to form a 300-candidate pool.
+5. Ranking over the pool: either multiplicative features (`rrf`) or the learned model (`gbdt`) over per-channel reciprocal ranks, normalised lexical and dense scores, query coverage of the unit and its neighbours, actor and role match, temporal window and order position, dialogue cues (question, reply, prompt), answer-type cues (a "when" question and a unit with a time expression; a "how many" question and a unit with a number; a "where" question and a unit naming a place) and query-type flags.
 6. Thread interleaving for count/span questions (aggregation needs breadth).
 7. Packing per §5.5: dialogue spans, once-per-thread headers, resolved dates, snippeted long units, hard budget.
 

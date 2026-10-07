@@ -51,11 +51,16 @@ class Params:
     w_entity: float = 0.4
     w_time: float = 0.5
     w_prf: float = 0.6
+    w_sub: float = 0.0  # optional channel, off by default (no dev gain)
+    w_qexp: float = 0.0  # optional channel, off by default (no dev gain)
+    qexp_weight: float = 0.4
+    qexp_min: float = 0.45
     w_bm25_seg: float = 0.6
     w_dense_seg: float = 0.4
     seg_sentences: int = 2
     rrf_k: float = 60.0
     depth: int = 200  # candidates per channel
+    pool: int = 300  # fused candidates passed to features/ranker
     # rerank features (multiplicative on fused score)
     f_cover: float = 0.6
     f_actor: float = 0.25
@@ -75,6 +80,12 @@ class Params:
     headers: bool = True
     resolve_dates: bool = True
     count_div: bool = True
+    ranker: str = "rrf"  # rrf | linear
+    lin_w: tuple = ()
+    lin_b: float = 0.0
+    lin_mu: tuple = ()
+    lin_sd: tuple = ()
+    gbdt: dict | None = None  # {"base": float, "trees": [{"f":[], "t":[], "l":[], "r":[], "v":[], "leaf":[]}]}
 
 
 _Q_STRIP = re.compile(r"^(what|when|where|who|whom|which|why|how|did|does|do|is|are|was|were|can|could|would|should|"
@@ -91,6 +102,8 @@ class Engine:
         self._dirty = True
         self._claims: dict[tuple[str, str], list[str]] = defaultdict(list)
         self.audit: list[dict] = []
+        self.collect = False
+        self.last = None
 
     # ------------------------------------------------------------ write
     def remember(self, items: Memory | list[Memory], principal: Principal = SYSTEM) -> list[str]:
@@ -255,6 +268,19 @@ class Engine:
         self.bm_seg = BM25(seg_txt)
         self.ES = self.emb.embed_many(seg_txt) if seg_txt else np.zeros((0, 1))
         self.bm = BM25(unit_txt)
+        # embedding-neighbour query expansion: one surface form per stem, embedded once
+        surf = {}
+        for t in unit_txt:
+            for w in words(t):
+                if w in STOPWORDS or len(w) < 3 or w.isdigit():
+                    continue
+                st = stem(w)
+                if st in self.bm.vocab and st not in surf:
+                    surf[st] = w
+        df = np.asarray((self.bm.mat > 0).sum(axis=0)).ravel()
+        keep = [st for st in surf if 1 < df[self.bm.vocab[st]] < max(3, 0.05 * n)]
+        self.xv_terms = keep
+        self.XV = self.emb.embed_many([surf[st] for st in keep]) if keep else np.zeros((0, 1))
         self.bm_win = BM25(win_txt)
         self.E = self.emb.embed_many([f"{m.actor}: {m.content}" for m in ms]) if n else np.zeros((0, 1))
         W = np.zeros_like(self.E)
@@ -293,6 +319,14 @@ class Engine:
         self.is_assistant = np.array([r == "assistant" for r in roles])
         self.has_roles = bool(self.is_assistant.any())
         self.unit_terms = [set(terms(t)) for t in unit_txt]
+        _time_rx = re.compile(r"\b(yesterday|today|tomorrow|tonight|last|next|ago|week|weekend|month|year|"
+                              r"monday|tuesday|wednesday|thursday|friday|saturday|sunday|january|february|march|"
+                              r"april|may|june|july|august|september|october|november|december|\d{4}|"
+                              r"\d{1,2}(st|nd|rd|th))\b", re.I)
+        self.has_time = np.array([bool(m.meta.get("time_refs")) or bool(_time_rx.search(m.content)) for m in ms])
+        self.has_num = np.array([bool(re.search(r"\b(\d+|one|two|three|four|five|six|seven|eight|nine|ten|"
+                                                r"twice|once|several|dozen)\b", m.content, re.I)) for m in ms])
+        self.has_place = np.array([bool(m.meta.get("entities")) for m in ms])
         self._dirty = False
 
     # ------------------------------------------------------------ admissibility (before ranking)
@@ -338,6 +372,7 @@ class Engine:
         if not mask.any():
             return ContextPack([], 0, req.budget_tokens, 0.0, self._snapshot(), ["no admissible memories"])
         q = req.query
+        self._qtext = q
         qcore = _Q_STRIP.sub("", q).strip()
         ti = timeparse.parse_query(q, now)
         qterms = [t for t in terms(q)]
@@ -360,7 +395,9 @@ class Engine:
         s_dense = self.E @ qvec
         chans["dense"] = (p.w_dense, topranks(s_dense + 1.0))
         chans["dense_win"] = (p.w_dense_win, topranks(self.W @ qvec + 1.0))
-        if p.w_bm25_seg > 0 or p.w_dense_seg > 0:
+        ub = np.zeros(n)
+        ud = np.full(n, -1.0)
+        if p.w_bm25_seg > 0 or p.w_dense_seg > 0 or p.ranker == "linear" or self.collect:
             ub = np.zeros(n)
             np.maximum.at(ub, self.seg_unit, self.bm_seg.score(q))
             chans["bm25_seg"] = (p.w_bm25_seg, topranks(ub))
@@ -391,6 +428,34 @@ class Engine:
             inwin = (self.ts >= lo) & (self.ts <= hi)
             if inwin[mask].any():
                 chans["time"] = (p.w_time, topranks(inwin * (s_bm + 0.1 * (s_dense + 1)) + 1e-6 * inwin))
+        # embedding-neighbour expansion (LLM-free query rewriting): add the corpus words nearest to each query word
+        if len(self.xv_terms) and p.w_qexp > 0:
+            wq = {t: 1.0 for t in qset}
+            for w in set(words(q)):
+                if w in STOPWORDS or len(w) < 3:
+                    continue
+                v = self.emb.embed(w)
+                if not v.any():
+                    continue
+                sims = self.XV @ v
+                for j in np.argsort(-sims)[:3]:
+                    if sims[j] < p.qexp_min:
+                        break
+                    t = self.xv_terms[j]
+                    if t not in qset:
+                        wq[t] = max(wq.get(t, 0), p.qexp_weight * float(sims[j]))
+            if len(wq) > len(qset):
+                chans["qexp"] = (p.w_qexp, topranks(self.bm.score("", weights=wq)))
+        # query decomposition: "between A and B", "A and B", "A or B" -> each part retrieves on its own
+        parts = _split_query(q)
+        self._n_parts = len(parts)
+        if len(parts) >= 2:
+            per = [topranks(self.bm.score(pt), 60) for pt in parts]
+            sub = np.zeros(n)
+            for rk in per:
+                for k, r in rk.items():
+                    sub[k] = max(sub[k], 1.0 / (10 + r))
+            chans["sub"] = (p.w_sub, topranks(sub))
         # first-pass fusion for pseudo-relevance feedback (RM3-style)
         fused0 = self._fuse(chans, n)
         if p.w_prf > 0:
@@ -415,7 +480,7 @@ class Engine:
                     wq[t] = wq.get(t, 0) + p.prf_mix * v / mx
                 chans["prf"] = (p.w_prf, topranks(self.bm.score("", weights=wq)))
         fused = self._fuse(chans, n)
-        cand = np.argsort(-fused)[: max(req.max_items * 4, 200)]
+        cand = np.argsort(-fused)[: max(req.max_items * 4, p.pool)]
         cand = [int(k) for k in cand if fused[k] > 0 and mask[k]]
         # ---------------- feature rerank
         first_person = bool(re.search(r"\b(i|my|me|mine|i've|i'm|i'd)\b", q.lower()))
@@ -438,8 +503,21 @@ class Engine:
                 elif first_person and not asks_assistant and m.role == "user":
                     sc *= 1 + p.f_role
             final[k] = sc
+        # learned linear ranker (trained on public dev splits only; see bench/ltr.py)
+        if (p.ranker == "linear" and p.lin_w) or (p.ranker == "gbdt" and p.gbdt) or self.collect:
+            X = self._featurize(cand, chans, fused, top_fused, qset, qents, ti, first_person, asks_assistant, s_bm,
+                                s_dense, ub, ud)
+            if self.collect:
+                self.last = (cand, X)
+            if p.ranker == "linear" and p.lin_w and len(cand):
+                Z = (X - np.array(p.lin_mu)) / np.array(p.lin_sd)
+                z = Z @ np.array(p.lin_w) + p.lin_b
+                final = {k: float(1 / (1 + math.exp(-z[i]))) for i, k in enumerate(cand)}
+            elif p.ranker == "gbdt" and p.gbdt and len(cand):
+                z = _gbdt_predict(p.gbdt, X)
+                final = {k: float(1 / (1 + math.exp(-z[i]))) for i, k in enumerate(cand)}
         # order / current-state intents: among strong candidates prefer earliest/latest
-        if ti.order and final:
+        if ti.order and final and p.ranker == "rrf":
             strong = [k for k, v in final.items() if v >= 0.5 * max(final.values())][:30]
             if len(strong) > 1:
                 tsv = sorted(self.ts[k] for k in strong)
@@ -453,9 +531,85 @@ class Engine:
             ranked = _interleave_threads(ranked[:60], self.thread_of) + ranked[60:]
         # ---------------- packing
         items = self._pack(ranked[: req.max_items], final, chans, req, qterms)
-        cov = min(1.0, (final[ranked[0]] if ranked else 0) / (1 + p.f_cover + p.f_actor + p.f_role))
+        if p.ranker in ("linear", "gbdt"):
+            cov = final[ranked[0]] if ranked else 0.0
+        else:
+            cov = min(1.0, (final[ranked[0]] if ranked else 0) / (1 + p.f_cover + p.f_actor + p.f_role))
         return ContextPack(items, sum(i.tokens for i in items), req.budget_tokens, round(float(cov), 3),
                            self._snapshot(), [f"time:{ti.window[0].date()}..{ti.window[1].date()}"] if ti.window else [])
+
+    FEATURES = ("rr_bm25", "rr_bm25_win", "rr_dense", "rr_dense_win", "rr_bm25_seg", "rr_dense_seg", "rr_thread",
+                "rr_entity", "rr_time", "rr_prf", "fused", "bm25_norm", "bm25_seg_norm", "cos", "cos_seg", "cover",
+                "cover_unit", "cover_next", "actor_match", "role_match", "in_window", "order_pos", "log_tokens",
+                "is_question", "prev_is_question", "next_reply", "when_q", "count_q", "nb_bm25", "has_time",
+                "has_number", "when_x_time", "count_x_number", "where_x_place", "ent_overlap", "rr_thread_x_cover",
+                "rr_sub", "n_parts", "rr_qexp")
+
+    def _featurize(self, cand, chans, fused, top_fused, qset, qents, ti, first_person, asks_assistant, s_bm, s_dense,
+                   ub, ud):
+        n_c = len(cand)
+        X = np.zeros((n_c, len(self.FEATURES)), np.float32)
+        if not n_c:
+            return X
+        names = ["bm25", "bm25_win", "dense", "dense_win", "bm25_seg", "dense_seg", "thread", "entity", "time", "prf"]
+        bmx = max(float(s_bm[cand].max()), 1e-6)
+        ubx = max(float(ub[cand].max()), 1e-6)
+        qn = max(1, len(qset))
+        win = None
+        if ti.window:
+            win = (ti.window[0].timestamp(), ti.window[1].timestamp())
+        tsv = self.ts[cand]
+        lo, hi = float(tsv.min()), float(tsv.max())
+        where_q = bool(re.search(r"\bwhere\b|\bwhich (city|country|place|state|town)\b", self._qtext.lower()))
+        qents_all = {w.lower().removesuffix("'s") for w in re.findall(r"\b[A-Z][a-zA-Z'\-]+\b", self._qtext)}
+        for i, k in enumerate(cand):
+            f = X[i]
+            for j, c in enumerate(names):
+                r = chans.get(c, (0, {}))[1].get(k)
+                f[j] = 0.0 if r is None else 1.0 / (1 + r)
+            f[10] = fused[k] / top_fused
+            f[11] = s_bm[k] / bmx
+            f[12] = ub[k] / ubx
+            f[13] = s_dense[k]
+            f[14] = ud[k]
+            pk, nk = self.prev[k], self.next[k]
+            ut = self.unit_terms[k]
+            pt = self.unit_terms[pk] if pk >= 0 else set()
+            nt = self.unit_terms[nk] if nk >= 0 else set()
+            f[15] = len(qset & (ut | pt)) / qn
+            f[16] = len(qset & ut) / qn
+            f[17] = len(qset & nt) / qn
+            m = self.mem[self.ids[k]]
+            f[18] = float(bool(qents) and m.actor.lower() in qents)
+            if self.has_roles:
+                f[19] = float((asks_assistant and m.role == "assistant") or
+                              (first_person and not asks_assistant and m.role == "user"))
+            if win:
+                f[20] = float(win[0] <= self.ts[k] <= win[1])
+            if ti.order:
+                pos = (self.ts[k] - lo) / (hi - lo + 1e-9)
+                f[21] = pos if ti.order == "latest" else 1 - pos
+            f[22] = math.log1p(self.ntok[k])
+            f[23] = float(m.content.rstrip().endswith("?"))
+            f[24] = float(pk >= 0 and self.mem[self.ids[pk]].content.rstrip().endswith("?"))
+            f[25] = float(nk >= 0 and self.mem[self.ids[nk]].actor != m.actor)
+            f[26] = float(ti.when)
+            f[27] = float(ti.count or ti.span)
+            f[28] = max(s_bm[pk] if pk >= 0 else 0.0, s_bm[nk] if nk >= 0 else 0.0) / bmx
+            f[29] = float(self.has_time[k])
+            f[30] = float(self.has_num[k])
+            f[31] = f[26] * f[29]
+            f[32] = f[27] * f[30]
+            f[33] = float(where_q) * float(self.has_place[k])
+            ents = {e.lower() for e in m.meta.get("entities", [])}
+            f[34] = len(ents & qents_all) / max(1, len(qents_all))
+            f[35] = f[6] * f[15]
+            r = chans.get("sub", (0, {}))[1].get(k)
+            f[36] = 0.0 if r is None else 1.0 / (1 + r)
+            f[37] = float(self._n_parts)
+            r = chans.get("qexp", (0, {}))[1].get(k)
+            f[38] = 0.0 if r is None else 1.0 / (1 + r)
+        return X
 
     def _fuse(self, chans, n):
         out = np.zeros(n)
@@ -548,6 +702,44 @@ class Engine:
 
 
 # ---------------------------------------------------------------- helpers
+_GBDT_CACHE: dict[int, tuple] = {}
+
+
+def _gbdt_predict(model: dict, X: np.ndarray) -> np.ndarray:
+    """Evaluate an exported gradient-boosted tree ensemble (feature <= threshold goes left)."""
+    hit = _GBDT_CACHE.get(id(model))
+    if hit is not None and hit[0] is model:
+        trees = hit[1]
+    else:
+        trees = [tuple(np.asarray(t[k]) for k in ("f", "t", "l", "r", "v", "leaf")) for t in model["trees"]]
+        _GBDT_CACHE[id(model)] = (model, trees)
+    out = np.full(len(X), float(model["base"]))
+    rows = np.arange(len(X))
+    for f, t, l, r, v, leaf in trees:
+        node = np.zeros(len(X), dtype=np.int64)
+        for _ in range(64):
+            active = ~leaf[node].astype(bool)
+            if not active.any():
+                break
+            nd = node[active]
+            go_left = X[rows[active], f[nd]] <= t[nd]
+            node[active] = np.where(go_left, l[nd], r[nd])
+        out += v[node]
+    return out
+
+
+
+_SPLIT = re.compile(r"\bbetween\b|\band\b|\bor\b|\bversus\b|\bvs\.?\b|,|;|\bafter\b|\bbefore\b|\bthan\b|"
+                    r"\bsince\b|\bwhen\b|\bwhile\b")
+
+
+def _split_query(q: str) -> list[str]:
+    """Split a question into retrievable parts; keep only parts with >= 2 content terms."""
+    parts = [x.strip() for x in _SPLIT.split(q) if x and x.strip()]
+    good = [x for x in parts if len(terms(x)) >= 2]
+    return good if len(good) >= 2 else []
+
+
 def _rrf(rankings: list[np.ndarray], n: int, k: float = 60) -> np.ndarray:
     out = np.zeros(n)
     for order in rankings:

@@ -106,6 +106,17 @@ class MCPBinding(unittest.TestCase):
             self.assertIn("British", r["result"]["content"][0]["text"])
             r = rpc(5, "resources/read", {"uri": f"orp://tv/mem/{mid}"})
             self.assertIn("British", r["result"]["contents"][0]["text"])
+            sub = rpc(7, "resources/subscribe", {"uri": "orp://tv/thread/prefs"})
+            self.assertEqual(sub["result"], {})
+            p.stdin.write(json.dumps({"jsonrpc": "2.0", "id": 8, "method": "tools/call", "params": {
+                "name": "orp_remember", "arguments": {"memories": [{"content": "Stevie likes flat whites",
+                                                                    "thread": "prefs"}]}}}) + "\n")
+            p.stdin.flush()
+            first = json.loads(p.stdout.readline())
+            second = json.loads(p.stdout.readline())
+            note = first if first.get("method") else second
+            self.assertEqual(note["method"], "notifications/resources/updated")
+            self.assertEqual(note["params"]["uri"], "orp://tv/thread/prefs")
             r = rpc(6, "tools/call", {"name": "orp_recall", "arguments": {"query": "x", "who_am_i": "admin"}})
             self.assertIn("error", r)  # identity cannot be asserted through arguments
             self.assertTrue(os.path.exists(store))

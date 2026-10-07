@@ -1,0 +1,46 @@
+collected 471 dev queries, 141295 candidates, 647 positives
+RRF dev J=0.7832
+C=0.01 CV J=0.7912  locomo R@1000=0.809 lme R@1000=0.815
+C=0.1 CV J=0.7909  locomo R@1000=0.811 lme R@1000=0.829
+gbdt {'max_iter': 150, 'learning_rate': 0.05, 'max_leaf_nodes': 15, 'min_samples_leaf': 40, 'l2_regularization': 1.0} CV J=0.8074  locomo R@1000=0.794 lme R@1000=0.854
+gbdt {'max_iter': 300, 'learning_rate': 0.05, 'max_leaf_nodes': 15, 'min_samples_leaf': 80, 'l2_regularization': 1.0} CV J=0.8093  locomo R@1000=0.792 lme R@1000=0.848
+gbdt {'max_iter': 150, 'learning_rate': 0.05, 'max_leaf_nodes': 7, 'min_samples_leaf': 80, 'l2_regularization': 1.0} CV J=0.8072  locomo R@1000=0.811 lme R@1000=0.831
+chosen C {'max_iter': 300, 'learning_rate': 0.05, 'max_leaf_nodes': 15, 'min_samples_leaf': 80, 'l2_regularization': 1.0} CV J 0.8093 vs RRF 0.7832
+{
+ "rr_bm25": 0.028196915984153748,
+ "rr_bm25_win": 0.0715777799487114,
+ "rr_dense": 0.052093759179115295,
+ "rr_dense_win": 0.015317405574023724,
+ "rr_bm25_seg": 0.046450644731521606,
+ "rr_dense_seg": 0.020903944969177246,
+ "rr_thread": 0.13812674582004547,
+ "rr_entity": 0.023194683715701103,
+ "rr_time": 0.036208536475896835,
+ "rr_prf": -0.01713447831571102,
+ "fused": 0.4666610658168793,
+ "bm25_norm": 0.08504761010408401,
+ "bm25_seg_norm": 0.09643625468015671,
+ "cos": -0.02059929259121418,
+ "cos_seg": -0.012374015524983406,
+ "cover": 0.29498693346977234,
+ "cover_unit": 0.05977920442819595,
+ "cover_next": -0.07274236530065536,
+ "actor_match": 0.6768018007278442,
+ "role_match": 0.5709348320960999,
+ "in_window": -0.014537671580910683,
+ "order_pos": 0.012832999229431152,
+ "log_tokens": -0.10282296687364578,
+ "is_question": -0.31642723083496094,
+ "prev_is_question": 0.19478236138820648,
+ "next_reply": 0.10339263081550598,
+ "when_q": -0.23732689023017883,
+ "count_q": 0.021870706230401993,
+ "nb_bm25": 0.2545251250267029,
+ "has_time": 0.2732790410518646,
+ "has_number": 0.058816857635974884,
+ "when_x_time": 0.1318976730108261,
+ "count_x_number": 0.013510666787624359,
+ "where_x_place": 0.012178576551377773,
+ "ent_overlap": -0.20934726297855377,
+ "rr_thread_x_cover": -0.052845802158117294
+}

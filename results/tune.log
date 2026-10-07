@@ -9,3 +9,7 @@ pass0 w_bm25_seg=1.0 J=0.7702 (best 0.7792) 62s
 pass0 w_bm25_win=0.0 J=0.7754 (best 0.7792) 65s
 pass0 w_bm25_win=0.3 J=0.7832 (best 0.7792) 65s
   -> new best w_bm25_win=0.3
+pass0 w_bm25_win=1.0 J=0.7775 (best 0.7832) 71s
+pass0 w_dense=0.3 J=0.7817 (best 0.7832) 99s
+pass0 w_dense=1.0 J=0.7800 (best 0.7832) 99s
+pass0 w_dense_seg=0.0 J=0.7725 (best 0.7832) 91s

@@ -1,0 +1,13 @@
+start 0.865
+long_unit_tokens 150 0.8698 best 0.865
+long_unit_tokens 350 0.8636 best 0.8698
+long_unit_tokens 500 0.8549 best 0.8698
+snippet_sentences 3 0.8709 best 0.8698
+snippet_sentences 6 0.8635 best 0.8709
+prompt_merge_words 8 0.8709 best 0.8709
+prompt_merge_words 20 0.8706 best 0.8709
+expand_next False 0.8717 best 0.8709
+expand_prev_q False 0.8768 best 0.8717
+headers False 0.8615 best 0.8768
+resolve_dates False 0.8524 best 0.8768
+final {'long_unit_tokens': 150, 'snippet_sentences': 3, 'expand_next': False, 'expand_prev_q': False} 0.8768184217719667

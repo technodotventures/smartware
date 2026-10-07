@@ -1,0 +1,49 @@
+collected 471 dev queries, 141286 candidates, 650 positives
+RRF dev J=0.7815
+C=0.01 CV J=0.7902  locomo R@1000=0.809 lme R@1000=0.815
+C=0.1 CV J=0.7897  locomo R@1000=0.813 lme R@1000=0.826
+gbdt {'max_iter': 150, 'learning_rate': 0.05, 'max_leaf_nodes': 15, 'min_samples_leaf': 40, 'l2_regularization': 1.0} CV J=0.8070  locomo R@1000=0.807 lme R@1000=0.844
+gbdt {'max_iter': 300, 'learning_rate': 0.05, 'max_leaf_nodes': 15, 'min_samples_leaf': 80, 'l2_regularization': 1.0} CV J=0.8024  locomo R@1000=0.797 lme R@1000=0.836
+gbdt {'max_iter': 150, 'learning_rate': 0.05, 'max_leaf_nodes': 7, 'min_samples_leaf': 80, 'l2_regularization': 1.0} CV J=0.8068  locomo R@1000=0.803 lme R@1000=0.831
+chosen C {'max_iter': 150, 'learning_rate': 0.05, 'max_leaf_nodes': 15, 'min_samples_leaf': 40, 'l2_regularization': 1.0} CV J 0.807 vs RRF 0.7815
+{
+ "rr_bm25": 0.03259824216365814,
+ "rr_bm25_win": 0.07107783108949661,
+ "rr_dense": 0.05549462139606476,
+ "rr_dense_win": 0.01987524889409542,
+ "rr_bm25_seg": 0.044195886701345444,
+ "rr_dense_seg": 0.01577761024236679,
+ "rr_thread": 0.134646937251091,
+ "rr_entity": 0.026927974075078964,
+ "rr_time": 0.03851466625928879,
+ "rr_prf": -0.015690404921770096,
+ "fused": 0.4541546106338501,
+ "bm25_norm": 0.08402427285909653,
+ "bm25_seg_norm": 0.10063227266073227,
+ "cos": -0.02007056213915348,
+ "cos_seg": -0.0028532776050269604,
+ "cover": 0.30722764134407043,
+ "cover_unit": 0.04589875787496567,
+ "cover_next": -0.0665140226483345,
+ "actor_match": 0.6859897971153259,
+ "role_match": 0.5617590546607971,
+ "in_window": -0.01629740558564663,
+ "order_pos": 0.01728769950568676,
+ "log_tokens": -0.08462256193161011,
+ "is_question": -0.3113779127597809,
+ "prev_is_question": 0.1949719935655594,
+ "next_reply": 0.10286016017198563,
+ "when_q": -0.24436165392398834,
+ "count_q": 0.009610175155103207,
+ "nb_bm25": 0.24249762296676636,
+ "has_time": 0.26637640595436096,
+ "has_number": 0.0508570671081543,
+ "when_x_time": 0.13146108388900757,
+ "count_x_number": 0.018336674198508263,
+ "where_x_place": 0.012580516748130322,
+ "ent_overlap": -0.19898225367069244,
+ "rr_thread_x_cover": -0.051239822059869766,
+ "rr_sub": 0.032783880829811096,
+ "n_parts": -0.04567285627126694,
+ "rr_qexp": -0.017339855432510376
+}

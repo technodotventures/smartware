@@ -112,6 +112,8 @@ class Server:
         self.client_caps = {}
         self._next_id = 1000
         self._pending = []
+        self.subs: set[str] = set()  # per-session subscriptions (this stdio process is one session)
+        self._cursor = 0
 
     # ------------------------------------------------------------ io
     def send(self, msg: dict):
@@ -131,6 +133,21 @@ class Server:
                 return msg.get("result")
             self._pending.append(msg)
         return None
+
+    def notify_changes(self):
+        """Send notifications/resources/updated for subscribed URIs touched by real, readable changes."""
+        feed = self.svc.changes(self._cursor, self.pr, limit=10_000)
+        self._cursor = feed["cursor"]
+        if not self.subs:
+            return
+        touched = set()
+        for c in feed["changes"]:
+            m = self.svc.engine.mem.get(c["id"])
+            touched.add(f"orp://{self.pr.tenant}/mem/{c['id']}")
+            if m is not None and m.thread:
+                touched.add(f"orp://{self.pr.tenant}/thread/{m.thread}")
+        for uri in sorted(touched & self.subs):
+            self.send({"jsonrpc": "2.0", "method": "notifications/resources/updated", "params": {"uri": uri}})
 
     def persist(self):
         if not self.store:
@@ -152,7 +169,7 @@ class Server:
                 self.client_caps = params.get("capabilities", {})
                 res = {"protocolVersion": params.get("protocolVersion", PROTOCOL),
                        "capabilities": {"tools": {"listChanged": False},
-                                        "resources": {"subscribe": False, "listChanged": False}},
+                                        "resources": {"subscribe": True, "listChanged": False}},
                        "serverInfo": {"name": "orp-reference", "version": "0.1.0"},
                        "instructions": INSTRUCTIONS}
             elif method in ("notifications/initialized", "notifications/cancelled"):
@@ -172,6 +189,13 @@ class Server:
                                       "mimeType": "application/json"}]}
             elif method == "resources/read":
                 res = self.read(params["uri"])
+            elif method == "resources/subscribe":
+                self.read(params["uri"])  # must exist and be readable
+                self.subs.add(params["uri"])
+                res = {}
+            elif method == "resources/unsubscribe":
+                self.subs.discard(params["uri"])
+                res = {}
             else:
                 return {"jsonrpc": "2.0", "id": mid, "error": {"code": -32601, "message": f"unknown method {method}"}}
         except ORPError as e:
@@ -253,6 +277,7 @@ class Server:
             raise ORPError("not_found", f"tool {name}")
         if name in ("orp_remember", "orp_forget", "orp_feedback", "orp_reflect"):
             self.persist()
+            self.notify_changes()
         return {"content": [{"type": "text", "text": json.dumps(out, default=str)}], "structuredContent": out,
                 "isError": False}
 

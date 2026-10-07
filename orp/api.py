@@ -99,6 +99,9 @@ class Service:
                          "prf:rm3"],
             "fusion": f"weighted-rrf(k={p.rrf_k})",
             "features": ["coverage", "actor", "role", "order", "current", "thread-interleave"],
+            "ranker": {"name": f"orp-{p.ranker}-1", "features": list(Engine.FEATURES),
+                       "fitted_on": "LoCoMo-10 conv 0-2 + LongMemEval 20% hash split (public dev data)"
+                       if p.ranker != "rrf" else "hand-tuned weights on the same dev data"},
             "recall_parameters": sorted(_RECALL_KEYS), "tokenizer": self.tokenizer,
             "score_scale": "fused-rrf-normalised (higher is better, top=1 before features)",
             "coverage_method": "top fused score after features, normalised to feature ceiling",
@@ -238,7 +241,7 @@ class Service:
             m0 = ms[0] if ms else None
             items.append({
                 "ref": f"orp://{principal.tenant}/mem/{it.memory_ids[0]}", "memory_ids": it.memory_ids,
-                "kind": m0.kind if m0 else "event", "text": it.text, "tokens": it.tokens, "score": it.score,
+                "kind": m0.kind if m0 else "event", "scope": m0.scope if m0 else "", "text": it.text, "tokens": it.tokens, "score": it.score,
                 "why": it.why if inc.get("explain", True) else {}, "validity": it.valid,
                 "citations": it.citations,
                 "superseded": [m.superseded_by for m in ms if m.superseded_by] if inc.get("history") else [],
