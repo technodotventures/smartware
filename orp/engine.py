@@ -1,4 +1,4 @@
-"""ORP reference engine (v0.1.1).
+"""ORP reference engine (v0.1.2).
 
 A single-process implementation of the Open Recall Protocol (spec/ORP-0.1.md):
 bi-temporal memory records, explicit supersession, provenance-closed access control,
