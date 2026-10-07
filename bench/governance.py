@@ -34,7 +34,7 @@ from .system import Item
 N_PRINCIPALS = 6
 
 
-def run(params: Params | None = None):
+def run(params: Params | None = None, visibility: float = 0.5):
     enc = Encoders(DenseEncoder.load())
     tasks = [t for t in load_locomo() if t.queries and t.queries[0].split == "test"]
     rows = defaultdict(list)
@@ -42,7 +42,7 @@ def run(params: Params | None = None):
         c = task.corpus
         rng = random.Random(f"gov:{c.id}")
         sessions = list(c.session_order)
-        members = {f"u{i}": set(rng.sample(sessions, len(sessions) // 2)) for i in range(N_PRINCIPALS)}
+        members = {f"u{i}": set(rng.sample(sessions, max(1, int(len(sessions) * visibility)))) for i in range(N_PRINCIPALS)}
         prins = {u: Principal(u, frozenset(f"ch:{s}" for s in chans), tenant="org") for u, chans in members.items()}
         admin = Principal("admin", frozenset({"*"}), tenant="org")
 
@@ -149,7 +149,13 @@ def run(params: Params | None = None):
     return out
 
 
+def final_params() -> Params:
+    from .orp_variants import ORPLtr
+    return ORPLtr().params
+
+
 if __name__ == "__main__":
-    r = run()
+    vis = float(sys.argv[2]) if len(sys.argv) > 2 else 0.5
+    r = run(final_params(), vis)
     print(json.dumps(r, indent=1))
     json.dump(r, open(sys.argv[1] if len(sys.argv) > 1 else "results/governance.json", "w"), indent=1)

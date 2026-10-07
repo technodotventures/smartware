@@ -1,0 +1,56 @@
+[
+ {
+  "J": 0.8028970094023755,
+  "variant": {}
+ },
+ {
+  "J": 0.8023518493598265,
+  "variant": {
+   "expand_next": false
+  }
+ },
+ {
+  "J": 0.8110961246587145,
+  "variant": {
+   "expand_prev_q": false
+  }
+ },
+ {
+  "J": 0.8110582953209505,
+  "variant": {
+   "expand_next": false,
+   "expand_prev_q": false
+  }
+ },
+ {
+  "J": 0.804790948796315,
+  "variant": {
+   "long_unit_tokens": 150
+  }
+ },
+ {
+  "J": 0.8037709271512933,
+  "variant": {
+   "snippet_sentences": 3
+  }
+ },
+ {
+  "J": 0.8047855375409037,
+  "variant": {
+   "long_unit_tokens": 150,
+   "snippet_sentences": 3
+  }
+ },
+ {
+  "J": 0.7923608111968726,
+  "variant": {
+   "headers": false
+  }
+ },
+ {
+  "J": 0.7845361961451852,
+  "variant": {
+   "resolve_dates": false
+  }
+ }
+]

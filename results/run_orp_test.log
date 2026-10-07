@@ -1,0 +1,4 @@
+locomo  orp-rrf                      R@1000=0.750 R@2000=0.814 full@2000=0.743 sessAll@5=0.775 mrr=0.552 p50=7.0ms
+locomo  orp                          R@1000=0.802 R@2000=0.861 full@2000=0.799 sessAll@5=0.801 mrr=0.602 p50=20.4ms
+lme     orp                          R@1000=0.822 R@2000=0.900 full@2000=0.832 sessAll@5=0.885 mrr=0.747 p50=48.1ms
+lme     orp-rrf                      R@1000=0.738 R@2000=0.788 full@2000=0.683 sessAll@5=0.872 mrr=0.709 p50=33.0ms

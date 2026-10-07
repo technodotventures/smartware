@@ -1,0 +1,902 @@
+[
+{
+"uid": "u00864",
+"question": "What does Nate want to do when he goes over to Joanna's place?",
+"gold": "Watch one of Joanna's movies together or go to the park",
+"answer": "I don't know"
+},
+{
+"uid": "u01018",
+"question": "I'm looking back at our previous conversation where you created two sad songs for me. Can you remind me what was the chord progression for the chorus in the second song?",
+"gold": "C D E F G A B A G F E D C",
+"answer": "I don't know"
+},
+{
+"uid": "u00713",
+"question": "What was the page count of the two novels I finished in January and March?",
+"gold": "856",
+"answer": "I don't know"
+},
+{
+"uid": "u00013",
+"question": "Has Jolene tried surfing?",
+"gold": "no",
+"answer": "No, not yet; she is keen to try it and has a beginners' guide but hasn't had a lesson"
+},
+{
+"uid": "u00262",
+"question": "How many weeks passed between the day I bought my new tennis racket and the day I received it?",
+"gold": "1 week",
+"answer": "1 week"
+},
+{
+"uid": "u00657",
+"question": "What type of beer does John not like?",
+"gold": "dark beer",
+"answer": "Dark beer"
+},
+{
+"uid": "u00940",
+"question": "When did James take his 3 dogs to the beach?",
+"gold": "August 9, 2022",
+"answer": "9 August 2022"
+},
+{
+"uid": "u00327",
+"question": "How long has Jolene been doing yoga and meditation?",
+"gold": "about 3 years",
+"answer": "About 3 years (sporadically)"
+},
+{
+"uid": "u00088",
+"question": "What did Evan find relaxing about his road trip to Jasper?",
+"gold": "fresh air, peacefulness, cozy cabin surrounded by mountains and forests",
+"answer": "Fresh air, peacefulness, and a cozy cabin surrounded by mountains and forests"
+},
+{
+"uid": "u00563",
+"question": "What does Andrew view his pets as?",
+"gold": "Family",
+"answer": "As family, bringing joy and companionship"
+},
+{
+"uid": "u00510",
+"question": "How many days passed between the day I replaced my spark plugs and the day I participated in the Turbocharged Tuesdays auto racking event?",
+"gold": "29 days. 30 days (including the last day) is also acceptable.",
+"answer": "29 days"
+},
+{
+"uid": "u00069",
+"question": "What did Audrey and her friends stumble across during a hike a few years back, as mentioned on June 26, 2023?",
+"gold": "a stunning lake in the mountains",
+"answer": "A stunning lake in the mountains"
+},
+{
+"uid": "u00335",
+"question": "How will John share the honey garlic chicken recipe with the other person?",
+"gold": "write it down and mail it",
+"answer": "He will write it down and mail it to him."
+},
+{
+"uid": "u01227",
+"question": "How long have I been sticking to my daily tidying routine?",
+"gold": "4 weeks",
+"answer": "3 weeks (as of 11 June 2023)"
+},
+{
+"uid": "u00585",
+"question": "Why did Jolene have to reschedule their meeting with Deborah on September 8, 2023?",
+"gold": "Jolene already had plans",
+"answer": "I don't know"
+},
+{
+"uid": "u00007",
+"question": "What motivates Evan to take care of his health?",
+"gold": "family, fitness tracker, thirst for adventure on interesting hikes",
+"answer": "His family, plus a smartwatch and visual reminder that track his progress"
+},
+{
+"uid": "u00231",
+"question": "What health issue did I initially think was just a cold?",
+"gold": "bronchitis",
+"answer": "Bronchitis"
+},
+{
+"uid": "u00073",
+"question": "What did Joanna make for one of the ladies at her writing club?",
+"gold": "a bookmark",
+"answer": "A bookmark"
+},
+{
+"uid": "u00406",
+"question": "When did Nate win a big Valorant tourney?",
+"gold": "The Saturday before 7November, 2022",
+"answer": "Saturday, 5 November 2022"
+},
+{
+"uid": "u00742",
+"question": "I was going through our previous conversation about The Library of Babel, and I wanted to confirm - what did Borges say about the center and circumference of the Library?",
+"gold": "According to Borges, 'The Library is a sphere whose exact center is any one of its hexagons and whose circumference is inaccessible.'",
+"answer": "\"The Library is a sphere whose exact center is any one of its hexagons and whose circumference is inaccessible.\""
+},
+{
+"uid": "u01263",
+"question": "How many health-related devices do I use in a day?",
+"gold": "4",
+"answer": "I don't know"
+},
+{
+"uid": "u00412",
+"question": "What significant event happened in Sam's life towards the end of summer 2023?",
+"gold": "He fell in love with a Canadian woman",
+"answer": "I don't know"
+},
+{
+"uid": "u01034",
+"question": "What breed is my dog?",
+"gold": "Golden Retriever",
+"answer": "Golden Retriever"
+},
+{
+"uid": "u00806",
+"question": "How many days did it take me to finish 'The Nightingale' by Kristin Hannah?",
+"gold": "21 days. 22 days (including the last day) is also acceptable.",
+"answer": "21 days"
+},
+{
+"uid": "u00419",
+"question": "How many free night's stays can I redeem at any Hilton property with my accumulated points?",
+"gold": "Two",
+"answer": "One (a single free night's stay)."
+},
+{
+"uid": "u00522",
+"question": "Where did I attend the religious activity last week?",
+"gold": "the Episcopal Church",
+"answer": "St. Mary's Church"
+},
+{
+"uid": "u00487",
+"question": "Can you recommend some resources where I can learn more about video editing?",
+"gold": "The user would prefer responses that suggest resources specifically tailored to Adobe Premiere Pro, especially those that delve into its advanced settings. They might not prefer general video editing resources or resources related to other video editing software.",
+"answer": "Adobe's official Premiere Pro documentation/tutorials, YouTube channels (Premiere Bro, Video Copilot, Adobe Creative Cloud), courses on Udemy, LinkedIn Learning and Skillshare, and communities like r/premierepro and Adobe's forum"
+},
+{
+"uid": "u01211",
+"question": "Which year did Jolene and her partner start dating?",
+"gold": "2020",
+"answer": "I don't know"
+},
+{
+"uid": "u00878",
+"question": "What did Anthony and John end up playing during the charity event?",
+"gold": "an intense Harry Potter trivia contest",
+"answer": "An intense Harry Potter trivia contest"
+},
+{
+"uid": "u00931",
+"question": "When did John work with a game developer on a project?",
+"gold": "November 5-6, 2022",
+"answer": "The weekend before November 7, 2022"
+},
+{
+"uid": "u01259",
+"question": "How many different museums or galleries did I visit in the month of February?",
+"gold": "2",
+"answer": "I don't know"
+},
+{
+"uid": "u00783",
+"question": "How long did I use my new binoculars before I saw the American goldfinches returning to the area?",
+"gold": "Two weeks",
+"answer": "Two weeks"
+},
+{
+"uid": "u01124",
+"question": "What is essential to keep the dogs looking good according to Audrey?",
+"gold": "Daily brushing, regular baths, nail trims, and lots of love",
+"answer": "Regular grooming (daily brushing, baths, nail trims)"
+},
+{
+"uid": "u00592",
+"question": "What dish did Nate make on 9 November, 2022?",
+"gold": "Homemade coconut ice cream",
+"answer": "I don't know"
+},
+{
+"uid": "u00380",
+"question": "What did Nate think of the coconut milk ice cream he made?",
+"gold": "Super good, rich and creamy",
+"answer": "He loved it: smooth and creamy with a tropical coconut twist, and at the top of his list"
+},
+{
+"uid": "u01028",
+"question": "I've been struggling with my slow cooker recipes. Any advice on getting better results?",
+"gold": "The user would prefer responses that provide tips and advice specifically tailored to their slow cooker experiences, utilizing their recent success with beef stew and interest in making yogurt in the slow cooker. They might not prefer general slow cooker recipes or advice unrelated to their specific experiences and interests.",
+"answer": "Build on your recent beef stew success; you've been exploring vegetarian/vegan recipes and a cashew-based slow cooker yogurt"
+},
+{
+"uid": "u00811",
+"question": "How does Andrew feel about his current work?",
+"gold": "Stressful",
+"answer": "I don't know"
+},
+{
+"uid": "u00180",
+"question": "How many years will I be when my friend Rachel gets married?",
+"gold": "33",
+"answer": "I don't know"
+},
+{
+"uid": "u01045",
+"question": "What book am I currently reading?",
+"gold": "The Seven Husbands of Evelyn Hugo",
+"answer": "The Seven Husbands of Evelyn Hugo"
+},
+{
+"uid": "u00677",
+"question": "How many months passed between Andrew adopting Buddy and Scout",
+"gold": "one month",
+"answer": "About 1 month (Buddy in October 2023, Scout in November 2023)"
+},
+{
+"uid": "u00545",
+"question": "What motivates Evan to take care of his health?",
+"gold": "family, fitness tracker, thirst for adventure on interesting hikes",
+"answer": "His family"
+},
+{
+"uid": "u00156",
+"question": "How many bikes do I currently own?",
+"gold": "4",
+"answer": "Four."
+},
+{
+"uid": "u00247",
+"question": "How many weeks ago did I attend a bird watching workshop at the local Audubon society?",
+"gold": "4",
+"answer": "About 4 weeks ago (30 days, on 1 April 2023)"
+},
+{
+"uid": "u00318",
+"question": "How does Jolene describe their home room?",
+"gold": "little haven for peace and rest",
+"answer": "As her little haven for peace and rest, the perfect spot to relax and recharge"
+},
+{
+"uid": "u00574",
+"question": "What alternative career might Nate consider after gaming?",
+"gold": "an animalkeeper at a localzoo and workingwith turtles; as heknows a great dealabout turtles andhow to care for them,and he enjoys it.",
+"answer": "Making gaming videos / creating gaming content for YouTube"
+},
+{
+"uid": "u00947",
+"question": "When did Andrew and his girlfriend go on a wine tasting trip?",
+"gold": "the weekend before October 24, 2023",
+"answer": "The weekend before October 24, 2023"
+},
+{
+"uid": "u00977",
+"question": "How many pieces of furniture did I buy, assemble, sell, or fix in the past few months?",
+"gold": "4",
+"answer": "2 (bought a West Elm coffee table, fixed the kitchen table leg)"
+},
+{
+"uid": "u01095",
+"question": "What personal health incidents does Evan face in 2023?",
+"gold": "heart palpitations, twisted ankle, twisted ankle",
+"answer": "A heart palpitation scare and a soccer injury"
+},
+{
+"uid": "u00749",
+"question": "I'm looking back at our previous conversation where you created two sad songs for me. Can you remind me what was the chord progression for the chorus in the second song?",
+"gold": "C D E F G A B A G F E D C",
+"answer": "I don't know"
+},
+{
+"uid": "u01220",
+"question": "When is Andrew going to go hiking with Audrey?",
+"gold": "August",
+"answer": "I don't know"
+},
+{
+"uid": "u00761",
+"question": "What is the name of the playlist I created on Spotify?",
+"gold": "Summer Vibes",
+"answer": "Summer Vibes"
+},
+{
+"uid": "u00521",
+"question": "Which device did I set up first, the smart thermostat or the mesh network system?",
+"gold": "Smart thermostat",
+"answer": "I don't know"
+},
+{
+"uid": "u01002",
+"question": "What percentage of packed shoes did I wear on my last trip?",
+"gold": "40%",
+"answer": "I don't know"
+},
+{
+"uid": "u00314",
+"question": "What did Dave open in May 2023?",
+"gold": "a car shop",
+"answer": "His own car maintenance shop"
+},
+{
+"uid": "u01008",
+"question": "I'm going back to our previous conversation about traditional Indian embroidery and tailoring techniques. Can you remind me of the name of that online store based in India that sells traditional Indian fabrics, threads, and embellishments?",
+"gold": "Nostalgia",
+"answer": "Nostalgia"
+},
+{
+"uid": "u00648",
+"question": "What filling did Joanna use in the cake she made recently in May 2022?",
+"gold": "strawberry",
+"answer": "Strawberry filling"
+},
+{
+"uid": "u00556",
+"question": "What are some foods that Audrey likes eating?",
+"gold": "chicken pot pie, chicken roast, blueberry muffins, sushi",
+"answer": "I don't know"
+},
+{
+"uid": "u00889",
+"question": "What type of seminars is John conducting?",
+"gold": "Sports and marketing seminars",
+"answer": "Seminars helping people with sports and marketing"
+},
+{
+"uid": "u00785",
+"question": "How many weeks ago did I attend a bird watching workshop at the local Audubon society?",
+"gold": "4",
+"answer": "About 4 weeks ago."
+},
+{
+"uid": "u00553",
+"question": "What does Joanna do to remember happy memories?",
+"gold": "Hangs them on a corkboard, writes themin a notebook.",
+"answer": "She writes her favorite memories down."
+},
+{
+"uid": "u01253",
+"question": "How many days did I take social media breaks in total?",
+"gold": "17 days",
+"answer": "I don't know"
+},
+{
+"uid": "u00982",
+"question": "What was the page count of the two novels I finished in January and March?",
+"gold": "856",
+"answer": "I don't know"
+},
+{
+"uid": "u00629",
+"question": "What game is Nate currently playing and recommends to others on November 7, 2022?",
+"gold": "\"Xenoblade Chronicles\"",
+"answer": "Xenoblade Chronicles"
+},
+{
+"uid": "u01294",
+"question": "Can you recommend some resources where I can learn more about video editing?",
+"gold": "The user would prefer responses that suggest resources specifically tailored to Adobe Premiere Pro, especially those that delve into its advanced settings. They might not prefer general video editing resources or resources related to other video editing software.",
+"answer": "Adobe Premiere Pro's official docs and tutorials, YouTube channels (Premiere Bro, Video Copilot, Adobe Creative Cloud), online courses (Udemy, LinkedIn Learning, Skillshare), and forums like r/premierepro"
+},
+{
+"uid": "u00054",
+"question": "What dish did Nate make on 9 November, 2022?",
+"gold": "Homemade coconut ice cream",
+"answer": "Homemade coconut ice cream"
+},
+{
+"uid": "u01180",
+"question": "What did John suggest James practice before playing FIFA 23 together?",
+"gold": "Control with a gamepad and timing",
+"answer": "He said James should practice a little first, then they could play together."
+},
+{
+"uid": "u00303",
+"question": "What kind of yoga for building core strength might John benefit from?",
+"gold": "Hatha Yoga",
+"answer": "Warrior II (a pose that works the legs and core)"
+},
+{
+"uid": "u00725",
+"question": "How many health-related devices do I use in a day?",
+"gold": "4",
+"answer": "I don't know"
+},
+{
+"uid": "u00823",
+"question": "What are the skills that Nate has helped others learn?",
+"gold": "coconut milk ice cream recipe, reset high scores, tips to improve gaming skills",
+"answer": "I don't know"
+},
+{
+"uid": "u00891",
+"question": "What activity do Andrew and Buddy enjoy doing together?",
+"gold": "Walking",
+"answer": "Going on walks"
+},
+{
+"uid": "u00753",
+"question": "I'm thinking of inviting my colleagues over for a small gathering. Any tips on what to bake?",
+"gold": "The user would prefer baking suggestions that take into account their previous success with the lemon poppyseed cake, such as variations of that recipe or other desserts that share similar qualities. They might prefer suggestions that balance impressiveness with manageability, considering their previous experience. The user may not prefer overly complex or unfamiliar recipes, or suggestions that do not build upon their existing baking experience.",
+"answer": "Lemon poppyseed cake (or lemon bars, cookies, banana bread)"
+},
+{
+"uid": "u00755",
+"question": "Can you suggest some activities that I can do in the evening?",
+"gold": "The user would prefer suggestions that involve relaxing activities that can be done in the evening, preferably before 9:30 pm. They would not prefer suggestions that involve using their phone or watching TV, as these activities have been affecting their sleep quality.",
+"answer": "Wind down with a warm bath, gentle stretches, soothing music, light reading, hobbies, or meditation before bed"
+},
+{
+"uid": "u00394",
+"question": "How long did John practice chess for before winning the chess tournament?",
+"gold": "nearly four months",
+"answer": "About 3 months (started chess around 22 July 2022, won the regional tournament in early November 2022)"
+},
+{
+"uid": "u00929",
+"question": "When did Joanna first watch \"Eternal Sunshine of the Spotless Mind?",
+"gold": "2019",
+"answer": "Around 3 years before January 2022"
+},
+{
+"uid": "u01205",
+"question": "When did Nate take time off to chill with his pets?",
+"gold": "The weekend of 22August, 2022.",
+"answer": "The weekend after 22 August 2022 (27-28 August 2022)."
+},
+{
+"uid": "u01255",
+"question": "How many different cuisines have I learned to cook or tried out in the past few months?",
+"gold": "4",
+"answer": "I don't know"
+},
+{
+"uid": "u00716",
+"question": "How many times did I ride rollercoasters across all the events I attended from July to October?",
+"gold": "10 times",
+"answer": "7 times (3 at SeaWorld San Diego, 1 on Xcelerator, 3 on Revenge of the Mummy)."
+},
+{
+"uid": "u00579",
+"question": "How often does Audrey take her pups to the park for practice?",
+"gold": "Twice a week",
+"answer": "Twice a week"
+},
+{
+"uid": "u00892",
+"question": "What method does Deb suggest Jolene to try for organizing tasks based on importance and urgency?",
+"gold": "The Eisenhower Matrix",
+"answer": "The Eisenhower Matrix"
+},
+{
+"uid": "u00747",
+"question": "I was looking back at our previous conversation about Native American powwows and I was wondering, which traditional game did you say was often performed by skilled dancers at powwows?",
+"gold": "Hoop Dance",
+"answer": "Hoop Dance"
+},
+{
+"uid": "u01076",
+"question": "When did Nate get Tilly for Joanna?",
+"gold": "25 May, 2022",
+"answer": "I don't know"
+},
+{
+"uid": "u00111",
+"question": "What did Nate think of the coconut milk ice cream he made?",
+"gold": "Super good, rich and creamy",
+"answer": "It was actually pretty good, and he was proud of himself"
+},
+{
+"uid": "u00884",
+"question": "What inspired James to create the game character in the virtual world?",
+"gold": "Appearance of a woman he saw during a walk",
+"answer": "Witcher 3"
+},
+{
+"uid": "u00943",
+"question": "When did John start playing professionally?",
+"gold": "May, 2023",
+"answer": "Roughly a year before December 2023 (around early 2023)"
+},
+{
+"uid": "u00386",
+"question": "What type of videos does Calvin usually watch on his television?",
+"gold": "Music videos, concerts, documentaries about artists and their creative process",
+"answer": "Music videos, concerts, and documentaries about artists and their creative process"
+},
+{
+"uid": "u00313",
+"question": "When did John meet back up with his teammates after his trip in August 2023?",
+"gold": "Aug 15th",
+"answer": "On the 15th of August 2023"
+},
+{
+"uid": "u00216",
+"question": "I've been feeling nostalgic lately. Do you think it would be a good idea to attend my high school reunion?",
+"gold": "The user would prefer responses that draw upon their personal experiences and memories, specifically their positive high school experiences such as being part of the debate team and taking advanced placement courses. They would prefer suggestions that highlight the potential benefits of attending the reunion, such as reconnecting with old friends and revisiting favorite subjects like history and economics. The user might not prefer generic or vague responses that do not take into account their individual experiences and interests.",
+"answer": "I don't know"
+},
+{
+"uid": "u00607",
+"question": "What did Audrey and her friends stumble across during a hike a few years back, as mentioned on June 26, 2023?",
+"gold": "a stunning lake in the mountains",
+"answer": "A stunning lake in the mountains"
+},
+{
+"uid": "u00378",
+"question": "What type of pizza is John's favorite?",
+"gold": "Hawaiian",
+"answer": "Hawaiian pizza"
+},
+{
+"uid": "u01085",
+"question": "Which locations does Deborah practice her yoga at?",
+"gold": "at her mother's old home, park, yoga studio, beach",
+"answer": "In the park and on the beach"
+},
+{
+"uid": "u00689",
+"question": "How long have I been sticking to my daily tidying routine?",
+"gold": "4 weeks",
+"answer": "4 weeks"
+},
+{
+"uid": "u01229",
+"question": "Where do I initially keep my old sneakers?",
+"gold": "under my bed",
+"answer": "I don't know"
+},
+{
+"uid": "u00714",
+"question": "What is the total time it takes I to get ready and commute to work?",
+"gold": "an hour and a half",
+"answer": "About 1.5 hours (1 hour to get ready plus a 30-minute commute)"
+},
+{
+"uid": "u00760",
+"question": "I've got some free time tonight, any documentary recommendations?",
+"gold": "The user would prefer documentary recommendations that are similar in style and theme to 'Our Planet', 'Free Solo', and 'Tiger King', which they have previously enjoyed. They might not prefer recommendations of documentaries that are vastly different in tone or subject matter from these titles. The preferred response utilizes the user's previously mentioned viewing history to suggest documentaries that cater to their tastes.",
+"answer": "Documentaries like Planet Earth, Blue Planet, Chasing Coral, The Staircase or The Keepers, similar to Our Planet, Free Solo and Tiger King"
+},
+{
+"uid": "u00735",
+"question": "How many plants did I acquire in the last month?",
+"gold": "3",
+"answer": "I don't know"
+},
+{
+"uid": "u00476",
+"question": "I was looking back at our previous conversation about environmentally responsible supply chain practices, and I was wondering if you could remind me of the company you mentioned that's doing a great job with sustainability?",
+"gold": "Patagonia",
+"answer": "Patagonia"
+},
+{
+"uid": "u00218",
+"question": "Can you recommend some resources where I can learn more about video editing?",
+"gold": "The user would prefer responses that suggest resources specifically tailored to Adobe Premiere Pro, especially those that delve into its advanced settings. They might not prefer general video editing resources or resources related to other video editing software.",
+"answer": "I don't know"
+},
+{
+"uid": "u00843",
+"question": "What alternative career might Nate consider after gaming?",
+"gold": "an animalkeeper at a localzoo and workingwith turtles; as heknows a great dealabout turtles andhow to care for them,and he enjoys it.",
+"answer": "Making gaming videos/content."
+},
+{
+"uid": "u00061",
+"question": "What color did Nate choose for his hair?",
+"gold": "purple",
+"answer": "Purple"
+},
+{
+"uid": "u00070",
+"question": "Why does John like Aragorn from Lord of the Rings?",
+"gold": "brave, selfless, down-to-earth attitude",
+"answer": "His brave, selfless, down-to-earth attitude inspires him; Aragorn never gives up, stands up for justice and is a great leader who puts others first."
+},
+{
+"uid": "u00786",
+"question": "I received a piece of jewelry last Saturday from whom?",
+"gold": "my aunt",
+"answer": "His aunt (a crystal chandelier that belonged to his great-grandmother)"
+},
+{
+"uid": "u00654",
+"question": "What kind of frosting did Joanna use on the cake she made recently in May 2022?",
+"gold": "coconut cream",
+"answer": "Coconut cream frosting"
+},
+{
+"uid": "u01241",
+"question": "Is my mom using the same grocery list method as me?",
+"gold": "Yes.",
+"answer": "Yes, she uses the same grocery list app as you"
+},
+{
+"uid": "u00956",
+"question": "When did Deborah`s mother pass away?",
+"gold": "a few years before 2023",
+"answer": "A few years ago"
+},
+{
+"uid": "u00163",
+"question": "What brand of BBQ sauce am I currently obsessed with?",
+"gold": "Kansas City Masterpiece",
+"answer": "Kansas City Masterpiece"
+},
+{
+"uid": "u00480",
+"question": "I'm looking back at our previous conversation where you created two sad songs for me. Can you remind me what was the chord progression for the chorus in the second song?",
+"gold": "C D E F G A B A G F E D C",
+"answer": "I don't know"
+},
+{
+"uid": "u00736",
+"question": "How many fish are there in total in both of my aquariums?",
+"gold": "17",
+"answer": "I don't know"
+},
+{
+"uid": "u00754",
+"question": "I've been feeling nostalgic lately. Do you think it would be a good idea to attend my high school reunion?",
+"gold": "The user would prefer responses that draw upon their personal experiences and memories, specifically their positive high school experiences such as being part of the debate team and taking advanced placement courses. They would prefer suggestions that highlight the potential benefits of attending the reunion, such as reconnecting with old friends and revisiting favorite subjects like history and economics. The user might not prefer generic or vague responses that do not take into account their individual experiences and interests.",
+"answer": "I don't know"
+},
+{
+"uid": "u01041",
+"question": "What was the discount I got on my first purchase from the new clothing brand?",
+"gold": "10%",
+"answer": "10%"
+},
+{
+"uid": "u00920",
+"question": "What are the names of Jolene's snakes?",
+"gold": "Susie, Seraphim",
+"answer": "Susie and Seraphim"
+},
+{
+"uid": "u00321",
+"question": "What injury did Evan suffer from in August 2023?",
+"gold": "Twisted knee",
+"answer": "I don't know"
+},
+{
+"uid": "u01033",
+"question": "What type of bulb did I replace in my bedside lamp?",
+"gold": "Philips LED bulb",
+"answer": "A Philips LED bulb"
+},
+{
+"uid": "u00395",
+"question": "When did Audrey move to a new place?",
+"gold": "June 2023",
+"answer": "Around 26 June 2023"
+},
+{
+"uid": "u01093",
+"question": "What things has Nate reccomended to Joanna?",
+"gold": "A pet,\"The Lord of the Rings\" movies,a dragon book series,coconut flavoring,\"Project Hail Mary\" book,Xenoblade Chronicles, dairy-free margarine, coconut oil",
+"answer": "I don't know"
+},
+{
+"uid": "u00387",
+"question": "Which city did John recommend to Tim in January 2024?",
+"gold": "Barcelona",
+"answer": "Barcelona"
+},
+{
+"uid": "u00473",
+"question": "I was going through our previous conversation about The Library of Babel, and I wanted to confirm - what did Borges say about the center and circumference of the Library?",
+"gold": "According to Borges, 'The Library is a sphere whose exact center is any one of its hexagons and whose circumference is inaccessible.'",
+"answer": "The Library is a sphere whose exact center is any one of its hexagons and whose circumference is inaccessible."
+},
+{
+"uid": "u00513",
+"question": "How many days passed between my visit to the Museum of Modern Art (MoMA) and the 'Ancient Civilizations' exhibit at the Metropolitan Museum of Art?",
+"gold": "7 days. 8 days (including the last day) is also acceptable.",
+"answer": "I don't know"
+},
+{
+"uid": "u01236",
+"question": "What was my previous personal best time for the charity 5K run?",
+"gold": "27 minutes and 45 seconds",
+"answer": "I don't know"
+},
+{
+"uid": "u00958",
+"question": "How long have I been sticking to my daily tidying routine?",
+"gold": "4 weeks",
+"answer": "4 weeks"
+},
+{
+"uid": "u00537",
+"question": "How many days did it take me to finish 'The Nightingale' by Kristin Hannah?",
+"gold": "21 days. 22 days (including the last day) is also acceptable.",
+"answer": "21 days (started 2023-01-10, finished 2023-01-31)"
+},
+{
+"uid": "u00392",
+"question": "When did Joanna's laptop crash?",
+"gold": "The week before 14September, 2022",
+"answer": "The week before September 14, 2022"
+},
+{
+"uid": "u00428",
+"question": "How long have my parents been staying with me in the US?",
+"gold": "nine months",
+"answer": "Nine months"
+},
+{
+"uid": "u01082",
+"question": "What did Audrey get wtih having so many dogs?",
+"gold": "Companionship",
+"answer": "A tattoo of her dogs (her \"little family\" gives her love and companionship)"
+},
+{
+"uid": "u00430",
+"question": "How many new postcards have I added to my collection since I started collecting again?",
+"gold": "25",
+"answer": "25"
+},
+{
+"uid": "u01000",
+"question": "What is the total weight of the new feed I purchased in the past two months?",
+"gold": "70 pounds",
+"answer": "50 pounds"
+},
+{
+"uid": "u00004",
+"question": "How does Andrew feel about his current work?",
+"gold": "Stressful",
+"answer": "It's tough and stressful, leaving him little time for outdoor activities and hard to keep balance"
+},
+{
+"uid": "u01303",
+"question": "What breed is my dog?",
+"gold": "Golden Retriever",
+"answer": "I don't know"
+},
+{
+"uid": "u00089",
+"question": "How does Jolene feel when spending time with Seraphim?",
+"gold": "comforted",
+"answer": "Comforted and at peace; she cheers her up."
+},
+{
+"uid": "u01179",
+"question": "What is Nate's favorite video game?",
+"gold": "Xenoblade Chronicles",
+"answer": "I don't know"
+},
+{
+"uid": "u00741",
+"question": "I was going through our previous chat. Can you remind me of the name of the last venue you recommended in the list of popular venues in Portland for indie music shows?",
+"gold": "Revolution Hall",
+"answer": "Revolution Hall"
+},
+{
+"uid": "u00481",
+"question": "I was thinking about our previous conversation about the Fifth Album, and I was wondering if you could remind me what song you said best exemplified the band's growth and development as artists?",
+"gold": "Evolution",
+"answer": "\"Evolution\""
+},
+{
+"uid": "u00594",
+"question": "Where did Dave come back from with insights on car modification on 1st September 2023?",
+"gold": "San Francisco",
+"answer": "San Francisco"
+},
+{
+"uid": "u00045",
+"question": "What did Dave open in May 2023?",
+"gold": "a car shop",
+"answer": "His own car maintenance shop"
+},
+{
+"uid": "u00639",
+"question": "Where did Calvin attend a music festival in April 2023?",
+"gold": "Tokyo",
+"answer": "Tokyo"
+},
+{
+"uid": "u00455",
+"question": "What is the minimum amount I could get if I sold the vintage diamond necklace and the antique vanity?",
+"gold": "$5,150",
+"answer": "I don't know"
+},
+{
+"uid": "u01286",
+"question": "I'm looking back at our previous conversation about the Seco de Cordero recipe from Ancash. You mentioned using a light or medium-bodied beer, but I was wondering if you could remind me what type of beer you specifically recommended?",
+"gold": "I recommended using a Pilsner or Lager for the recipe.",
+"answer": "A pilsner or lager (a light or medium-bodied beer)"
+},
+{
+"uid": "u01209",
+"question": "When did James take his 3 dogs to the beach?",
+"gold": "August 9, 2022",
+"answer": "9 August 2022"
+},
+{
+"uid": "u00874",
+"question": "When did Jolene's parents give her first console?",
+"gold": "when she was 10",
+"answer": "When Jolene was 10"
+},
+{
+"uid": "u00328",
+"question": "What do Deborah and Jolene plan to try when they meet in a new cafe?",
+"gold": "coffee and fresh pastries",
+"answer": "Fresh pastries"
+},
+{
+"uid": "u01137",
+"question": "What color did Nate choose for his hair?",
+"gold": "purple",
+"answer": "Purple"
+},
+{
+"uid": "u00833",
+"question": "What fantasy movies does Tim like?",
+"gold": "Lord of the Rings, Harry Potter, and Star Wars.",
+"answer": "I don't know"
+},
+{
+"uid": "u01330",
+"question": "Which event happened first, the meeting with Rachel or the pride parade?",
+"gold": "The meeting with Rachel",
+"answer": "I don't know"
+},
+{
+"uid": "u00504",
+"question": "How much RAM did I upgrade my laptop to?",
+"gold": "16GB",
+"answer": "16GB"
+},
+{
+"uid": "u00857",
+"question": "What did Evan suggest Sam to check out for insights into his dream?",
+"gold": "dream interpretation book",
+"answer": "A dream interpretation book"
+},
+{
+"uid": "u00232",
+"question": "Where did I buy my new tennis racket from?",
+"gold": "the sports store downtown",
+"answer": "A sports store downtown"
+},
+{
+"uid": "u00611",
+"question": "What did Joanna make for one of the ladies at her writing club?",
+"gold": "a bookmark",
+"answer": "A bookmark"
+},
+{
+"uid": "u00666",
+"question": "When did Deborah go to a yoga retreat near her mom's place?",
+"gold": "a week before 24 August,2023",
+"answer": "The week before 24 August 2023 (week of 17 August 2023)"
+},
+{
+"uid": "u00827",
+"question": "Which bands has Dave enjoyed listening to?",
+"gold": "Aerosmith, The Fireworks",
+"answer": "I don't know"
+},
+{
+"uid": "u01292",
+"question": "I've been feeling nostalgic lately. Do you think it would be a good idea to attend my high school reunion?",
+"gold": "The user would prefer responses that draw upon their personal experiences and memories, specifically their positive high school experiences such as being part of the debate team and taking advanced placement courses. They would prefer suggestions that highlight the potential benefits of attending the reunion, such as reconnecting with old friends and revisiting favorite subjects like history and economics. The user might not prefer generic or vague responses that do not take into account their individual experiences and interests.",
+"answer": "I don't know"
+},
+{
+"uid": "u00009",
+"question": "Which locations does Deborah practice her yoga at?",
+"gold": "at her mother's old home, park, yoga studio, beach",
+"answer": "In a park (with a group) and at a yoga studio room with yoga mats"
+}
+]

@@ -27,5 +27,7 @@ class ORPLtr(ORPSystem):
 
     def __init__(self, **kw):
         p = _load("ltr_params_v1.json")
-        p.update(w_sub=0.0, w_qexp=0.0)
+        # packing chosen by held-out CV on dev (results/pack_cv.json): with the learned ranker, dialogue-span
+        # expansion costs more tokens than it recovers
+        p.update(w_sub=0.0, w_qexp=0.0, expand_next=False, expand_prev_q=False)
         super().__init__(**{**p, **kw})

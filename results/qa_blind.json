@@ -1,0 +1,150 @@
+{
+ "locomo": {
+  "orp": {
+   "accuracy": 0.7066666666666667,
+   "n": 150
+  },
+  "supermemory-company-brain": {
+   "accuracy": 0.62,
+   "n": 150,
+   "orp_minus_ci": [
+    0.02666666666666667,
+    0.14666666666666667
+   ]
+  },
+  "mem0": {
+   "accuracy": 0.5933333333333334,
+   "n": 150,
+   "orp_minus_ci": [
+    0.04,
+    0.18666666666666668
+   ]
+  },
+  "graphiti": {
+   "accuracy": 0.5333333333333333,
+   "n": 150,
+   "orp_minus_ci": [
+    0.10666666666666667,
+    0.24666666666666667
+   ]
+  },
+  "cognee": {
+   "accuracy": 0.6333333333333333,
+   "n": 150,
+   "orp_minus_ci": [
+    0.02,
+    0.13333333333333333
+   ]
+  }
+ },
+ "lme": {
+  "orp": {
+   "accuracy": 0.7899159663865546,
+   "n": 119
+  },
+  "supermemory-company-brain": {
+   "accuracy": 0.6218487394957983,
+   "n": 119,
+   "orp_minus_ci": [
+    0.09243697478991597,
+    0.24369747899159663
+   ]
+  },
+  "mem0": {
+   "accuracy": 0.6890756302521008,
+   "n": 119,
+   "orp_minus_ci": [
+    0.025210084033613446,
+    0.17647058823529413
+   ]
+  },
+  "graphiti": {
+   "accuracy": 0.6554621848739496,
+   "n": 119,
+   "orp_minus_ci": [
+    0.058823529411764705,
+    0.21008403361344538
+   ]
+  },
+  "cognee": {
+   "accuracy": 0.3277310924369748,
+   "n": 119,
+   "orp_minus_ci": [
+    0.3697478991596639,
+    0.5546218487394958
+   ]
+  }
+ },
+ "by_category": {
+  "locomo:multi-hop": {
+   "orp": 37.0,
+   "supermemory-company-brain": 22.2,
+   "mem0": 37.0,
+   "graphiti": 22.2,
+   "cognee": 29.6
+  },
+  "locomo:open-domain": {
+   "orp": 30.0,
+   "supermemory-company-brain": 30.0,
+   "mem0": 20.0,
+   "graphiti": 30.0,
+   "cognee": 30.0
+  },
+  "locomo:single-hop": {
+   "orp": 84.3,
+   "supermemory-company-brain": 77.1,
+   "mem0": 71.1,
+   "graphiti": 63.9,
+   "cognee": 75.9
+  },
+  "locomo:temporal": {
+   "orp": 76.7,
+   "supermemory-company-brain": 66.7,
+   "mem0": 60.0,
+   "graphiti": 60.0,
+   "cognee": 70.0
+  },
+  "lme:knowledge-update": {
+   "orp": 94.7,
+   "supermemory-company-brain": 84.2,
+   "mem0": 94.7,
+   "graphiti": 94.7,
+   "cognee": 26.3
+  },
+  "lme:multi-session": {
+   "orp": 56.2,
+   "supermemory-company-brain": 28.1,
+   "mem0": 25.0,
+   "graphiti": 28.1,
+   "cognee": 0.0
+  },
+  "lme:single-session-assistant": {
+   "orp": 92.9,
+   "supermemory-company-brain": 92.9,
+   "mem0": 92.9,
+   "graphiti": 92.9,
+   "cognee": 92.9
+  },
+  "lme:single-session-preference": {
+   "orp": 62.5,
+   "supermemory-company-brain": 75.0,
+   "mem0": 75.0,
+   "graphiti": 50.0,
+   "cognee": 62.5
+  },
+  "lme:single-session-user": {
+   "orp": 100.0,
+   "supermemory-company-brain": 88.2,
+   "mem0": 88.2,
+   "graphiti": 88.2,
+   "cognee": 70.6
+  },
+  "lme:temporal-reasoning": {
+   "orp": 79.3,
+   "supermemory-company-brain": 51.7,
+   "mem0": 75.9,
+   "graphiti": 65.5,
+   "cognee": 13.8
+  }
+ }
+}

@@ -1,0 +1,10 @@
+fitted fold models
+{} 0.8029 locomo R@1000 0.802 ans@1000 0.811 | lme R@1000 0.828 ans@1000 0.772
+{"expand_next": false} 0.8024 locomo R@1000 0.807 ans@1000 0.811 | lme R@1000 0.828 ans@1000 0.772
+{"expand_prev_q": false} 0.8111 locomo R@1000 0.815 ans@1000 0.822 | lme R@1000 0.84 ans@1000 0.756
+{"expand_next": false, "expand_prev_q": false} 0.8111 locomo R@1000 0.817 ans@1000 0.824 | lme R@1000 0.84 ans@1000 0.756
+{"long_unit_tokens": 150} 0.8048 locomo R@1000 0.802 ans@1000 0.811 | lme R@1000 0.828 ans@1000 0.772
+{"snippet_sentences": 3} 0.8038 locomo R@1000 0.802 ans@1000 0.811 | lme R@1000 0.828 ans@1000 0.772
+{"long_unit_tokens": 150, "snippet_sentences": 3} 0.8048 locomo R@1000 0.802 ans@1000 0.811 | lme R@1000 0.828 ans@1000 0.766
+{"headers": false} 0.7924 locomo R@1000 0.812 ans@1000 0.805 | lme R@1000 0.84 ans@1000 0.715
+{"resolve_dates": false} 0.7845 locomo R@1000 0.802 ans@1000 0.732 | lme R@1000 0.828 ans@1000 0.772

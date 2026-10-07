@@ -268,7 +268,7 @@ Engines MAY apply declared features after fusion: query coverage, actor/subject 
 ### 5.5 Packing
 
 - The engine MUST NOT exceed `budget.tokens`.
-- Dialogue integrity: when a unit is a question, the engine SHOULD include its reply; when a unit is a short reply, it SHOULD include the prompt it answers. These spans count as one item.
+- Dialogue integrity: with `granularity: span`, when a unit is a question the engine SHOULD include its reply, and when a unit is a short reply it SHOULD include the prompt it answers; these spans count as one item. With `auto`, the engine decides (the reference engine's learned ranker returns units, because it already ranks answer turns directly and spans cost budget).
 - Thread headers (date, thread label) SHOULD be emitted once per thread per pack, not per line.
 - Relative time expressions SHOULD be rendered with their resolved absolute value.
 - Long units MAY be snippeted to their most relevant sentences; snippets MUST be marked with `…` and keep `memory_ids` of the full unit so the client can fetch it.

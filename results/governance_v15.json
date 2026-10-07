@@ -1,0 +1,37 @@
+{
+ "pre_filter": {
+  "permitted_n": 718,
+  "forbidden_n": 5678,
+  "recall@1000_permitted": 0.9556638811513463,
+  "queries_with_any_leak": 0.0,
+  "forbidden_answer_evidence_leaked": 0.0
+ },
+ "post_filter@10": {
+  "permitted_n": 718,
+  "forbidden_n": 5678,
+  "recall@1000_permitted": 0.8386722376973073,
+  "queries_with_any_leak": 0.0,
+  "forbidden_answer_evidence_leaked": 0.0
+ },
+ "post_filter@50": {
+  "permitted_n": 718,
+  "forbidden_n": 5678,
+  "recall@1000_permitted": 0.939066852367688,
+  "queries_with_any_leak": 0.0,
+  "forbidden_answer_evidence_leaked": 0.0
+ },
+ "scope_only": {
+  "permitted_n": 718,
+  "forbidden_n": 5678,
+  "recall@1000_permitted": 0.8837047353760445,
+  "queries_with_any_leak": 1.0,
+  "forbidden_answer_evidence_leaked": 0.8679112363508278
+ },
+ "derived_bank": {
+  "permitted_n": 718,
+  "forbidden_n": 5678,
+  "recall@1000_permitted": 0.9440575673166203,
+  "queries_with_any_leak": 0.8101938711694809,
+  "forbidden_answer_evidence_leaked": 0.0
+ }
+}

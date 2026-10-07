@@ -1,0 +1,902 @@
+[
+{
+"uid": "u00514",
+"question": "How long did I use my new binoculars before I saw the American goldfinches returning to the area?",
+"gold": "Two weeks",
+"answer": "About two weeks"
+},
+{
+"uid": "u00879",
+"question": "How does Nate describe the stuffed animal he got for Joanna?",
+"gold": "A stuffed animal to remind you of the good vibes",
+"answer": "A stuffed animal (a new pup) to remind her of the good vibes"
+},
+{
+"uid": "u00877",
+"question": "Why does John like Aragorn from Lord of the Rings?",
+"gold": "brave, selfless, down-to-earth attitude",
+"answer": "His brave, selfless, down-to-earth attitude and how much he grows, from ranger to king of Gondor"
+},
+{
+"uid": "u00866",
+"question": "What do Deborah and Jolene plan to try when they meet in a new cafe?",
+"gold": "coffee and fresh pastries",
+"answer": "I don't know"
+},
+{
+"uid": "u00782",
+"question": "How many days passed between my visit to the Museum of Modern Art (MoMA) and the 'Ancient Civilizations' exhibit at the Metropolitan Museum of Art?",
+"gold": "7 days. 8 days (including the last day) is also acceptable.",
+"answer": "I don't know"
+},
+{
+"uid": "u00343",
+"question": "When did Calvin first get interested in cars?",
+"gold": "at an early age",
+"answer": "I don't know"
+},
+{
+"uid": "u00001",
+"question": "What kind of healthy food suggestions has Evan given to Sam?",
+"gold": "flavored seltzer water, dark chocolate with high cocoa content, air-popped popcorn and fruit, veggies, healthy sandwich snacks, energy balls, grilled chicken salad with avocado",
+"answer": "Flavored seltzer with air-popped popcorn or fruit as a snack, plus healthy swaps, small steps and a balanced diet"
+},
+{
+"uid": "u01283",
+"question": "I was looking back at our previous conversation about environmentally responsible supply chain practices, and I was wondering if you could remind me of the company you mentioned that's doing a great job with sustainability?",
+"gold": "Patagonia",
+"answer": "Patagonia"
+},
+{
+"uid": "u00927",
+"question": "How long has Nate had his first two turtles?",
+"gold": "three years",
+"answer": "I don't know"
+},
+{
+"uid": "u00223",
+"question": "What is the name of the playlist I created on Spotify?",
+"gold": "Summer Vibes",
+"answer": "Summer Vibes"
+},
+{
+"uid": "u00316",
+"question": "Why did Jolene have to reschedule their meeting with Deborah on September 8, 2023?",
+"gold": "Jolene already had plans",
+"answer": "I don't know"
+},
+{
+"uid": "u00035",
+"question": "Would Tim enjoy reading books by C. S. Lewis or John Greene?",
+"gold": "C. S.Lewis",
+"answer": "Likely C. S. Lewis, since Tim loves fantasy books"
+},
+{
+"uid": "u00250",
+"question": "What is the order of the three sports events I participated in during the past month, from earliest to latest?",
+"gold": "I first completed the Spring Sprint Triathlon, then took part in the Midsummer 5K Run, and finally participated in the company's annual charity soccer tournament.",
+"answer": "I don't know"
+},
+{
+"uid": "u00331",
+"question": "What did Calvin book a flight ticket for on 1st September 2023?",
+"gold": "Boston",
+"answer": "A trip to Boston."
+},
+{
+"uid": "u00560",
+"question": "How many video game tournaments has Nate participated in?",
+"gold": "nine",
+"answer": "I don't know"
+},
+{
+"uid": "u00336",
+"question": "When did Jolene's parents give her first console?",
+"gold": "when she was 10",
+"answer": "When she was 10 years old"
+},
+{
+"uid": "u00372",
+"question": "What is Nate's favorite video game?",
+"gold": "Xenoblade Chronicles",
+"answer": "I don't know"
+},
+{
+"uid": "u00269",
+"question": "When did Nate get Tilly for Joanna?",
+"gold": "25 May, 2022",
+"answer": "I don't know"
+},
+{
+"uid": "u01086",
+"question": "Which of Deborah`s family and friends have passed away?",
+"gold": "mother, father, her friend Karlie",
+"answer": "Her mother and her father"
+},
+{
+"uid": "u00835",
+"question": "What can Andrew potentially do to improve his stress and accomodate his living situation with his dogs?",
+"gold": "Change to a hybrid or remote job so he can move away from the city to the suburbs to have a larger living space and be closer to nature.",
+"answer": "I don't know"
+},
+{
+"uid": "u00872",
+"question": "What sports activity has Evan been doing to stay active while dealing with the knee injury?",
+"gold": "Swimming",
+"answer": "Swimming"
+},
+{
+"uid": "u00161",
+"question": "How many new postcards have I added to my collection since I started collecting again?",
+"gold": "25",
+"answer": "25"
+},
+{
+"uid": "u00189",
+"question": "How many projects have I led or am currently leading?",
+"gold": "2",
+"answer": "I don't know"
+},
+{
+"uid": "u00470",
+"question": "I'm going back to our previous conversation about traditional Indian embroidery and tailoring techniques. Can you remind me of the name of that online store based in India that sells traditional Indian fabrics, threads, and embellishments?",
+"gold": "Nostalgia",
+"answer": "Nostalgia"
+},
+{
+"uid": "u01232",
+"question": "How many bikes do I currently own?",
+"gold": "4",
+"answer": "Three bikes"
+},
+{
+"uid": "u01130",
+"question": "What dish did Nate make on 9 November, 2022?",
+"gold": "Homemade coconut ice cream",
+"answer": "I don't know"
+},
+{
+"uid": "u00997",
+"question": "How many different art-related events did I attend in the past month?",
+"gold": "4",
+"answer": "I don't know"
+},
+{
+"uid": "u00248",
+"question": "I received a piece of jewelry last Saturday from whom?",
+"gold": "my aunt",
+"answer": "I don't know"
+},
+{
+"uid": "u01277",
+"question": "I'm going back to our previous conversation about traditional Indian embroidery and tailoring techniques. Can you remind me of the name of that online store based in India that sells traditional Indian fabrics, threads, and embellishments?",
+"gold": "Nostalgia",
+"answer": "Nostalgia."
+},
+{
+"uid": "u00288",
+"question": "What personal health incidents does Evan face in 2023?",
+"gold": "heart palpitations, twisted ankle, twisted ankle",
+"answer": "A sudden heart palpitation health scare"
+},
+{
+"uid": "u00686",
+"question": "Did Andrew have a pet dog during March 2023?",
+"gold": "No",
+"answer": "I don't know"
+},
+{
+"uid": "u00907",
+"question": "What kind of lighting does Nate's gaming room have?",
+"gold": "red and purple lighting",
+"answer": "I don't know"
+},
+{
+"uid": "u01252",
+"question": "What is the total time it takes I to get ready and commute to work?",
+"gold": "an hour and a half",
+"answer": "I don't know"
+},
+{
+"uid": "u00681",
+"question": "What significant event happened in Sam's life towards the end of summer 2023?",
+"gold": "He fell in love with a Canadian woman",
+"answer": "I don't know"
+},
+{
+"uid": "u00903",
+"question": "What is Audrey's favorite recipe that she shares with Andrew on 3 July, 2023?",
+"gold": "Chicken Pot Pie",
+"answer": "Chicken Pot Pie."
+},
+{
+"uid": "u01067",
+"question": "Which event happened first, the narrator losing their phone charger or the narrator receiving their new phone case?",
+"gold": "Receiving the new phone case",
+"answer": "Receiving the new phone case (about a month ago) happened before losing the charger (about two weeks ago)"
+},
+{
+"uid": "u01273",
+"question": "How many plants did I acquire in the last month?",
+"gold": "3",
+"answer": "I don't know"
+},
+{
+"uid": "u00933",
+"question": "When did Audrey move to a new place?",
+"gold": "June 2023",
+"answer": "Around 26 June 2023 (she got a new place with a bigger backyard for her dogs)"
+},
+{
+"uid": "u00261",
+"question": "How many days ago did I attend the Maundy Thursday service at the Episcopal Church?",
+"gold": "4 days.",
+"answer": "4 days"
+},
+{
+"uid": "u00758",
+"question": "I've been thinking about making a cocktail for an upcoming get-together, but I'm not sure which one to choose. Any suggestions?",
+"gold": "Considering their mixology class background, the user would prefer cocktail suggestions that build upon their existing skills and interests, such as creative variations of classic cocktails or innovative twists on familiar flavors. They might appreciate recommendations that incorporate their experience with refreshing summer drinks like Pimm's Cup. The user would not prefer overly simplistic or basic cocktail recipes, and may not be interested in suggestions that don't take into account their mixology class background.",
+"answer": "A summer cocktail with Hendrick's gin, such as the Pimm's Cup with a Twist served in a Collins glass"
+},
+{
+"uid": "u00640",
+"question": "How does Tim stay motivated during difficult study sessions?",
+"gold": "Visualizing goals and success",
+"answer": "He breaks studying into smaller parts, 25 minutes on and 5 minutes off for something fun"
+},
+{
+"uid": "u00072",
+"question": "How does Nate describe the stuffed animal he got for Joanna?",
+"gold": "A stuffed animal to remind you of the good vibes",
+"answer": "As a stuffed animal (a pup) to remind her of the good vibes, like having joy in your pocket."
+},
+{
+"uid": "u00014",
+"question": "What was the artists Calvin used to listen to when he was a kid?",
+"gold": "Tupac and Dr. Dre",
+"answer": "Tupac and Dr. Dre"
+},
+{
+"uid": "u00853",
+"question": "What did Calvin discuss with the cool artist he met at the gala?",
+"gold": "Music and art",
+"answer": "They clicked over music and art"
+},
+{
+"uid": "u01324",
+"question": "I received a piece of jewelry last Saturday from whom?",
+"gold": "my aunt",
+"answer": "I don't know"
+},
+{
+"uid": "u00830",
+"question": "How many times has Joanna's scripts been rejected?",
+"gold": "Twice",
+"answer": "I don't know"
+},
+{
+"uid": "u00414",
+"question": "When did John get married at a greenhouse?",
+"gold": "last week of September 2023",
+"answer": "The week before 2 October 2023 (week of 25 September 2023)"
+},
+{
+"uid": "u01327",
+"question": "What is the order of the three trips I took in the past three months, from earliest to latest?",
+"gold": "I went on a day hike to Muir Woods National Monument with my family, then I went on a road trip with friends to Big Sur and Monterey, and finally I started my solo camping trip to Yosemite National Park.",
+"answer": "I don't know"
+},
+{
+"uid": "u00651",
+"question": "What are the names of Jolene's snakes?",
+"gold": "Susie, Seraphim",
+"answer": "Susie and Seraphim"
+},
+{
+"uid": "u01096",
+"question": "Which bands has Dave enjoyed listening to?",
+"gold": "Aerosmith, The Fireworks",
+"answer": "Aerosmith (also classic rock)"
+},
+{
+"uid": "u01007",
+"question": "What is the total number of lunch meals I got from the chicken fajitas and lentil soup?",
+"gold": "8 meals",
+"answer": "8 lunches (3 from the chicken fajitas plus 5 from the lentil soup)"
+},
+{
+"uid": "u00203",
+"question": "I was going through our previous chat. Can you remind me of the name of the last venue you recommended in the list of popular venues in Portland for indie music shows?",
+"gold": "Revolution Hall",
+"answer": "Revolution Hall"
+},
+{
+"uid": "u00350",
+"question": "How does James communicate with his gaming team?",
+"gold": "voice chat",
+"answer": "Voice chat"
+},
+{
+"uid": "u00235",
+"question": "How much RAM did I upgrade my laptop to?",
+"gold": "16GB",
+"answer": "16GB"
+},
+{
+"uid": "u00220",
+"question": "I've been thinking about making a cocktail for an upcoming get-together, but I'm not sure which one to choose. Any suggestions?",
+"gold": "Considering their mixology class background, the user would prefer cocktail suggestions that build upon their existing skills and interests, such as creative variations of classic cocktails or innovative twists on familiar flavors. They might appreciate recommendations that incorporate their experience with refreshing summer drinks like Pimm's Cup. The user would not prefer overly simplistic or basic cocktail recipes, and may not be interested in suggestions that don't take into account their mixology class background.",
+"answer": "A summer cocktail with Hendrick's gin, something other than a classic Pimm's Cup or the classics from the mixology class"
+},
+{
+"uid": "u00876",
+"question": "What did Audrey and her friends stumble across during a hike a few years back, as mentioned on June 26, 2023?",
+"gold": "a stunning lake in the mountains",
+"answer": "A stunning lake in the mountains"
+},
+{
+"uid": "u00315",
+"question": "What did Calvin discuss with the cool artist he met at the gala?",
+"gold": "Music and art",
+"answer": "I don't know"
+},
+{
+"uid": "u00518",
+"question": "How long have I been working before I started my current job at NovaTech?",
+"gold": "4 years and 9 months",
+"answer": "I don't know"
+},
+{
+"uid": "u01118",
+"question": "How did the audience in Tokyo react when Calvin sang one of his songs?",
+"gold": "Everyone was so into it and sang along",
+"answer": "They were really into it and sang along when he played one of his songs, a magical moment."
+},
+{
+"uid": "u00559",
+"question": "What is something Nate gave to Joanna that brings her a lot of joy?",
+"gold": "stuffed toy pup",
+"answer": "A stuffed animal dog (Tilly)."
+},
+{
+"uid": "u00883",
+"question": "Where did Joanna go for a road trip for research?",
+"gold": "Woodhaven",
+"answer": "I don't know"
+},
+{
+"uid": "u00672",
+"question": "When was Calvin's concert in Tokyo?",
+"gold": "last week of May 2023",
+"answer": "May 2023"
+},
+{
+"uid": "u00442",
+"question": "When did I submit my research paper on sentiment analysis?",
+"gold": "February 1st",
+"answer": "I don't know"
+},
+{
+"uid": "u00665",
+"question": "When did James start taking cooking classes?",
+"gold": "September 2, 2022",
+"answer": "Around 2 September 2022 (he signed up two days before 4 Sept 2022)."
+},
+{
+"uid": "u00674",
+"question": "When did John start playing professionally?",
+"gold": "May, 2023",
+"answer": "Just under a year before December 2023, so roughly late 2022 or early 2023"
+},
+{
+"uid": "u00108",
+"question": "In which area has John's team seen the most growth during training?",
+"gold": "Communication and bonding",
+"answer": "Communication and bonding"
+},
+{
+"uid": "u01319",
+"question": "How many months ago did I attend the photography workshop?",
+"gold": "3",
+"answer": "I don't know"
+},
+{
+"uid": "u01149",
+"question": "What did Joanna make for one of the ladies at her writing club?",
+"gold": "a bookmark",
+"answer": "A bookmark"
+},
+{
+"uid": "u00486",
+"question": "Can you suggest some activities that I can do in the evening?",
+"gold": "The user would prefer suggestions that involve relaxing activities that can be done in the evening, preferably before 9:30 pm. They would not prefer suggestions that involve using their phone or watching TV, as these activities have been affecting their sleep quality.",
+"answer": "Catch up with family or friends, pursue a hobby, read, or unwind (warm bath, gentle stretches, soothing music)"
+},
+{
+"uid": "u00526",
+"question": "How many days had passed since I finished reading 'The Seven Husbands of Evelyn Hugo' when I attended the book reading event at the local library, where the author of 'The Silent Patient' is discussing her latest thriller novel?",
+"gold": "18 days. 19 days (including the last day) is also acceptable.",
+"answer": "18 days"
+},
+{
+"uid": "u00194",
+"question": "How many minutes did I exceed my target time by in the marathon?",
+"gold": "12",
+"answer": "I don't know"
+},
+{
+"uid": "u00564",
+"question": "What fantasy movies does Tim like?",
+"gold": "Lord of the Rings, Harry Potter, and Star Wars.",
+"answer": "Star Wars and The Hobbit"
+},
+{
+"uid": "u01257",
+"question": "How many days did I spend in total traveling in Hawaii and in New York City?",
+"gold": "15 days",
+"answer": "I don't know"
+},
+{
+"uid": "u00750",
+"question": "I was thinking about our previous conversation about the Fifth Album, and I was wondering if you could remind me what song you said best exemplified the band's growth and development as artists?",
+"gold": "Evolution",
+"answer": "\"Evolution\""
+},
+{
+"uid": "u00828",
+"question": "What is something Nate gave to Joanna that brings her a lot of joy?",
+"gold": "stuffed toy pup",
+"answer": "A stuffed animal dog (Tilly)"
+},
+{
+"uid": "u00015",
+"question": "What does Joanna do to remember happy memories?",
+"gold": "Hangs them on a corkboard, writes themin a notebook.",
+"answer": "She writes her favorite memories down"
+},
+{
+"uid": "u00037",
+"question": "What was Jolene doing with her partner in Rio de Janeiro?",
+"gold": "they went on excursions, checked out some cool yoga classes, visited a lot of delicious cafes, visited an old temple",
+"answer": "Checking out yoga classes (and going on excursions, e.g. visiting an old temple)"
+},
+{
+"uid": "u00256",
+"question": "Which book did I finish reading first, 'The Hate U Give' or 'The Nightingale'?",
+"gold": "'The Hate U Give'",
+"answer": "The Hate U Give (finished a few days before the book club meeting in the week of 8 May 2023; The Nightingale was finished the weekend of 15 May 2023)."
+},
+{
+"uid": "u00916",
+"question": "What type of pizza is John's favorite?",
+"gold": "Hawaiian",
+"answer": "Hawaiian pizza"
+},
+{
+"uid": "u01072",
+"question": "Who became a parent first, Rachel or Alex?",
+"gold": "Alex",
+"answer": "I don't know"
+},
+{
+"uid": "u00355",
+"question": "What did Nate make and share with his vegan diet group?",
+"gold": "vegan ice cream",
+"answer": "Vegan ice cream"
+},
+{
+"uid": "u00277",
+"question": "What kind of subjects does Evan enjoy painting?",
+"gold": "nature landscapes, portraits, abstract minimalism",
+"answer": "Nature scenes (forests, sunsets, desert cactus, watercolor landscapes) and contemporary figurative paintings"
+},
+{
+"uid": "u00182",
+"question": "How many hours of jogging and yoga did I do last week?",
+"gold": "0.5 hours",
+"answer": "I don't know"
+},
+{
+"uid": "u00688",
+"question": "How many free night's stays can I redeem at any Hilton property with my accumulated points?",
+"gold": "Two",
+"answer": "Two free nights' stays (the latest statement, 2023-05-28)"
+},
+{
+"uid": "u00512",
+"question": "How many months ago did I attend the photography workshop?",
+"gold": "3",
+"answer": "3 months ago (about 3 months, on 1 Nov 2023)"
+},
+{
+"uid": "u01114",
+"question": "What did James prepare for the first time in the cooking class?",
+"gold": "Omelette",
+"answer": "An omelette."
+},
+{
+"uid": "u00296",
+"question": "What is an indoor activity that Andrew would enjoy doing while make his dog happy?",
+"gold": "cook dog treats",
+"answer": "Taking his dog to the indoor doggy daycare/play space"
+},
+{
+"uid": "u01135",
+"question": "What do Deborah and Jolene plan to try when they meet in a new cafe?",
+"gold": "coffee and fresh pastries",
+"answer": "Fresh pastries"
+},
+{
+"uid": "u00777",
+"question": "How long did Alex marinate the BBQ ribs in special sauce?",
+"gold": "24 hours",
+"answer": "24 hours"
+},
+{
+"uid": "u00543",
+"question": "How many times has Jolene been to France?",
+"gold": "two times",
+"answer": "I don't know"
+},
+{
+"uid": "u00312",
+"question": "How long has John been surfing?",
+"gold": "five years",
+"answer": "Five years"
+},
+{
+"uid": "u01282",
+"question": "I wanted to follow up on our previous conversation about mindfulness techniques. You mentioned some great resources for guided imagery exercises, can you remind me of the website that had free exercises like 'The Mountain Meditation' and 'The Body Scan Meditation'?",
+"gold": "Mindful.org.",
+"answer": "Mindful.org"
+},
+{
+"uid": "u01123",
+"question": "Why did Jolene have to reschedule their meeting with Deborah on September 8, 2023?",
+"gold": "Jolene already had plans",
+"answer": "I don't know"
+},
+{
+"uid": "u00206",
+"question": "I wanted to follow up on our previous conversation about mindfulness techniques. You mentioned some great resources for guided imagery exercises, can you remind me of the website that had free exercises like 'The Mountain Meditation' and 'The Body Scan Meditation'?",
+"gold": "Mindful.org.",
+"answer": "Mindful.org"
+},
+{
+"uid": "u00898",
+"question": "What game is Nate currently playing and recommends to others on November 7, 2022?",
+"gold": "\"Xenoblade Chronicles\"",
+"answer": "Xenoblade Chronicles (a fantasy RPG)"
+},
+{
+"uid": "u00051",
+"question": "How old are Deborah's cats?",
+"gold": "Max is 8 years old and Luna is 5 years old",
+"answer": "Max is 8 years old and Luna is 5 years old"
+},
+{
+"uid": "u01043",
+"question": "Where did I attend for my study abroad program?",
+"gold": "University of Melbourne in Australia",
+"answer": "University of Melbourne"
+},
+{
+"uid": "u01237",
+"question": "How many new postcards have I added to my collection since I started collecting again?",
+"gold": "25",
+"answer": "17"
+},
+{
+"uid": "u00112",
+"question": "What type of movies does Nate enjoy watching the most?",
+"gold": "action and sci-fi",
+"answer": "Action and sci-fi movies (also fantasy and sci-fi)"
+},
+{
+"uid": "u00244",
+"question": "How many days passed between my visit to the Museum of Modern Art (MoMA) and the 'Ancient Civilizations' exhibit at the Metropolitan Museum of Art?",
+"gold": "7 days. 8 days (including the last day) is also acceptable.",
+"answer": "7 days"
+},
+{
+"uid": "u00726",
+"question": "How much more money did I raise than my initial goal in the charity cycling event?",
+"gold": "$50",
+"answer": "$50 more (raised $250 vs a $200 goal)"
+},
+{
+"uid": "u00539",
+"question": "What kind of healthy food suggestions has Evan given to Sam?",
+"gold": "flavored seltzer water, dark chocolate with high cocoa content, air-popped popcorn and fruit, veggies, healthy sandwich snacks, energy balls, grilled chicken salad with avocado",
+"answer": "Focus on healthy swaps and small steps, add more vegetables, and ask a doctor for diet advice"
+},
+{
+"uid": "u00044",
+"question": "When did John meet back up with his teammates after his trip in August 2023?",
+"gold": "Aug 15th",
+"answer": "On the 15th (August 15, 2023)"
+},
+{
+"uid": "u00895",
+"question": "What did Evan find relaxing about his road trip to Jasper?",
+"gold": "fresh air, peacefulness, cozy cabin surrounded by mountains and forests",
+"answer": "The stunning views made him feel relaxed"
+},
+{
+"uid": "u00636",
+"question": "What did James learn to make in the cooking class besides omelette and meringue?",
+"gold": "Dough",
+"answer": "How to make dough"
+},
+{
+"uid": "u00274",
+"question": "How many times has Jolene been to France?",
+"gold": "two times",
+"answer": "I don't know"
+},
+{
+"uid": "u01171",
+"question": "Why did Joanna name the stuffed animal dog Tilly?",
+"gold": "after a dog she had in Michigan",
+"answer": "She had a dog named Tilly in Michigan before becoming allergic, and the name helps her remember that dog."
+},
+{
+"uid": "u00566",
+"question": "What can Andrew potentially do to improve his stress and accomodate his living situation with his dogs?",
+"gold": "Change to a hybrid or remote job so he can move away from the city to the suburbs to have a larger living space and be closer to nature.",
+"answer": "Get back to nature, e.g. hiking and exploring outdoors with his dogs, and choose exercise suited to apartment/city living"
+},
+{
+"uid": "u00930",
+"question": "When did Joanna's laptop crash?",
+"gold": "The week before 14September, 2022",
+"answer": "The week before 2022-09-14 (roughly early September 2022)"
+},
+{
+"uid": "u00011",
+"question": "How many screenplays has Joanna written?",
+"gold": "three",
+"answer": "I don't know"
+},
+{
+"uid": "u01092",
+"question": "What are the skills that Nate has helped others learn?",
+"gold": "coconut milk ice cream recipe, reset high scores, tips to improve gaming skills",
+"answer": "Gaming skills; he gave friends tips on how to improve their game"
+},
+{
+"uid": "u01063",
+"question": "Which book did I finish reading first, 'The Hate U Give' or 'The Nightingale'?",
+"gold": "'The Hate U Give'",
+"answer": "The Hate U Give"
+},
+{
+"uid": "u00270",
+"question": "What kind of healthy food suggestions has Evan given to Sam?",
+"gold": "flavored seltzer water, dark chocolate with high cocoa content, air-popped popcorn and fruit, veggies, healthy sandwich snacks, energy balls, grilled chicken salad with avocado",
+"answer": "A salad with chicken, avocado, tomatoes, corn and cheese, plus advice to focus on a balanced diet and low-impact exercise (swimming, yoga, walking)"
+},
+{
+"uid": "u00068",
+"question": "How does Calvin describe his process of adding electronic elements to his songs?",
+"gold": "gives them a fresh vibe",
+"answer": "It gives his songs a fresh vibe and has been an exciting process of self-discovery and growth"
+},
+{
+"uid": "u00227",
+"question": "What breed is my dog?",
+"gold": "Golden Retriever",
+"answer": "Golden Retriever"
+},
+{
+"uid": "u00622",
+"question": "What activity do Andrew and Buddy enjoy doing together?",
+"gold": "Walking",
+"answer": "Going for walks"
+},
+{
+"uid": "u00085",
+"question": "What method does Deb suggest Jolene to try for organizing tasks based on importance and urgency?",
+"gold": "The Eisenhower Matrix",
+"answer": "The Eisenhower Matrix"
+},
+{
+"uid": "u00266",
+"question": "Which item did I purchase first, the dog bed for Max or the training pads for Luna?",
+"gold": "Training pads for Luna",
+"answer": "The training pads for Luna (about a month ago, vs the dog bed three weeks ago)"
+},
+{
+"uid": "u01111",
+"question": "Would Tim enjoy reading books by C. S. Lewis or John Greene?",
+"gold": "C. S.Lewis",
+"answer": "Likely C. S. Lewis, since Tim loves fantasy books"
+},
+{
+"uid": "u00090",
+"question": "What does Dave say is important for making his custom cars unique?",
+"gold": "attention to small details",
+"answer": "Paying attention to small details, which make the car unique and personalized"
+},
+{
+"uid": "u00649",
+"question": "What did Nate think of the coconut milk ice cream he made?",
+"gold": "Super good, rich and creamy",
+"answer": "It was actually pretty good, and he was proud of himself"
+},
+{
+"uid": "u00017",
+"question": "What things has Nate reccomended to Joanna?",
+"gold": "A pet,\"The Lord of the Rings\" movies,a dragon book series,coconut flavoring,\"Project Hail Mary\" book,Xenoblade Chronicles, dairy-free margarine, coconut oil",
+"answer": "The game Xenoblade Chronicles, and having pets like turtles for times of stress"
+},
+{
+"uid": "u00275",
+"question": "What did Audrey get wtih having so many dogs?",
+"gold": "Companionship",
+"answer": "A tattoo of her four dogs (with more drawings added later)"
+},
+{
+"uid": "u00963",
+"question": "How many bikes do I currently own?",
+"gold": "4",
+"answer": "Four bikes"
+},
+{
+"uid": "u01050",
+"question": "How many months ago did I attend the photography workshop?",
+"gold": "3",
+"answer": "3 months ago"
+},
+{
+"uid": "u00187",
+"question": "How many health-related devices do I use in a day?",
+"gold": "4",
+"answer": "I don't know"
+},
+{
+"uid": "u01084",
+"question": "What kind of subjects does Evan enjoy painting?",
+"gold": "nature landscapes, portraits, abstract minimalism",
+"answer": "Landscapes and nature scenes (e.g. sunsets over the ocean, forests, desert cactus, mountains)"
+},
+{
+"uid": "u00818",
+"question": "How many screenplays has Joanna written?",
+"gold": "three",
+"answer": "I don't know"
+},
+{
+"uid": "u01020",
+"question": "I was looking back at our previous chat and I wanted to confirm, how many times did the Chiefs play the Jaguars at Arrowhead Stadium?",
+"gold": "The Chiefs played the Jaguars 12 times at Arrowhead Stadium.",
+"answer": "12 times"
+},
+{
+"uid": "u01056",
+"question": "How long have I been working before I started my current job at NovaTech?",
+"gold": "4 years and 9 months",
+"answer": "I don't know"
+},
+{
+"uid": "u00091",
+"question": "What game is Nate currently playing and recommends to others on November 7, 2022?",
+"gold": "\"Xenoblade Chronicles\"",
+"answer": "Xenoblade Chronicles"
+},
+{
+"uid": "u00334",
+"question": "What sports activity has Evan been doing to stay active while dealing with the knee injury?",
+"gold": "Swimming",
+"answer": "Swimming"
+},
+{
+"uid": "u01062",
+"question": "How many days passed between the day I cancelled my FarmFresh subscription and the day I did my online grocery shopping from Instacart?",
+"gold": "54 days. 55 days (including the last day) is also acceptable.",
+"answer": "54 days"
+},
+{
+"uid": "u00506",
+"question": "How long did I wait for the decision on my asylum application?",
+"gold": "over a year",
+"answer": "Over a year"
+},
+{
+"uid": "u00584",
+"question": "What did Calvin discuss with the cool artist he met at the gala?",
+"gold": "Music and art",
+"answer": "Their favorite artists, art, and how the power of music connects us all"
+},
+{
+"uid": "u00932",
+"question": "How long did John practice chess for before winning the chess tournament?",
+"gold": "nearly four months",
+"answer": "I don't know"
+},
+{
+"uid": "u00549",
+"question": "How many screenplays has Joanna written?",
+"gold": "three",
+"answer": "I don't know"
+},
+{
+"uid": "u00152",
+"question": "How many different species of birds have I seen in my local park?",
+"gold": "32",
+"answer": "27"
+},
+{
+"uid": "u00415",
+"question": "How long was the car modification workshop in San Francisco?",
+"gold": "two weeks",
+"answer": "I don't know"
+},
+{
+"uid": "u01223",
+"question": "When did Dave host a card-playing night with his friends?",
+"gold": "on the Friday before 22 August, 2023",
+"answer": "Friday 18 August 2023."
+},
+{
+"uid": "u00838",
+"question": "Is Deborah married?",
+"gold": "yes",
+"answer": "Yes"
+},
+{
+"uid": "u00692",
+"question": "How long have I been using my Fitbit Charge 3?",
+"gold": "9 months",
+"answer": "9 months"
+},
+{
+"uid": "u01323",
+"question": "How many weeks ago did I attend a bird watching workshop at the local Audubon society?",
+"gold": "4",
+"answer": "About 4 weeks"
+},
+{
+"uid": "u01053",
+"question": "Which gift did I buy first, the necklace for my sister or the photo album for my mom?",
+"gold": "the photo album for my mom",
+"answer": "The photo album for his mom (ordered about two weeks before 22 May 2023; the necklace was bought last weekend)."
+},
+{
+"uid": "u00839",
+"question": "What pets wouldn't cause any discomfort to Joanna?",
+"gold": "Hairless cats or pigs,since they don't have fur, which is one of the main causes of Joanna's allergy.",
+"answer": "I don't know"
+},
+{
+"uid": "u00132",
+"question": "When is Tim attending a book conference?",
+"gold": "September 2023",
+"answer": "September 2023"
+},
+{
+"uid": "u00773",
+"question": "How much RAM did I upgrade my laptop to?",
+"gold": "16GB",
+"answer": "16GB"
+},
+{
+"uid": "u00276",
+"question": "What motivates Evan to take care of his health?",
+"gold": "family, fitness tracker, thirst for adventure on interesting hikes",
+"answer": "I don't know"
+},
+{
+"uid": "u01325",
+"question": "How long have I been working before I started my current job at NovaTech?",
+"gold": "4 years and 9 months",
+"answer": "I don't know"
+},
+{
+"uid": "u00797",
+"question": "How many days had passed since I bought my Adidas running shoes when I realized one of the shoelaces on my old Converse sneakers had broken?",
+"gold": "14 days. 15 days (including the last day) is also acceptable.",
+"answer": "14 days"
+}
+]
