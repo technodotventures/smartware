@@ -194,6 +194,24 @@ class RecallSemantics(unittest.TestCase):
         after = [i["memory_ids"] for i in recall(self.s, ALICE, q, granularity="unit")["items"]]
         self.assertEqual(before, after)
 
+    def test_M32_M33_M54b_identical_to_store_without_inadmissible(self):
+        mems = []
+        for t in range(6):
+            for i in range(6):
+                priv = (t + i) % 3 == 0
+                mems.append(ev(f"thread {t} turn {i}: notes on hiring plan and budget {'secret raise' if priv else ''}",
+                               thread=f"th{t}", seq=i, readers=["group:exec"] if priv else None,
+                               actor="Ann" if i % 2 else "Ben"))
+        full = make_service()
+        full.remember({"memories": mems}, ADMIN)
+        clean = make_service()
+        clean.remember({"memories": [m for m in mems if m.get("readers") is None]}, ADMIN)
+        for q in ("hiring plan", "What did Ann say about the budget?", "secret raise", "notes"):
+            for g in ("unit", "span", "auto"):
+                a = [i["text"] for i in recall(full, ALICE, q, granularity=g)["items"]]
+                b = [i["text"] for i in recall(clean, ALICE, q, granularity=g)["items"]]
+                self.assertEqual(a, b, (q, g))
+
     def test_M34_M47_history_labelled(self):
         self.s.remember({"memories": [{"kind": "fact", "content": "Maya lives in Paris", "valid_from": "2024-01-01",
                                        "claim": {"subject": "Maya", "predicate": "city", "object": "Paris"}},

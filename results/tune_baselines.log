@@ -1,0 +1,15 @@
+310 configurations to evaluate
+graphiti                   J=0.6334 {"bfs": false, "limit": null, "mode": "edges", "reranker": "episode_mentions"} 53s
+graphiti                   J=0.6801 {"bfs": false, "limit": null, "mode": "edges", "reranker": "rrf"} 53s
+graphiti                   J=0.6658 {"bfs": false, "limit": null, "mode": "combined", "reranker": "episode_mentions"} 64s
+graphiti                   J=0.672 {"bfs": false, "limit": null, "mode": "combined", "reranker": "rrf"} 65s
+graphiti                   J=0.5886 {"bfs": false, "limit": 10, "mode": "edges", "reranker": "rrf"} 50s
+graphiti                   J=0.5679 {"bfs": false, "limit": 10, "mode": "edges", "reranker": "episode_mentions"} 50s
+graphiti                   J=0.6652 {"bfs": false, "limit": 10, "mode": "combined", "reranker": "episode_mentions"} 65s
+graphiti                   J=0.6767 {"bfs": false, "limit": 10, "mode": "combined", "reranker": "rrf"} 65s
+graphiti                   J=0.6334 {"bfs": false, "limit": 50, "mode": "edges", "reranker": "episode_mentions"} 60s
+graphiti                   J=0.6801 {"bfs": false, "limit": 50, "mode": "edges", "reranker": "rrf"} 60s
+graphiti                   J=0.6811 {"bfs": false, "limit": 50, "mode": "combined", "reranker": "rrf"} 145s
+graphiti                   J=0.6344 {"bfs": false, "limit": 50, "mode": "combined", "reranker": "episode_mentions"} 148s
+graphiti                   J=0.6577 {"bfs": true, "limit": null, "mode": "edges", "reranker": "rrf"} 99s
+graphiti                   J=0.5636 {"bfs": true, "limit": null, "mode": "edges", "reranker": "episode_mentions"} 98s

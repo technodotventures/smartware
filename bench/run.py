@@ -45,6 +45,7 @@ REGISTRY = {
     "dense": "baselines.reference:DenseOnly",
     "orp": "bench.orp_variants:ORPLtr",
     "orp-rrf": "bench.orp_variants:ORPRrf",
+    "orp-ablate": "bench.orp_variants:ORPAblate",
 }
 
 _TASKS = {}

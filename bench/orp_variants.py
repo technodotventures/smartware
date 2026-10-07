@@ -1,4 +1,5 @@
-"""Benchmark entries for the ORP reference engine, loading parameters fixed on dev splits."""
+"""Benchmark entries for the ORP reference engine, loading parameters fixed on dev splits
+by bench/train_orp.py."""
 from __future__ import annotations
 
 import json
@@ -22,12 +23,16 @@ class ORPRrf(ORPSystem):
 
 
 class ORPLtr(ORPSystem):
-    """Learned ranker (gradient-boosted trees over declared features), fitted on dev splits only."""
+    """Learned ranker fitted on dev splits only (model family and packing chosen by grouped CV)."""
     name = "orp"
 
     def __init__(self, **kw):
-        p = _load("ltr_params_v1.json")
-        # packing chosen by held-out CV on dev (results/pack_cv.json): with the learned ranker, dialogue-span
-        # expansion costs more tokens than it recovers
-        p.update(w_sub=0.0, w_qexp=0.0, expand_next=False, expand_prev_q=False)
-        super().__init__(**{**p, **kw})
+        super().__init__(**{**_load("orp_params.json"), **kw})
+
+
+class ORPAblate(ORPSystem):
+    """Learned ranker without position- and length-correlated features (dataset-prior check)."""
+    name = "orp-ablate"
+
+    def __init__(self, **kw):
+        super().__init__(**{**_load("orp_ablate_params.json"), **kw})

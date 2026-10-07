@@ -95,6 +95,7 @@ class Params:
     lin_sd: tuple = ()
     gbdt: dict | None = None
     drop_features: tuple = ()  # feature names forced to 0 (ablations)
+    admissible_stats: bool = True  # False only for experiments: global statistics (side-channel baseline)
 
 
 class Engine:
@@ -277,6 +278,7 @@ class Engine:
                 self.prev[b] = a
         self.threads = list(by_thread)
         self.thread_units = [np.array(by_thread[t]) for t in self.threads]
+        self.thread_named = [bool(t[1]) for t in self.threads]
         self.thread_of = np.zeros(n, dtype=int)
         for ti, ks in enumerate(self.thread_units):
             self.thread_of[ks] = ti
@@ -421,36 +423,46 @@ class Engine:
         if not np.any(qvec):
             notes.append("degraded:dense_unavailable")
         NEG = -1e9
-        pm = np.where((self.prev >= 0) & mask[np.maximum(self.prev, 0)], self.prev, -1)
-        nm = np.where((self.next >= 0) & mask[np.maximum(self.next, 0)], self.next, -1)
-        self._pm, self._nm = pm, nm
+        apm, anm = self._admissible_neighbours(mask)
+        if p.admissible_stats:
+            pm, nm = apm, anm
+        else:  # experiment only: neighbour features see inadmissible units (as many systems do)
+            pm, nm = self.prev.copy(), self.next.copy()
+        self._pm, self._nm, self._apm, self._anm = pm, nm, apm, anm
+        smask = mask if p.admissible_stats else None
+
+        adm = np.flatnonzero(mask)
 
         def topranks(score: np.ndarray, depth: int = p.depth) -> dict[int, int]:
-            s = np.where(mask, score, NEG)
-            idx = np.argpartition(-s, min(depth, n - 1))[:depth] if n > depth else np.arange(n)
-            idx = idx[s[idx] > NEG / 2]
-            idx = idx[np.argsort(-s[idx], kind="stable")]
-            if score[mask].max() > 0:
-                idx = [i for i in idx if score[i] > 0]
-            return {int(i): r for r, i in enumerate(idx)}
+            # deterministic: order admissible units by (-score, position); ties never depend on other units
+            sc = score[adm]
+            order = adm[np.lexsort((adm, -sc))][:depth]
+            if sc.max() > 0:
+                order = order[score[order] > 0]
+            return {int(i): r for r, i in enumerate(order)}
 
         def nb(arr: np.ndarray, ix: np.ndarray) -> np.ndarray:
             return np.where(ix >= 0, arr[np.maximum(ix, 0)], 0.0)
 
         chans: dict[str, tuple[float, dict[int, int]]] = {}
-        s_bm = np.where(mask, self.bm.score(q, mask=mask), 0.0)
+        s_bm_all = self.bm.score(q, mask=smask)
+        s_bm = s_bm_all if smask is None else np.where(mask, s_bm_all, 0.0)
         chans["bm25"] = (p.w_bm25, topranks(s_bm))
         chans["bm25_win"] = (p.w_bm25_win, topranks(s_bm + 0.5 * (nb(s_bm, pm) + nb(s_bm, nm))))
         s_dense = self.E @ qvec
         chans["dense"] = (p.w_dense, topranks(s_dense + 1.0))
         hp, hn = (pm >= 0).astype(float), (nm >= 0).astype(float)
-        wnorm = np.sqrt(np.maximum(1e-9, 1 + 0.25 * hp + 0.25 * hn + hp * self.d_kp + hn * self.d_kn +
-                                   0.5 * hp * hn * self.d_pn))
+        Ep, En = self.E[np.maximum(pm, 0)], self.E[np.maximum(nm, 0)]
+        d_kp = (self.E * Ep).sum(1) * hp
+        d_kn = (self.E * En).sum(1) * hn
+        d_pn = (Ep * En).sum(1) * hp * hn
+        wnorm = np.sqrt(np.maximum(1e-9, 1 + 0.25 * hp + 0.25 * hn + d_kp + d_kn + 0.5 * d_pn))
         s_win = (s_dense + 0.5 * nb(s_dense, pm) + 0.5 * nb(s_dense, nm)) / wnorm
         chans["dense_win"] = (p.w_dense_win, topranks(s_win + 1.0))
         segmask = mask[self.seg_unit]
         ub = np.zeros(n)
-        np.maximum.at(ub, self.seg_unit, np.where(segmask, self.bm_seg.score(q, mask=segmask), 0.0))
+        np.maximum.at(ub, self.seg_unit, np.where(segmask, self.bm_seg.score(
+            q, mask=segmask if p.admissible_stats else None), 0.0))
         ud = np.full(n, -1.0)
         np.maximum.at(ud, self.seg_unit, self.ES @ qvec)
         chans["bm25_seg"] = (p.w_bm25_seg, topranks(ub))
@@ -458,16 +470,19 @@ class Engine:
         th_b = np.zeros(len(self.threads))
         th_d = np.full(len(self.threads), -1.0)
         for t, ks in enumerate(self.thread_units):
-            ks = ks[mask[ks]]
+            ks = ks[mask[ks]] if p.admissible_stats else ks
             if len(ks):
                 th_b[t] = float(np.sort(s_bm[ks])[-3:].sum())
                 th_d[t] = float(s_dense[ks].mean())
-        th_rank = _rrf([np.argsort(-th_b), np.argsort(-th_d)], len(self.threads), k=10)
+        live = np.array([bool(mask[ks].any()) if p.admissible_stats else True for ks in self.thread_units])
+        lt = np.flatnonzero(live)
+        th_rank = np.zeros(len(self.threads))
+        th_rank[lt] = _rrf([np.lexsort((lt, -th_b[lt])), np.lexsort((lt, -th_d[lt]))], len(lt), k=10)
         chans["thread"] = (p.w_thread, topranks(th_rank[self.thread_of] + 1e-6))
         qents = set()
         for w in re.findall(r"\b[A-Z][a-zA-Z'\-]+\b", q):
             wl = w.lower().removesuffix("'s")
-            if wl in self.ent and wl not in STOPWORDS:
+            if wl in self.ent and wl not in STOPWORDS and any(mask[k] for k in self.ent[wl]):
                 qents.add(wl)
         if qents:
             es = np.zeros(n)
@@ -475,7 +490,8 @@ class Engine:
                 ks = [k for k in self.ent[e] if mask[k]]
                 for k in ks:
                     es[k] += 1.0 / math.log(2 + len(ks))
-            chans["entity"] = (p.w_entity, topranks(es * (1 + 0.01 * (s_bm > 0)) + 1e-9 * s_bm))
+            if es[mask].max() > 0:
+                chans["entity"] = (p.w_entity, topranks(es * (1 + 0.01 * (s_bm > 0)) + 1e-9 * s_bm))
         if ti.window:
             lo, hi = ti.window[0].timestamp(), ti.window[1].timestamp()
             inwin = (self.ts >= lo) & (self.ts <= hi)
@@ -509,7 +525,7 @@ class Engine:
         fused0 = self._fuse(chans, n)
         if p.w_prf > 0:
             tf = Counter()
-            for k in np.argsort(-fused0)[: p.prf_docs]:
+            for k in adm[np.lexsort((adm, -fused0[adm]))][: p.prf_docs]:
                 if fused0[k] <= 0 or not mask[k]:
                     continue
                 c = Counter(terms(self.unit_txt[k]))
@@ -530,10 +546,11 @@ class Engine:
                     wq[t] = wq.get(t, 0) + p.prf_mix * v / mx
                 chans["prf"] = (p.w_prf, topranks(self.bm.score("", weights=wq, mask=mask)))
         fused = self._fuse(chans, n)
-        cand = np.argsort(-fused)[: max(req.max_items * 4, p.pool)]
-        cand = [int(k) for k in cand if fused[k] > 0 and mask[k]]
+        cand = adm[np.lexsort((adm, -fused[adm]))][: max(req.max_items * 4, p.pool)]
+        cand = [int(k) for k in cand if fused[k] > 0]
         first_person = bool(re.search(r"\b(i|my|me|mine|i've|i'm|i'd)\b", q.lower()))
-        asks_assistant = bool(re.search(r"\b(you|your)\b", q.lower())) and self.has_roles
+        self._has_roles = bool(self.is_assistant[mask].any())
+        asks_assistant = bool(re.search(r"\b(you|your)\b", q.lower())) and self._has_roles
         self._asks_assistant = asks_assistant
         final: dict[int, float] = {}
         self._mult: dict[int, dict] = {}
@@ -546,7 +563,7 @@ class Engine:
             mul["coverage"] = 1 + p.f_cover * len(qset & ctx) / qn
             if qents and self.actor_l[k] in qents:
                 mul["actor"] = 1 + p.f_actor
-            if self.has_roles:
+            if self._has_roles:
                 role = self.mem[self.ids[k]].role
                 if (asks_assistant and role == "assistant") or (first_person and not asks_assistant and
                                                                 role == "user"):
@@ -598,6 +615,19 @@ class Engine:
         return ContextPack(items, sum(i.tokens for i in items), req.budget_tokens, round(float(cov), 3),
                            self._snapshot(), notes)
 
+    def _admissible_neighbours(self, mask: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+        """Previous/next admissible unit in thread order (skipping inadmissible ones, so gaps are invisible)."""
+        n = len(mask)
+        pm, nm = np.full(n, -1), np.full(n, -1)
+        for ks, named in zip(self.thread_units, self.thread_named):
+            if not named:
+                continue
+            ka = ks[mask[ks]]
+            if len(ka) > 1:
+                pm[ka[1:]] = ka[:-1]
+                nm[ka[:-1]] = ka[1:]
+        return pm, nm
+
     def _featurize(self, cand, chans, fused, top_fused, qset, qents, ti, first_person, asks_assistant, s_bm, s_dense,
                    ub, ud):
         X = np.zeros((len(cand), len(self.FEATURES)), np.float32)
@@ -632,7 +662,7 @@ class Engine:
             f[17] = len(qset & nt) / qn
             m = self.mem[self.ids[k]]
             f[18] = float(bool(qents) and self.actor_l[k] in qents)
-            if self.has_roles:
+            if self._has_roles:
                 f[19] = float((asks_assistant and m.role == "assistant") or
                               (first_person and not asks_assistant and m.role == "user"))
             if win:
@@ -675,7 +705,7 @@ class Engine:
 
     def _pack(self, ranked, final, chans, req, qterms, mask, feats, fidx, as_of) -> list[ContextItem]:
         p = self.p
-        pm, nm = self._pm, self._nm  # admissible neighbours only
+        pm, nm = self._apm, self._anm  # nearest admissible neighbours only
         gran = req.filters.get("granularity", "auto")
         nbh = int(req.filters.get("neighbours", 0) or 0)
         quotas = req.filters.get("quotas") or {}

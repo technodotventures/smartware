@@ -1,0 +1,4 @@
+start J=0.7446 {}
+pass0 w_bm25=0.6 J=0.7496 (best 0.7446) 59s
+  -> new best w_bm25=0.6
+pass0 w_bm25=1.4 J=0.7434 (best 0.7496) 69s
