@@ -1,4 +1,12 @@
-"""Render results/*.json into results/RESULTS.md (v0.1.1)."""
+"""Render results into results/RESULTS.md (v0.1.2).
+
+Sources (all on held-out test splits):
+  results/summary.json          v0.1.1 run: the 15 baselines with default settings, ORP v0.1.1, references
+  results/summary_v012.json     ORP v0.1.2 (shipped, rrf, allfeat) and references, with evidence-text recall (E@B)
+  results/summary_tuned.json    the 15 baselines with dev-tuned settings, with E@B
+  results/summary_hotpot*.json  HotpotQA-50 (held-out, out-of-domain; answers only)
+  results/raw_v012/<bench>/<system>.test.jsonl   per-query rows used for paired bootstrap CIs
+"""
 from __future__ import annotations
 
 import json
@@ -8,93 +16,190 @@ import numpy as np
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RES = os.path.join(ROOT, "results")
+RAW = os.path.join(RES, "raw_v012")
 BASE = {
     "graphiti": "Graphiti (Zep)", "hindsight": "Hindsight", "mem0": "mem0", "letta": "Letta",
     "supermemory-company-brain": "Supermemory Company Brain", "gbrain": "GBrain", "supermemory": "Supermemory",
     "onyx": "Onyx", "cognee": "Cognee", "basic-memory": "Basic Memory", "sylph": "Sylph",
     "mcp-memory": "MCP memory server", "memos": "MemOS", "langmem": "LangMem", "memoryos": "MemoryOS",
 }
-ORP = {"orp": "**ORP reference engine (learned ranker)**", "orp-rrf": "ORP, hand-tuned RRF (no learned model)",
-       "orp-allfeat": "ORP, learned ranker incl. position/length features (not shipped)",
+ORP = {"orp": "**ORP reference engine**", "orp-rrf": "ORP, hand-tuned RRF (no learned model)",
+       "orp-allfeat": "ORP, learned ranker with position/length features (not shipped)",
        "bm25": "_BM25 over turns (reference)_", "dense": "_Dense over turns (reference)_"}
+METRICS = [("recall@500", "R@500"), ("recall@1000", "R@1000"), ("recall@2000", "R@2000"), ("e_recall@1000", "E@1000"),
+           ("ans@500", "Ans@500"), ("ans@1000", "Ans@1000"), ("ans@2000", "Ans@2000"), ("sess_all@5", "SessAll@5"),
+           ("mrr", "MRR")]
+HEAD = ["recall@500", "recall@1000", "recall@2000", "e_recall@1000", "ans@500", "ans@1000", "ans@2000"]
 
 
 def label(n: str) -> str:
     if n in ORP:
         return ORP[n]
     if n.endswith("@tuned"):
-        return f"{BASE.get(n[:-6], n[:-6])} (re-impl., dev-tuned)"
-    return f"{BASE.get(n, n)} (re-impl., defaults)"
+        return f"{BASE.get(n[:-6], n[:-6])}"
+    return f"{BASE.get(n, n)}"
 
 
 def f(x):
     return "–" if x is None else f"{x * 100:.1f}"
 
 
-def bench_table(summ: dict) -> str:
-    rows = sorted(summ.items(), key=lambda kv: -(kv[1].get("recall@1000") or 0))
-    out = ["| # | System | R@500 | R@1000 | R@2000 | R@4000 | Ans@1000 | SessAll@5 | MRR | R@1000 (secondary) |",
-           "|---|---|---|---|---|---|---|---|---|---|"]
-    for i, (n, s) in enumerate(rows, 1):
-        out.append(f"| {i} | {label(n)} | {f(s.get('recall@500'))} | {f(s.get('recall@1000'))} | "
-                   f"{f(s.get('recall@2000'))} | {f(s.get('recall@4000'))} | {f(s.get('ans@1000'))} | "
-                   f"{f(s.get('sess_all@5'))} | {f(s.get('mrr'))} | {f(s.get('s_recall@1000'))} |")
+def load(name):
+    p = os.path.join(RES, name)
+    return json.load(open(p)) if os.path.exists(p) else {}
+
+
+def rows(bench, name):
+    p = os.path.join(RAW, bench, f"{name}.test.jsonl")
+    if not os.path.exists(p):
+        return None
+    return {json.loads(l)["qid"]: json.loads(l) for l in open(p)}
+
+
+def paired(bench, a, b, metric, exclude=()):
+    A, B = rows(bench, a), rows(bench, b)
+    if not A or not B:
+        return None
+    d = np.array([A[q][metric] - B[q][metric] for q in A if q in B and q not in exclude
+                  and metric in A[q] and metric in B[q]])
+    if not len(d):
+        return None
+    rng = np.random.default_rng(0)
+    bs = [d[rng.integers(0, len(d), len(d))].mean() for _ in range(4000)]
+    return float(d.mean()), float(np.percentile(bs, 2.5)), float(np.percentile(bs, 97.5)), len(d)
+
+
+def mean_excl(bench, name, metric, exclude):
+    R = rows(bench, name)
+    if not R:
+        return None
+    v = [r[metric] for q, r in R.items() if q not in exclude and metric in r]
+    return float(np.mean(v)) if v else None
+
+
+def table(summ: dict, names: list[str], metrics=METRICS) -> str:
+    out = ["| System | " + " | ".join(h for _, h in metrics) + " |", "|---|" + "---|" * len(metrics)]
+    for n in names:
+        s = summ.get(n)
+        if s is None:
+            continue
+        out.append(f"| {label(n)} | " + " | ".join(f(s.get(k)) for k, _ in metrics) + " |")
     return "\n".join(out)
 
 
-def cat_table(summ: dict) -> str:
-    allc = sorted({c for s in summ.values() for c in s.get("by_category", {})})
-    rows = sorted(summ.items(), key=lambda kv: -(kv[1].get("recall@1000") or 0))
+def verdict(bench, summ, tuned_names, metrics, exclude=()):
+    """ORP vs the best of the 15 (dev-tuned) on each metric, with a paired bootstrap CI."""
+    out = ["| Metric | ORP | Best of the 15 (tuned) | Difference [95% CI] | Verdict |", "|---|---|---|---|---|"]
+    tally = {"win": 0, "tie": 0, "loss": 0}
+    for k, h in metrics:
+        if summ.get("orp", {}).get(k) is None:
+            continue
+        cands = [(summ[n].get(k), n) for n in tuned_names if n in summ and summ[n].get(k) is not None]
+        if not cands:
+            continue
+        bv, bn = max(cands)
+        r = paired(bench, "orp", bn, k, exclude)
+        if r is None:
+            continue
+        v = "ORP better" if r[1] > 0 else "ORP worse" if r[2] < 0 else "no significant difference"
+        tally["win" if r[1] > 0 else "loss" if r[2] < 0 else "tie"] += 1
+        out.append(f"| {h} | {f(summ['orp'][k])} | {f(bv)} ({label(bn)}) | {r[0] * 100:+.1f} "
+                   f"[{r[1] * 100:+.1f}, {r[2] * 100:+.1f}] | {v} |")
+    return "\n".join(out), tally
+
+
+def cat_table(summ: dict, names: list[str]) -> str:
+    allc = sorted({c for n in names if n in summ for c in summ[n].get("by_category", {})})
     out = ["| System | " + " | ".join(allc) + " |", "|---|" + "---|" * len(allc)]
-    for n, s in rows:
-        bc = s.get("by_category", {})
+    for n in names:
+        if n not in summ:
+            continue
+        bc = summ[n].get("by_category", {})
         out.append(f"| {label(n)} | " + " | ".join(f(bc.get(c, {}).get("recall@1000")) for c in allc) + " |")
-    ns = {c: next((s["by_category"][c]["n"] for s in summ.values() if c in s.get("by_category", {})), 0) for c in allc}
+    ns = {c: next((summ[n]["by_category"][c]["n"] for n in names if n in summ and c in summ[n].get("by_category", {})),
+                  0) for c in allc}
     out.append("| _n_ | " + " | ".join(str(ns[c]) for c in allc) + " |")
     return "\n".join(out)
 
 
-def paired(bench: str, a: str, b: str, metric: str):
-    pa, pb = os.path.join(RES, "raw", bench, f"{a}.test.jsonl"), os.path.join(RES, "raw", bench, f"{b}.test.jsonl")
-    if not (os.path.exists(pa) and os.path.exists(pb)):
-        return None
-    A = {json.loads(l)["qid"]: json.loads(l) for l in open(pa)}
-    B = {json.loads(l)["qid"]: json.loads(l) for l in open(pb)}
-    d = np.array([A[q][metric] - B[q][metric] for q in A if q in B and metric in A[q] and metric in B[q]])
-    rng = np.random.default_rng(0)
-    bs = [d[rng.integers(0, len(d), len(d))].mean() for _ in range(5000)]
-    return d.mean(), np.percentile(bs, 2.5), np.percentile(bs, 97.5), len(d)
-
-
 def main():
-    S = json.load(open(os.path.join(RES, "summary.json")))
-    md = ["# ORP-Bench results, v0.1.1 (test splits)", "",
-          "All numbers are percentages on held-out test splits. Baselines are LLM-free re-implementations of each "
-          "project's recall path (see `reports/` and `baselines/`), run with the same shared encoders as ORP; they are "
-          "not the products themselves. **R@B**: share of gold evidence turns inside the first B tokens of the returned "
-          "context (primary packer: characters/4 tokens, greedy fill skipping items that do not fit). **Ans@1000**: "
-          "share of the gold answer's content words in that context. **SessAll@5**: LongMemEval's session retrieval "
-          "metric. **Secondary**: word/punctuation token estimate with stop-at-first-overflow packing.", ""]
+    v011, v012, tuned = load("summary.json"), load("summary_v012.json"), load("summary_tuned.json")
+    hot = {}
+    for fn in ("summary_hotpot.json", "summary_hotpot_tuned.json"):
+        hot.update(load(fn).get("hotpot", {}).get("test", {}))
+    quirks = load("lme_quirks.json").get("excluded", [])
+    md = ["# ORP-Bench results, v0.1.2", "",
+          "Held-out test splits only. The 15 projects are **LLM-free re-implementations of each project's recall "
+          "path** (see `reports/` and `baselines/`), run with the same shared encoders as ORP, each with its best "
+          "dev-tuned configuration; they are not the products themselves. Methodology, tuning budgets and limitations: "
+          "`results/METHODOLOGY.md`.", "",
+          "**R@B**: share of gold evidence turns inside the first B tokens of the returned context (characters/4 "
+          "tokens, greedy packing). **E@B**: the same, but a turn counts only if the context carries at least half of "
+          "its content words. **Ans@B**: share of the gold answer's content words in the context. **SessAll@5**: "
+          "LongMemEval's session metric. Verdicts use a paired bootstrap 95% CI against the best of the 15 on that "
+          "metric (chosen after the fact, which favours the baselines).", ""]
+    tally_all = {"win": 0, "tie": 0, "loss": 0}
     for b, title in (("locomo", "LoCoMo-10 test (7 conversations, categories 1-4)"),
                      ("lme", "LME-R test (LongMemEval oracle questions, recombined 40-session haystacks)")):
-        if b not in S or "test" not in S[b]:
+        s012 = v012.get(b, {}).get("test", {})
+        st = {k: v for k, v in tuned.get(b, {}).get("test", {}).items()}
+        if not s012:
             continue
-        summ = S[b]["test"]
-        n = next(iter(summ.values()))["n"]
-        md += [f"## {title}, n={n}", "", bench_table(summ), ""]
-        best = max((k for k in summ if k not in ORP), key=lambda k: summ[k].get("recall@1000") or 0)
-        lines = []
-        for metric in ("recall@500", "recall@1000", "recall@2000", "ans@1000"):
-            r = paired(b, "orp", best, metric)
-            if r:
-                lines.append(f"{metric}: {r[0] * 100:+.1f} [{r[1] * 100:+.1f}, {r[2] * 100:+.1f}]")
-        md += [f"ORP minus the strongest baseline ({label(best)}), paired bootstrap 95% CI: " + "; ".join(lines), "",
-               "Recall@1000 by question category:", "", cat_table(summ), ""]
+        summ = {**s012, **st}
+        tnames = [f"{n}@tuned" for n in BASE if f"{n}@tuned" in summ]
+        n = s012["orp"]["n"]
+        md += [f"## {title}, n={n}", ""]
+        vt, tally = verdict(b, summ, tnames, [(k, h) for k, h in METRICS if k in HEAD])
+        for k in tally:
+            tally_all[k] += tally[k]
+        md += [f"ORP against the best of the 15 on each metric: **{tally['win']} better, {tally['tie']} no significant "
+               f"difference, {tally['loss']} worse**.", "", vt, ""]
+        order = ["orp", "orp-rrf", "orp-allfeat"] + sorted(tnames, key=lambda x: -(summ[x].get("recall@1000") or 0)) \
+            + ["bm25", "dense"]
+        md += ["All systems (baselines dev-tuned):", "", table(summ, order), ""]
+        dflt = v011.get(b, {}).get("test", {})
+        if dflt:
+            dn = sorted([x for x in BASE if x in dflt], key=lambda x: -(dflt[x].get("recall@1000") or 0))
+            md += ["Baselines with their default settings (v0.1.1 run; E@B was added later):", "",
+                   table(dflt, dn, [m for m in METRICS if m[0] != "e_recall@1000"]), ""]
+            if "orp" in dflt and "orp" in s012:
+                same = all(abs((dflt["orp"].get(k) or 0) - (s012["orp"].get(k) or 0)) < 1e-9
+                           for k in ("recall@500", "recall@1000", "recall@2000", "ans@1000", "mrr"))
+                md += [f"ORP v0.1.1 and v0.1.2 test results are {'identical' if same else 'different'} on this "
+                       "benchmark" + ("." if same else f" (v0.1.1 R@1000 {f(dflt['orp']['recall@1000'])}).") + "", ""]
+        if b == "lme" and quirks:
+            md += [f"Without the {len(quirks)} test questions affected by LME-R construction quirks "
+                   "(`results/lme_quirks.json`):", "",
+                   "| System | " + " | ".join(h for _, h in METRICS[:7]) + " |", "|---|" + "---|" * 7]
+            for nme in ["orp"] + sorted(tnames, key=lambda x: -(summ[x].get("recall@1000") or 0))[:5] + ["bm25"]:
+                md.append(f"| {label(nme)} | " + " | ".join(f(mean_excl(b, nme, k, set(quirks)))
+                                                          for k, _ in METRICS[:7]) + " |")
+            vq, tq = verdict(b, {k: {m: mean_excl(b, k, m, set(quirks)) for m, _ in METRICS[:7]}
+                                 for k in ["orp"] + tnames}, tnames, METRICS[:7], set(quirks))
+            md += ["", f"Verdicts on this subset: {tq['win']} better, {tq['tie']} no significant difference, "
+                   f"{tq['loss']} worse.", "", vq, ""]
+        md += ["Recall@1000 by question category:", "", cat_table(summ, ["orp"] + tnames[:0] + sorted(
+            tnames, key=lambda x: -(summ[x].get("recall@1000") or 0))[:6] + ["bm25"]), ""]
+    if hot:
+        names = [n for n in ["orp", "orp-rrf"] + [f"{x}@tuned" for x in BASE] + list(BASE) + ["bm25", "dense"]
+                 if n in hot]
+        md += ["## HotpotQA-50 (held-out, out-of-domain, answers only), n=50", "",
+               "Cognee's evaluation set: 500 Wikipedia paragraphs, 50 multi-hop questions. Added after the v0.1.1 "
+               "freeze; nothing was tuned on it. Only answer recall can be scored.", ""]
+        hm = [("ans@500", "Ans@500"), ("ans@1000", "Ans@1000"), ("ans@2000", "Ans@2000"), ("ans@4000", "Ans@4000")]
+        tn = [n for n in hot if n.endswith("@tuned")] or [n for n in hot if n in BASE]
+        vh, th = verdict("hotpot", hot, tn, hm)
+        md += [f"ORP against the best of the 15: {th['win']} better, {th['tie']} no significant difference, "
+               f"{th['loss']} worse.", "", vh, "", table(hot, names, hm), ""]
+        for k in th:
+            tally_all[k] += th[k]
+    md.insert(6, f"**Overall: on {sum(tally_all.values())} benchmark-metric comparisons against the best of the 15, "
+                 f"ORP is better on {tally_all['win']}, not significantly different on {tally_all['tie']} and worse on "
+                 f"{tally_all['loss']}.**\n")
     for vis in ("50", "15"):
-        gp = os.path.join(RES, f"governance_v{vis}.json")
-        if not os.path.exists(gp):
+        G = load(f"governance_v{vis}.json")
+        if not G:
             continue
-        G = json.load(open(gp))
         lab = {"orp": "ORP: admissible-set ranking + provenance closure",
                "global_stats": "Pre-filter, but statistics and neighbour features over all memories",
                "post_filter@10": "Filter after top-10", "post_filter@50": "Filter after top-50",
@@ -109,9 +214,8 @@ def main():
                 md.append(f"| {lab[k]} | {f(v['recall@1000'])} | {f(v['text_leak'])} | {f(v['answer_leak'])} | "
                           f"{f(v['rank_side_channel'])} |")
         md.append("")
-    qp = os.path.join(RES, "qa_blind.json")
-    if os.path.exists(qp):
-        Q = json.load(open(qp))
+    Q = load("qa_blind.json")
+    if Q:
         md += ["## Blind QA (Claude Sonnet readers and judges, 1,000-token contexts)", "",
                "| System | LoCoMo acc. | LME-R acc. |", "|---|---|---|"]
         for s in Q["systems"]:
@@ -122,11 +226,10 @@ def main():
                 f"{label(s)} {v['diff'] * 100:+.1f} [{v['ci95'][0] * 100:+.1f}, {v['ci95'][1] * 100:+.1f}]"
                 for s, v in Q["orp_minus"][b].items()))
         md.append("")
-    lp = os.path.join(RES, "latency.json")
-    if os.path.exists(lp):
-        L = json.load(open(lp))
-        md += ["## Latency (single process, one core, LoCoMo test)", "", "| System | p50 ms | p95 ms | build ms |",
-               "|---|---|---|---|"]
+    L = load("latency.json")
+    if L:
+        md += ["## Latency (single process, one core, LoCoMo test, cold caches)", "",
+               "| System | p50 ms | p95 ms | build ms |", "|---|---|---|---|"]
         for n, v in sorted(L.items(), key=lambda kv: kv[1]["p50"]):
             md.append(f"| {label(n)} | {v['p50']:.1f} | {v['p95']:.1f} | {v['build']:.0f} |")
         md.append("")
