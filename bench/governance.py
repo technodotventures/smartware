@@ -53,14 +53,17 @@ from .system import Item
 N_PRINCIPALS = 6
 
 
-def shingles(text: str, n: int = 8) -> set[str]:
-    """Per line, without a leading 'Speaker:' and without headers: 8-word shingles, or the whole line if shorter."""
+def shingles(text: str, n: int = 8, speakers: frozenset = frozenset()) -> set[str]:
+    """Per line, without headers and without a leading '<speaker>: ' for a known speaker: 8-word shingles, or the
+    whole line if shorter. Turn texts are passed without speakers (nothing stripped); rendered context with them."""
     out = set()
     for line in text.split("\n"):
         if line.startswith("## "):
             continue
         line = re.sub(r"^\[[a-z]+\] ", "", line)
-        line = line.split(": ", 1)[1] if re.match(r"^[^:]{1,40}: ", line) else line
+        head, sep, rest = line.partition(": ")
+        if sep and head in speakers:
+            line = rest
         w = re.findall(r"[a-z0-9']+", line.lower())
         if not w:
             continue
@@ -78,6 +81,7 @@ def run(params: Params, visibility: float = 0.5, private_share: float = 0.2, max
     if max_queries:  # smoke runs only
         tasks = [type(t)(t.corpus, t.queries[:max_queries]) if hasattr(t, "corpus") else t for t in tasks]
     rows = defaultdict(list)
+    examples: list = []
     for ti, task in enumerate(tasks[:max_tasks] if max_tasks else tasks):
         c = task.corpus
         other = tasks[(ti + 1) % len(tasks)].corpus  # second tenant, same thread ids
@@ -145,6 +149,7 @@ def run(params: Params, visibility: float = 0.5, private_share: float = 0.2, max
         other_all = set().union(*(shingles(t.text) for t in other.turns))
         other_text = other_all - set().union(*(shingles(t.text) for t in c.turns))
         tid_text = {t.id: shingles(t.text) for t in c.turns}
+        spk = frozenset({t.speaker for t in c.turns} | {t.speaker for t in other.turns})
 
         def to_items(pk, svc):
             out = []
@@ -176,8 +181,13 @@ def run(params: Params, visibility: float = 0.5, private_share: float = 0.2, max
                     res[f"post_filter@{k}"] = to_items({"items": keep}, V["global_stats"])
                 for name, its in res.items():
                     cov, used, kept = pack(its, 1000, chars4, True)
-                    ctx = set().union(*(shingles(it.text) for it in kept)) if kept else set()
-                    r = {"kind": kind, "text_leak": float(bool(ctx & (unread_text[u] | other_text)))}
+                    ctx = set().union(*(shingles(it.text, speakers=spk) for it in kept)) if kept else set()
+                    leak = ctx & (unread_text[u] | other_text)
+                    r = {"kind": kind, "text_leak": float(bool(leak))}
+                    if leak and name == "orp" and len(examples) < 40:
+                        examples.append({"u": u, "qid": q.qid, "shingles": sorted(leak)[:3],
+                                         "lines": [ln for it in kept for ln in it.text.split("\n")
+                                                   if shingles(ln, speakers=spk) & leak][:3]})
                     if kind == "permitted":
                         r["recall@1000"] = len(cov & q.gold_turns) / len(q.gold_turns)
                     else:
@@ -213,6 +223,7 @@ def run(params: Params, visibility: float = 0.5, private_share: float = 0.2, max
                      "text_leak": sum(r["text_leak"] for r in rs) / max(1, len(rs)),
                      "answer_leak": sum(r["answer_leak"] for r in forb) / max(1, len(forb)),
                      "rank_side_channel": (sum(side) / len(side)) if side else None}
+    out["_orp_leak_examples"] = examples
     return out
 
 
@@ -224,6 +235,6 @@ def final_params() -> Params:
 if __name__ == "__main__":
     vis = float(sys.argv[2]) if len(sys.argv) > 2 else 0.5
     smoke = int(sys.argv[3]) if len(sys.argv) > 3 else 0
-    r = run(final_params(), vis, max_tasks=smoke or None, max_queries=12 if smoke else None)
+    r = run(final_params(), vis, max_tasks=smoke or None, max_queries=int(sys.argv[4]) if len(sys.argv) > 4 else (12 if smoke else None))
     print(json.dumps(r, indent=1))
     json.dump(r, open(sys.argv[1] if len(sys.argv) > 1 else "results/governance.json", "w"), indent=1)
