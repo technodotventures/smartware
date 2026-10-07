@@ -39,6 +39,17 @@ APPROXIMATED (no LLM)
 - Shared dense embedder stands in for text-embedding-3-large; cosine distance = 1 - dot. No thresholds are
   applied in this lane, so no scale conversion is needed.
 
+TUNABLE KNOBS (dev-split tuning only; defaults unchanged)
+Cognee exposes all four as HybridRetriever constructor arguments (cognee/modules/retrieval/hybrid_retriever.py:58-78),
+settable per request through search()/recall(retriever_specific_config=...)
+(cognee/modules/search/methods/get_search_type_retriever_instance.py:138-162); Cognee's own BEAM sweeps vary exactly
+these (cognee/eval_framework/beam/report_artifacts/10m_routed/beam_qa_v1_hybrid_routing_configs.json; report sec. 10).
+- chunks_top_k [10, 20, 30]: passages kept from the chunk RRF lane (also sets 2*CK dense and CK second-view
+  candidates and rrf_k = max(30, min(60, 20 + 2*CK))).
+- entities_top_k [5, 20]: entity-name hits, each rendered as an entity block.
+- max_edges_per_entity [5, 10]: bullets per entity block (also sizes the fact-search limit EK*MAX_EDGES + FACTS_K).
+- facts_top_k [5, 50]: standalone fact lines after the entity blocks.
+
 OPTIONS (not default)
 - lanes="search_default": per-lane top-k as cognee.search()/recall() pass them (min(top_k, 10) = 10 for
   chunks, entities and facts budget defaults: CK=10, EK=10, MAX_EDGES=10, FACTS_K=10).
@@ -140,13 +151,36 @@ class Cognee(System):
         "as in Cognee. Items are Cognee's context sections in order: passages, entity blocks, fact lines."
     )
 
-    def __init__(self, mode: str = "hybrid", lanes: str = "beam_100k"):
+    # Dev-split tuning grid (3*2*2*2 = 24). Defaults (20, 20, 10, 5) are Cognee's BEAM-100K config.
+    TUNABLE: dict[str, list] = {
+        "chunks_top_k": [10, 20, 30],
+        "entities_top_k": [5, 20],
+        "max_edges_per_entity": [5, 10],
+        "facts_top_k": [5, 50],
+    }
+
+    def __init__(self, mode: str = "hybrid", lanes: str = "beam_100k", chunks_top_k: int | None = None,
+                 entities_top_k: int | None = None, max_edges_per_entity: int | None = None,
+                 facts_top_k: int | None = None):
         assert mode in ("hybrid", "graph_completion")
         self.mode = mode
         if lanes == "search_default":
             self.ck, self.ek, self.max_edges, self.facts_k = 10, 10, 10, 10
         else:
             self.ck, self.ek, self.max_edges, self.facts_k = CK, EK, MAX_EDGES, FACTS_K
+        # Explicit per-lane values override the preset, as retriever_specific_config does in Cognee.
+        if chunks_top_k is not None:
+            self.ck = chunks_top_k
+        if entities_top_k is not None:
+            self.ek = entities_top_k
+        if max_edges_per_entity is not None:
+            self.max_edges = max_edges_per_entity
+        if facts_top_k is not None:
+            self.facts_k = facts_top_k
+
+    def __repr__(self):
+        return (f"Cognee(mode={self.mode!r}, chunks_top_k={self.ck}, entities_top_k={self.ek}, "
+                f"max_edges_per_entity={self.max_edges}, facts_top_k={self.facts_k})")
 
     # ------------------------------------------------------------------ build
     def build(self, corpus, enc):

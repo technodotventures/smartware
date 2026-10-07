@@ -60,6 +60,18 @@ PARAMETERS: limit = k, offset = 0, dense cosine only, index field "$" (whole JSO
 ("memories", corpus_id), units = same-speaker runs; options: context_format ("json" | "content"),
 index_mode ("json" | "text"), dedupe (False), dedupe_sim (0.95), query_limit (5).
 
+TUNABLE KNOBS (dev-split tuning only; the defaults above are unchanged)
+- ``limit``: the ``limit`` request parameter of ``search_memory`` / ``MemoryStoreManager.search`` /
+  ``BaseStore.search``. Defaults are 10 in vendor/langchain-ai_langmem/src/langmem/knowledge/tools.py:439 and
+  459 and extraction.py:1358 and 1518. None (the default here) means "pass the harness k through". Candidates:
+  None, 10, 20, 30.
+- ``index_mode``: the store's index field paths. ``"json"`` is ``fields: ["$"]`` (langgraph.json:15, the
+  README/docs default). ``"text"`` is ``index=["content.content"]``, i.e. embedding only the memory string; the
+  per-put ``index=[...]`` option is documented at extraction.py:1434-1440 and 1461. Report section 3.
+- ``context_format``: how the caller renders results into context. ``"json"`` is the ``search_memory`` tool's
+  orjson output (tools.py:452-454). ``"content"`` is the memory string only, the developer-formatted pattern in
+  docs/docs/guides/extract_episodic_memories.md:120-131 (``item.value["content"]``). Report section 5.
+
 DELIBERATE DEVIATIONS: none in the default path beyond the no-LLM unitisation and the live-ingestion
 timestamps described above.
 """
@@ -98,10 +110,18 @@ class LangMem(System):
         "Optional (off) dedupe stand-in at cosine 0.95."
     )
 
+    TUNABLE: dict[str, list] = {
+        "limit": [None, 10, 20, 30],          # search_memory / BaseStore.search limit (None = harness k)
+        "index_mode": ["json", "text"],       # index fields ["$"] vs ["content.content"]
+        "context_format": ["json", "content"],  # tool JSON vs memory string only
+    }
+
     def __init__(self, context_format: str = "json", index_mode: str = "json", dedupe: bool = False,
-                 dedupe_sim: float = DEDUPE_SIM, query_limit: int = QUERY_LIMIT):
+                 dedupe_sim: float = DEDUPE_SIM, query_limit: int = QUERY_LIMIT, limit: int | None = None):
         assert context_format in ("json", "content")
         assert index_mode in ("json", "text")
+        assert limit is None or limit > 0
+        self.limit = limit
         self.context_format = context_format
         self.index_mode = index_mode
         self.dedupe = dedupe
@@ -172,7 +192,10 @@ class LangMem(System):
         return json.dumps(item, ensure_ascii=False, separators=(",", ":"))
 
     def retrieve(self, q, k=30):
-        limit = DEFAULT_LIMIT if k is None else k
+        if self.limit is not None:
+            limit = self.limit if k is None else min(self.limit, k)
+        else:
+            limit = DEFAULT_LIMIT if k is None else k
         offset = 0
         if not len(self.records):
             return []

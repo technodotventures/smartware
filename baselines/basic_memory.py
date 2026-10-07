@@ -78,6 +78,19 @@ APPROXIMATED / DEVIATIONS
 - Date strings: LoCoMo uses the dataset's ``h:mm am on d Month, yyyy``; LME uses ``yyyy/mm/dd (Day) HH:MM``.
 - Turn text is used as the harness supplies it, including LoCoMo photo captions. Whitespace is collapsed, as in
   the LME converter.
+
+TUNABLE KNOBS (dev-split tuning only; the defaults reproduce the behaviour above exactly)
+- ``search_type`` in {"hybrid", "text", "vector"}. This is the ``search_notes`` request parameter
+  (src/basic_memory/mcp/tools/search.py:61, 81-92) and the operator config ``default_search_type``
+  (src/basic_memory/config_models.py:423). "text" runs FTS5 alone, ranked by bm25, with the service-level relaxed
+  fallback when eligible (services/search_service.py:249-268). "vector" runs the vector leg alone, with a chunk
+  window of max(vector_k, 10*limit) (repository/search_reader.py:378-398, 776-833).
+- ``min_sim_percentile`` in {50, 0, 70}. This is ``semantic_min_similarity`` (config_models.py:417; default 0.55,
+  and "0.0 disables filtering") and the per-query ``min_similarity`` request override (mcp/tools/search.py:69,
+  123). It is expressed as a percentile of the query's chunk cosines, as described above. 0 disables the floor.
+- ``page_size`` in {None, 10}. This is the ``search_notes`` page_size request parameter (default 10,
+  mcp/tools/search.py:1041-1044). None means "use the harness k", which is the default here: BM's benchmark
+  provider passes page_size = k (benchmarks/.../providers/bm_local.py:270).
 """
 from __future__ import annotations
 
@@ -326,8 +339,23 @@ class BasicMemory(System):
         "to the per-query 50th percentile of chunk cosines; boolean/tag/CJK query syntax is not modelled."
     )
 
-    def __init__(self, min_sim_percentile: float = MIN_SIM_PERCENTILE):
+    TUNABLE: dict[str, list] = {
+        "search_type": ["hybrid", "text", "vector"],
+        "min_sim_percentile": [MIN_SIM_PERCENTILE, 0.0, 70.0],
+        "page_size": [None, 10],
+    }
+
+    def __init__(self, min_sim_percentile: float = MIN_SIM_PERCENTILE, search_type: str = "hybrid",
+                 page_size: int | None = None):
+        if search_type not in ("hybrid", "text", "vector"):
+            raise ValueError(f"search_type must be hybrid|text|vector, got {search_type!r}")
         self.min_sim_percentile = min_sim_percentile
+        self.search_type = search_type
+        self.page_size = page_size
+
+    def __repr__(self):
+        return (f"BasicMemory(search_type={self.search_type!r}, min_sim_percentile={self.min_sim_percentile}, "
+                f"page_size={self.page_size})")
 
     # ---- build ----
     def build(self, corpus, enc):
@@ -433,7 +461,8 @@ class BasicMemory(System):
         qv = self.enc.embed(text)
         sims = self.E @ qv
         order = np.argsort(-sims, kind="stable")[:chunk_limit]
-        thr = float(np.percentile(sims, self.min_sim_percentile))
+        # semantic_min_similarity = 0.0 disables filtering
+        thr = float(np.percentile(sims, self.min_sim_percentile)) if self.min_sim_percentile > 0 else -np.inf
         best: dict[int, float] = {}
         chunks_by_doc: dict[int, list[int]] = {}
         for ci in order:
@@ -461,7 +490,14 @@ class BasicMemory(System):
         text = (q.text or "").strip()
         if not text or not self.docs:
             return []
-        limit, offset = k, 0
+        limit = k if self.page_size is None else min(k, self.page_size)
+        offset = 0
+        if self.search_type == "text":
+            return self._items(self.fts(text, limit), {}, {}, {})
+        if self.search_type == "vector":
+            chunk_window = max(SEMANTIC_VECTOR_K, (limit + offset) * 10)
+            vec_rows, matched = self.vector(text, chunk_window, chunk_window)
+            return self._items(vec_rows[:limit], matched, {}, dict(vec_rows))
         C = max(SEMANTIC_VECTOR_K, (limit + offset) * 10)
         vec_chunk_limit = max(SEMANTIC_VECTOR_K, C * 10)  # rerank disabled -> vector leg expands again
         fts_rows = self.fts(text, C)
@@ -476,7 +512,9 @@ class BasicMemory(System):
         fused = {di: max(v.get(di, 0.0), f.get(di, 0.0)) + FUSION_BONUS * min(v.get(di, 0.0), f.get(di, 0.0))
                  for di in set(f) | set(v)}
         ranked = sorted(fused.items(), key=lambda kv: (-kv[1], kv[0]))[offset:offset + limit]
+        return self._items(ranked, matched, f, v)
 
+    def _items(self, ranked, matched, f, v):
         items = []
         for di, score in ranked:
             d = self.docs[di]

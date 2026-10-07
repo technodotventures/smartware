@@ -60,6 +60,21 @@ APPROXIMATED (no LLM)
 - "Search echo" demotion (x0.1, from letta-code local BM25): applied to a message whose text equals the
   question. This is rarely triggered on these corpora.
 
+TUNABLE KNOBS (dev-split tuning only; defaults unchanged)
+- ``limit`` in {5, 10, 20, 50}: the result count per search, which is also the per-channel candidate pool.
+  Letta exposes it as:
+  - ``conversation_search(limit=...)`` (vendor/letta-ai_letta-archive/letta/functions/function_sets/base.py:91),
+    default 5 (constants.py:458)
+  - ``POST /v1/messages/search`` ``limit`` 1..100 (letta/schemas/message.py:2688)
+  - ``letta messages search --limit``, default 10 (vendor/letta-ai_letta-code/src/cli/subcommands/messages.ts:67,432)
+- ``search_mode`` in {"hybrid", "vector", "fts"}: the request parameter ``search_mode`` (letta/schemas/message.py:2682)
+  and the CLI ``--mode`` (messages.ts:64,427-429). Single modes rank one channel and return combined_score
+  1/rank (tpuf_client.py:1214-1225).
+- ``expand`` in {0, 10}: the recall subagent's ``letta messages list --before/--after --limit N`` expansion
+  around the top hit. It is set in vendor/letta-ai_letta-code/src/agent/prompts/recall_subagent.md
+  ("Strategy 1: Needle + Expand", --limit 10). 0 means search results only (report section 13, step 8).
+Total grid = 4 x 3 x 2 = 24.
+
 ASSEMBLY / PARAMETERS
 - Output order, deduplicated by turn id, first occurrence kept:
   1. Fused hits in RRF order.
@@ -174,9 +189,19 @@ class Letta(System):
         "reranker."
     )
 
+    TUNABLE: dict[str, list] = {
+        "limit": [5, 10, 20, 50],
+        "search_mode": ["hybrid", "vector", "fts"],
+        "expand": [0, 10],
+    }
+
     def __init__(self, variant: str = "cloud", limit: int = 10, rrf_k: int = 60, vector_weight: float = 0.5,
-                 fts_weight: float = 0.5, expand: int = 10, tail: int = 20, echo_factor: float = 0.1):
+                 fts_weight: float = 0.5, expand: int = 10, tail: int = 20, echo_factor: float = 0.1,
+                 search_mode: str = "hybrid"):
+        if search_mode not in ("hybrid", "vector", "fts"):
+            raise ValueError(f"Invalid search_mode: {search_mode}")
         self.variant = variant
+        self.search_mode = search_mode
         self.limit = limit if variant == "cloud" else 5
         self.rrf_k, self.wv, self.wf = rrf_k, vector_weight, fts_weight
         self.expand, self.tail_n, self.echo_factor = expand, tail, echo_factor
@@ -235,9 +260,22 @@ class Letta(System):
         bs = self.bm25.score(q.text)[idx]
         pos = np.nonzero(bs > 0)[0]
         forder = idx[pos[np.argsort(-bs[pos], kind="stable")[:K]]]
+        qn = " ".join(q.text.lower().split())
+        if self.search_mode != "hybrid":
+            # single-mode: rank one channel, combined_score = 1/rank (tpuf_client.py:1214-1225)
+            order = vorder if self.search_mode == "vector" else forder
+            key = f"{self.search_mode}_rank"
+            single = []
+            for r, d in enumerate(order):
+                d = int(d)
+                s = 1.0 / (r + 1)
+                if self.norm_text[d] == qn:
+                    s *= self.echo_factor
+                single.append((d, s, {"rrf_score": s, key: r + 1}))
+            single.sort(key=lambda x: (-x[1], -x[0]))
+            return single[:K]
         vr = {int(d): r + 1 for r, d in enumerate(vorder)}
         fr = {int(d): r + 1 for r, d in enumerate(forder)}
-        qn = " ".join(q.text.lower().split())
         out = []
         for d in set(vr) | set(fr):
             s = 0.0

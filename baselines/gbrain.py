@@ -98,6 +98,22 @@ delivery budget 24000.
 
 OPTIONS (not default): return_unit='chunk' returns the ranked chunk rows (the LongMemEval retrieval-harness
 shape); token_budget=None disables the 12000 cap.
+
+Tunable knobs (TUNABLE; the defaults reproduce the frozen baseline exactly)
+- return_unit in {auto, window, chunk}. This is the `return_unit` request parameter of search/query/recall
+  (src/core/ops/search.ts:634, RETURN_UNIT_PARAM :114) and the operator config `search.return_unit`
+  (src/core/search/evidence-delivery.ts:38-43).
+  - auto: whole conversation pages.
+  - window: the hit chunk plus +/- `search.return_window` (default 1, max 3) neighbour chunks, cut by
+    windowCandidates. With an explicit unit there is no spill to chunk rows: a block whose floor does not fit is
+    dropped, except that rank 1 is cut to fit (allocate, evidence-delivery.ts:680).
+  - chunk: the raw ranked chunk rows (stage inert).
+- delivery_budget in {None, 3000, 12000}. This is the evidence token budget: the `token_budget` request parameter
+  (ops/search.ts:636) or the operator configs `search.return_budget_conversation` / `search.return_budget_default`
+  (evidence-delivery.ts:45-50). None = the project default for the unit: 24000 for auto, 6000 for window.
+  It has no effect when return_unit='chunk'.
+- limit in {None, 20}. This is the `limit` request parameter of the search op (ops/search.ts:624, which defaults
+  to 20 when the caller omits it; ops/search.ts:649). None = the harness's k.
 """
 from __future__ import annotations
 
@@ -122,7 +138,9 @@ RECENCY_CHAT = (7.0, 1.0)           # chat/ prefix: halflife days, coefficient
 SESSION_DEMOTE, GRAPH_TOP_K = 0.95, 20
 DEDUP_JACCARD, DEDUP_PER_PAGE = 0.85, 2
 TOKEN_BUDGET = 12000                # balanced bundle
-DELIVERY_BUDGET = 24000             # DEFAULT_CONVERSATION_BUDGET
+DELIVERY_BUDGET = 24000             # DEFAULT_CONVERSATION_BUDGET (auto)
+DEFAULT_RETURN_BUDGET = 6000        # window/section/page
+MAX_WINDOW = 3
 PIECE_MAX_CHARS = 400
 EVIDENCE_BLOCK_CHAR_CAP = 60000
 OMISSION = "\n\n[…]\n\n"
@@ -362,9 +380,25 @@ class GBrain(System):
         "shared BM25 (the AND/OR gate is kept), HNSW by an exact scan, and stages that are inert on a linkless "
         "corpus (title arm, aliases, graph, backlinks) are omitted.")
 
-    def __init__(self, return_unit: str = "auto", token_budget: int | None = TOKEN_BUDGET):
+    TUNABLE: dict[str, list] = {
+        "return_unit": ["auto", "window", "chunk"],
+        "delivery_budget": [None, 3000, 12000],
+        "limit": [None, 20],
+    }
+
+    def __init__(self, return_unit: str = "auto", token_budget: int | None = TOKEN_BUDGET,
+                 delivery_budget: int | None = None, limit: int | None = None, return_window: int = 1):
+        if return_unit not in ("auto", "window", "chunk"):
+            raise ValueError(f"return_unit must be auto|window|chunk (got {return_unit!r})")
         self.return_unit = return_unit
         self.token_budget = token_budget
+        self.delivery_budget = delivery_budget
+        self.limit = limit
+        self.return_window = max(1, min(MAX_WINDOW, int(return_window)))
+
+    def __repr__(self):
+        return (f"GBrain(return_unit={self.return_unit!r}, delivery_budget={self.delivery_budget!r}, "
+                f"limit={self.limit!r}, token_budget={self.token_budget!r}, return_window={self.return_window})")
 
     # ------------------------------------------------------------ build
     def build(self, corpus, enc):
@@ -373,7 +407,7 @@ class GBrain(System):
         for t in corpus.turns:
             sess_turns.setdefault(t.session_id, []).append(t)
         self.pages = []  # dict(slug,title,date,text,turn_spans)
-        ch_text, ch_page, ch_span, ch_turns, emb_in = [], [], [], [], []
+        ch_text, ch_page, ch_span, ch_turns, emb_in, ch_idx = [], [], [], [], [], []
         for sid in corpus.session_order:
             ts = sorted(sess_turns.get(sid, []), key=lambda t: t.idx)
             if not ts:
@@ -389,13 +423,18 @@ class GBrain(System):
             self.pages.append(dict(slug=slug, title=title, date=corpus.session_ts.get(sid, ts[0].ts), text=body,
                                    spans=spans))
             prefix = f"<context>{title}\n</context>\n"
-            for ctext, s, e in chunk_page(body):
+            for ci_, (ctext, s, e) in enumerate(chunk_page(body)):
+                ch_idx.append(ci_)
                 ch_text.append(ctext)
                 ch_page.append(pid)
                 ch_span.append((s, e))
                 ch_turns.append([tid for a, b, tid in spans if a < e and b > s])
                 emb_in.append(prefix + ctext)
         self.ch_text, self.ch_page, self.ch_span, self.ch_turns = ch_text, np.array(ch_page), ch_span, ch_turns
+        self.ch_idx = ch_idx
+        self.page_chunks: dict[int, list[int]] = {}
+        for ci_, p_ in enumerate(ch_page):
+            self.page_chunks.setdefault(p_, []).append(ci_)
         self.E = enc.embed_many(emb_in)
         self.bm25 = enc.bm25(ch_text)
         self.ch_terms = [set(terms(t)) for t in ch_text]
@@ -445,7 +484,7 @@ class GBrain(System):
 
     # ------------------------------------------------------------ retrieve
     def retrieve(self, q, k: int = 30) -> list[Item]:
-        limit = k
+        limit = self.limit if self.limit else k
         P = min(max(limit * 2, PRE_FUSION_POOL_FLOOR, limit), MAX_SEARCH_LIMIT)
         intent, recency = classify(q.text)
         kw_w, vec_w, _ = INTENT_WEIGHTS[intent]
@@ -598,7 +637,10 @@ class GBrain(System):
             byp[p] = g
             groups.append(g)
         blocks, passthrough = [], []
-        remaining = DELIVERY_BUDGET
+        auto = self.return_unit == "auto"
+        budget = self.delivery_budget or (DELIVERY_BUDGET if auto else DEFAULT_RETURN_BUDGET)
+        remaining = budget
+        dropped_any = False
         omit_tok = count_tokens(OMISSION)
         for g in groups:
             pg = self.pages[g["page"]]
@@ -610,33 +652,65 @@ class GBrain(System):
                 cs, ce = self.ch_span[c]
                 anchors.append([i for i, (a, b) in enumerate(pieces) if a < ce and b > cs])
             core = anchors[0]
+            if auto:
+                cands = list(range(len(pieces)))
+            else:  # window: pieces of chunks within +/- return_window of each hit chunk (windowCandidates)
+                cs_ = set()
+                for c in g["hits"]:
+                    for oc in self.page_chunks[g["page"]]:
+                        if abs(self.ch_idx[oc] - self.ch_idx[c]) <= self.return_window:
+                            a_, e_ = self.ch_span[oc]
+                            cs_.update(i for i, (a, b) in enumerate(pieces) if a < e_ and b > a_)
+                for an in anchors:
+                    cs_.update(an)
+                cands = sorted(cs_)
             title_tok = count_tokens(pg["title"])
             floor = title_tok + sum(ptok[i] for i in core)
             floor_chars = sum(pieces[i][1] - pieces[i][0] for i in core)
+            blk = dict(g=g, pieces=pieces, ptok=ptok, anchors=anchors, sel=set(core), cands=cands, cut=False)
             if floor <= remaining and floor_chars <= EVIDENCE_BLOCK_CHAR_CAP:
                 remaining -= floor
-                blocks.append(dict(g=g, pieces=pieces, ptok=ptok, anchors=anchors, sel=set(core)))
-            else:  # auto: conversation over budget -> raw chunk rows
+                blocks.append(blk)
+            elif auto:  # conversation over budget -> raw chunk rows
                 for c in g["hits"]:
                     passthrough.append((hits.index(c), c))
+            elif not blocks and not dropped_any:  # rank one alone exceeds the budget: cut it to fit
+                remaining -= min(title_tok, remaining)
+                sel, chars = set(), 0
+                for i in core:
+                    ln = pieces[i][1] - pieces[i][0]
+                    if ptok[i] <= remaining and chars + ln <= EVIDENCE_BLOCK_CHAR_CAP:
+                        sel.add(i)
+                        remaining -= ptok[i]
+                        chars += ln
+                    else:
+                        if not sel:
+                            sel.add(i)
+                            remaining = 0
+                        break
+                blk.update(sel=sel, cut=True)
+                blocks.append(blk)
+            else:
+                dropped_any = True
         for b in blocks:  # enrichment, rank order
+            if b["cut"]:
+                continue
             pieces, ptok, sel, anchors = b["pieces"], b["ptok"], b["sel"], b["anchors"]
             core = set(anchors[0])
             core_rank = {}
             for r, a in enumerate(anchors[1:]):
                 for pi in a:
                     core_rank.setdefault(pi, r)
-            n = len(pieces)
-            seeds = [i for i in range(n) if i in core or i in core_rank]
-            dist = [10**9] * n
-            for i in seeds:
-                dist[i] = 0
+            cl = b["cands"]
+            n = len(cl)
+            dist = [0 if (c in core or c in core_rank) else 10**9 for c in cl]
             for i in range(1, n):
                 dist[i] = min(dist[i], dist[i - 1] + 1)
             for i in range(n - 2, -1, -1):
                 dist[i] = min(dist[i], dist[i + 1] + 1)
-            cand = [i for i in range(n) if i not in core]
-            cand.sort(key=lambda i: (0 if i in core_rank else 1, core_rank.get(i, 0), dist[i], i))
+            pos = {c: j for j, c in enumerate(cl)}
+            cand = [c for c in cl if c not in core]
+            cand.sort(key=lambda i: (0 if i in core_rank else 1, core_rank.get(i, 0), dist[pos[i]], i))
             chars = sum(pieces[i][1] - pieces[i][0] for i in sel)
             for i in cand:
                 adj = (i - 1) in sel or (i + 1) in sel
@@ -663,7 +737,7 @@ class GBrain(System):
             covered = [tid for a, e, tid in pg["spans"]
                        if any(pieces[i][0] < e and pieces[i][1] > a for i in order)]
             ranked.append((b["g"]["rank"], Item(covered, self._header(p) + out, float(s[b["g"]["hits"][0]]),
-                                                {"slug": pg["slug"], "unit": "page"})))
+                                                {"slug": pg["slug"], "unit": "page" if auto else "window"})))
         for rank, c in passthrough:
             ranked.append((rank, self._chunk_item(c, s[c])))
         ranked.sort(key=lambda x: x[0])

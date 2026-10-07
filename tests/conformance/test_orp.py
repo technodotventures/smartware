@@ -126,7 +126,7 @@ class L1Core(unittest.TestCase):
         c = self.s.capabilities()
         self.assertIn("fusion", c)
         self.assertIn("tokenizer", c)
-        self.assertIn("L3", c["conformance"])
+        self.assertIn("L3", c["conformance"]["claimed"])
 
     def test_cross_tenant_isolation(self):  # §2 tenant
         self.s.remember({"memories": [ev("acme launch date is March 3", thread="t")]}, ALICE)

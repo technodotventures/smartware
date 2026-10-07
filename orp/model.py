@@ -29,7 +29,8 @@ class Principal:
     tenant: str = "default"
 
     def tokens(self) -> frozenset[str]:
-        return frozenset({f"principal:{self.id}", "public", *(f"group:{g}" for g in self.groups)})
+        return frozenset({f"principal:{self.id}", "public", *(f"group:{g}" for g in self.groups),
+                          *(g for g in self.groups if g.startswith("label:"))})
 
 
 SYSTEM = Principal("system", frozenset({"*"}))

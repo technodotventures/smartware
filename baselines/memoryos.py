@@ -94,6 +94,24 @@ PARAMETERS (paper default | lib):
 - page text "{u}{ts}{r}" | "User: {u} Assistant: {r}"
 
 OPTIONS (not default): mode="lib"; threshold_mode="raw"; meta="none".
+
+Tunable knobs (dev-split tuning only; every default is unchanged, and None means the mode's default):
+- top_pages: global top-k of mid-term pages.
+  - Operator setting `retrieval_queue_capacity` (vendor memoryos-pypi/memoryos.py:38, MCP config.json
+    "retrieval_queue_capacity").
+  - In eval it is RetrievalAndAnswer(queue_capacity=10) (eval/main_loco_parse.py:237).
+  - The paper sweeps k in {5,10,20,30,40} (paper section 4.4, Fig. 3).
+  - Values: 7 (lib default), 10 (paper default), 20, 30.
+- top_m: number of candidate segments.
+  - `top_k_sessions` parameter of Retriever.retrieve_context (memoryos-pypi/retriever.py:97; MCP copy
+    mid_term.py:282 defaults to 6).
+  - Paper "top-m segments = 5" (section 4.1).
+  - Values: 5, 10.
+- theta: segment merge threshold.
+  - Operator setting `mid_term_similarity_threshold` (memoryos-pypi/memoryos.py:40, README "New Config
+    Parameter", chromadb test uses 0.7).
+  - Paper theta = 0.6 (Eq. 2, section 4.1).
+  - Values: 0.5, 0.6, 0.7.
 """
 from __future__ import annotations
 
@@ -154,10 +172,20 @@ class MemoryOS(System):
         "ranked KB instead). No recency (disabled in eval); q.time unused; returns <=20 items by design."
     )
 
-    def __init__(self, mode: str = "paper", threshold_mode: str = "pctl", meta: str = "chain"):
+    TUNABLE: dict[str, list] = {
+        "top_pages": [7, 10, 20, 30],   # retrieval_queue_capacity (paper default 10)
+        "top_m": [5, 10],               # top_k_sessions (default 5)
+        "theta": [0.5, 0.6, 0.7],       # mid_term_similarity_threshold (default 0.6)
+    }
+
+    def __init__(self, mode: str = "paper", threshold_mode: str = "pctl", meta: str = "chain",
+                 top_pages: int | None = None, top_m: int | None = None, theta: float | None = None):
         assert mode in PARAMS and threshold_mode in ("pctl", "raw") and meta in ("chain", "none")
         self.mode, self.threshold_mode, self.meta_mode = mode, threshold_mode, meta
-        self.P = PARAMS[mode]
+        self.P = dict(PARAMS[mode])
+        for key, val in (("top_pages", top_pages), ("top_m", top_m), ("theta", theta)):
+            if val is not None:
+                self.P[key] = val
 
     # ------------------------------------------------------------ helpers
     def _keywords(self, text: str) -> set[str]:

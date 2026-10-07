@@ -1,20 +1,27 @@
-"""ORP reference engine.
+"""ORP reference engine (v0.1.1).
 
-A single-process, dependency-light implementation of the Open Recall Protocol
-(spec/ORP-0.1.md): bi-temporal memory records, provenance-closed access control
-enforced before ranking, claim supersession, and a budget-aware multi-channel
-recall pipeline that returns a ContextPack.
+A single-process implementation of the Open Recall Protocol (spec/ORP-0.1.md):
+bi-temporal memory records, explicit supersession, provenance-closed access control,
+and a budget-aware multi-channel recall pipeline returning a ContextPack.
 
-Recall pipeline (all deterministic; LLM hooks optional):
-  0. Admissibility mask (tenant, ACL tokens, status/validity at as_of, known_at, scope, kinds) -- before ranking.
-  1. Query analysis: content terms, named entities, temporal intent (window/order/current/when/count), role intent.
-  2. Candidate channels over memory units: BM25(unit), BM25(window), dense(unit), dense(window),
-     thread prior (BM25+dense over whole threads), entity match, temporal window, RM3 pseudo-relevance feedback.
-  3. Weighted reciprocal-rank fusion.
-  4. Feature rerank: query-term coverage, actor/role match, temporal fit, order/current intents, thread prior.
-  5. Diversification for aggregate questions (count/list/multi-thread).
-  6. Packing into a token budget: thread headers emitted once, relative dates resolved inline,
-     short replies carry their prompt, long units are snippeted (and only claimed when mostly included).
+Admissibility (§5.1) is computed first, and everything after it is computed over the
+admissible set only: lexical collection statistics (N, df, average length), window and
+thread aggregates, neighbour features, entity hub damping, pseudo-relevance feedback and
+dialogue expansion. An inadmissible memory therefore cannot change what or how an asker
+recalls (no side channel). Threads never cross tenants.
+
+Recall pipeline:
+  0. Admissibility mask: tenant, ACL tokens, labels, status, validity at as_of, known_at, scope path, kinds.
+  1. Query analysis: content terms, named entities, temporal intent, role intent, parts.
+  2. Channels (each nominates its own top `depth` candidates): BM25(unit), window (unit + admissible
+     neighbours), BM25 over 2-sentence segments max-pooled to units, dense(unit), dense(window),
+     dense(segments), thread relevance, entity match, temporal window, RM3 pseudo-relevance feedback,
+     optional query decomposition and embedding-neighbour expansion.
+  3. Weighted reciprocal-rank fusion -> candidate pool.
+  4. Ranking: multiplicative features (ranker="rrf") or a learned model over declared features
+     (ranker="gbdt" | "linear").
+  5. Thread interleaving for aggregate questions.
+  6. Packing into the token budget per granularity, with once-per-thread headers and resolved dates.
 """
 from __future__ import annotations
 
@@ -22,8 +29,8 @@ import hashlib
 import math
 import re
 from collections import Counter, defaultdict
-from dataclasses import dataclass, field, replace
-from datetime import datetime, timedelta
+from dataclasses import dataclass
+from datetime import datetime
 from typing import Protocol
 
 import numpy as np
@@ -31,7 +38,7 @@ import numpy as np
 from . import timeparse
 from ._text import STOPWORDS, count_tokens, sentences, stem, terms, words
 from .index import BM25
-from .model import (SYSTEM, Claim, ContextItem, ContextPack, Memory, Principal, RecallRequest)
+from .model import SYSTEM, ContextItem, ContextPack, Memory, Principal, RecallRequest
 
 
 class Embedder(Protocol):
@@ -42,7 +49,7 @@ class Embedder(Protocol):
 
 @dataclass
 class Params:
-    # channel weights for weighted RRF
+    # channel weights (weighted RRF)
     w_bm25: float = 1.0
     w_bm25_win: float = 0.6
     w_dense: float = 0.6
@@ -51,22 +58,22 @@ class Params:
     w_entity: float = 0.4
     w_time: float = 0.5
     w_prf: float = 0.6
-    w_sub: float = 0.0  # optional channel, off by default (no dev gain)
-    w_qexp: float = 0.0  # optional channel, off by default (no dev gain)
+    w_sub: float = 0.0  # optional channel, off by default
+    w_qexp: float = 0.0  # optional channel, off by default
     qexp_weight: float = 0.4
     qexp_min: float = 0.45
     w_bm25_seg: float = 0.6
     w_dense_seg: float = 0.4
     seg_sentences: int = 2
     rrf_k: float = 60.0
-    depth: int = 200  # candidates per channel
-    pool: int = 300  # fused candidates passed to features/ranker
-    # rerank features (multiplicative on fused score)
+    depth: int = 200
+    pool: int = 300
+    # rrf-ranker features (multiplicative)
     f_cover: float = 0.6
     f_actor: float = 0.25
     f_role: float = 0.25
     f_order: float = 0.15
-    f_thread_div: float = 0.0
+    prefer_boost: float = 0.25
     prf_docs: int = 8
     prf_terms: int = 12
     prf_mix: float = 0.5
@@ -80,19 +87,24 @@ class Params:
     headers: bool = True
     resolve_dates: bool = True
     count_div: bool = True
-    ranker: str = "rrf"  # rrf | linear
+    # learned rankers
+    ranker: str = "rrf"  # rrf | linear | gbdt
     lin_w: tuple = ()
     lin_b: float = 0.0
     lin_mu: tuple = ()
     lin_sd: tuple = ()
-    gbdt: dict | None = None  # {"base": float, "trees": [{"f":[], "t":[], "l":[], "r":[], "v":[], "leaf":[]}]}
-
-
-_Q_STRIP = re.compile(r"^(what|when|where|who|whom|which|why|how|did|does|do|is|are|was|were|can|could|would|should|"
-                      r"has|have|had)\b", re.I)
+    gbdt: dict | None = None
+    drop_features: tuple = ()  # feature names forced to 0 (ablations)
 
 
 class Engine:
+    FEATURES = ("rr_bm25", "rr_bm25_win", "rr_dense", "rr_dense_win", "rr_bm25_seg", "rr_dense_seg", "rr_thread",
+                "rr_entity", "rr_time", "rr_prf", "fused", "bm25_norm", "bm25_seg_norm", "cos", "cos_seg", "cover",
+                "cover_unit", "cover_next", "actor_match", "role_match", "in_window", "order_pos", "log_tokens",
+                "is_question", "prev_is_question", "next_reply", "when_q", "count_q", "nb_bm25", "has_time",
+                "has_number", "when_x_time", "count_x_number", "where_x_place", "ent_overlap", "rr_thread_x_cover",
+                "rr_sub", "n_parts", "rr_qexp")
+
     def __init__(self, embedder: Embedder, params: Params | None = None):
         self.emb = embedder
         self.p = params or Params()
@@ -104,32 +116,39 @@ class Engine:
         self.audit: list[dict] = []
         self.collect = False
         self.last = None
+        self.mutations = 0
 
     # ------------------------------------------------------------ write
+    def touch(self):
+        self.mutations += 1
+        self._dirty = True
+
     def remember(self, items: Memory | list[Memory], principal: Principal = SYSTEM) -> list[str]:
         if isinstance(items, Memory):
             items = [items]
         ids = []
         for m in items:
             h = m.meta.get("idempotency_key") or m.content_hash()
-            if h in self._hash:  # idempotent replay
+            if h in self._hash and self._hash[h] in self.mem:
                 ids.append(self._hash[h])
                 continue
             if m.observed_at is None:
                 m.observed_at = datetime.now()
             if m.valid_from is None:
                 m.valid_from = m.event_time or m.observed_at
-            # provenance-closed access: derived memories may be read only by principals who can read every source
-            if m.derived_from:
-                src = [self.mem[s] for s in m.derived_from if s in self.mem]
-                acl = None
-                for s in src:
-                    if s.readers is not None:
-                        acl = set(s.readers) if acl is None else acl & set(s.readers)
+            if m.derived_from:  # provenance-closed access (§6.3) and label inheritance
+                acl, labels = None, set(m.labels)
+                for s in m.derived_from:
+                    sm = self.mem.get(s)
+                    if sm is None:
+                        continue
+                    if sm.readers is not None:
+                        acl = set(sm.readers) if acl is None else acl & set(sm.readers)
+                    labels |= {l for l in sm.labels if l in ("secret", "pii", "health", "legal")}
                 if acl is not None:
                     m.readers = frozenset(acl) if m.readers is None else frozenset(set(m.readers) & acl)
-            # deterministic enrichment
-            if self.p.resolve_dates and m.observed_at:
+                m.labels = sorted(labels)
+            if self.p.resolve_dates and m.observed_at and m.kind in ("event", "document"):
                 refs = timeparse.resolve_relative(m.content, m.event_time or m.observed_at)
                 if refs:
                     m.meta["time_refs"] = refs
@@ -137,45 +156,47 @@ class Engine:
             self.mem[m.id] = m
             self.order.append(m.id)
             self._hash[h] = m.id
-            if m.claim is not None:
+            if m.claim is not None and m.kind not in ("event", "document"):
                 self._supersede(m)
-            self.audit.append({"op": "remember", "id": m.id, "by": principal.id})
+            self.audit.append({"op": "remember", "id": m.id, "by": principal.id, "at": datetime.now().isoformat()})
             ids.append(m.id)
-        self._dirty = True
+        self.touch()
         return ids
 
     def _supersede(self, m: Memory):
         key = (m.tenant, m.claim.key())
         chain = self._claims[key]
-        chain.append(m.id)
+        if m.id not in chain:
+            chain.append(m.id)
         if m.claim.cardinality != "one":
             return
-        # order by world validity, then by transaction time; the latest-valid assertion is current
+        # validity order (world time), then transaction time: backfilled old facts never override newer ones
         chain.sort(key=lambda i: (self.mem[i].valid_from or datetime.min, self.mem[i].observed_at or datetime.min))
         live = [i for i in chain if self.mem[i].status in ("active", "superseded")]
         for a, b in zip(live, live[1:]):
             ma, mb = self.mem[a], self.mem[b]
             if ma.claim.object.strip().lower() == mb.claim.object.strip().lower():
                 continue
-            ma.status = "superseded"
-            ma.superseded_by = b
-            ma.valid_to = mb.valid_from
+            if ma.status != "superseded" or ma.superseded_by != b:
+                ma.status, ma.superseded_by, ma.valid_to = "superseded", b, mb.valid_from
+                ma.version += 1
             if a not in mb.supersedes:
                 mb.supersedes.append(a)
         if live:
             last = self.mem[live[-1]]
-            last.status = "active"
-            last.superseded_by = None
-            last.valid_to = None
+            if last.status != "active" or last.valid_to is not None:
+                last.status, last.superseded_by, last.valid_to = "active", None, None
+                last.version += 1
 
     def reclose(self, mem_id: str) -> list[str]:
-        """Re-apply provenance-closed ACL to everything derived (transitively) from mem_id after its ACL changed."""
-        changed, frontier = [], [mem_id]
+        """Re-apply provenance-closed ACL to everything derived (transitively) from mem_id."""
+        changed, frontier, seen = [], [mem_id], set()
         while frontier:
             cur = frontier.pop()
             for d in self.mem.values():
-                if cur not in d.derived_from:
+                if cur not in d.derived_from or d.id in seen:
                     continue
+                seen.add(d.id)
                 acl = None
                 for s in d.derived_from:
                     sm = self.mem.get(s)
@@ -184,15 +205,16 @@ class Engine:
                 new = d.readers if acl is None else frozenset(acl if d.readers is None else set(d.readers) & acl)
                 if new != d.readers:
                     d.readers = new
+                    d.version += 1
                     changed.append(d.id)
                 frontier.append(d.id)
-        self._dirty = True
+        self.touch()
         return changed
 
     def forget(self, mem_id: str, mode: str = "retract", cascade: bool = True, principal: Principal = SYSTEM,
                reason: str = "") -> list[str]:
-        """retract: hidden from recall, kept for audit. redact: content erased. purge: record removed.
-        cascade: derived memories built from it are retracted too (no laundering through summaries)."""
+        """retract: hidden from recall, kept for audit. redact: content and derived metadata erased.
+        purge: record removed. cascade: derived memories are retracted/redacted too (no laundering)."""
         hit = [mem_id]
         if cascade:
             frontier = [mem_id]
@@ -209,13 +231,20 @@ class Engine:
             if mode == "purge":
                 del self.mem[i]
                 self.order.remove(i)
+                for k in [k for k, v in self._hash.items() if v == i]:
+                    del self._hash[k]
             else:
                 m.status = "retracted"
+                m.version += 1
                 if mode == "redact":
                     m.content = "[redacted]"
-                    m.meta.pop("time_refs", None)
-            self.audit.append({"op": f"forget:{mode}", "id": i, "by": principal.id, "reason": reason})
-        self._dirty = True
+                    for k in ("time_refs", "entities"):
+                        m.meta.pop(k, None)
+                    if m.claim is not None:
+                        m.claim.object = "[redacted]"
+            self.audit.append({"op": f"forget:{mode}", "id": i, "by": principal.id, "reason": reason,
+                               "at": datetime.now().isoformat()})
+        self.touch()
         return hit
 
     def history(self, subject: str, predicate: str, tenant: str = "default") -> list[Memory]:
@@ -234,33 +263,31 @@ class Engine:
             extra = " ".join(r for _, r in m.meta.get("time_refs", []))
             unit_txt.append(f"{m.actor}: {m.content} {extra}".strip())
         self.unit_txt = unit_txt
-        # neighbours within thread
         self.prev = np.full(n, -1)
         self.next = np.full(n, -1)
         by_thread = defaultdict(list)
         for k, m in enumerate(ms):
-            by_thread[m.thread].append(k)
-        for th, ks in by_thread.items():
+            by_thread[(m.tenant, m.thread)].append(k)  # threads never cross tenants
+        for key, ks in by_thread.items():
             ks.sort(key=lambda k: (ms[k].seq, ms[k].observed_at or datetime.min))
+            if not key[1]:
+                continue  # unthreaded memories have no neighbours
             for a, b in zip(ks, ks[1:]):
                 self.next[a] = b
                 self.prev[b] = a
-        self.by_thread = by_thread
-        win_txt = []
-        for k in range(n):
-            parts = [unit_txt[self.prev[k]]] if self.prev[k] >= 0 else []
-            parts.append(unit_txt[k])
-            if self.next[k] >= 0:
-                parts.append(unit_txt[self.next[k]])
-            win_txt.append(" ".join(parts))
+        self.threads = list(by_thread)
+        self.thread_units = [np.array(by_thread[t]) for t in self.threads]
+        self.thread_of = np.zeros(n, dtype=int)
+        for ti, ks in enumerate(self.thread_units):
+            self.thread_of[ks] = ti
         seg_txt, seg_unit = [], []
         for k, m in enumerate(ms):
             ss = sentences(m.content)
-            if len(ss) <= self.p.seg_sentences:
+            w = self.p.seg_sentences
+            if len(ss) <= w:
                 seg_txt.append(unit_txt[k])
                 seg_unit.append(k)
                 continue
-            w = self.p.seg_sentences
             for i in range(0, len(ss) - w + 1):
                 seg_txt.append(f"{m.actor}: " + " ".join(ss[i:i + w]))
                 seg_unit.append(k)
@@ -268,46 +295,31 @@ class Engine:
         self.bm_seg = BM25(seg_txt)
         self.ES = self.emb.embed_many(seg_txt) if seg_txt else np.zeros((0, 1))
         self.bm = BM25(unit_txt)
-        # embedding-neighbour query expansion: one surface form per stem, embedded once
-        surf = {}
-        for t in unit_txt:
-            for w in words(t):
-                if w in STOPWORDS or len(w) < 3 or w.isdigit():
-                    continue
-                st = stem(w)
-                if st in self.bm.vocab and st not in surf:
-                    surf[st] = w
-        df = np.asarray((self.bm.mat > 0).sum(axis=0)).ravel()
-        keep = [st for st in surf if 1 < df[self.bm.vocab[st]] < max(3, 0.05 * n)]
-        self.xv_terms = keep
-        self.XV = self.emb.embed_many([surf[st] for st in keep]) if keep else np.zeros((0, 1))
-        self.bm_win = BM25(win_txt)
         self.E = self.emb.embed_many([f"{m.actor}: {m.content}" for m in ms]) if n else np.zeros((0, 1))
-        W = np.zeros_like(self.E)
+        self.d_kp = np.zeros(n)
+        self.d_kn = np.zeros(n)
+        self.d_pn = np.zeros(n)
         for k in range(n):
-            v = self.E[k].copy()
-            if self.prev[k] >= 0:
-                v += 0.5 * self.E[self.prev[k]]
-            if self.next[k] >= 0:
-                v += 0.5 * self.E[self.next[k]]
-            W[k] = v / (np.linalg.norm(v) + 1e-9)
-        self.W = W
-        # threads
-        self.threads = list(by_thread)
-        self.thread_of = np.zeros(n, dtype=int)
-        th_txt, th_vec = [], []
-        for ti, th in enumerate(self.threads):
-            ks = by_thread[th]
-            self.thread_of[ks] = ti
-            th_txt.append(" ".join(unit_txt[k] for k in ks))
-            v = self.E[ks].mean(0)
-            th_vec.append(v / (np.linalg.norm(v) + 1e-9))
-        self.bm_th = BM25(th_txt)
-        self.TV = np.stack(th_vec) if th_vec else np.zeros((0, 1))
-        self.thread_start = {th: min((ms[k].observed_at or datetime.min) for k in ks) for th, ks in by_thread.items()}
-        # entities and actors
+            p_, n_ = self.prev[k], self.next[k]
+            if p_ >= 0:
+                self.d_kp[k] = float(self.E[k] @ self.E[p_])
+            if n_ >= 0:
+                self.d_kn[k] = float(self.E[k] @ self.E[n_])
+            if p_ >= 0 and n_ >= 0:
+                self.d_pn[k] = float(self.E[p_] @ self.E[n_])
+        self.xv_terms, self.XV = [], np.zeros((0, 1))
+        if self.p.w_qexp > 0:
+            surf = {}
+            for t in unit_txt:
+                for w in words(t):
+                    if w in STOPWORDS or len(w) < 3 or w.isdigit():
+                        continue
+                    st = stem(w)
+                    if st in self.bm.vocab and st not in surf:
+                        surf[st] = w
+            self.xv_terms = list(surf)
+            self.XV = self.emb.embed_many([surf[s] for s in self.xv_terms]) if surf else np.zeros((0, 1))
         self.ent = defaultdict(set)
-        self.actors = Counter(m.actor for m in ms)
         for k, m in enumerate(ms):
             for e in m.meta.get("entities", []):
                 self.ent[e.lower()].add(k)
@@ -315,8 +327,7 @@ class Engine:
                 self.ent[m.actor.lower()].add(k)
         self.ts = np.array([((m.event_time or m.observed_at) or datetime(1970, 1, 1)).timestamp() for m in ms])
         self.ntok = np.array([count_tokens(t) for t in unit_txt])
-        roles = [m.role for m in ms]
-        self.is_assistant = np.array([r == "assistant" for r in roles])
+        self.is_assistant = np.array([m.role == "assistant" for m in ms], dtype=bool)
         self.has_roles = bool(self.is_assistant.any())
         self.unit_terms = [set(terms(t)) for t in unit_txt]
         _time_rx = re.compile(r"\b(yesterday|today|tomorrow|tonight|last|next|ago|week|weekend|month|year|"
@@ -327,32 +338,59 @@ class Engine:
         self.has_num = np.array([bool(re.search(r"\b(\d+|one|two|three|four|five|six|seven|eight|nine|ten|"
                                                 r"twice|once|several|dozen)\b", m.content, re.I)) for m in ms])
         self.has_place = np.array([bool(m.meta.get("entities")) for m in ms])
+        self.is_q = np.array([m.content.rstrip().endswith("?") for m in ms])
+        self.actor_l = [m.actor.lower() for m in ms]
         self._dirty = False
 
-    # ------------------------------------------------------------ admissibility (before ranking)
+    # ------------------------------------------------------------ access
+    def readable(self, m: Memory, pr: Principal, labels: tuple = ()) -> bool:
+        if m.tenant != pr.tenant:
+            return False
+        star = "*" in pr.groups
+        if not star and m.readers is not None and not (m.readers & pr.tokens()):
+            return False
+        if "secret" in m.labels and not ("secret" in labels and (star or "label:secret" in pr.tokens())):
+            return False
+        return True
+
+    def can_write(self, m: Memory, pr: Principal) -> bool:
+        if m.tenant != pr.tenant:
+            return False
+        if "*" in pr.groups:
+            return True
+        if m.writers is None:
+            return m.meta.get("_creator") == pr.id
+        return bool(m.writers & pr.tokens())
+
+    @staticmethod
+    def valid_at(m: Memory, t: datetime) -> bool:
+        if m.valid_from and m.valid_from > t:
+            return False
+        if m.valid_to and t >= m.valid_to:
+            return False
+        return True
+
     def _mask(self, req: RecallRequest) -> np.ndarray:
-        tok = req.principal.tokens()
-        star = "*" in req.principal.groups
-        as_of = req.as_of
+        as_of = req.as_of or datetime.now()
+        labels = tuple(req.filters.get("labels", ()))
+        drafts = bool(req.filters.get("drafts"))
+        sc = req.scope.rstrip("/")
         ok = np.zeros(len(self.ids), dtype=bool)
         for k, i in enumerate(self.ids):
             m = self.mem[i]
-            if m.tenant != req.tenant:
+            if not self.readable(m, req.principal, labels):
                 continue
-            if not star and m.readers is not None and not (m.readers & tok):
+            if m.status in ("retracted", "expired"):
                 continue
-            if m.status in ("retracted", "draft"):
+            if m.status == "draft" and not (drafts and self.can_write(m, req.principal)):
                 continue
-            if m.status == "superseded" and not req.include_history:
-                if not (as_of and m.valid_to and as_of < m.valid_to):  # as_of time travel: it was current then
-                    continue
             if req.known_at and m.observed_at and m.observed_at > req.known_at:
                 continue
-            if as_of and m.valid_from and m.valid_from > as_of + timedelta(days=1) and m.kind != "event":
+            if not (req.include_history or self.valid_at(m, as_of)):
                 continue
-            if m.expires_at and as_of and m.expires_at <= as_of:
+            if m.expires_at and m.expires_at <= as_of:
                 continue
-            if req.scope and not m.scope.startswith(req.scope):
+            if sc and not (m.scope == sc or m.scope.startswith(sc + "/")):
                 continue
             if req.kinds and m.kind not in req.kinds:
                 continue
@@ -371,46 +409,61 @@ class Engine:
         mask = self._mask(req)
         if not mask.any():
             return ContextPack([], 0, req.budget_tokens, 0.0, self._snapshot(), ["no admissible memories"])
+        notes: list[str] = []
         q = req.query
         self._qtext = q
-        qcore = _Q_STRIP.sub("", q).strip()
         ti = timeparse.parse_query(q, now)
-        qterms = [t for t in terms(q)]
-        qset = set(qterms)
-        qvec = self.emb.embed(q)
+        qset = set(terms(q))
+        try:
+            qvec = np.asarray(self.emb.embed(q), dtype=np.float32)
+        except Exception:  # spec §5.8: report, never fail silently
+            qvec = np.zeros(self.E.shape[1] if self.E.ndim == 2 else 1, np.float32)
+        if not np.any(qvec):
+            notes.append("degraded:dense_unavailable")
         NEG = -1e9
+        pm = np.where((self.prev >= 0) & mask[np.maximum(self.prev, 0)], self.prev, -1)
+        nm = np.where((self.next >= 0) & mask[np.maximum(self.next, 0)], self.next, -1)
+        self._pm, self._nm = pm, nm
 
         def topranks(score: np.ndarray, depth: int = p.depth) -> dict[int, int]:
             s = np.where(mask, score, NEG)
             idx = np.argpartition(-s, min(depth, n - 1))[:depth] if n > depth else np.arange(n)
             idx = idx[s[idx] > NEG / 2]
             idx = idx[np.argsort(-s[idx], kind="stable")]
-            idx = [i for i in idx if score[i] > 0] if score.max() > 0 else list(idx)
+            if score[mask].max() > 0:
+                idx = [i for i in idx if score[i] > 0]
             return {int(i): r for r, i in enumerate(idx)}
 
+        def nb(arr: np.ndarray, ix: np.ndarray) -> np.ndarray:
+            return np.where(ix >= 0, arr[np.maximum(ix, 0)], 0.0)
+
         chans: dict[str, tuple[float, dict[int, int]]] = {}
-        s_bm = self.bm.score(q)
+        s_bm = np.where(mask, self.bm.score(q, mask=mask), 0.0)
         chans["bm25"] = (p.w_bm25, topranks(s_bm))
-        chans["bm25_win"] = (p.w_bm25_win, topranks(self.bm_win.score(q)))
+        chans["bm25_win"] = (p.w_bm25_win, topranks(s_bm + 0.5 * (nb(s_bm, pm) + nb(s_bm, nm))))
         s_dense = self.E @ qvec
         chans["dense"] = (p.w_dense, topranks(s_dense + 1.0))
-        chans["dense_win"] = (p.w_dense_win, topranks(self.W @ qvec + 1.0))
+        hp, hn = (pm >= 0).astype(float), (nm >= 0).astype(float)
+        wnorm = np.sqrt(np.maximum(1e-9, 1 + 0.25 * hp + 0.25 * hn + hp * self.d_kp + hn * self.d_kn +
+                                   0.5 * hp * hn * self.d_pn))
+        s_win = (s_dense + 0.5 * nb(s_dense, pm) + 0.5 * nb(s_dense, nm)) / wnorm
+        chans["dense_win"] = (p.w_dense_win, topranks(s_win + 1.0))
+        segmask = mask[self.seg_unit]
         ub = np.zeros(n)
+        np.maximum.at(ub, self.seg_unit, np.where(segmask, self.bm_seg.score(q, mask=segmask), 0.0))
         ud = np.full(n, -1.0)
-        if p.w_bm25_seg > 0 or p.w_dense_seg > 0 or p.ranker == "linear" or self.collect:
-            ub = np.zeros(n)
-            np.maximum.at(ub, self.seg_unit, self.bm_seg.score(q))
-            chans["bm25_seg"] = (p.w_bm25_seg, topranks(ub))
-            ud = np.full(n, -1.0)
-            np.maximum.at(ud, self.seg_unit, self.ES @ qvec)
-            chans["dense_seg"] = (p.w_dense_seg, topranks(ud + 1.0))
-        # thread prior
-        th_s = self.bm_th.score(q)
-        th_d = self.TV @ qvec
-        th_rank = _rrf([np.argsort(-th_s), np.argsort(-th_d)], len(self.threads), k=10)
-        unit_th = th_rank[self.thread_of]
-        chans["thread"] = (p.w_thread, topranks(unit_th + 1e-6))
-        # entities named in the query (actors and capitalised names seen in memory)
+        np.maximum.at(ud, self.seg_unit, self.ES @ qvec)
+        chans["bm25_seg"] = (p.w_bm25_seg, topranks(ub))
+        chans["dense_seg"] = (p.w_dense_seg, topranks(ud + 1.0))
+        th_b = np.zeros(len(self.threads))
+        th_d = np.full(len(self.threads), -1.0)
+        for t, ks in enumerate(self.thread_units):
+            ks = ks[mask[ks]]
+            if len(ks):
+                th_b[t] = float(np.sort(s_bm[ks])[-3:].sum())
+                th_d[t] = float(s_dense[ks].mean())
+        th_rank = _rrf([np.argsort(-th_b), np.argsort(-th_d)], len(self.threads), k=10)
+        chans["thread"] = (p.w_thread, topranks(th_rank[self.thread_of] + 1e-6))
         qents = set()
         for w in re.findall(r"\b[A-Z][a-zA-Z'\-]+\b", q):
             wl = w.lower().removesuffix("'s")
@@ -419,17 +472,16 @@ class Engine:
         if qents:
             es = np.zeros(n)
             for e in qents:
-                for k in self.ent[e]:
-                    es[k] += 1.0 / math.log(2 + len(self.ent[e]))
+                ks = [k for k in self.ent[e] if mask[k]]
+                for k in ks:
+                    es[k] += 1.0 / math.log(2 + len(ks))
             chans["entity"] = (p.w_entity, topranks(es * (1 + 0.01 * (s_bm > 0)) + 1e-9 * s_bm))
-        # temporal window
         if ti.window:
             lo, hi = ti.window[0].timestamp(), ti.window[1].timestamp()
             inwin = (self.ts >= lo) & (self.ts <= hi)
-            if inwin[mask].any():
+            if (inwin & mask).any():
                 chans["time"] = (p.w_time, topranks(inwin * (s_bm + 0.1 * (s_dense + 1)) + 1e-6 * inwin))
-        # embedding-neighbour expansion (LLM-free query rewriting): add the corpus words nearest to each query word
-        if len(self.xv_terms) and p.w_qexp > 0:
+        if p.w_qexp > 0 and len(self.xv_terms):
             wq = {t: 1.0 for t in qset}
             for w in set(words(q)):
                 if w in STOPWORDS or len(w) < 3:
@@ -439,84 +491,82 @@ class Engine:
                     continue
                 sims = self.XV @ v
                 for j in np.argsort(-sims)[:3]:
+                    t = self.xv_terms[j]
                     if sims[j] < p.qexp_min:
                         break
-                    t = self.xv_terms[j]
-                    if t not in qset:
+                    if t not in qset and self.bm.df(t, mask) > 0:
                         wq[t] = max(wq.get(t, 0), p.qexp_weight * float(sims[j]))
             if len(wq) > len(qset):
-                chans["qexp"] = (p.w_qexp, topranks(self.bm.score("", weights=wq)))
-        # query decomposition: "between A and B", "A and B", "A or B" -> each part retrieves on its own
+                chans["qexp"] = (p.w_qexp, topranks(self.bm.score("", weights=wq, mask=mask)))
         parts = _split_query(q)
         self._n_parts = len(parts)
-        if len(parts) >= 2:
-            per = [topranks(self.bm.score(pt), 60) for pt in parts]
+        if len(parts) >= 2 and p.w_sub > 0:
             sub = np.zeros(n)
-            for rk in per:
-                for k, r in rk.items():
+            for pt in parts:
+                for k, r in topranks(self.bm.score(pt, mask=mask), 60).items():
                     sub[k] = max(sub[k], 1.0 / (10 + r))
             chans["sub"] = (p.w_sub, topranks(sub))
-        # first-pass fusion for pseudo-relevance feedback (RM3-style)
         fused0 = self._fuse(chans, n)
         if p.w_prf > 0:
-            top = np.argsort(-fused0)[: p.prf_docs]
             tf = Counter()
-            for k in top:
-                if fused0[k] <= 0:
+            for k in np.argsort(-fused0)[: p.prf_docs]:
+                if fused0[k] <= 0 or not mask[k]:
                     continue
                 c = Counter(terms(self.unit_txt[k]))
                 tot = sum(c.values()) or 1
                 for t, v in c.items():
                     tf[t] += v / tot
-            for t in list(tf):
-                if t in qset or t not in self.bm.vocab:
-                    continue
+            nadm = max(1, int(mask.sum()))
             exp = {t: v for t, v in tf.most_common(p.prf_terms * 3) if t not in qset and t in self.bm.vocab}
-            exp = dict(sorted(exp.items(), key=lambda kv: -kv[1] * self.bm.idf[self.bm.vocab[kv[0]]])[: p.prf_terms])
+
+            def _idf(t):
+                d = self.bm.df(t, mask)
+                return math.log(1 + (nadm - d + 0.5) / (d + 0.5))
+            exp = dict(sorted(exp.items(), key=lambda kv: -kv[1] * _idf(kv[0]))[: p.prf_terms])
             if exp:
                 mx = max(exp.values())
                 wq = {t: 1.0 for t in qset}
                 for t, v in exp.items():
                     wq[t] = wq.get(t, 0) + p.prf_mix * v / mx
-                chans["prf"] = (p.w_prf, topranks(self.bm.score("", weights=wq)))
+                chans["prf"] = (p.w_prf, topranks(self.bm.score("", weights=wq, mask=mask)))
         fused = self._fuse(chans, n)
         cand = np.argsort(-fused)[: max(req.max_items * 4, p.pool)]
         cand = [int(k) for k in cand if fused[k] > 0 and mask[k]]
-        # ---------------- feature rerank
         first_person = bool(re.search(r"\b(i|my|me|mine|i've|i'm|i'd)\b", q.lower()))
         asks_assistant = bool(re.search(r"\b(you|your)\b", q.lower())) and self.has_roles
         self._asks_assistant = asks_assistant
-        final = {}
+        final: dict[int, float] = {}
+        self._mult: dict[int, dict] = {}
         top_fused = fused[cand[0]] if cand else 1.0
         qn = max(1, len(qset))
         for k in cand:
             sc = fused[k] / top_fused
-            ctx_terms = self.unit_terms[k] | (self.unit_terms[self.prev[k]] if self.prev[k] >= 0 else set())
-            cover = len(qset & ctx_terms) / qn
-            sc *= 1 + p.f_cover * cover
-            m = self.mem[self.ids[k]]
-            if qents and m.actor.lower() in qents:
-                sc *= 1 + p.f_actor
+            mul = {}
+            ctx = self.unit_terms[k] | (self.unit_terms[pm[k]] if pm[k] >= 0 else set())
+            mul["coverage"] = 1 + p.f_cover * len(qset & ctx) / qn
+            if qents and self.actor_l[k] in qents:
+                mul["actor"] = 1 + p.f_actor
             if self.has_roles:
-                if asks_assistant and m.role == "assistant":
-                    sc *= 1 + p.f_role
-                elif first_person and not asks_assistant and m.role == "user":
-                    sc *= 1 + p.f_role
+                role = self.mem[self.ids[k]].role
+                if (asks_assistant and role == "assistant") or (first_person and not asks_assistant and
+                                                                role == "user"):
+                    mul["role"] = 1 + p.f_role
+            for v in mul.values():
+                sc *= v
             final[k] = sc
-        # learned linear ranker (trained on public dev splits only; see bench/ltr.py)
-        if (p.ranker == "linear" and p.lin_w) or (p.ranker == "gbdt" and p.gbdt) or self.collect:
-            X = self._featurize(cand, chans, fused, top_fused, qset, qents, ti, first_person, asks_assistant, s_bm,
-                                s_dense, ub, ud)
+            self._mult[k] = mul
+        feats = None
+        if p.ranker in ("linear", "gbdt") or self.collect:
+            feats = self._featurize(cand, chans, fused, top_fused, qset, qents, ti, first_person, asks_assistant,
+                                    s_bm, s_dense, ub, ud)
             if self.collect:
-                self.last = (cand, X)
+                self.last = (cand, feats)
             if p.ranker == "linear" and p.lin_w and len(cand):
-                Z = (X - np.array(p.lin_mu)) / np.array(p.lin_sd)
-                z = Z @ np.array(p.lin_w) + p.lin_b
+                z = ((feats - np.array(p.lin_mu)) / np.array(p.lin_sd)) @ np.array(p.lin_w) + p.lin_b
                 final = {k: float(1 / (1 + math.exp(-z[i]))) for i, k in enumerate(cand)}
             elif p.ranker == "gbdt" and p.gbdt and len(cand):
-                z = _gbdt_predict(p.gbdt, X)
+                z = _gbdt_predict(p.gbdt, feats)
                 final = {k: float(1 / (1 + math.exp(-z[i]))) for i, k in enumerate(cand)}
-        # order / current-state intents: among strong candidates prefer earliest/latest
         if ti.order and final and p.ranker == "rrf":
             strong = [k for k, v in final.items() if v >= 0.5 * max(final.values())][:30]
             if len(strong) > 1:
@@ -524,40 +574,41 @@ class Engine:
                 lo, hi = tsv[0], tsv[-1]
                 for k in strong:
                     pos = (self.ts[k] - lo) / (hi - lo + 1e-9)
-                    final[k] *= 1 + p.f_order * (pos if ti.order == "latest" else 1 - pos)
+                    f_ = 1 + p.f_order * (pos if ti.order == "latest" else 1 - pos)
+                    final[k] *= f_
+                    self._mult.setdefault(k, {})["order"] = f_
+        if req.filters.get("prefer"):
+            pref = [s.rstrip("/") for s in req.filters["prefer"]]
+            for k in final:
+                sc_ = self.mem[self.ids[k]].scope
+                if any(sc_ == s or sc_.startswith(s + "/") for s in pref):
+                    final[k] *= 1 + p.prefer_boost
+                    self._mult.setdefault(k, {})["prefer"] = 1 + p.prefer_boost
         ranked = sorted(final, key=lambda k: -final[k])
-        # diversification for aggregate questions: interleave threads
         if p.count_div and (ti.count or ti.span) and ranked:
             ranked = _interleave_threads(ranked[:60], self.thread_of) + ranked[60:]
-        # ---------------- packing
-        items = self._pack(ranked[: req.max_items], final, chans, req, qterms)
+        fidx = {k: i for i, k in enumerate(cand)}
+        items = self._pack(ranked, final, chans, req, list(qset), mask, feats, fidx, now)
         if p.ranker in ("linear", "gbdt"):
             cov = final[ranked[0]] if ranked else 0.0
         else:
             cov = min(1.0, (final[ranked[0]] if ranked else 0) / (1 + p.f_cover + p.f_actor + p.f_role))
+        if ti.window:
+            notes.append(f"time:{ti.window[0].date()}..{ti.window[1].date()}")
         return ContextPack(items, sum(i.tokens for i in items), req.budget_tokens, round(float(cov), 3),
-                           self._snapshot(), [f"time:{ti.window[0].date()}..{ti.window[1].date()}"] if ti.window else [])
-
-    FEATURES = ("rr_bm25", "rr_bm25_win", "rr_dense", "rr_dense_win", "rr_bm25_seg", "rr_dense_seg", "rr_thread",
-                "rr_entity", "rr_time", "rr_prf", "fused", "bm25_norm", "bm25_seg_norm", "cos", "cos_seg", "cover",
-                "cover_unit", "cover_next", "actor_match", "role_match", "in_window", "order_pos", "log_tokens",
-                "is_question", "prev_is_question", "next_reply", "when_q", "count_q", "nb_bm25", "has_time",
-                "has_number", "when_x_time", "count_x_number", "where_x_place", "ent_overlap", "rr_thread_x_cover",
-                "rr_sub", "n_parts", "rr_qexp")
+                           self._snapshot(), notes)
 
     def _featurize(self, cand, chans, fused, top_fused, qset, qents, ti, first_person, asks_assistant, s_bm, s_dense,
                    ub, ud):
-        n_c = len(cand)
-        X = np.zeros((n_c, len(self.FEATURES)), np.float32)
-        if not n_c:
+        X = np.zeros((len(cand), len(self.FEATURES)), np.float32)
+        if not cand:
             return X
+        pm, nm = self._pm, self._nm
         names = ["bm25", "bm25_win", "dense", "dense_win", "bm25_seg", "dense_seg", "thread", "entity", "time", "prf"]
         bmx = max(float(s_bm[cand].max()), 1e-6)
         ubx = max(float(ub[cand].max()), 1e-6)
         qn = max(1, len(qset))
-        win = None
-        if ti.window:
-            win = (ti.window[0].timestamp(), ti.window[1].timestamp())
+        win = (ti.window[0].timestamp(), ti.window[1].timestamp()) if ti.window else None
         tsv = self.ts[cand]
         lo, hi = float(tsv.min()), float(tsv.max())
         where_q = bool(re.search(r"\bwhere\b|\bwhich (city|country|place|state|town)\b", self._qtext.lower()))
@@ -572,7 +623,7 @@ class Engine:
             f[12] = ub[k] / ubx
             f[13] = s_dense[k]
             f[14] = ud[k]
-            pk, nk = self.prev[k], self.next[k]
+            pk, nk = pm[k], nm[k]
             ut = self.unit_terms[k]
             pt = self.unit_terms[pk] if pk >= 0 else set()
             nt = self.unit_terms[nk] if nk >= 0 else set()
@@ -580,7 +631,7 @@ class Engine:
             f[16] = len(qset & ut) / qn
             f[17] = len(qset & nt) / qn
             m = self.mem[self.ids[k]]
-            f[18] = float(bool(qents) and m.actor.lower() in qents)
+            f[18] = float(bool(qents) and self.actor_l[k] in qents)
             if self.has_roles:
                 f[19] = float((asks_assistant and m.role == "assistant") or
                               (first_person and not asks_assistant and m.role == "user"))
@@ -590,9 +641,9 @@ class Engine:
                 pos = (self.ts[k] - lo) / (hi - lo + 1e-9)
                 f[21] = pos if ti.order == "latest" else 1 - pos
             f[22] = math.log1p(self.ntok[k])
-            f[23] = float(m.content.rstrip().endswith("?"))
-            f[24] = float(pk >= 0 and self.mem[self.ids[pk]].content.rstrip().endswith("?"))
-            f[25] = float(nk >= 0 and self.mem[self.ids[nk]].actor != m.actor)
+            f[23] = float(self.is_q[k])
+            f[24] = float(pk >= 0 and self.is_q[pk])
+            f[25] = float(nk >= 0 and self.actor_l[nk] != self.actor_l[k])
             f[26] = float(ti.when)
             f[27] = float(ti.count or ti.span)
             f[28] = max(s_bm[pk] if pk >= 0 else 0.0, s_bm[nk] if nk >= 0 else 0.0) / bmx
@@ -609,6 +660,8 @@ class Engine:
             f[37] = float(self._n_parts)
             r = chans.get("qexp", (0, {}))[1].get(k)
             f[38] = 0.0 if r is None else 1.0 / (1 + r)
+        for name in self.p.drop_features:
+            X[:, self.FEATURES.index(name)] = 0.0
         return X
 
     def _fuse(self, chans, n):
@@ -620,62 +673,91 @@ class Engine:
                 out[k] += w / (self.p.rrf_k + r + 1)
         return out
 
-    def _pack(self, ranked, final, chans, req, qterms) -> list[ContextItem]:
+    def _pack(self, ranked, final, chans, req, qterms, mask, feats, fidx, as_of) -> list[ContextItem]:
         p = self.p
+        pm, nm = self._pm, self._nm  # admissible neighbours only
+        gran = req.filters.get("granularity", "auto")
+        nbh = int(req.filters.get("neighbours", 0) or 0)
+        quotas = req.filters.get("quotas") or {}
+        kcount: Counter = Counter()
         items: list[ContextItem] = []
         used = 0
-        seen_threads: set[str] = set()
+        seen_threads: set = set()
         emitted: set[int] = set()
         for k in ranked:
+            if len(items) >= req.max_items:
+                break
             if k in emitted:
                 continue
             m = self.mem[self.ids[k]]
-            members = [k]
-            # dialogue-structure expansion: a question needs its answer, a short reply needs its prompt
-            pk, nk = self.prev[k], self.next[k]
-            if pk >= 0 and pk not in emitted and self.mem[self.ids[pk]].actor != m.actor and (
-                    len(m.content.split()) <= p.prompt_merge_words or
-                    (p.expand_prev_q and self.mem[self.ids[pk]].content.rstrip().endswith("?"))):
-                members = [pk, k]
-            if p.expand_next and nk >= 0 and nk not in emitted and self.mem[self.ids[nk]].actor != m.actor and (
-                    m.content.rstrip().endswith("?") or "?" in m.content[-60:]) and \
-                    self.ntok[nk] <= p.long_unit_tokens and \
-                    (self.mem[self.ids[nk]].role != "assistant" or self._asks_assistant):
-                members.append(nk)
+            if quotas and m.kind in quotas and kcount[m.kind] >= int(quotas[m.kind]):
+                continue
+            if gran == "thread":
+                members = [int(x) for x in self.thread_units[self.thread_of[k]] if mask[x] and x not in emitted]
+            else:
+                members = [k]
+                pk, nk = pm[k], nm[k]
+                if gran != "unit":
+                    expand_prev = gran == "span" or p.expand_prev_q
+                    expand_next = gran == "span" or p.expand_next
+                    if pk >= 0 and pk not in emitted and self.actor_l[pk] != self.actor_l[k] and (
+                            len(m.content.split()) <= p.prompt_merge_words or (expand_prev and self.is_q[pk])):
+                        members = [int(pk), k]
+                    if expand_next and nk >= 0 and nk not in emitted and self.actor_l[nk] != self.actor_l[k] and (
+                            m.content.rstrip().endswith("?") or "?" in m.content[-60:]) and \
+                            self.ntok[nk] <= p.long_unit_tokens and \
+                            (self.mem[self.ids[nk]].role != "assistant" or self._asks_assistant):
+                        members.append(int(nk))
+                for _ in range(nbh):
+                    a, b = pm[members[0]], nm[members[-1]]
+                    if a >= 0 and a not in emitted:
+                        members.insert(0, int(a))
+                    if b >= 0 and b not in emitted:
+                        members.append(int(b))
             lines, claimed = [], []
             for j in members:
                 mj = self.mem[self.ids[j]]
-                body, frac = self._body(j, qterms)
+                body, frac = (mj.content, 1.0) if gran == "thread" else self._body(j, qterms)
                 if p.resolve_dates and mj.meta.get("time_refs"):
                     body += " (" + "; ".join(f"{a} = {b}" for a, b in mj.meta["time_refs"][:2]) + ")"
                 lines.append(f"{mj.actor}: {body}" if mj.actor else body)
                 if frac >= p.claim_fraction:
                     claimed.append(j)
             head = ""
-            if p.headers and m.thread not in seen_threads:
-                d = (m.event_time or m.observed_at)
+            tkey = (m.tenant, m.thread)
+            if p.headers and tkey not in seen_threads:
+                d = m.event_time or m.observed_at
                 ds = d.strftime("%Y-%m-%d (%a)") if d else ""
-                lab = m.thread.split(":")[-1] if m.thread else ""
+                lab = m.meta.get("thread_label") or (m.thread.split(":")[-1] if m.thread else "")
                 head = f"## {ds} · {lab}\n" if lab else f"## {ds}\n"
-                seen_threads.add(m.thread)
+                seen_threads.add(tkey)
+            label = "current" if self.valid_at(m, as_of) else ("superseded" if m.status == "superseded"
+                                                               else "historical")
             text = head + "\n".join(lines)
-            if m.status == "superseded":
-                text = "[superseded] " + text
+            if label != "current":
+                text = f"[{label}] " + text
             emitted.update(members)
+            kcount[m.kind] += 1
             tok = count_tokens(text)
             used += tok
-            why = {c: round(w / (p.rrf_k + r[k] + 1), 5) for c, (w, r) in chans.items() if k in r}
+            why = {c: round(w / (p.rrf_k + r[k] + 1), 5) for c, (w, r) in chans.items() if k in r and w > 0}
+            if feats is not None and k in fidx and p.ranker != "rrf":
+                fv = feats[fidx[k]]
+                why["features"] = {nme: round(float(v), 4) for nme, v in zip(self.FEATURES, fv) if v}
+            else:
+                why["features"] = {kk: round(float(vv), 4) for kk, vv in self._mult.get(k, {}).items()}
+            why["ranker"] = p.ranker
             mids = [self.ids[j] for j in members]
-            items.append(ContextItem(memory_ids=mids, text=text, score=round(float(final[k]), 5), why=why, tokens=tok,
-                                     citations=[s.uri for j in members for s in self.mem[self.ids[j]].sources] or mids,
-                                     valid="superseded" if m.status == "superseded" else "current",
+            items.append(ContextItem(memory_ids=mids, text=text, score=round(float(final.get(k, 0)), 5), why=why,
+                                     tokens=tok, citations=[s.uri for j in members for s in
+                                                            self.mem[self.ids[j]].sources] or mids,
+                                     valid=label,
                                      turn_ids=[self.mem[self.ids[j]].meta.get("turn_id", self.ids[j]) for j in claimed]))
             if req.budget_tokens and used >= req.budget_tokens:
                 break
         return items
 
     def _body(self, k: int, qterms: list[str]) -> tuple[str, float]:
-        """Unit text, snippeted to the most query-relevant sentences if long. Returns (text, fraction kept)."""
         m = self.mem[self.ids[k]]
         if self.ntok[k] <= self.p.long_unit_tokens:
             return m.content, 1.0
@@ -683,22 +765,21 @@ class Engine:
         if len(sents) <= self.p.snippet_sentences:
             return m.content, 1.0
         qs = set(qterms)
-        scored = []
-        for i, s in enumerate(sents):
-            st = set(terms(s))
-            scored.append((len(st & qs) + (0.5 if i == 0 else 0), i))
+        scored = [(len(set(terms(s)) & qs) + (0.5 if i == 0 else 0), i) for i, s in enumerate(sents)]
         keep = sorted(i for _, i in sorted(scored, reverse=True)[: self.p.snippet_sentences])
-        out, last = [], -1
+        out, last = (["…"] if keep[0] > 0 else []), -1
         for i in keep:
             if last >= 0 and i != last + 1:
                 out.append("…")
             out.append(sents[i])
             last = i
+        if keep[-1] < len(sents) - 1:
+            out.append("…")
         txt = " ".join(out)
         return txt, len(txt) / max(1, len(m.content))
 
     def _snapshot(self) -> str:
-        return hashlib.sha1(("|".join(self.order[-50:]) + str(len(self.order))).encode()).hexdigest()[:16]
+        return hashlib.sha1(f"{self.mutations}|{len(self.mem)}".encode()).hexdigest()[:16]
 
 
 # ---------------------------------------------------------------- helpers
@@ -728,13 +809,11 @@ def _gbdt_predict(model: dict, X: np.ndarray) -> np.ndarray:
     return out
 
 
-
 _SPLIT = re.compile(r"\bbetween\b|\band\b|\bor\b|\bversus\b|\bvs\.?\b|,|;|\bafter\b|\bbefore\b|\bthan\b|"
                     r"\bsince\b|\bwhen\b|\bwhile\b")
 
 
 def _split_query(q: str) -> list[str]:
-    """Split a question into retrievable parts; keep only parts with >= 2 content terms."""
     parts = [x.strip() for x in _SPLIT.split(q) if x and x.strip()]
     good = [x for x in parts if len(terms(x)) >= 2]
     return good if len(good) >= 2 else []
@@ -786,15 +865,18 @@ class ORPSystem:
         for k, v in kw.items():
             if k.startswith("_"):
                 continue
+            if isinstance(v, list) and k in ("lin_w", "lin_mu", "lin_sd", "drop_features"):
+                v = tuple(v)
             setattr(p, k, v)
         self.params = p
 
     def build(self, corpus, enc):
         self.eng = Engine(enc.dense, self.params)
-        mems = []
-        for t in corpus.turns:
-            mems.append(Memory(content=t.text, kind="event", actor=t.speaker, role=t.role, thread=t.session_id,
-                               seq=t.idx, observed_at=t.ts, meta={"turn_id": t.id}))
+        label = {s: f"S{i + 1}" for i, s in enumerate(corpus.session_order)}  # neutral, dataset-free labels
+        mems = [Memory(content=t.text, kind="event", actor=t.speaker, role=t.role, thread=t.session_id, seq=t.idx,
+                       observed_at=t.ts, meta={"turn_id": t.id, "idempotency_key": t.id,
+                                                "thread_label": label.get(t.session_id, "")})
+                for t in corpus.turns]
         self.eng.remember(mems)
         self.eng._build()
 

@@ -71,6 +71,25 @@ ASSEMBLY / PARAMETERS
   - tag recall: tag_keys=10, tag_fetch=500, tag_budget=20000.
 - q.time is not used: the project's retrieval has no "now".
 
+TUNABLE KNOBS (dev-split tuning only; ``CompanyBrain()`` with no arguments is unchanged)
+- ``per_container_limit`` in {20, 40}, default 40.
+  - This is the ``limit: 40`` request parameter of each per-container supermemory search
+    (vendor src/brain/memory/search-brain.ts:73).
+  - The final ``.slice(0, 40)`` (search-brain.ts:116) stays hard-coded as in the project, so values above 40 would
+    be meaningless.
+- ``threshold`` in {0.2, 0.3, 0.4}, default 0.3.
+  - ``BRAIN_RELEVANCE_THRESHOLD`` (src/brain/search-brain-format.ts:1).
+  - It is passed as the search ``threshold`` (search-brain.ts:74) and reapplied by ``relevantBrainResults``
+    (search-brain-format.ts:46-54).
+- ``blend`` in {None, 0.5, 0.9}, default None (= 0.7, i.e. w_dense 0.7, w_bm25 0.3).
+  - Setting it gives ``w_dense = blend``, ``w_bm25 = 1 - blend``.
+  - This is NOT a knob the project exposes. Supermemory's hybrid fusion runs server-side and is unpublished (report
+    sections 5.2 and 13). The 0.7/0.3 default is this baseline's assumption.
+  - It is included at the coordinator's request, after the audit flagged that assumption, as a sensitivity knob
+    over the approximation. The nearest real control is the request's ``searchMode: "hybrid"``
+    (search-brain.ts:79), which callers can set to ``memories`` or ``documents``.
+- Grid size: 2 x 3 x 3 = 18.
+
 DELIBERATE DEVIATIONS
 - None beyond the approximations above.
 - The wrapper text of the tag-recall block (``<brain_memory_context>``, the topic-map header and the truncation
@@ -113,6 +132,11 @@ def _ws(s: str) -> str:
 
 
 class CompanyBrain(System):
+    TUNABLE: dict[str, list] = {
+        "per_container_limit": [20, 40],
+        "threshold": [0.2, 0.3, 0.4],
+        "blend": [None, 0.5, 0.9],  # None == default 0.7 dense / 0.3 BM25
+    }
     name = "supermemory-company-brain"
     family = "company-brain"
     faithful_notes = (
@@ -130,8 +154,12 @@ class CompanyBrain(System):
     def __init__(self, per_container_limit: int = 40, threshold: float = 0.3, w_dense: float = 0.7,
                  w_bm25: float = 0.3, cand: int = 200, window_msgs: int = 60, window_chars: int = 8000,
                  chunk_chars: int = 1000, chunk_overlap_max: int = 100, long_turn: int = 400,
-                 tag_keys: int = 10, tag_fetch: int = 500, tag_budget: int = 20_000, supersede: bool = False):
+                 tag_keys: int = 10, tag_fetch: int = 500, tag_budget: int = 20_000, supersede: bool = False,
+                 blend: float | None = None):
         self.limit, self.threshold = per_container_limit, threshold
+        if blend is not None:  # single fusion knob: w_dense = blend, w_bm25 = 1 - blend
+            w_dense, w_bm25 = float(blend), 1.0 - float(blend)
+        self.blend = blend
         self.w_dense, self.w_bm25, self.cand = w_dense, w_bm25, cand
         self.window_msgs, self.window_chars = window_msgs, window_chars
         self.chunk_chars, self.chunk_overlap_max, self.long_turn = chunk_chars, chunk_overlap_max, long_turn
@@ -258,7 +286,7 @@ class CompanyBrain(System):
                 if s >= self.threshold:
                     res.append((s, kind, store[i]))
         res.sort(key=lambda x: -x[0])
-        res = res[: self.limit]  # per-container top `limit`
+        res = res[: self.limit]  # per-container top `limit` (request param)
         merged: dict[str, tuple] = {}  # merge across containers by id, max similarity (one container here)
         for r in res:
             if r[2]["id"] not in merged or r[0] > merged[r[2]["id"]][0]:

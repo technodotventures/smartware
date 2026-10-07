@@ -1,0 +1,2 @@
+--- historical (pre-audit) test invocations, reconstructed from logs:
+2026-10-08T02:48 (bm25,dense, all 15 baselines; LoCoMo + LME-H v1) ; 2026-10-08T04:48 (orp, orp-rrf; LoCoMo + LME-H v1). Superseded by the post-audit runs below.

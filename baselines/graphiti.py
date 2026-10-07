@@ -48,6 +48,20 @@ OPTIONAL MODES (not default)
 - bfs=True: add the edge-BFS channel (depth 3, directed from each unit's first entity, seeded by the
   first-stage hits, BFS order, 2*limit) as in COMBINED_HYBRID_SEARCH_CROSS_ENCODER's edge methods.
 
+TUNABLE KNOBS (dev-split tuning only; defaults reproduce the frozen baseline exactly)
+- limit {None, 10, 50}: SearchConfig.limit / num_results. Real defaults: Graphiti.search num_results=
+  DEFAULT_SEARCH_LIMIT=10 (graphiti.py:1658, search_config.py:29), MCP search_memory_facts max_facts=10
+  (mcp_server/src/graphiti_mcp_server.py:619), REST SearchQuery.max_facts=10 (server/graph_service/dto/retrieve.py:13).
+  None = use the harness k (frozen default). The result is always capped at k. Candidate depth stays 2*limit.
+  In mode="combined", an explicit limit is applied per scope (as Graphiti does), with the total capped at k.
+- reranker {"rrf", "episode_mentions"}: EdgeSearchConfig.reranker; recipes EDGE_HYBRID_SEARCH_RRF vs
+  EDGE_HYBRID_SEARCH_EPISODE_MENTIONS (search_config_recipes.py:111, :135). LLM/CE rerankers excluded.
+- bfs {False, True}: EdgeSearchMethod.bfs in search_methods (search_config.py:35), shipped in
+  COMBINED_HYBRID_SEARCH_CROSS_ENCODER / EDGE_HYBRID_SEARCH_CROSS_ENCODER (search_config_recipes.py:81, :143).
+- mode {"edges", "combined"}: Graphiti.search (edges only) vs Graphiti.search_ with COMBINED_HYBRID_SEARCH_RRF
+  (search_config_recipes.py:34), i.e. which scopes (facts / entities / episodes) are returned.
+Product of value counts: 3 * 2 * 2 * 2 = 24.
+
 PARAMETERS: limit=k, candidates 2k/channel, RRF const 1, cos gate 0.2 raw (0.6 normalised), BFS depth 3,
 fuzzy Jaccard 0.9, entropy 1.5, min name length 6 / 2 tokens, summary cap 2000 chars, BM25 query cap 128 words.
 """
@@ -141,8 +155,18 @@ class Graphiti(System):
         "BFS channel) mirror other shipped recipes but are off by default."
     )
 
-    def __init__(self, mode: str = "edges", reranker: str = "rrf", bfs: bool = False):
-        self.mode, self.reranker, self.bfs = mode, reranker, bfs
+    TUNABLE: dict[str, list] = {
+        "limit": [None, 10, 50],
+        "reranker": ["rrf", "episode_mentions"],
+        "bfs": [False, True],
+        "mode": ["edges", "combined"],
+    }
+
+    def __init__(self, mode: str = "edges", reranker: str = "rrf", bfs: bool = False, limit: int | None = None):
+        self.mode, self.reranker, self.bfs, self.limit = mode, reranker, bfs, limit
+
+    def __repr__(self):
+        return f"Graphiti(mode={self.mode!r}, reranker={self.reranker!r}, bfs={self.bfs}, limit={self.limit})"
 
     # ------------------------------------------------------------------ build
     def build(self, corpus, enc):
@@ -313,8 +337,8 @@ class Graphiti(System):
         if not q.text.strip():
             return []
         if self.mode != "combined":
-            return self._edge_search(q.text, qv, k)
-        lim = math.ceil(k / 3)
+            return self._edge_search(q.text, qv, self.limit if self.limit is not None else k)[:k]
+        lim = self.limit if self.limit is not None else math.ceil(k / 3)
         facts = self._edge_search(q.text, qv, lim)
         order, scores = _rrf(self._hybrid(self.node_bm25, self.node_E, q.text, qv, lim))
         nodes = []

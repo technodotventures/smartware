@@ -86,7 +86,29 @@ DELIBERATE DEVIATIONS
 
 PARAMETERS
 - chunk_tokens=512, min_content=256, meta_pct=0.25, blurb=128, cand=500, w_vec=0.5, w_kw=0.5, num_hits=50, rrf_k=50,
-  w_main=2.5, w_kw_line=1.0, kw_terms=3, keyword_lines=1, speaker_prefix=False, time_filter=False.
+  w_main=2.5, w_kw_line=1.0, kw_terms=3, keyword_lines=1, speaker_prefix=False, time_filter=False,
+  normalization="min_max", subquery_config=2.
+
+TUNABLE KNOBS (dev-split tuning only; product of value counts = 3*2*2*2 = 24)
+- num_hits in [20, 30, 50]: the per-query hit count, which also caps the returned sections.
+  - Request parameter: SearchToolOverrideKwargs.num_hits (backend/onyx/tools/models.py:220), default
+    NUM_RETURNED_HITS = 50 (configs/chat_configs.py:3).
+  - Search UI SendSearchQueryRequest.num_hits default 30 (ee/onyx/server/query_and_chat/models.py:36).
+- normalization in ["min_max", "z_score"]: hybrid score normalisation.
+  - Env HYBRID_SEARCH_NORMALIZATION_PIPELINE = 1 (MIN_MAX, default) or 2 (ZSCORE)
+    (backend/onyx/document_index/opensearch/constants.py:131-151); the z_score pipeline is defined in
+    opensearch/search.py:150-169.
+  - Z-score follows OpenSearch's ZScoreNormalizationTechnique: population mean/std per subquery list;
+    (s - mean)/std, with values <= 0 clipped to 0.001; a single result scores 1.0.
+- subquery_config in [2, 1]: env HYBRID_SEARCH_SUBQUERY_CONFIGURATION (opensearch/constants.py:115-131).
+  - 2 (default): [content_vector, keyword] with weights [0.5, 0.5].
+  - 1: [title_vector, content_vector, keyword] with weights [0.1, 0.45, 0.45] (opensearch/search.py:80-125).
+  - The title vector embeds the document title (semantic_identifier); see embedder.py title embedding.
+- keyword_lines in [0, 1]: query expansion off/on.
+  - Request parameter skip_query_expansion (server/features/search/models.py:25; MCP search_indexed_documents,
+    mcp_server/tools/search.py:281).
+  - 0 = expansion skipped: only the raw query runs (Onyx: tool query 0.7 + original 0.5 merge into one list).
+  - 1 = default: the IDF keyword line stands in for the LLM keyword expansion.
 """
 from __future__ import annotations
 
@@ -210,6 +232,18 @@ class _Field:
         return out
 
 
+def _zscore(scores: np.ndarray) -> np.ndarray:
+    """OpenSearch ZScoreNormalizationTechnique (population stats over one subquery's result list)."""
+    if len(scores) == 1:
+        return np.ones_like(scores)
+    mean, std = float(scores.mean()), float(scores.std())
+    if std == 0.0:
+        return np.full_like(scores, 0.001)
+    z = (scores - mean) / std
+    z[z <= 0.0] = 0.001
+    return z
+
+
 def _minmax(scores: np.ndarray) -> np.ndarray:
     """OpenSearch MinMaxScoreNormalizationTechnique over one subquery's result list."""
     lo, hi = float(scores.min()), float(scores.max())
@@ -270,6 +304,12 @@ def _time_window(q: str, now: datetime) -> tuple[datetime | None, datetime | Non
 
 
 class Onyx(System):
+    TUNABLE: dict[str, list] = {
+        "num_hits": [20, 30, 50],
+        "normalization": ["min_max", "z_score"],
+        "subquery_config": [2, 1],
+        "keyword_lines": [0, 1],
+    }
     name = "onyx"
     family = "company-brain"
     faithful_notes = (
@@ -289,7 +329,12 @@ class Onyx(System):
     def __init__(self, chunk_tokens: int = 512, min_content: int = 256, meta_pct: float = 0.25, cand: int = 500,
                  w_vec: float = 0.5, w_kw: float = 0.5, num_hits: int = 50, rrf_k: int = 50, w_main: float = 2.5,
                  w_kw_line: float = 1.0, kw_terms: int = 3, keyword_lines: int = 1, speaker_prefix: bool = False,
-                 time_filter: bool = False):
+                 time_filter: bool = False, normalization: str = "min_max", subquery_config: int = 2):
+        if normalization not in ("min_max", "z_score"):
+            raise ValueError(normalization)
+        if subquery_config not in (1, 2):
+            raise ValueError(subquery_config)
+        self.normalization, self.subquery_config = normalization, subquery_config
         self.chunk_tokens, self.min_content, self.meta_pct = chunk_tokens, min_content, meta_pct
         self.cand, self.w_vec, self.w_kw, self.num_hits, self.rrf_k = cand, w_vec, w_kw, num_hits, rrf_k
         self.w_main, self.w_kw_line, self.kw_terms, self.keyword_lines = w_main, w_kw_line, kw_terms, keyword_lines
@@ -372,6 +417,7 @@ class Onyx(System):
         self.content = _Field(enc, [c["kw_text"] for c in self.chunks])
         self.title = _Field(enc, [c["title"] for c in self.chunks])
         self.E = enc.embed_many([c["emb_text"] for c in self.chunks])
+        self.T = enc.embed_many([c["title"] for c in self.chunks]) if self.subquery_config == 1 else None
         self.key_to_idx = {(c["doc"], c["cid"]): i for i, c in enumerate(self.chunks)}
         self.created = np.array([self.doc_info[c["doc"]][0].timestamp() for c in self.chunks])
         self.updated = np.array([self.doc_info[c["doc"]][1].timestamp() for c in self.chunks])
@@ -382,10 +428,20 @@ class Onyx(System):
         kw = " ".join(kw_words) if kw_words else query
         n = len(self.chunks)
         allowed = np.ones(n, bool) if mask is None else mask
-        # vector subquery
-        v = self.E @ self.enc.embed(query)
-        v_idx = np.where(allowed)[0]
-        v_idx = v_idx[np.argsort(-v[v_idx], kind="stable")][: self.cand]
+        qv = self.enc.embed(query)
+        norm = _minmax if self.normalization == "min_max" else _zscore
+
+        def knn(M: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+            sc = M @ qv
+            idx = np.where(allowed)[0]
+            return idx[np.argsort(-sc[idx], kind="stable")][: self.cand], sc
+
+        subs: list[tuple[np.ndarray, np.ndarray, float]] = []
+        if self.subquery_config == 1:
+            t_idx, t = knn(self.T)
+            subs.append((t_idx, t, 0.1))
+        v_idx, v = knn(self.E)
+        subs.append((v_idx, v, self.w_vec if self.subquery_config == 2 else 0.45))
         # keyword subquery: bool.should of 4 clauses, min_should_match=1
         mc = self.content.match(kw)
         mt = self.title.match(kw)
@@ -394,14 +450,13 @@ class Onyx(System):
         pt = self.title.phrase(kw, any_hit)
         k = 1.0 * mc + 1.5 * pc + 0.1 * mt + 0.2 * pt
         k_idx = any_hit[np.argsort(-k[any_hit], kind="stable")][: self.cand]
+        subs.append((k_idx, k, self.w_kw if self.subquery_config == 2 else 0.45))
         comb: dict[int, float] = defaultdict(float)
-        if len(v_idx):
-            for i, s in zip(v_idx, _minmax(v[v_idx])):
-                comb[int(i)] += self.w_vec * float(s)
-        if len(k_idx):
-            for i, s in zip(k_idx, _minmax(k[k_idx])):
-                comb[int(i)] += self.w_kw * float(s)
-        tot = self.w_vec + self.w_kw
+        for idx, sc, w in subs:
+            if len(idx):
+                for i, x in zip(idx, norm(sc[idx])):
+                    comb[int(i)] += w * float(x)
+        tot = sum(w for _, _, w in subs)
         ranked = sorted(comb, key=lambda i: -comb[i] / tot)
         return ranked[: self.num_hits]
 

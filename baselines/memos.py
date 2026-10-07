@@ -70,6 +70,21 @@ PARAMETERS: k (caller); K_ret = 3k; per-bucket pool 2*K_ret; window 1024 tokens,
 > 1024 tokens into 512-token sentence chunks with 128 overlap; relativity percentile 0.90; MMR lambda 0.8,
 prefill 2, penalty start 0.9, alpha 10; near-dup gate 0.9 / 0.92 with weights 0.40/0.35/0.25.
 
+TUNABLE KNOBS (dev-split tuning; the defaults are unchanged)
+- relativity_pctl ([0.0, 0.80, 0.90]; default 0.90): the request parameter `relativity` of APISearchRequest
+  (src/memos/api/product_models.py:406; default 0.45; 0 disables it, search_handler.py:255). It is expressed
+  as the percentile mapping described under THRESHOLDS. 0.0 disables the floor, as relativity=0 does in MemOS.
+- dedup (["mmr", "sim", "no"]; default "mmr"): the request parameter `dedup` (product_models.py:416),
+  dispatched in search_handler.py:91-115 and searcher.py:172.
+  - "mmr" is the default path above.
+  - "sim" uses K_ret = 3k with exact-text dedupe, then greedily keeps an item if its max cosine to the kept
+    items is <= 0.92 (_dedup_text_memories, search_handler.py:287), capped at k.
+  - "no" uses K_ret = k with no exact-text dedupe and no MMR, returning the top k by cosine after the floor.
+- add_batch ([2, 6]; default 2): messages per add() call. This is the client's `batch_size`
+  (evaluation/scripts/utils/client.py:150; the harness uses 2). Each call's messages become one fast-mode
+  window of <= chat_window_max_tokens = 1024 (mem_reader/simple_struct.py:207), so this sets the size of each
+  returned item.
+
 OPTIONS (not default):
 - threshold_mode="raw"
 - backfill=True: refill to k from below-floor items, as section 13 step 6 suggests for recall@k. MemOS does not
@@ -102,6 +117,7 @@ MMR_SIM_THRESHOLD = 0.9
 MMR_ALPHA = 10.0
 NEARDUP_EMB = 0.9
 NEARDUP_TEXT = 0.92
+SIM_DEDUP = 0.92                  # _dedup_text_memories threshold (search_handler.py:318)
 
 
 def _dice(a: str, b: str) -> float:
@@ -151,9 +167,21 @@ class MemOS(System):
         "q.time unused; may return fewer than k by design."
     )
 
-    def __init__(self, threshold_mode: str = "pctl", backfill: bool = False, hybrid: bool = False):
+    TUNABLE: dict[str, list] = {
+        "relativity_pctl": [0.0, 0.80, 0.90],
+        "dedup": ["mmr", "sim", "no"],
+        "add_batch": [2, 6],
+    }
+
+    def __init__(self, threshold_mode: str = "pctl", backfill: bool = False, hybrid: bool = False,
+                 relativity_pctl: float = THRESHOLD_PCTL, dedup: str = "mmr", add_batch: int = ADD_BATCH):
         assert threshold_mode in ("pctl", "raw")
+        assert dedup in ("mmr", "sim", "no")
+        assert 0.0 <= relativity_pctl < 1.0 and add_batch >= 1
         self.threshold_mode = threshold_mode
+        self.relativity_pctl = float(relativity_pctl)
+        self.dedup = dedup
+        self.add_batch = int(add_batch)
         self.backfill = backfill
         self.hybrid = hybrid
 
@@ -208,9 +236,9 @@ class MemOS(System):
         for sid in sorted(by_sess, key=lambda s: order.get(s, 1 << 30)):
             turns = sorted(by_sess[sid], key=lambda t: t.idx)
             chat_time = corpus.session_ts[sid].isoformat() + "+00:00"
-            for i in range(0, len(turns), ADD_BATCH):
+            for i in range(0, len(turns), self.add_batch):
                 batch = [(t.id, t.role, f"{t.speaker}: [{chat_time}]: {t.text[:CONTENT_MAX_CHARS]}\n")
-                         for t in turns[i:i + ADD_BATCH]]
+                         for t in turns[i:i + self.add_batch]]
                 for w in self._windows(batch):
                     text = "".join(x[2] for x in w)
                     if not text.strip():
@@ -242,7 +270,7 @@ class MemOS(System):
         if not self.texts:
             return []
         K = k
-        k_ret = DEDUP_MULT * K
+        k_ret = DEDUP_MULT * K if self.dedup in ("mmr", "sim") else K
         pool_k = POOL_MULT * k_ret
         cos = self.E @ self.enc.embed(q.text)
 
@@ -260,21 +288,38 @@ class MemOS(System):
                 cand.update(int(i) for i in top if bm[i] > 0)
         # cosine_local rerank -> top K_ret
         ranked = sorted(cand, key=lambda i: -cos[i])[:k_ret]
-        # post_retrieve: exact-text dedupe (max score), sort, trim
+        # post_retrieve: exact-text dedupe (max score) unless dedup == "no", sort, trim
         seen, deduped = set(), []
         for i in ranked:
-            if self.texts[i] in seen:
+            if self.dedup != "no" and self.texts[i] in seen:
                 continue
             seen.add(self.texts[i])
             deduped.append(i)
         deduped = deduped[:k_ret]
 
-        # relativity floor
-        thr = RELATIVITY if self.threshold_mode == "raw" else float(np.quantile(cos, THRESHOLD_PCTL))
+        # relativity floor (relativity <= 0 disables it, search_handler.py:255)
+        if self.relativity_pctl <= 0:
+            thr = -np.inf
+        elif self.threshold_mode == "raw":
+            thr = RELATIVITY
+        else:
+            thr = float(np.quantile(cos, self.relativity_pctl))
         kept = [i for i in deduped if cos[i] >= thr]
         dropped = [i for i in deduped if cos[i] < thr]
         if not kept:
             return []
+
+        if self.dedup == "no":
+            return self._finish(kept[:K], dropped, cos, K)
+        if self.dedup == "sim":
+            # _dedup_text_memories: greedy by relevance, keep if max emb sim <= 0.92, cap K
+            sel: list[int] = []
+            for i in kept:  # already sorted by cosine desc
+                if len(sel) >= K:
+                    break
+                if all(float(self.E[i] @ self.E[j]) <= SIM_DEDUP for j in sel):
+                    sel.append(i)
+            return self._finish(sel, dropped, cos, K)
 
         # MMR dedup (search_handler._mmr_dedup_text_memories)
         rel = np.array([cos[i] for i in kept], dtype=np.float64)
@@ -313,7 +358,9 @@ class MemOS(System):
                 break
         selected.sort(key=lambda x: -rel[x])
         out = [kept[li] for li in selected][:K]
+        return self._finish(out, dropped, cos, K)
 
+    def _finish(self, out, dropped, cos, K):
         items = [Item(list(self.tids[i]), self.texts[i], float(cos[i]),
                       meta={"memory_type": str(self.buckets[i])}) for i in out]
         if self.backfill and len(items) < K:

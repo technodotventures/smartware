@@ -92,6 +92,24 @@ PARAMETERS: top_k = k (caller), N = max(4k, 60), entity weight 0.5, damping 0.00
 query entities <= 8, BM25 k1=1.2 b=0.75 avg_len=256, unit chunk <= 80 words (<= 100 kept whole),
 context prefix 300 chars.
 
+TUNABLE KNOBS (dev-split tuning; the default is unchanged at threshold=0.1, pool_mult=4, unit_max_words=80)
+- threshold in {0.0, 0.1, 0.3}: mem0's user-facing ``search(threshold=0.1)`` request parameter
+  (mem0/memory/main.py:1399, validated to [0, 1] at :212-236; REST ``POST /search`` field, server/main.py:205).
+  Mapped to percentiles of the query's cosines (0.0 -> no gate, 0.1 -> 25th, 0.2 -> 60th, 0.3 -> 85th), from
+  text-embedding-3-small's typical spread. ``threshold_mode="raw"`` uses the value directly.
+- pool_mult in {4, 8}: the dense over-fetch ``internal_limit = max(limit * 4, 60)`` (main.py:1655; the TS port
+  has the same constant at mem0-ts/src/oss/src/memory/index.ts:1433). It is an operator-editable constant,
+  not a request parameter. The pool floor of 60 is unchanged. Under the faithful variant this pool bounds what
+  any channel can return, so it is the main recall knob. Users can get the same effect by asking for a larger
+  top_k and truncating.
+- unit_max_words in {40, 80, 150}: memory granularity. mem0 sets it through the extraction prompt's length
+  rule "15-80 words, up to 100 for detail-rich content" (mem0/configs/prompts.py:631-632, 934), which operators
+  override via ``MemoryConfig.custom_instructions`` (configs/base.py) or ``add(prompt=...)`` (main.py:772).
+  The whole-turn cap scales with it (x1.25, so 80 -> 100).
+- Considered and excluded: rerank=True needs a cross-encoder or LLM model, which is unavailable. The
+  ``variant="fixed"`` mode is not shipped by mem0. ``add(infer=False)`` (raw-message mode, no entity linking;
+  main.py:770, 882-916) is a real shipped mode but would push the grid past 24.
+
 OPTIONS (not default): variant="fixed" (BM25 top-N and entity-linked units also nominate candidates, and the
 threshold applies to the fused score); threshold_mode="raw".
 """
@@ -117,6 +135,10 @@ ENTITY_SEARCH_TOPK = 500              # main.py:1789
 MAX_QUERY_ENTITIES = 8                # main.py:1761
 SEARCH_THRESHOLD = 0.1                # main.py:1399
 THRESHOLD_PCTL = 0.25                 # 0.1 on text-embedding-3-small -> percentile (see docstring)
+# mem0 threshold value -> percentile of the query's cosines over the scope, using text-embedding-3-small's typical
+# query-vs-conversation distribution (unrelated ~0.05-0.2, related >= 0.3). 0.0 = no gate (the minimum).
+THRESHOLD_TO_PCTL = {0.0: 0.0, 0.1: THRESHOLD_PCTL, 0.2: 0.60, 0.3: 0.85}
+POOL_MULT, POOL_MIN = 4, 60           # main.py:1655 internal_limit = max(limit * 4, 60)
 BM25_K1, BM25_B, BM25_AVG_LEN = 1.2, 0.75, 256.0   # fastembed Qdrant/bm25
 UNIT_MAX_WORDS, UNIT_WHOLE_WORDS = 80, 100
 CTX_CHARS = 300                       # prompts.py PAST_MESSAGE_TRUNCATION_LIMIT
@@ -305,11 +327,29 @@ class Mem0(System):
         "budget (as in mem0 OSS); q.time unused."
     )
 
-    def __init__(self, variant: str = "faithful", threshold_mode: str = "pctl"):
+    TUNABLE: dict[str, list] = {
+        "threshold": [0.0, 0.1, 0.3],          # search(threshold=...) main.py:1399
+        "pool_mult": [4, 8],                   # internal_limit multiplier main.py:1655
+        "unit_max_words": [40, 80, 150],       # extraction length rule prompts.py:631-632 (custom_instructions)
+    }
+
+    def __init__(self, variant: str = "faithful", threshold_mode: str = "pctl", threshold: float = SEARCH_THRESHOLD,
+                 pool_mult: int = POOL_MULT, unit_max_words: int = UNIT_MAX_WORDS):
         assert variant in ("faithful", "fixed")
         assert threshold_mode in ("pctl", "raw")
+        assert threshold in THRESHOLD_TO_PCTL or threshold_mode == "raw", f"no percentile mapping for {threshold}"
+        assert int(pool_mult) >= 1 and int(unit_max_words) >= 10
         self.variant = variant
         self.threshold_mode = threshold_mode
+        self.threshold = float(threshold)
+        self.pool_mult = int(pool_mult)
+        self.unit_max_words = int(unit_max_words)
+        # whole-turn cap keeps mem0's 80 -> "up to 100" ratio
+        self.unit_whole_words = int(round(self.unit_max_words * UNIT_WHOLE_WORDS / UNIT_MAX_WORDS))
+
+    def __repr__(self):
+        return (f"Mem0(variant={self.variant!r}, threshold_mode={self.threshold_mode!r}, threshold={self.threshold}, "
+                f"pool_mult={self.pool_mult}, unit_max_words={self.unit_max_words})")
 
     # -------------------------------------------------------------- build (add() without the LLM)
     def _units(self, corpus):
@@ -323,13 +363,13 @@ class Mem0(System):
             body = t.text.strip()
             if not body:
                 continue
-            if len(body.split()) <= UNIT_WHOLE_WORDS:
+            if len(body.split()) <= self.unit_whole_words:
                 chunks = [body]
             else:
                 chunks, cur, cw = [], [], 0
                 for s in sentences(body) or [body]:
                     sw = len(s.split())
-                    if cur and cw + sw > UNIT_MAX_WORDS:
+                    if cur and cw + sw > self.unit_max_words:
                         chunks.append(" ".join(cur))
                         cur, cw = [], 0
                     cur.append(s)
@@ -486,9 +526,12 @@ class Mem0(System):
         if self.n == 0:
             return []
         top_k = k
-        N = max(top_k * 4, 60)
+        N = max(top_k * self.pool_mult, POOL_MIN)
         cos = self.E @ self.enc.embed(q.text)
-        thr = SEARCH_THRESHOLD if self.threshold_mode == "raw" else float(np.quantile(cos, THRESHOLD_PCTL))
+        if self.threshold_mode == "raw":
+            thr = self.threshold
+        else:
+            thr = float(np.quantile(cos, THRESHOLD_TO_PCTL[self.threshold]))
         q_terms = _lemma_terms(q.text)
         bm25 = self._bm25(q_terms, N)
         ent = self._entity_boosts(q.text)

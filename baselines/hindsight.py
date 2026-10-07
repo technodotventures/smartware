@@ -89,6 +89,19 @@ graph seeds 20, per-entity cap 200, kNN links 50, temporal links 20/unit over 24
 
 OPTIONS (not default): budget="low"|"high"; fix_temporal_boost=True (temporal proximity from any arm);
 entities=False (pure "chunks" mode, which has no entity data).
+
+TUNABLE KNOBS (dev-split tuning only; defaults unchanged)
+- max_tokens in {2048, 4096, 8192}: the recall request's ``max_tokens`` token budget on fact text
+  (hindsight-api-slim/hindsight_api/api/http.py:528, default 4096; report section 5 step "token budget").
+- budget in {"mid", "high"}: the recall request's ``budget`` level (http.py:527, default MID), mapped to
+  thinking_budget via recall_budget_fixed_{mid,high} = 300/1000 (config.py:1954-1955). It sets the per-arm
+  candidate depth, the BFS node budget and the 2B truncation.
+- enable_graph in {True, False}: the per-bank ``enable_graph_retrieval`` stage switch
+  (config.py:3496/5189, read at memory_engine.py:8978). False removes the graph arm from fusion.
+- recency_decay in {"linear", "exponential"}: the operator setting HINDSIGHT_API_RECENCY_DECAY_FUNCTION
+  (config.py:1062/1350, default "linear" over 365 d). "exponential" is 0.5 ** (days/90), with the default
+  half-life of 90 d (config.py:1354; search/reranking.py:56-78).
+Grid size 3 x 2 x 2 x 2 = 24.
 """
 from __future__ import annotations
 
@@ -127,6 +140,7 @@ SPREAD_MAX_ITERS = 5
 SPREAD_MIN_LINK_W = 0.1
 SPREAD_CONTINUE = 0.2
 RECENCY_WINDOW_DAYS = 365.0
+RECENCY_HALFLIFE_DAYS = 90.0
 RECENCY_ALPHA = 0.2
 TEMPORAL_ALPHA = 0.2
 # threshold -> percentile conversions (see module docstring)
@@ -377,9 +391,20 @@ class Hindsight(System):
         "0.1 -> none). q.time is used as Hindsight's question_date 'now'."
     )
 
+    TUNABLE: dict[str, list] = {
+        "max_tokens": [2048, 4096, 8192],
+        "budget": ["mid", "high"],
+        "enable_graph": [True, False],
+        "recency_decay": ["linear", "exponential"],
+    }
+
     def __init__(self, budget: str = "mid", fix_temporal_boost: bool = False, entities: bool = True,
-                 max_tokens: int = MAX_TOKENS):
+                 max_tokens: int = MAX_TOKENS, enable_graph: bool = True, recency_decay: str = "linear"):
+        if recency_decay not in ("linear", "exponential", "none"):
+            raise ValueError(recency_decay)
         self.B = BUDGETS[budget]
+        self.enable_graph = enable_graph
+        self.recency_decay = recency_decay
         self.fix_temporal_boost = fix_temporal_boost
         self.use_entities = entities
         self.max_tokens = max_tokens
@@ -648,7 +673,8 @@ class Hindsight(System):
             seeds = [int(u) for u in rows if cos[u] >= floor][:GRAPH_SEED_LIMIT]
             mask = self.ft == ft
             keyword += [(u, 0.0) for u in self._keyword(q.text, mask)]
-            graph += self._graph(seeds, ft)
+            if self.enable_graph:
+                graph += self._graph(seeds, ft)
             if win is not None:
                 for u, sc, p in self._temporal(ft, cos, win):
                     temporal.append((u, sc))
@@ -678,7 +704,12 @@ class Hindsight(System):
         for rank, u in enumerate(merged):
             base = 1.0 - 0.9 * rank / denom
             days = (now - self.ts[u]).total_seconds() / 86400.0
-            rec = max(0.1, min(1.0, 1.0 - days / RECENCY_WINDOW_DAYS))
+            if self.recency_decay == "linear":
+                rec = max(0.1, min(1.0, 1.0 - days / RECENCY_WINDOW_DAYS))
+            elif self.recency_decay == "exponential":
+                rec = 1.0 if days <= 0 else 0.5 ** (days / RECENCY_HALFLIFE_DAYS)
+            else:
+                rec = 0.5
             has_t = u in tprox and (self.fix_temporal_boost or first_arm[u] == 3)
             t = tprox[u] if has_t else 0.5
             final = base * (1 + RECENCY_ALPHA * (rec - 0.5)) * (1 + TEMPORAL_ALPHA * (t - 0.5))

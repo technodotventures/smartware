@@ -86,6 +86,19 @@ DELIBERATE DEVIATIONS / INTERPRETATIONS (all documented, none tuned)
   - ``mode="query"`` (search only) and ``mode="profile"`` exist but are not the default;
   - ``budget=None`` disables pruning;
   - ``related=False`` disables attachments.
+
+TUNABLE KNOBS (``TUNABLE`` class attribute; 2 x 3 x 3 = 18 combinations; the defaults are unchanged)
+- ``mode`` in {"full", "query"}: the @supermemory/tools ``MemoryMode`` that users pick per integration
+  (vendor packages/tools/src/shared/types.ts:66; "full" = profile + search, "query" = search only).
+  "profile" is left out because it ignores the query.
+- ``threshold`` in {0.1, 0.3, 0.6}: the search request's ``threshold``. Each value is one the project ships:
+  - 0.3 is the v5 API default (apps/docs/recall/search.mdx:106);
+  - 0.6 is the v4 default and the TS tools default (packages/validation/api.ts:476-479;
+    packages/tools/src/tools-shared.ts:10);
+  - 0.1 is the Python voice-SDK default (packages/livekit-sdk-python/src/supermemory_livekit/memory.py:42).
+  The values are applied as-is on the shared embedder's cosine scale. The BM25 top-10 bypass still applies.
+- ``limit`` in {10, 15, 30}: the search request's ``limit``. The API default is 10 (search.mdx:105, max 100). 15 is
+  README's Recall@15 operating point and this baseline's default. 30 is a larger in-range value.
 """
 from __future__ import annotations
 
@@ -125,6 +138,11 @@ def _content_tokens(s: str) -> frozenset[str]:
 class Supermemory(System):
     name = "supermemory"
     family = "memory-sdk"
+    TUNABLE: dict[str, list] = {
+        "mode": ["full", "query"],
+        "threshold": [0.1, 0.3, 0.6],
+        "limit": [10, 15, 30],
+    }
     faithful_notes = (
         "Supermemory's engine is closed source, so this rebuilds what its API documents. Retrieval is hybrid: "
         "versioned sentence-level 'memories' and contextual session-window chunks come back in one ranked list. "

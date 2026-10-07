@@ -18,7 +18,7 @@ We read the source of 15 leading open-source memory and "brain" projects (Graphi
 3. **Supersession is invisible.** Contradiction handling is either absent (mem0 OSS drops the LLM's links; Cognee writes validity tags no retriever reads) or decided by similarity thresholds the caller never sees.
 4. **Access control is bolted on, often after ranking.** We found post-limit filtering (Letta tags, Hindsight graph arm, Supermemory list), cross-tenant reads by id (mem0 REST, MemOS `/product`), shared assistant stores (MemoryOS) and no defined rule for summaries built from private sources.
 5. **Recall returns lists, not context.** Few projects budget tokens, explain why an item was returned, or tell the agent when nothing relevant exists.
-6. **Knobs lie.** We found accepted-but-ignored parameters in at least six projects (`hybrid_alpha`, `reference_time`, `visibility`, recency multipliers, MCP `filter`).
+6. **Knobs lie.** We found parameters that are accepted but ignored in several projects (for example Onyx `hybrid_alpha`, MemOS `reference_time` and `visibility`, MemOS MCP `filter`; see Appendix C).
 7. **Benchmarks are not reproducible.** Headline LoCoMo/LongMemEval numbers mostly come from hosted engines, unpinned external harnesses, generous judges or tuning on the scored set.
 
 ORP turns the best mechanisms we found into requirements, and turns each failure into a MUST NOT.
@@ -73,7 +73,7 @@ ORP turns the best mechanisms we found into requirements, and turns each failure
 | `expires_at` | timestamp | MAY | Retention limit. After it the record is `expired`. |
 | `status` | enum | MUST | §3.3. |
 | `supersedes`, `superseded_by` | id[], id | MUST when applicable | Explicit version links (§5.6). |
-| `version` | int | MUST | Increments on every change; used for `if_version` concurrency. |
+| `version` | int | MUST | Increments on every change, including status changes from supersession, forget and approval; used for `if_version` concurrency. |
 | `sources` | Source[] | MUST for non-`observed` | `{uri, span, hash, observed_at}`: where the evidence lives (`slack://C1/p17`, `file://notes/a.md#L10-14`, `orp://t/mem_x`). |
 | `derived_from` | id[] | MUST for `extracted`/`inferred` | Memories this was derived from. Drives ACL closure and cascade. |
 | `support` | int | MAY | Count of independent sources agreeing. |
@@ -181,9 +181,9 @@ Request:
 
 - `as_of` defaults to the request time. It sets the validity view (§5.2) **and** the "now" for all relative reasoning and recency. Engines MUST NOT use wall-clock time when `as_of` is given.
 - `known_at` answers "what did we know then?" by excluding records observed after it.
-- `scope.within` narrows admissibility; `scope.prefer` is a soft prior that MUST NOT filter.
-- `kinds` is a per-kind quota map or list.
-- `budget.tokens` is a hard cap on the rendered pack. Engines MUST report the tokeniser they count with.
+- `scope.within` narrows admissibility by path segment (`org/acme` covers `org/acme/...`, not `org/acme-x`); `scope.prefer` is a soft prior that MUST NOT filter.
+- `kinds` is a list (restrict to these kinds) or a per-kind quota map (at most N items of each kind). Engines MUST honour both forms or reject them.
+- `budget.tokens` is a hard cap on the rendered pack. Engines MUST report the tokeniser they count with. If omitted, the engine's default budget applies and MUST be declared in `capabilities.defaults`.
 - `granularity`: `unit \| span \| thread \| auto`. `auto` lets the engine return dialogue spans (§5.5).
 - `mode`: `fast` (no second pass), `balanced` (default), `deep` (may use model-based reranking or query decomposition; MUST declare it in `explain`).
 
@@ -226,7 +226,7 @@ Returns `load: always` memories for a subject (user, agent, team) within a token
 
 - `dry_run: true` MUST return the full set of ids that would be affected (including cascaded derived memories) and change nothing.
 - `cascade` retracts or re-derives every memory whose `derived_from` includes an affected id, transitively. A summary MUST NOT keep facts its sources no longer support.
-- `retract` blocks re-ingestion of the same content hash unless the request sets `allow_reingest`.
+- `retract` blocks re-ingestion of the same content hash by new writes unless the request sets `allow_reingest`. A replay of the original write with the same `idempotency_key` still returns the original ids (now `retracted`); it does not re-create the memory.
 - Forget on records readable by others REQUIRES `writers` permission, not just read permission.
 - Over MCP, engines SHOULD use elicitation to confirm destructive forgets (§8.1).
 
@@ -251,11 +251,11 @@ Starts an async job that produces derived memories (`observation`, `summary`, `p
 
 ### 5.1 Admissibility comes first
 
-Before any channel scores a candidate, the engine MUST compute the admissible set: same tenant; `readers ∩ principal.tokens ≠ ∅` (or `readers = null`); status admissible under §5.2; `observed_at ≤ known_at` if given; within `scope.within`; matching `kinds`. Every channel (lexical, dense, graph, temporal, entity, neighbour expansion, profile) MUST draw only from the admissible set. Post-ranking filtering is non-conformant because it silently loses recall and is the usual source of leaks.
+Before any channel scores a candidate, the engine MUST compute the admissible set: same tenant; `readers ∩ principal.tokens ≠ ∅` (or `readers = null`); status admissible under §5.2; `observed_at ≤ known_at` if given; within `scope.within`; matching `kinds`. Every channel (lexical, dense, graph, temporal, entity, neighbour expansion, profile) MUST draw only from the admissible set, and collection statistics used for scoring (document frequencies, average lengths, thread and window aggregates, feature normalisers) MUST be computed over the admissible set, so that inadmissible memories cannot change the ranking an asker sees. Filtering after a top-k cut is non-conformant: it leaks information through ranking and, when the asker can read only a small share of memory, it silently loses recall (ORP-Bench governance: at 15% visibility, filtering after the top 10 loses 11.7 points of recall).
 
 ### 5.2 Validity view
 
-By default recall returns only memories that are `active` and valid at `as_of` (`valid_from ≤ as_of < valid_to`, open bounds allowed). With `include.history: true`, superseded versions MAY be returned and MUST be labelled `validity: superseded` with a link to the current version. A memory that was current at `as_of` (time travel) is returned as current for that request. `event` and `document` records are evidence and are never "superseded"; facts derived from them are.
+By default recall returns only memories that are `active` and valid at `as_of` (`valid_from ≤ as_of < valid_to`, open bounds allowed). With `include.history: true`, superseded versions MAY be returned and MUST be labelled `validity: superseded` with a link to the current version. A memory that was valid at `as_of` (time travel) MUST be returned with `validity: current` for that request, even if it has since been superseded. `event` and `document` records are evidence: they MUST NOT be superseded (engines MUST reject `mode: supersede` on them); facts derived from them can be. Evidence is valid from its `event_time` (or `observed_at`) onwards, so events after `as_of` are not returned.
 
 ### 5.3 Channels
 
@@ -268,7 +268,7 @@ Engines MAY apply declared features after fusion: query coverage, actor/subject 
 ### 5.5 Packing
 
 - The engine MUST NOT exceed `budget.tokens`.
-- Dialogue integrity: with `granularity: span`, when a unit is a question the engine SHOULD include its reply, and when a unit is a short reply it SHOULD include the prompt it answers; these spans count as one item. With `auto`, the engine decides (the reference engine's learned ranker returns units, because it already ranks answer turns directly and spans cost budget).
+- Granularity: `unit` returns single units; `span` returns dialogue spans (when a unit is a question the engine SHOULD include its reply, and when a unit is a short reply it SHOULD include the prompt it answers; a span counts as one item); `thread` returns whole admissible threads; `auto` lets the engine choose and MUST be declared in `capabilities`. Expansion MUST only add admissible units.
 - Thread headers (date, thread label) SHOULD be emitted once per thread per pack, not per line.
 - Relative time expressions SHOULD be rendered with their resolved absolute value.
 - Long units MAY be snippeted to their most relevant sentences; snippets MUST be marked with `…` and keep `memory_ids` of the full unit so the client can fetch it.
@@ -284,7 +284,7 @@ Every pack carries `coverage` (0..1, declared method) estimating whether memory 
 
 ### 5.8 Degradation
 
-If any channel, index or model is unavailable, the response MUST list it in `degraded[]` (`dense_unavailable`, `index_stale`, `reranker_skipped`, `partial_scope`, `budget_truncated`). An engine MUST NOT return an empty success when a scorer failed.
+If any channel, index or model is unavailable, the response MUST list it in `degraded[]`. An engine that reports degradation remains conformant for that response (`dense_unavailable`, `index_stale`, `reranker_skipped`, `partial_scope`, `budget_truncated`). An engine MUST NOT return an empty success when a scorer failed.
 
 ### 5.9 Determinism
 
@@ -316,7 +316,7 @@ For any derived memory `d` with sources `S = derived_from(d)`:
 readers(d) ⊆ ⋂_{s ∈ S} readers(s)
 ```
 
-with `null` treated as the universal set. Engines MUST enforce this at write time (narrowing `readers(d)`) and on every source ACL change (re-narrowing or retracting `d`). A summary, profile, observation, edge or entity description built from a private DM can therefore never surface in a shared channel. No project we studied enforces this.
+with `null` treated as the universal set. Engines MUST enforce this at write time (narrowing `readers(d)`) and on every source ACL change (re-narrowing or retracting `d`). A summary, profile, observation, edge or entity description built from a private DM can therefore never surface in a shared channel. Derived memories also inherit their sources' sensitivity labels (§6.4).
 
 ### 6.4 Labels and redaction
 
@@ -324,7 +324,7 @@ Memories labelled `secret` MUST NOT be returned unless the request includes the 
 
 ### 6.5 Audit
 
-Every write, forget, approval and ACL change is appended to a tenant audit log `{at, principal, op, ids, reason}` retrievable through `changes` by principals with `role:auditor`.
+Every write, forget, approval and ACL change is appended to a tenant audit log `{at, principal, op, ids, reason}`, readable only by principals holding the tenant's `auditor` role.
 
 ## 7. Lifecycle
 
@@ -373,7 +373,7 @@ An ORP bundle is a directory or `.orp` zip containing `manifest.json` (spec vers
 | L3 | Governed | Pre-ranking admissibility on every channel and verb, provenance-closed ACL, read/write separation, redact with cascade, `dry_run`, audit, per-session subscriptions |
 | L4 | Adaptive | `reflect` jobs with lineage, `feedback` incl. draft→final, `profile` with budget, rule proposals via `draft`, bundle export/import round-trip |
 
-The conformance suite (`tests/conformance/`) tests each MUST in this document. An engine claims a level only if it passes every test at that level.
+`spec/MUSTS.md` lists every MUST in this document with a stable id, its level and the conformance test (`tests/conformance/`) that checks it. A MUST without a test is listed as untested. An engine claims a level only if it passes every test at that level, and MUST NOT claim a level containing a MUST it knowingly violates.
 
 ## 10. Evaluation (ORP-Bench)
 
@@ -401,6 +401,10 @@ Rules: pinned dataset versions; dev/test splits with all tuning on dev; per-cate
 | MemOS | memory states, scheduler | enforced tenancy, no FIFO deletion |
 | LangMem | typed kinds, procedural memory | lexical channel, time, history |
 | MemoryOS | tiers and promotion | side-effect-free reads, scope, lossless raw tier |
+
+## Appendix C. Evidence for the claims in §0
+
+Each claim about another project is sourced in `reports/<project>.md` (code-level citations): mem0 dropped supersession links (`mem0.md` §4, §12); Cognee writes validity tags no retriever reads (`cognee.md` §12); Letta tag filters run after the result limit (`letta.md` §12); Hindsight's graph arm filters tags after its cut (`hindsight.md` §12); mem0 REST checks the key but not the user (`mem0.md` §12); MemOS `/product` has no ownership checks (`memos.md` §12); MemoryOS shares the assistant store across users (`memoryos.md` §12); Onyx `hybrid_alpha` is ignored (`onyx.md` §5); MemOS `reference_time`, `visibility` and MCP `filter` are ignored (`memos.md` §12).
 
 ## Appendix B. Reference engine recall algorithm
 

@@ -5,7 +5,9 @@ python -m bench.run --bench locomo,lme --systems all [--split test] [--workers 2
 from __future__ import annotations
 
 import argparse
+import datetime as _dt
 import importlib
+import subprocess
 import json
 import os
 import statistics
@@ -55,6 +57,11 @@ def get_tasks(bench: str):
 
 
 def make(name: str, **kw):
+    """`<system>@tuned` builds the baseline with its dev-tuned configuration (results/baseline_tuning.json)."""
+    if name.endswith("@tuned"):
+        base = name[: -len("@tuned")]
+        tuned = json.load(open(os.path.join(ROOT, "results", "baseline_tuning.json")))[base]["best"]
+        return make(base, **{**tuned, **kw})
     mod, cls = REGISTRY[name].split(":")
     return getattr(importlib.import_module(mod), cls)(**kw)
 
@@ -110,6 +117,7 @@ def summarise(rows: list[dict]) -> dict:
         c: {"n": len(rs), "recall@1000": sum(r.get("recall@1000", 0) for r in rs) / len(rs),
             "recall@2000": sum(r.get("recall@2000", 0) for r in rs) / len(rs),
             "ans@1000": sum(r.get("ans@1000", 0) for r in rs) / len(rs),
+            "s_recall@1000": sum(r.get("s_recall@1000", 0) for r in rs) / len(rs),
             "sess_all@5": sum(r["sess_all@5"] for r in rs) / len(rs)}
         for c, rs in sorted(bycat.items())
     }
@@ -126,6 +134,17 @@ def main(argv=None):
     a = ap.parse_args(argv)
     names = list(REGISTRY) if a.systems == "all" else a.systems.split(",")
     jobs = [(n, b, a.split, {}) for b in a.bench.split(",") for n in names]
+    if a.split == "test":  # append-only record of every test-split invocation
+        try:
+            head = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=ROOT, capture_output=True,
+                                  text=True).stdout.strip()
+            dirty = bool(subprocess.run(["git", "status", "--porcelain"], cwd=ROOT, capture_output=True,
+                                        text=True).stdout.strip())
+        except Exception:
+            head, dirty = "?", True
+        with open(os.path.join(ROOT, "results", "TEST_RUNS.log"), "a") as f:
+            f.write(f"{_dt.datetime.now().isoformat()} git={head}{'+dirty' if dirty else ''} bench={a.bench} "
+                    f"systems={','.join(names)}\n")
     summary = json.load(open(a.out)) if os.path.exists(a.out) else {}
     with Pool(a.workers) as p:
         for name, bench, s in p.imap_unordered(run_one, jobs):
@@ -133,8 +152,9 @@ def main(argv=None):
                 print(f"FAILED {name} {bench}", flush=True)
                 continue
             summary.setdefault(bench, {}).setdefault(a.split, {})[name] = s
-            print(f"{bench:7s} {name:28s} R@1000={s.get('recall@1000', 0):.3f} R@2000={s.get('recall@2000', 0):.3f} "
-                  f"full@2000={s.get('full@2000', 0):.3f} sessAll@5={s['sess_all@5']:.3f} mrr={s['mrr']:.3f} "
+            print(f"{bench:7s} {name:28s} R@500={s.get('recall@500', 0):.3f} R@1000={s.get('recall@1000', 0):.3f} "
+                  f"R@2000={s.get('recall@2000', 0):.3f} sR@1000={s.get('s_recall@1000', 0):.3f} "
+                  f"ans@1000={s.get('ans@1000', 0):.3f} sessAll@5={s['sess_all@5']:.3f} mrr={s['mrr']:.3f} "
                   f"p50={s['latency_p50_ms']:.1f}ms", flush=True)
             json.dump(summary, open(a.out, "w"), indent=1, default=str)
 

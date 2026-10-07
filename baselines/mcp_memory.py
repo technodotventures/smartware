@@ -67,6 +67,19 @@ PARAMETERS
   is off by default and is not implemented, to keep fidelity. No decay or recency, and q.time is unused: the
   server has no notion of time.
 
+TUNABLE KNOBS
+The real server exposes NO retrieval knobs. Its only configuration is MEMORY_FILE_PATH (src/memory/index.ts:30-38).
+search_nodes takes just ``query`` (max 2048 chars, index.ts:625-630) and has no limit, threshold, ranking or
+expansion option (index.ts:314-339). So every knob below is an agent-usage convention: how an LLM client drives
+the server's tools. They come from report section 13, steps 7 and 10. TUNABLE is a grid of 3 x 2 x 3 = 18.
+- ``max_probes`` [4, 8, 12], default 8: how many search_nodes calls the agent makes per question (recipe step 7).
+- ``kw_max`` [3, 6], default 6: how many content keywords the agent probes with (recipe step 7d).
+- ``hop_top`` [0, 3, 6], default 3: how many top hits the agent follows with open_nodes on their neighbours.
+  0 turns expansion off. The server's either-endpoint relation return makes neighbours visible
+  (index.ts:327-331, 350-356; recipe step 10).
+- ``hop_factor`` (0.5) and ``mode`` ("A"/"F") are constructor options but are not in the grid. Mode F is the
+  literal floor, not an agent usage pattern.
+
 DELIBERATE INTERPRETATIONS / DEVIATIONS
 - Probe (b) matches entity names case-sensitively on word boundaries in the original query, not as raw lowercase
   substrings. An agent recognises names as names; this stops "Art" firing inside "start" and stops LME entities
@@ -167,10 +180,24 @@ class MCPMemory(System):
         "relation rows are not charged."
     )
 
-    def __init__(self, mode: str = "A"):
+    # Agent-usage conventions, not server settings: the server exposes no retrieval knobs (see docstring).
+    TUNABLE: dict[str, list] = {
+        "max_probes": [4, 8, 12],
+        "kw_max": [3, 6],
+        "hop_top": [0, 3, 6],
+    }
+
+    def __init__(self, mode: str = "A", max_probes: int = MAX_PROBES, kw_max: int = KW_MAX,
+                 hop_top: int = HOP_TOP, hop_factor: float = HOP_FACTOR):
         if mode not in ("A", "F"):
             raise ValueError("mode must be 'A' or 'F'")
         self.mode = mode
+        self.max_probes, self.kw_max = int(max_probes), int(kw_max)
+        self.hop_top, self.hop_factor = int(hop_top), float(hop_factor)
+
+    def __repr__(self):
+        return (f"MCPMemory(mode={self.mode!r}, max_probes={self.max_probes}, kw_max={self.kw_max}, "
+                f"hop_top={self.hop_top}, hop_factor={self.hop_factor})")
 
     # ---------------------------------------------------------------- build (write path)
     def build(self, corpus, enc):
@@ -261,7 +288,7 @@ class MCPMemory(System):
 
         def add(p, w):
             p = p.lower()
-            if p and p not in seen and len(out) < MAX_PROBES:
+            if p and p not in seen and len(out) < self.max_probes:
                 seen.add(p)
                 out.append((p, w))
 
@@ -273,7 +300,7 @@ class MCPMemory(System):
         for s in _proper_spans(query):                               # (c)
             add(s, W_NAME)
         kws = [w for w in _KW.findall(ql) if len(w) >= KW_MIN_LEN and w not in STOPWORDS]
-        for w in list(dict.fromkeys(kws))[:KW_MAX]:                  # (d)
+        for w in list(dict.fromkeys(kws))[:self.kw_max]:             # (d)
             add(w, W_KEYWORD)
         for y in _YEAR.findall(ql):                                  # (e)
             add(y, W_KEYWORD)
@@ -321,9 +348,9 @@ class MCPMemory(System):
             return self._flatten([(e, 0.0) for e in self.entities], [], k)
 
         ranked = sorted(score, key=lambda n: (-score[n], self.by_name[n].order))
-        for n in ranked[:HOP_TOP]:  # open_nodes on 1-hop neighbours
+        for n in ranked[:self.hop_top]:  # open_nodes on 1-hop neighbours
             for m in self.adj.get(n, []):
                 if m not in score:
-                    score[m] = HOP_FACTOR * score[n]
+                    score[m] = self.hop_factor * score[n]
         ranked = sorted(score, key=lambda n: (-score[n], self.by_name[n].order))
         return self._flatten([(self.by_name[n], score[n]) for n in ranked], [p for p, _ in probes], k)

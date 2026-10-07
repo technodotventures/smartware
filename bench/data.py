@@ -1,10 +1,12 @@
 """Benchmark corpora.
 
 LoCoMo-10 (snap-research/locomo): 10 long conversations, 1,986 QA with evidence turn ids.
-LME-H: LongMemEval questions (oracle file vendored in getzep/graphiti) with a
-reconstructed haystack: each question's evidence sessions plus distractor
-sessions drawn from other questions (seeded), dated before the question, up to
-40 sessions per question. The official LongMemEval_S haystack is on Hugging
+LME-R ("LongMemEval oracle, recombined"): LongMemEval questions (oracle file vendored
+in getzep/graphiti) with a reconstructed haystack: each question's evidence sessions
+plus distractor sessions drawn (seeded) from evidence sessions of OTHER questions in the
+SAME split, dated before the question where possible, 40 sessions per question. Dev and
+test haystacks are therefore disjoint apart from the few evidence sessions the dataset
+itself shares between questions. The official LongMemEval_S haystack is on Hugging
 Face, which this sandbox cannot reach; this reconstruction follows the same
 recipe (evidence sessions hidden among unrelated user-assistant sessions).
 """
@@ -135,10 +137,15 @@ def _is_dev(qid: str) -> bool:
 def load_lme(n_sessions: int = 40, seed: int = 7, limit: int | None = None) -> list[Task]:
     data = json.load(open(LME_ORACLE))
     pool: dict[str, tuple[datetime, list[dict]]] = {}
+    split_of_session: dict[str, set[str]] = {}
     for q in data:
+        sp = "dev" if _is_dev(q["question_id"]) else "test"
         for sid, dt, sess in zip(q["haystack_session_ids"], q["haystack_dates"], q["haystack_sessions"]):
             pool.setdefault(sid, (_parse_lme_dt(dt), sess))
-    pool_ids = sorted(pool)
+            split_of_session.setdefault(sid, set()).add(sp)
+    # distractors come only from sessions owned exclusively by the question's own split, so dev haystacks never
+    # contain test questions' evidence sessions (and vice versa)
+    pools = {sp: sorted(sid for sid, sps in split_of_session.items() if sps == {sp}) for sp in ("dev", "test")}
     tasks = []
     for qn, q in enumerate(data):
         if q["question_id"].endswith("_abs"):
@@ -148,8 +155,9 @@ def load_lme(n_sessions: int = 40, seed: int = 7, limit: int | None = None) -> l
         rng = random.Random(f"{seed}:{q['question_id']}")
         qtime = _parse_lme_dt(q["question_date"])
         own = list(q["haystack_session_ids"])
+        pool_ids = pools["dev" if _is_dev(q["question_id"]) else "test"]
         cand = [s for s in pool_ids if s not in own and pool[s][0] <= qtime]
-        if len(cand) < n_sessions:
+        if len(cand) < n_sessions - len(own):
             cand = [s for s in pool_ids if s not in own]
         distract = rng.sample(cand, max(0, n_sessions - len(own)))
         sids = own + distract

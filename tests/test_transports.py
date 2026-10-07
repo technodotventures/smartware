@@ -35,6 +35,7 @@ class HTTPBinding(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         cls.srv.shutdown()
+        cls.srv.server_close()
 
     def call(self, method, path, tok, body=None, headers=None):
         req = urllib.request.Request(f"http://127.0.0.1:{self.port}{path}", method=method,
@@ -122,6 +123,9 @@ class MCPBinding(unittest.TestCase):
             self.assertTrue(os.path.exists(store))
         finally:
             p.kill()
+            p.wait()
+            p.stdin.close()
+            p.stdout.close()
 
 
 if __name__ == "__main__":

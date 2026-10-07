@@ -49,6 +49,23 @@ APPROXIMATED / DEVIATIONS
 PARAMETERS: S=3, R=2, P=5, N=3, K=10, RRF k=60, weights (1.0, 1.0, 0.5), global-grep weight 0.5,
 rare DF <= 1%, neighbour window +/-1, recency tilt 0.5 (temporal queries only), budget 3000, card terms 15,
 card excerpt 40 tokens, card header 60 tokens.
+
+TUNABLE KNOBS (dev-split tuning only; the defaults reproduce the behaviour above exactly)
+Sylph has no config file. Its knobs are prose conventions an operator edits in AGENTS.md, SKILL.md and
+agents/*/PROMPT.md.
+- n_folders in {3, 1, 5}: how many domain/channel folders the agent orients to (S). AGENTS.md:20-27 ("What
+  domain ... Which channel or subfolder") picks one folder per task. Multi-source skills read several, e.g.
+  customer-report/SKILL.md:20-29 (6 sources) and the chief-of-staff fan-out (agents/chief-of-staff/PROMPT.md:
+  180-200). Report sec. 5 and 13 step 5.
+- n_recent in {2, 3}: how many most-recent folders are always read (R, the continuity step). This is the "Read
+  the N most recent files in _logs/" convention: N=3 in agents/chief-of-staff/PROMPT.md:11 and
+  .claude/skills/head-of-data/SKILL.md:45, N=2 in agents/product-manager/PROMPT.md:11, N=1 in
+  agents/cmo/PROMPT.md:11. Report sec. 5 and 13 step 5.
+- top_k in {10, 20}: how many files are read inside the chosen folders before expansion (K). It maps to "Read
+  2-3 files from _examples/" (agents/cmo/PROMPT.md:93) and "3-5 examples per channel is plenty"
+  (sylph/self-improvement.md:90). Report sec. 13 step 9.
+- budget in {3000, 4000}: the context budget for assembly. Sylph sets none (report sec. 5 "no token budget");
+  the recipe's 3000 is a harness necessity (report sec. 13 step 10), so an operator-style alternative is offered.
 """
 from __future__ import annotations
 
@@ -125,6 +142,20 @@ class Sylph(System):
         "+/-1 and grouped by session behind a 60-token card header, within a 3000-token budget. All of this "
         "approximates LLM-driven folder choice, LLM-written insights and human-curated exemplars."
     )
+
+    TUNABLE: dict[str, list] = {
+        "n_folders": [S_SEL, 1, 5],
+        "n_recent": [R_RECENT, 3],
+        "top_k": [K_TOP, 20],
+        "budget": [BUDGET, 4000],
+    }
+
+    def __init__(self, n_folders: int = S_SEL, n_recent: int = R_RECENT, top_k: int = K_TOP, budget: int = BUDGET):
+        self.n_folders, self.n_recent, self.top_k, self.budget = n_folders, n_recent, top_k, budget
+
+    def __repr__(self):
+        return (f"Sylph(n_folders={self.n_folders}, n_recent={self.n_recent}, top_k={self.top_k}, "
+                f"budget={self.budget})")
 
     # ---------------------------------------------------------------- build
     def build(self, corpus, enc):
@@ -227,9 +258,9 @@ class Sylph(System):
         r2 = {i: r + 1 for r, i in enumerate(np.argsort(-cd, kind="stable"))}
         sscore = {i: (1.0 / (RRF_K + r1[i]) if i in r1 else 0.0) + 1.0 / (RRF_K + r2[i])
                   for i in range(len(self.sessions))}
-        selected = sorted(sscore, key=lambda i: (-sscore[i], i))[:S_SEL]
+        selected = sorted(sscore, key=lambda i: (-sscore[i], i))[:self.n_folders]
         existing = [s for s in self.sessions if self.sess_start[s] <= q.time] or list(self.sessions)
-        recent = sorted(existing, key=lambda s: self.sess_last_ts[s], reverse=True)[:R_RECENT]
+        recent = sorted(existing, key=lambda s: self.sess_last_ts[s], reverse=True)[:self.n_recent]
         sel_sessions = [self.sessions[i] for i in selected]
         for s in recent:
             if s not in sel_sessions:
@@ -281,7 +312,7 @@ class Sylph(System):
                 score[i] *= 1.0 + RECENCY_TILT * pct
 
         # 9. select + expand
-        top = sorted(score, key=lambda i: (-score[i], i))[:K_TOP]
+        top = sorted(score, key=lambda i: (-score[i], i))[:self.top_k]
         groups: dict[int, dict] = {}
         for i in top:
             si = int(self.turn_sess[i])
@@ -313,12 +344,12 @@ class Sylph(System):
             return c
 
         for b in reversed(blocks):  # drop cards first, lowest group first
-            if total() <= BUDGET:
+            if total() <= self.budget:
                 break
             b["card"] = None
-        while total() > BUDGET and len(blocks) > 1:  # then drop lowest-scoring hit groups
+        while total() > self.budget and len(blocks) > 1:  # then drop lowest-scoring hit groups
             blocks.pop()
-        while total() > BUDGET and blocks and len(blocks[0]["lines"]) > 1:  # truncate the last group
+        while total() > self.budget and blocks and len(blocks[0]["lines"]) > 1:  # truncate the last group
             blocks[0]["lines"].pop()
             blocks[0]["ids"].pop()
 
