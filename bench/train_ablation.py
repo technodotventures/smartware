@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import sys
 from dataclasses import replace
 
 import numpy as np
@@ -48,6 +49,15 @@ def main():
     json.dump({"params": final, "dropped": list(ABLATE), "cv_J": j, "shipped_cv_J": shipped["cv_J"]},
               open(R("orp_ablate_params.json"), "w"))
     print("ablation CV J", round(j, 4), "vs shipped", round(shipped["cv_J"], 4))
+    if "--ship" in sys.argv and j > shipped["cv_J"]:
+        # step 2 of the pipeline (python -m bench.train_orp && python -m bench.train_ablation --ship): keep the
+        # all-feature model as orp_allfeat_params.json and ship the ablated one if its dev CV objective is higher
+        json.dump(shipped, open(R("orp_allfeat_params.json"), "w"))
+        json.dump({"params": final, "model": [kind, cfg], "cv_J": j, "log": shipped.get("log"),
+                   "selection": f"Grouped 5-fold CV on dev: the ranker without position/length-correlated features "
+                                f"{list(ABLATE)} scored {j:.4f} vs {shipped['cv_J']:.4f} with all features, so it ships."},
+                  open(R("orp_params.json"), "w"))
+        print("shipped the ablated ranker")
 
 
 if __name__ == "__main__":

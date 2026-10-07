@@ -25,7 +25,8 @@ class HTTPBinding(unittest.TestCase):
                 "tok_b": {"id": "bob", "groups": ["eng"], "tenant": "acme"},
                 "tok_e": {"id": "eve", "groups": [], "tenant": "other"}}
         kp = os.path.join(cls.tmp, "keys.json")
-        json.dump(keys, open(kp, "w"))
+        with open(kp, "w") as f:
+            json.dump(keys, f)
         cls.store = os.path.join(cls.tmp, "store.json")
         svc, k = http_server.build(kp, cls.store, "hashing")
         cls.srv = ThreadingHTTPServer(("127.0.0.1", 0), http_server.make_handler(svc, k, cls.store))

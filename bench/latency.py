@@ -1,4 +1,5 @@
-"""Single-process latency on LoCoMo test (2 conversations), run with nothing else on the machine.
+"""Single-process latency on LoCoMo test (2 conversations), run with nothing else on the machine. Each system
+starts with a cold encoder cache, so build times include its own embedding work.
 
 python -m bench.latency orp,orp-rrf,mem0,...
 """
@@ -18,11 +19,11 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 def main():
     names = sys.argv[1].split(",")
-    enc = Encoders(DenseEncoder.load())
     tasks = [t for t in load_locomo() if t.queries[0].split == "test"][:2]
     out = json.load(open(os.path.join(ROOT, "results", "latency.json"))) if os.path.exists(
         os.path.join(ROOT, "results", "latency.json")) else {}
     for n in names:
+        enc = Encoders(DenseEncoder.load())  # fresh, cold embedding cache per system: timing never depends on order
         q_ms, b_ms = [], []
         for t in tasks:
             s = make(n)

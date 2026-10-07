@@ -17,7 +17,7 @@ import traceback
 from collections import defaultdict
 from multiprocessing import Pool
 
-from .data import load_lme, load_locomo
+from .data import load_lme, load_locomo, load_hotpot
 from .encoders import DenseEncoder, Encoders
 from .metrics import score_query
 
@@ -53,7 +53,7 @@ _TASKS = {}
 
 def get_tasks(bench: str):
     if bench not in _TASKS:
-        _TASKS[bench] = load_locomo() if bench == "locomo" else load_lme()
+        _TASKS[bench] = {"locomo": load_locomo, "lme": load_lme, "hotpot": load_hotpot}[bench]()
     return _TASKS[bench]
 
 

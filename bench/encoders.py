@@ -111,7 +111,7 @@ class DenseEncoder:
         pmi = np.log((C.data / total) / ((rs[C.row] / total) * cs[C.col]) + 1e-12)
         keep = pmi > 0
         P = sp.csr_matrix((pmi[keep].astype(np.float32), (C.row[keep], C.col[keep])), shape=(V, V))
-        U, S, _ = svds(P, k=dim)
+        U, S, _ = svds(P, k=dim, random_state=0)  # seeded start vector (the shipped encoder predates the seed)
         W = U * np.sqrt(S)
         W /= np.linalg.norm(W, axis=1, keepdims=True) + 1e-9
         freq = np.array([cnt[w] for w in vocab], dtype=np.float64)

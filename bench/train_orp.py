@@ -1,10 +1,15 @@
-"""Fit the ORP reference engine on DEV splits only, end to end (one command, reproducible).
+"""Fit the ORP reference engine on DEV splits only (two commands, reproducible):
+
+    python -m bench.train_orp && python -m bench.train_ablation --ship
+
 
 1. Hand-tuned ranker: coordinate descent over channel weights and features (bench.tune).
 2. Learned ranker: grouped 5-fold CV on dev over linear and GBDT models; fit the winner on all dev.
 3. Packing: chosen with held-out fold models (packing does not change ranking).
-4. Ablation: the same learned ranker without position- and length-correlated features.
-Writes results/tuned_params.json, results/orp_params.json, results/orp_ablate_params.json.
+4. Ablation (bench.train_ablation): the same learned ranker without position- and length-correlated features;
+   with --ship it replaces orp_params.json when its dev CV objective is higher (it was: 0.7995 vs 0.7952).
+Writes results/tuned_params.json and results/orp_params.json; train_ablation writes orp_ablate_params.json and,
+with --ship, orp_allfeat_params.json.
 """
 from __future__ import annotations
 

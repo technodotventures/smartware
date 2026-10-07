@@ -199,3 +199,28 @@ def all_texts() -> list[str]:
             seen.add(sid)
             out += [t["content"] for t in sess]
     return out
+
+
+# ---------------------------------------------------------------- HotpotQA-50 (out-of-domain, never used in tuning)
+HOTPOT = os.path.join(VENDOR, "topoteretes_cognee", "evals", "old")
+
+
+def load_hotpot() -> list[Task]:
+    """Cognee's HotpotQA-50 evaluation set (vendored): 500 Wikipedia paragraphs shared by 50 multi-hop questions.
+    Each paragraph is its own one-unit document thread. There are no evidence labels, only answers, so only Ans@B is
+    scored. Added after the v0.1.1 freeze as a held-out, out-of-domain check: no system was tuned on it."""
+    corpus = json.load(open(os.path.join(HOTPOT, "hotpot_50_corpus.json")))
+    qa = json.load(open(os.path.join(HOTPOT, "hotpot_50_qa_pairs.json")))
+    t0 = datetime(2024, 1, 1)
+    turns, order, sts = [], [], {}
+    for i, para in enumerate(corpus):
+        sid = f"hotpot:d{i}"
+        order.append(sid)
+        sts[sid] = t0 + timedelta(minutes=i)
+        turns.append(Turn(id=f"{sid}:0", session_id=sid, idx=0, speaker="source", role="document", text=para,
+                          ts=sts[sid]))
+    c = Corpus(id="hotpot50", turns=turns, session_order=order, session_ts=sts, speakers=["source"])
+    qs = [Query(qid=f"hotpot:{j}", text=x["question"], time=t0 + timedelta(days=30), gold_turns=set(),
+                gold_sessions=set(), category=x.get("level", "na"), answer=str(x["answer"]), split="test")
+          for j, x in enumerate(qa)]
+    return [Task(c, qs)]
