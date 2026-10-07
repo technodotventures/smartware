@@ -121,9 +121,9 @@ class Service:
                          "dense:window", "dense:segment-maxpool", "thread(admissible units)", "entity", "temporal",
                          "prf:rm3"],
             "fusion": f"weighted-rrf(k={p.rrf_k})",
-            "ranker": {"name": f"orp-{p.ranker}-1", "features": list(Engine.FEATURES) if learned else
+            "ranker": {"name": f"orp-{p.ranker}-1", "features": [x for x in Engine.FEATURES if x not in p.drop_features] if learned else
                        ["coverage", "actor", "role", "order", "current", "prefer"],
-                       "fitted_on": "public dev splits (LoCoMo-10 conv 0-2; LongMemEval dev hash split)"},
+                       "fitted_on": "public dev splits (LoCoMo-10 conv 0-2; LME-R dev split)"},
             "score_scale": "probability-like 0..1 from the learned ranker" if learned else
             "fused RRF normalised to top=1, times feature multipliers",
             "coverage_method": "top item's ranker probability" if learned else "top score / feature ceiling",

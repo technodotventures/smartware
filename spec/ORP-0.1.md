@@ -292,7 +292,7 @@ Given the same request and `snapshot`, an engine MUST return the same pack. [M52
 
 ### 5.10 Declared rankers
 
-If an engine uses a learned or model-based ranker, `capabilities` MUST name it with a version (`ranker: "orp-gbdt-1"`), list its input features, and state what data it was fitted on. [M53] Engines SHOULD also offer an unlearned mode (`mode: fast`) so clients can compare. Learned rankers MUST NOT use features that bypass admissibility (e.g. statistics computed over inadmissible memories). [M54]
+If an engine uses a learned or model-based ranker, `capabilities` MUST name it with a version (`ranker: "orp-linear-1"`), list its input features, and state what data it was fitted on. [M53] Engines SHOULD also offer an unlearned mode (`mode: fast`) so clients can compare. Learned rankers MUST NOT use features that bypass admissibility (e.g. statistics computed over inadmissible memories). [M54]
 
 ### 5.11 Multi-scope recall (SaaS)
 
@@ -370,16 +370,18 @@ An ORP bundle is a directory or `.orp` zip containing `manifest.json` (spec vers
 |---|---|---|
 | L1 | Core | Record model, `remember`, `recall` (lexical + dense, independent nomination), `get`, `forget(retract)`, idempotency, budget cap, `capabilities`, unknown-parameter rejection |
 | L2 | Temporal | `observed_at`/`event_time`/validity, `as_of`, `known_at`, explicit supersession with links, `history`, relative-time resolution |
-| L3 | Governed | Pre-ranking admissibility on every channel and verb, provenance-closed ACL, read/write separation, redact with cascade, `dry_run`, audit, per-session subscriptions |
+| L3 | Governed | Pre-ranking admissibility on every channel and verb, removal equivalence, provenance-closed ACL, read/write separation, redact with cascade, `dry_run`, audit, per-session subscriptions |
 | L4 | Adaptive | `reflect` jobs with lineage, `feedback` incl. draft→final, `profile` with budget, rule proposals via `draft`, bundle export/import round-trip |
 
 `spec/MUSTS.md` lists every MUST in this document with a stable id, its level and the conformance test (`tests/conformance/`) that checks it. [M63] A MUST without a test is listed as untested. [M64] An engine claims a level only if it passes every test at that level, and MUST NOT claim a level containing a MUST it knowingly violates. [M65]
 
 ## 10. Evaluation (ORP-Bench)
 
-Recall quality is measured by **evidence recall inside a fixed token budget**: the fraction of gold evidence units contained in the context an agent would actually receive at 500, 1,000, 2,000 and 4,000 tokens, plus answer-token recall (does the packed context contain the answer's content words), session recall (LongMemEval `recall_all@k`), MRR and latency. Charging every item its rendered token cost makes systems of different granularity (facts, turns, chunks, pages) comparable.
+Recall quality is measured by **evidence recall inside a fixed token budget**: the fraction of gold evidence units contained in the context an agent would actually receive at 500, 1,000, 2,000 and 4,000 tokens, plus answer-token recall (does the packed context contain the answer's content words), session recall (LongMemEval `recall_all@k`), MRR and latency. Charging every item its rendered token cost makes systems of different granularity (facts, turns, chunks, pages) comparable. Tokens are counted as characters divided by four, and packing is greedy (an item that does not fit is skipped and the next one tried), so no format or item size is penalised by the counter.
 
-Rules: pinned dataset versions; dev/test splits with all tuning on dev; per-category n; every system run with the same encoders; LLM-free retrieval numbers reported separately from LLM-in-the-loop QA numbers; the harness, configs and raw per-query results published with any claim.
+**ORP-Gov** measures permission-aware recall in a multi-tenant setting: recall for permitted askers, text leakage, answer leakage to forbidden askers, and how often an asker's ranking changes when memories they cannot read are removed.
+
+Rules: pinned dataset versions; dev/test splits with all tuning on dev for every system, ORP and baselines alike; per-category n; every system run with the same encoders; LLM-free retrieval numbers reported separately from LLM-in-the-loop QA numbers; the harness, configs, raw per-query results and a log of every test-split run published with any claim.
 
 ---
 
@@ -408,13 +410,13 @@ Each claim about another project is sourced in `reports/<project>.md` (code-leve
 
 ## Appendix B. Reference engine recall algorithm
 
-The reference engine (`orp/engine.py`) implements §5 without any language model. It ships two declared rankers: `rrf` (weighted reciprocal-rank fusion plus multiplicative features, hand-tuned on public dev splits) and `gbdt` (a gradient-boosted tree ensemble, exported as JSON, over the 39 declared features in `Engine.FEATURES`, fitted only on public dev splits). Steps:
+The reference engine (`orp/engine.py`) implements §5 without any language model. It ships three declared rankers, selected by `Params.ranker`: `rrf` (weighted reciprocal-rank fusion plus multiplicative features, hand-tuned on public dev splits; used by `mode: fast`), `linear` (a logistic-regression ranker over declared features) and `gbdt` (a gradient-boosted tree ensemble exported as JSON). The shipped default is `orp-linear-1` over 34 of the 39 features in `Engine.FEATURES`: grouped five-fold cross-validation on the dev splits chose it over the GBDT and over the same model with five position- and length-correlated features (`log_tokens`, `is_question`, `prev_is_question`, `next_reply`, `order_pos`), which are therefore dropped and not listed in `capabilities`. Every model is fitted only on public dev splits (`results/orp_params.json`). Steps:
 
 1. Admissibility mask (§5.1, §5.2).
 2. Query analysis: content terms, named entities resolved against known actors and entities, temporal intent (window, order, current, when, count, span) relative to `as_of`, role intent.
 3. Channels, each nominating its own top 200: BM25 over units; BM25 over three-unit windows; BM25 over two-sentence segments max-pooled to units; dense over units, windows and segments; thread relevance (BM25 + dense over whole threads, rank-fused); entity match with hub damping; temporal window; RM3 pseudo-relevance feedback.
 4. Weighted reciprocal-rank fusion (declared weights, `k` declared) to form a 300-candidate pool.
-5. Ranking over the pool: either multiplicative features (`rrf`) or the learned model (`gbdt`) over per-channel reciprocal ranks, normalised lexical and dense scores, query coverage of the unit and its neighbours, actor and role match, temporal window and order position, dialogue cues (question, reply, prompt), answer-type cues (a "when" question and a unit with a time expression; a "how many" question and a unit with a number; a "where" question and a unit naming a place) and query-type flags.
+5. Ranking over the pool: either multiplicative features (`rrf`) or the learned model (`linear` or `gbdt`) over per-channel reciprocal ranks, normalised lexical and dense scores, query coverage of the unit and its neighbours, actor and role match, temporal window and order position, dialogue cues (question, reply, prompt), answer-type cues (a "when" question and a unit with a time expression; a "how many" question and a unit with a number; a "where" question and a unit naming a place) and query-type flags.
 6. Thread interleaving for count/span questions (aggregation needs breadth).
 7. Packing per §5.5: dialogue spans, once-per-thread headers, resolved dates, snippeted long units, hard budget.
 
