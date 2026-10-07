@@ -1,0 +1,138 @@
+{
+ "bm25": {
+  "locomo": {
+   "recall@500": 0.6163620539599651,
+   "recall@1000": 0.6925587467362925,
+   "recall@2000": 0.7485204525674499,
+   "full@1000": 0.6422976501305483,
+   "sess_all@5": 0.7911227154046997,
+   "mrr": 0.45912179940909775,
+   "cats": {
+    "temporal": 0.906,
+    "open-domain": 0.289,
+    "multi-hop": 0.49,
+    "single-hop": 0.71
+   },
+   "n": 383
+  },
+  "lme": {
+   "recall@500": 0.5140151515151515,
+   "recall@1000": 0.6390151515151515,
+   "recall@2000": 0.746969696969697,
+   "full@1000": 0.5568181818181818,
+   "sess_all@5": 0.8295454545454546,
+   "mrr": 0.6101157333827788,
+   "cats": {
+    "temporal-reasoning": 0.625,
+    "multi-session": 0.5,
+    "knowledge-update": 0.8,
+    "single-session-preference": 0.25,
+    "single-session-assistant": 0.9,
+    "single-session-user": 0.7
+   },
+   "n": 88
+  }
+ },
+ "supermemory-company-brain": {
+  "locomo": {
+   "recall@500": 0.648041775456919,
+   "recall@1000": 0.7597476066144474,
+   "recall@2000": 0.817319408181027,
+   "full@1000": 0.7023498694516971,
+   "sess_all@5": 0.7859007832898173,
+   "mrr": 0.5557244921543609,
+   "cats": {
+    "temporal": 0.894,
+    "open-domain": 0.368,
+    "multi-hop": 0.419,
+    "single-hop": 0.863
+   },
+   "n": 383
+  },
+  "lme": {
+   "recall@500": 0.4950757575757576,
+   "recall@1000": 0.5954545454545455,
+   "recall@2000": 0.7164772727272727,
+   "full@1000": 0.5227272727272727,
+   "sess_all@5": 0.8409090909090909,
+   "mrr": 0.5729273613715459,
+   "cats": {
+    "temporal-reasoning": 0.595,
+    "multi-session": 0.483,
+    "knowledge-update": 0.75,
+    "single-session-preference": 0.25,
+    "single-session-assistant": 0.8,
+    "single-session-user": 0.6
+   },
+   "n": 88
+  }
+ },
+ "graphiti": {
+  "locomo": {
+   "recall@500": 0.5683637946040034,
+   "recall@1000": 0.6443864229765013,
+   "recall@2000": 0.720147954743255,
+   "full@1000": 0.5926892950391645,
+   "sess_all@5": 0.741514360313316,
+   "mrr": 0.4310443866098942,
+   "cats": {
+    "temporal": 0.856,
+    "open-domain": 0.263,
+    "multi-hop": 0.443,
+    "single-hop": 0.66
+   },
+   "n": 383
+  },
+  "lme": {
+   "recall@500": 0.6399621212121213,
+   "recall@1000": 0.7284090909090909,
+   "recall@2000": 0.8007575757575758,
+   "full@1000": 0.6363636363636364,
+   "sess_all@5": 0.8068181818181818,
+   "mrr": 0.5117874517231135,
+   "cats": {
+    "temporal-reasoning": 0.665,
+    "multi-session": 0.65,
+    "knowledge-update": 0.85,
+    "single-session-preference": 0.25,
+    "single-session-assistant": 1.0,
+    "single-session-user": 0.9
+   },
+   "n": 88
+  }
+ },
+ "cognee": {
+  "locomo": {
+   "recall@500": 0.5135335073977372,
+   "recall@1000": 0.6864664926022629,
+   "recall@2000": 0.7946910356832028,
+   "full@1000": 0.6292428198433421,
+   "sess_all@5": 0.7049608355091384,
+   "mrr": 0.44742133611447843,
+   "cats": {
+    "temporal": 0.861,
+    "open-domain": 0.342,
+    "multi-hop": 0.418,
+    "single-hop": 0.74
+   },
+   "n": 383
+  },
+  "lme": {
+   "recall@500": 0.268939393939394,
+   "recall@1000": 0.3181818181818182,
+   "recall@2000": 0.5136363636363637,
+   "full@1000": 0.18181818181818182,
+   "sess_all@5": 0.8181818181818182,
+   "mrr": 0.580384325270689,
+   "cats": {
+    "temporal-reasoning": 0.191,
+    "multi-session": 0.25,
+    "knowledge-update": 0.45,
+    "single-session-preference": 0.25,
+    "single-session-assistant": 0.8,
+    "single-session-user": 0.3
+   },
+   "n": 88
+  }
+ }
+}

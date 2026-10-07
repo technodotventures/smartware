@@ -1,0 +1,11 @@
+start J=0.7671 {}
+pass0 w_bm25=0.6 J=0.7720 (best 0.7671) 62s
+  -> new best w_bm25=0.6
+pass0 w_bm25=1.4 J=0.7642 (best 0.7720) 62s
+pass0 w_bm25_seg=0.0 J=0.7792 (best 0.7720) 64s
+  -> new best w_bm25_seg=0.0
+pass0 w_bm25_seg=0.3 J=0.7750 (best 0.7792) 62s
+pass0 w_bm25_seg=1.0 J=0.7702 (best 0.7792) 62s
+pass0 w_bm25_win=0.0 J=0.7754 (best 0.7792) 65s
+pass0 w_bm25_win=0.3 J=0.7832 (best 0.7792) 65s
+  -> new best w_bm25_win=0.3
