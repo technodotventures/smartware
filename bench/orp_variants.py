@@ -30,9 +30,9 @@ class ORPLtr(ORPSystem):
         super().__init__(**{**_load("orp_params.json"), **kw})
 
 
-class ORPAblate(ORPSystem):
-    """Learned ranker without position- and length-correlated features (dataset-prior check)."""
-    name = "orp-ablate"
+class ORPAllFeatures(ORPSystem):
+    """Learned ranker WITH position- and length-correlated features (lost to the shipped model in dev CV)."""
+    name = "orp-allfeat"
 
     def __init__(self, **kw):
-        super().__init__(**{**_load("orp_ablate_params.json"), **kw})
+        super().__init__(**{**_load("orp_allfeat_params.json"), **kw})

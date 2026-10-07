@@ -15,7 +15,7 @@ from collections import defaultdict
 
 from .data import load_lme, load_locomo
 from .encoders import DenseEncoder, Encoders
-from .metrics import pack
+from .metrics import chars4, pack
 from .run import make
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -58,7 +58,7 @@ def main():
                 s = make(name)
                 s.build(t.corpus, enc)
                 built[t.corpus.id] = s
-            _, used, kept = pack(s.retrieve(q, k=50), a.budget)
+            _, used, kept = pack(s.retrieve(q, k=50), a.budget, chars4, True)
             uid = f"u{len(key):05d}"
             key[uid] = {"system": name, "bench": bench, "qid": q.qid, "category": q.category, "gold": q.answer,
                         "question": q.text, "tokens": used}

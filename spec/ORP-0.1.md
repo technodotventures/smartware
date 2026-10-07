@@ -1,6 +1,6 @@
 # Open Recall Protocol (ORP) 0.1
 
-**Status:** Draft for review · **Editor:** Steve Ghiassi, Techno Ventures · **Date:** October 2026
+**Status:** Draft for review, revision 0.1.1 (after independent audit) · **Editor:** Steve Ghiassi, Techno Ventures · **Date:** October 2026
 **Working name.** "Open Recall Protocol" is a placeholder until a name is chosen.
 
 ORP is an open protocol for how AI agents and SaaS platforms **store, govern and recall** memory and context. It defines a memory record, a small set of verbs, normative recall semantics, an access-control model that holds up in multi-tenant products, transport bindings for MCP and HTTP, and a conformance and evaluation suite. A reference engine and benchmark harness ship with the spec.
@@ -21,7 +21,7 @@ We read the source of 15 leading open-source memory and "brain" projects (Graphi
 6. **Knobs lie.** We found parameters that are accepted but ignored in several projects (for example Onyx `hybrid_alpha`, MemOS `reference_time` and `visibility`, MemOS MCP `filter`; see Appendix C).
 7. **Benchmarks are not reproducible.** Headline LoCoMo/LongMemEval numbers mostly come from hosted engines, unpinned external harnesses, generous judges or tuning on the scored set.
 
-ORP turns the best mechanisms we found into requirements, and turns each failure into a MUST NOT.
+ORP turns the best mechanisms we found into requirements, and turns each failure into a MUST NOT. [M01]
 
 ## 1. Design principles
 
@@ -55,34 +55,34 @@ ORP turns the best mechanisms we found into requirements, and turns each failure
 
 | Field | Type | Req | Meaning |
 |---|---|---|---|
-| `id` | string | MUST | Stable, engine-assigned or client-supplied, unique per tenant. Never a display name. |
-| `tenant` | string | MUST | Hard isolation boundary. |
-| `kind` | enum | MUST | See §3.2. |
-| `content` | string | MUST | Human-readable text. For structured kinds, a faithful rendering of `claim`. |
+| `id` | string | MUST | Stable, engine-assigned or client-supplied, unique per tenant. [M02] Never a display name. |
+| `tenant` | string | MUST | Hard isolation boundary. [M03] |
+| `kind` | enum | MUST | See §3.2. [M04] |
+| `content` | string | MUST | Human-readable text. [M05] For structured kinds, a faithful rendering of `claim`. |
 | `claim` | object | MAY | `{subject, predicate, object, cardinality: one\|many}` for facts and preferences. |
 | `scope` | string | SHOULD | Hierarchical path (§2). |
-| `readers` | string[] \| null | MUST | Access tokens that may read. `null` = every principal in the tenant. |
+| `readers` | string[] \| null | MUST | Access tokens that may read. [M06] `null` = every principal in the tenant. |
 | `writers` | string[] \| null | SHOULD | Tokens that may modify or forget. Defaults to the creator. |
 | `actor` | string | SHOULD | Who said or asserted it (speaker, agent id, connector). |
 | `role` | enum | SHOULD | `user \| assistant \| system \| tool \| human \| connector`. |
-| `origin` | enum | MUST | `observed` (raw evidence) · `extracted` (derived by a model or rule from evidence) · `inferred` (concluded, not stated) · `human` (written or approved by a person) · `imported` · `seed`. |
+| `origin` | enum | MUST | `observed` (raw evidence) · `extracted` (derived by a model or rule from evidence) · `inferred` (concluded, not stated) · `human` (written or approved by a person) · `imported` · `seed`. [M07] |
 | `thread`, `seq` | string, int | SHOULD | Container and position, so neighbours can be fetched. |
-| `observed_at` | timestamp | MUST | Transaction time: when the engine learned it. Engine-set, never authored. |
+| `observed_at` | timestamp | MUST | Transaction time: when the engine learned it. [M08] Engine-set, never authored. |
 | `event_time` | interval | SHOULD | When the described thing happened: `{start, end, granularity}`. |
 | `valid_from`, `valid_to` | timestamp | SHOULD | World-time validity of the assertion. Open-ended `valid_to` = still valid. |
 | `expires_at` | timestamp | MAY | Retention limit. After it the record is `expired`. |
-| `status` | enum | MUST | §3.3. |
-| `supersedes`, `superseded_by` | id[], id | MUST when applicable | Explicit version links (§5.6). |
-| `version` | int | MUST | Increments on every change, including status changes from supersession, forget and approval; used for `if_version` concurrency. |
-| `sources` | Source[] | MUST for non-`observed` | `{uri, span, hash, observed_at}`: where the evidence lives (`slack://C1/p17`, `file://notes/a.md#L10-14`, `orp://t/mem_x`). |
-| `derived_from` | id[] | MUST for `extracted`/`inferred` | Memories this was derived from. Drives ACL closure and cascade. |
+| `status` | enum | MUST | §3.3. [M09] |
+| `supersedes`, `superseded_by` | id[], id | MUST when applicable | Explicit version links (§5.6). [M10] |
+| `version` | int | MUST | Increments on every change, including status changes from supersession, forget and approval; used for `if_version` concurrency. [M11] |
+| `sources` | Source[] | MUST for non-`observed` | `{uri, span, hash, observed_at}`: where the evidence lives (`slack://C1/p17`, `file://notes/a.md#L10-14`, `orp://t/mem_x`). [M12] |
+| `derived_from` | id[] | MUST for `extracted`/`inferred` | Memories this was derived from. [M13] Drives ACL closure and cascade. |
 | `support` | int | MAY | Count of independent sources agreeing. |
 | `confidence` | number 0..1 | MAY | Engine's or author's confidence. Declared scale. |
 | `labels` | string[] | MAY | Sensitivity (`pii`, `secret`, `health`, `legal`) and topical labels. |
 | `load` | enum | MAY | `always \| on_scope \| on_query` (default). Profiles, standing rules and identity are `always`. |
-| `meta` | object | MAY | Free-form, namespaced keys (`x-acme-...`). Engines MUST round-trip it. |
+| `meta` | object | MAY | Free-form, namespaced keys (`x-acme-...`). Engines MUST round-trip it. [M14] |
 
-Embeddings and index structures are **not** part of the record. They are engine internals and MUST be rebuildable from records.
+Embeddings and index structures are **not** part of the record. They are engine internals and MUST be rebuildable from records. [M15]
 
 ### 3.2 Kinds
 
@@ -110,7 +110,7 @@ Entities are memories of kind `entity` with `aliases[]` in `meta.aliases` and a 
 
 ### 3.5 Threads
 
-A thread is identified by `thread` on its units. Engines MUST be able to return a unit's neighbours (`before`/`after` cursors) and whole threads, because answers in conversation often sit in the turn after the most "relevant" one (§5.5).
+A thread is identified by `thread` on its units. Engines MUST be able to return a unit's neighbours (`before`/`after` cursors) and whole threads, because answers in conversation often sit in the turn after the most "relevant" one (§5.5). [M16]
 
 ## 4. Verbs
 
@@ -151,11 +151,11 @@ All verbs take a `principal` (bound server-side from credentials, never from mod
 ```
 
 - `mode`: `append` (default) · `upsert` (by client id, requires `if_version` when the record exists) · `supersede` (explicitly replaces `supersedes[]`) · `propose` (creates `draft` for approval).
-- Engines MUST be idempotent on `idempotency_key` (or, absent one, on `(tenant, thread, actor, content-hash)` within a declared window) and MUST return the original ids on replay.
-- Engines MUST reject unknown top-level fields and unsupported enum values with `unsupported_parameter`, not ignore them (P5).
+- Engines MUST be idempotent on `idempotency_key` (or, absent one, on `(tenant, thread, actor, content-hash)` within a declared window) and MUST return the original ids on replay. [M17]
+- Engines MUST reject unknown top-level fields and unsupported enum values with `unsupported_parameter`, not ignore them (P5). [M18]
 - `wait`: `accepted \| stored \| indexed`. The response states which stage was reached, so clients get read-your-writes when they need it.
 - Engines SHOULD resolve relative time expressions against `observed_at` at write time and store the absolute value (e.g. "last month" observed on 2026-05-12 → `event_time ≈ 2026-04`), keeping the original text.
-- `origin: observed` records are evidence and MUST NOT be rewritten by consolidation.
+- `origin: observed` records are evidence and MUST NOT be rewritten by consolidation. [M19]
 
 ### 4.2 recall
 
@@ -179,13 +179,13 @@ Request:
 }
 ```
 
-- `as_of` defaults to the request time. It sets the validity view (§5.2) **and** the "now" for all relative reasoning and recency. Engines MUST NOT use wall-clock time when `as_of` is given.
+- `as_of` defaults to the request time. It sets the validity view (§5.2) **and** the "now" for all relative reasoning and recency. Engines MUST NOT use wall-clock time when `as_of` is given. [M20]
 - `known_at` answers "what did we know then?" by excluding records observed after it.
-- `scope.within` narrows admissibility by path segment (`org/acme` covers `org/acme/...`, not `org/acme-x`); `scope.prefer` is a soft prior that MUST NOT filter.
-- `kinds` is a list (restrict to these kinds) or a per-kind quota map (at most N items of each kind). Engines MUST honour both forms or reject them.
-- `budget.tokens` is a hard cap on the rendered pack. Engines MUST report the tokeniser they count with. If omitted, the engine's default budget applies and MUST be declared in `capabilities.defaults`.
+- `scope.within` narrows admissibility by path segment (`org/acme` covers `org/acme/...`, not `org/acme-x`); `scope.prefer` is a soft prior that MUST NOT filter. [M21]
+- `kinds` is a list (restrict to these kinds) or a per-kind quota map (at most N items of each kind). Engines MUST honour both forms or reject them. [M22]
+- `budget.tokens` is a hard cap on the rendered pack. Engines MUST report the tokeniser they count with. [M23] If omitted, the engine's default budget applies and MUST be declared in `capabilities.defaults`. [M24]
 - `granularity`: `unit \| span \| thread \| auto`. `auto` lets the engine return dialogue spans (§5.5).
-- `mode`: `fast` (no second pass), `balanced` (default), `deep` (may use model-based reranking or query decomposition; MUST declare it in `explain`).
+- `mode`: `fast` (no second pass), `balanced` (default), `deep` (may use model-based reranking or query decomposition; MUST declare it in `explain`). [M25]
 
 Response (ContextPack):
 
@@ -216,7 +216,7 @@ Response (ContextPack):
 
 ### 4.3 profile
 
-Returns `load: always` memories for a subject (user, agent, team) within a token budget, ordered by kind priority (`procedure` → `preference` → `profile` → `fact`), each line individually citable and forgettable. Unbounded ambient injection is not allowed: `budget.tokens` is REQUIRED.
+Returns `load: always` memories for a subject (user, agent, team) within a token budget, ordered by kind priority (`procedure` → `preference` → `profile` → `fact`), each line individually citable and forgettable. Unbounded ambient injection is not allowed: `budget.tokens` is REQUIRED. [M26]
 
 ### 4.4 forget
 
@@ -224,8 +224,8 @@ Returns `load: always` memories for a subject (user, agent, team) within a token
 {"ids": ["mem_9f.."], "mode": "retract|redact|purge", "cascade": true, "dry_run": true, "reason": "user request"}
 ```
 
-- `dry_run: true` MUST return the full set of ids that would be affected (including cascaded derived memories) and change nothing.
-- `cascade` retracts or re-derives every memory whose `derived_from` includes an affected id, transitively. A summary MUST NOT keep facts its sources no longer support.
+- `dry_run: true` MUST return the full set of ids that would be affected (including cascaded derived memories) and change nothing. [M27]
+- `cascade` retracts or re-derives every memory whose `derived_from` includes an affected id, transitively. A summary MUST NOT keep facts its sources no longer support. [M28]
 - `retract` blocks re-ingestion of the same content hash by new writes unless the request sets `allow_reingest`. A replay of the original write with the same `idempotency_key` still returns the original ids (now `retracted`); it does not re-create the memory.
 - Forget on records readable by others REQUIRES `writers` permission, not just read permission.
 - Over MCP, engines SHOULD use elicitation to confirm destructive forgets (§8.1).
@@ -237,11 +237,11 @@ Returns `load: always` memories for a subject (user, agent, team) within a token
  "draft": "...", "final": "...", "actor": "u7", "note": "..."}
 ```
 
-`draft_final` pairs are stored server-side as evidence. Engines MAY derive `procedure` rule candidates from them, which MUST be created as `draft` and require approval before `active`. Feedback MUST NOT silently change the ranking algorithm; its effect is a declared, versioned ranking feature (§5.4).
+`draft_final` pairs are stored server-side as evidence. Engines MAY derive `procedure` rule candidates from them, which MUST be created as `draft` and require approval before `active`. [M29] Feedback MUST NOT silently change the ranking algorithm; its effect is a declared, versioned ranking feature (§5.4). [M30]
 
 ### 4.6 reflect
 
-Starts an async job that produces derived memories (`observation`, `summary`, `profile`, rule candidates). Requirements: idempotent per `(scope, cursor)`; outputs carry `derived_from` and `origin: extracted|inferred`; outputs inherit closed ACLs (§6.3); a job MUST NOT delete or rewrite `observed` evidence; results are versioned, so a re-run supersedes the previous version rather than overwriting it. Engines MAY use the client's model through MCP sampling (§8.1), so a server needs no model key.
+Starts an async job that produces derived memories (`observation`, `summary`, `profile`, rule candidates). Requirements: idempotent per `(scope, cursor)`; outputs carry `derived_from` and `origin: extracted|inferred`; outputs inherit closed ACLs (§6.3); a job MUST NOT delete or rewrite `observed` evidence; results are versioned, so a re-run supersedes the previous version rather than overwriting it. [M31] Engines MAY use the client's model through MCP sampling (§8.1), so a server needs no model key.
 
 ### 4.7 changes and subscriptions
 
@@ -251,32 +251,32 @@ Starts an async job that produces derived memories (`observation`, `summary`, `p
 
 ### 5.1 Admissibility comes first
 
-Before any channel scores a candidate, the engine MUST compute the admissible set: same tenant; `readers ∩ principal.tokens ≠ ∅` (or `readers = null`); status admissible under §5.2; `observed_at ≤ known_at` if given; within `scope.within`; matching `kinds`. Every channel (lexical, dense, graph, temporal, entity, neighbour expansion, profile) MUST draw only from the admissible set, and collection statistics used for scoring (document frequencies, average lengths, thread and window aggregates, feature normalisers) MUST be computed over the admissible set, so that inadmissible memories cannot change the ranking an asker sees. Filtering after a top-k cut is non-conformant: it leaks information through ranking and, when the asker can read only a small share of memory, it silently loses recall (ORP-Bench governance: at 15% visibility, filtering after the top 10 loses 11.7 points of recall).
+Before any channel scores a candidate, the engine MUST compute the admissible set: same tenant; [M32] `readers ∩ principal.tokens ≠ ∅` (or `readers = null`); status admissible under §5.2; `observed_at ≤ known_at` if given; within `scope.within`; matching `kinds`. Every channel (lexical, dense, graph, temporal, entity, neighbour expansion, profile) MUST draw only from the admissible set, and collection statistics used for scoring (document frequencies, average lengths, thread and window aggregates, feature normalisers) MUST be computed over the admissible set, so that inadmissible memories cannot change the ranking an asker sees. [M33] Neighbour relations used for ranking or expansion MUST be computed over admissible units only (a unit's neighbour is the nearest admissible unit in thread order), so that the existence of hidden units is not revealed either. [M66] Equivalently: for any principal, recall over a store MUST return exactly what it would return over the same store with every memory that principal cannot read removed. [M67] Filtering after a top-k cut is non-conformant: it leaks information through ranking and, when the asker can read only a small share of memory, it silently loses recall (ORP-Bench governance: at 15% visibility, filtering after the top 10 loses 11.7 points of recall).
 
 ### 5.2 Validity view
 
-By default recall returns only memories that are `active` and valid at `as_of` (`valid_from ≤ as_of < valid_to`, open bounds allowed). With `include.history: true`, superseded versions MAY be returned and MUST be labelled `validity: superseded` with a link to the current version. A memory that was valid at `as_of` (time travel) MUST be returned with `validity: current` for that request, even if it has since been superseded. `event` and `document` records are evidence: they MUST NOT be superseded (engines MUST reject `mode: supersede` on them); facts derived from them can be. Evidence is valid from its `event_time` (or `observed_at`) onwards, so events after `as_of` are not returned.
+By default recall returns only memories that are `active` and valid at `as_of` (`valid_from ≤ as_of < valid_to`, open bounds allowed). With `include.history: true`, superseded versions MAY be returned and MUST be labelled `validity: superseded` with a link to the current version. [M34] A memory that was valid at `as_of` (time travel) MUST be returned with `validity: current` for that request, even if it has since been superseded. [M35] `event` and `document` records are evidence: they MUST NOT be superseded (engines MUST reject `mode: supersede` on them); facts derived from them can be. [M36] Evidence is valid from its `event_time` (or `observed_at`) onwards, so events after `as_of` are not returned.
 
 ### 5.3 Channels
 
-A conforming engine MUST provide at least a lexical channel with IDF and length normalisation, and a dense channel. Each channel MUST be able to nominate candidates independently (no channel may only re-rank another channel's pool). Engines SHOULD provide: sentence- or span-level max-pooling for long units, thread-level relevance, entity match, temporal windows, and pseudo-relevance feedback. Fusion MUST be declared in `capabilities` (e.g. `rrf(k=60)` with weights). Scores returned to clients MUST be higher-is-better with a declared scale.
+A conforming engine MUST provide at least a lexical channel with IDF and length normalisation, and a dense channel. [M37] Each channel MUST be able to nominate candidates independently (no channel may only re-rank another channel's pool). [M38] Engines SHOULD provide: sentence- or span-level max-pooling for long units, thread-level relevance, entity match, temporal windows, and pseudo-relevance feedback. Fusion MUST be declared in `capabilities` (e.g. [M39] `rrf(k=60)` with weights). Scores returned to clients MUST be higher-is-better with a declared scale. [M40]
 
 ### 5.4 Ranking features
 
-Engines MAY apply declared features after fusion: query coverage, actor/subject match, role match ("what did you recommend" → assistant), temporal fit, order intent (earliest/latest), current-state intent ("now", "still", "currently" → latest valid), feedback, support count. Every applied feature MUST appear in `why`. Recency and popularity boosts MUST be gated on independent relevance evidence, never applied to everything.
+Engines MAY apply declared features after fusion: query coverage, actor/subject match, role match ("what did you recommend" → assistant), temporal fit, order intent (earliest/latest), current-state intent ("now", "still", "currently" → latest valid), feedback, support count. Every applied feature MUST appear in `why`. [M41] Recency and popularity boosts MUST be gated on independent relevance evidence, never applied to everything. [M42]
 
 ### 5.5 Packing
 
-- The engine MUST NOT exceed `budget.tokens`.
-- Granularity: `unit` returns single units; `span` returns dialogue spans (when a unit is a question the engine SHOULD include its reply, and when a unit is a short reply it SHOULD include the prompt it answers; a span counts as one item); `thread` returns whole admissible threads; `auto` lets the engine choose and MUST be declared in `capabilities`. Expansion MUST only add admissible units.
+- The engine MUST NOT exceed `budget.tokens`. [M43]
+- Granularity: `unit` returns single units; `span` returns dialogue spans (when a unit is a question the engine SHOULD include its reply, and when a unit is a short reply it SHOULD include the prompt it answers; a span counts as one item); `thread` returns whole admissible threads; `auto` lets the engine choose and MUST be declared in `capabilities`. [M44] Expansion MUST only add admissible units. [M45]
 - Thread headers (date, thread label) SHOULD be emitted once per thread per pack, not per line.
 - Relative time expressions SHOULD be rendered with their resolved absolute value.
-- Long units MAY be snippeted to their most relevant sentences; snippets MUST be marked with `…` and keep `memory_ids` of the full unit so the client can fetch it.
-- Superseded versions, when included, MUST be marked.
+- Long units MAY be snippeted to their most relevant sentences; snippets MUST be marked with `…` and keep `memory_ids` of the full unit so the client can fetch it. [M46]
+- Superseded versions, when included, MUST be marked. [M47]
 
 ### 5.6 Supersession
 
-When two active `fact`/`preference` memories share a claim key `(subject, predicate)` with `cardinality: one` and different objects, the one with the later `valid_from` (then later `observed_at`) is current; the other becomes `superseded` with `valid_to` set to the newer `valid_from`. Ordering MUST use event/validity time, not ingestion order, so backfilled old data never overrides newer facts. Engines MUST NOT supersede on similarity alone without exposing the decision (`supersedes` link + `why.superseded_by_rule`). `cardinality: many` claims never supersede each other.
+When two active `fact`/`preference` memories share a claim key `(subject, predicate)` with `cardinality: one` and different objects, the one with the later `valid_from` (then later `observed_at`) is current; the other becomes `superseded` with `valid_to` set to the newer `valid_from`. Ordering MUST use event/validity time, not ingestion order, so backfilled old data never overrides newer facts. [M48] Engines MUST NOT supersede on similarity alone without exposing the decision (`supersedes` link + `why.superseded_by_rule`). [M49] `cardinality: many` claims never supersede each other.
 
 ### 5.7 Coverage and abstention
 
@@ -284,29 +284,29 @@ Every pack carries `coverage` (0..1, declared method) estimating whether memory 
 
 ### 5.8 Degradation
 
-If any channel, index or model is unavailable, the response MUST list it in `degraded[]`. An engine that reports degradation remains conformant for that response (`dense_unavailable`, `index_stale`, `reranker_skipped`, `partial_scope`, `budget_truncated`). An engine MUST NOT return an empty success when a scorer failed.
+If any channel, index or model is unavailable, the response MUST list it in `degraded[]`. [M50] An engine that reports degradation remains conformant for that response (`dense_unavailable`, `index_stale`, `reranker_skipped`, `partial_scope`, `budget_truncated`). An engine MUST NOT return an empty success when a scorer failed. [M51]
 
 ### 5.9 Determinism
 
-Given the same request and `snapshot`, an engine MUST return the same pack. `snapshot` identifies the index state used.
+Given the same request and `snapshot`, an engine MUST return the same pack. [M52] `snapshot` identifies the index state used and changes on every write, forget, approval or ACL change. Ties MUST be broken by a rule that does not depend on inadmissible memories (e.g. by position among admissible units). [M68]
 
 ### 5.10 Declared rankers
 
-If an engine uses a learned or model-based ranker, `capabilities` MUST name it with a version (`ranker: "orp-gbdt-1"`), list its input features, and state what data it was fitted on. Engines SHOULD also offer an unlearned mode (`mode: fast`) so clients can compare. Learned rankers MUST NOT use features that bypass admissibility (e.g. statistics computed over inadmissible memories).
+If an engine uses a learned or model-based ranker, `capabilities` MUST name it with a version (`ranker: "orp-gbdt-1"`), list its input features, and state what data it was fitted on. [M53] Engines SHOULD also offer an unlearned mode (`mode: fast`) so clients can compare. Learned rankers MUST NOT use features that bypass admissibility (e.g. statistics computed over inadmissible memories). [M54]
 
 ### 5.11 Multi-scope recall (SaaS)
 
-A single recall MAY span several scopes the principal can read (organisation, team, channel, user, agent). Engines MUST rank all admissible candidates on one scale rather than merging per-scope result lists by raw score, MUST return each item's `scope`, and SHOULD honour `scope.prefer` as a soft prior. Per-scope quotas, when needed, are expressed with `kinds`-style quota maps on scopes.
+A single recall MAY span several scopes the principal can read (organisation, team, channel, user, agent). Engines MUST rank all admissible candidates on one scale rather than merging per-scope result lists by raw score, MUST return each item's `scope`, and SHOULD honour `scope.prefer` as a soft prior. [M55] Per-scope quotas, when needed, are expressed with `kinds`-style quota maps on scopes.
 
 ## 6. Access control and governance
 
 ### 6.1 Principals and tokens
 
-Credentials bind to a principal server-side. The engine computes `principal.tokens` (`principal:<id>`, `group:<g>`, `channel:<c>`, `role:<r>`, `public`). Clients MUST NOT be able to assert tokens through tool arguments. Connectors MUST write source-system ACLs into `readers` at ingest and keep them in sync through `remember(mode: upsert)` with metadata-only updates (no re-embedding).
+Credentials bind to a principal server-side. The engine computes `principal.tokens` (`principal:<id>`, `group:<g>`, `channel:<c>`, `role:<r>`, `public`). Clients MUST NOT be able to assert tokens through tool arguments. [M56] Connectors MUST write source-system ACLs into `readers` at ingest and keep them in sync through `remember(mode: upsert)` with metadata-only updates (no re-embedding). [M57]
 
 ### 6.2 Read and write are separate
 
-`readers` controls recall, get, neighbours, profile, export. `writers` controls upsert, supersede, forget, approve. Get-by-id, neighbours and history MUST check `readers` exactly like recall.
+`readers` controls recall, get, neighbours, profile, export. `writers` controls upsert, supersede, forget, approve. Get-by-id, neighbours and history MUST check `readers` exactly like recall. [M58]
 
 ### 6.3 Provenance-closed access (the laundering rule)
 
@@ -316,11 +316,11 @@ For any derived memory `d` with sources `S = derived_from(d)`:
 readers(d) ⊆ ⋂_{s ∈ S} readers(s)
 ```
 
-with `null` treated as the universal set. Engines MUST enforce this at write time (narrowing `readers(d)`) and on every source ACL change (re-narrowing or retracting `d`). A summary, profile, observation, edge or entity description built from a private DM can therefore never surface in a shared channel. Derived memories also inherit their sources' sensitivity labels (§6.4).
+with `null` treated as the universal set. Engines MUST enforce this at write time (narrowing `readers(d)`) and on every source ACL change (re-narrowing or retracting `d`). [M59] A summary, profile, observation, edge or entity description built from a private DM can therefore never surface in a shared channel. Derived memories also inherit their sources' sensitivity labels (§6.4).
 
 ### 6.4 Labels and redaction
 
-Memories labelled `secret` MUST NOT be returned unless the request includes the label in `include.labels` and the principal holds `label:secret`. `redact` erases content in the record and every derived record and index, keeping an auditable tombstone.
+Memories labelled `secret` MUST NOT be returned unless the request includes the label in `include.labels` and the principal holds `label:secret`. [M60] `redact` erases content in the record and every derived record and index, keeping an auditable tombstone.
 
 ### 6.5 Audit
 
@@ -330,7 +330,7 @@ Every write, forget, approval and ACL change is appended to a tenant audit log `
 
 - **Tiers.** Raw evidence (`event`, `document`) is lossless and never rewritten. Derived tiers (`fact`, `preference`, `procedure`, `observation`, `summary`, `profile`) are rebuildable.
 - **Consolidation** runs as `reflect` jobs with declared triggers (`every N units`, `on thread close`, `nightly`, `on compaction`), never inline in `remember` unless `wait: indexed` asks for it.
-- **Forgetting** is explicit (`forget`), time-based (`expires_at`) or policy-based (declared per scope). Silent FIFO or LFU deletion is non-conformant. Reads MUST NOT mutate state (no heat counters on read); usage signals go through `feedback(used)`.
+- **Forgetting** is explicit (`forget`), time-based (`expires_at`) or policy-based (declared per scope). Silent FIFO or LFU deletion is non-conformant. Reads MUST NOT mutate state (no heat counters on read); usage signals go through `feedback(used)`. [M61]
 - **Procedures** (standing rules, skills) are versioned memories with `load: always|on_scope`, created through `propose` and activated by approval.
 
 ## 8. Bindings
@@ -362,7 +362,7 @@ ORP over MCP maps verbs to tools with JSON Schema `inputSchema` and `outputSchem
 
 ### 8.3 Bundle format
 
-An ORP bundle is a directory or `.orp` zip containing `manifest.json` (spec version, tenant, counts, hashes, engine capabilities, consolidation config), `memories.jsonl` (records, all tiers, all statuses including tombstones), `edges.jsonl`, `audit.jsonl` (optional) and `render/` (optional Markdown rendering: one file per thread or entity, frontmatter = record fields). Import MUST be lossless: `export → import → export` yields identical `memories.jsonl` modulo engine-assigned ids, which are remapped through `manifest.id_map`. Secrets in `meta` are scrubbed unless the exporter holds `label:secret`.
+An ORP bundle is a directory or `.orp` zip containing `manifest.json` (spec version, tenant, counts, hashes, engine capabilities, consolidation config), `memories.jsonl` (records, all tiers, all statuses including tombstones), `edges.jsonl`, `audit.jsonl` (optional) and `render/` (optional Markdown rendering: one file per thread or entity, frontmatter = record fields). Import MUST be lossless: `export → import → export` yields identical `memories.jsonl` modulo engine-assigned ids, which are remapped through `manifest.id_map`. [M62] Secrets in `meta` are scrubbed unless the exporter holds `label:secret`.
 
 ## 9. Conformance
 
@@ -373,7 +373,7 @@ An ORP bundle is a directory or `.orp` zip containing `manifest.json` (spec vers
 | L3 | Governed | Pre-ranking admissibility on every channel and verb, provenance-closed ACL, read/write separation, redact with cascade, `dry_run`, audit, per-session subscriptions |
 | L4 | Adaptive | `reflect` jobs with lineage, `feedback` incl. draft→final, `profile` with budget, rule proposals via `draft`, bundle export/import round-trip |
 
-`spec/MUSTS.md` lists every MUST in this document with a stable id, its level and the conformance test (`tests/conformance/`) that checks it. A MUST without a test is listed as untested. An engine claims a level only if it passes every test at that level, and MUST NOT claim a level containing a MUST it knowingly violates.
+`spec/MUSTS.md` lists every MUST in this document with a stable id, its level and the conformance test (`tests/conformance/`) that checks it. [M63] A MUST without a test is listed as untested. [M64] An engine claims a level only if it passes every test at that level, and MUST NOT claim a level containing a MUST it knowingly violates. [M65]
 
 ## 10. Evaluation (ORP-Bench)
 

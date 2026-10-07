@@ -1,0 +1,12 @@
+mem0                       screen J=0.669 {"pool_mult": 4, "threshold": 0.0, "unit_max_words": 80} 636s
+mem0                       screen J=0.6948 {"pool_mult": 4, "threshold": 0.0, "unit_max_words": 40} 639s
+mem0                       screen J=0.6555 {"pool_mult": 4, "threshold": 0.0, "unit_max_words": 150} 80s
+mem0                       screen J=0.6948 {"pool_mult": 4, "threshold": 0.1, "unit_max_words": 40} 94s
+mem0                       screen J=0.669 {"pool_mult": 4, "threshold": 0.1, "unit_max_words": 80} 149s
+mem0                       screen J=0.6555 {"pool_mult": 4, "threshold": 0.1, "unit_max_words": 150} 140s
+mem0                       screen J=0.6476 {"pool_mult": 4, "threshold": 0.3, "unit_max_words": 40} 159s
+mem0                       screen J=0.61 {"pool_mult": 4, "threshold": 0.3, "unit_max_words": 80} 157s
+mem0                       screen J=0.597 {"pool_mult": 4, "threshold": 0.3, "unit_max_words": 150} 146s
+mem0                       screen J=0.7122 {"pool_mult": 8, "threshold": 0.0, "unit_max_words": 40} 158s
+mem0                       screen J=0.6953 {"pool_mult": 8, "threshold": 0.0, "unit_max_words": 80} 96s
+mem0                       screen J=0.681 {"pool_mult": 8, "threshold": 0.0, "unit_max_words": 150} 81s

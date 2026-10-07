@@ -194,7 +194,7 @@ class RecallSemantics(unittest.TestCase):
         after = [i["memory_ids"] for i in recall(self.s, ALICE, q, granularity="unit")["items"]]
         self.assertEqual(before, after)
 
-    def test_M32_M33_M54b_identical_to_store_without_inadmissible(self):
+    def test_M32_M33_M54b_M66_M67_identical_to_store_without_inadmissible(self):
         mems = []
         for t in range(6):
             for i in range(6):
@@ -305,7 +305,7 @@ class RecallSemantics(unittest.TestCase):
         self.assertIn("dense_unavailable", p["degraded"])
         self.assertTrue(p["items"])
 
-    def test_M52_snapshot_changes_with_state(self):
+    def test_M52_M68_snapshot_changes_with_state(self):
         ids = self.s.remember({"memories": [ev("door code 1234", thread="t")]}, ALICE)["ids"]
         a = recall(self.s, ALICE, "door code")
         b = recall(self.s, ALICE, "door code")

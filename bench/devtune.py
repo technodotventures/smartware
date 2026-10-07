@@ -22,12 +22,13 @@ def tasks(bench):
     return _cache[bench]
 
 
-def evaluate(make_system, benches=("locomo", "lme"), enc=None, cats=False):
+def evaluate(make_system, benches=("locomo", "lme"), enc=None, cats=False, subset: dict | None = None):
+    """subset: optional {"locomo": n_tasks, "lme": n_tasks} to evaluate on the first n dev tasks only."""
     enc = enc or Encoders(DenseEncoder.load())
     out = {}
     for b in benches:
         rows = []
-        for task in tasks(b):
+        for task in (tasks(b)[: subset[b]] if subset else tasks(b)):
             s = make_system()
             s.build(task.corpus, enc)
             t2s = {t.id: t.session_id for t in task.corpus.turns}

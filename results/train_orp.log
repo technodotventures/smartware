@@ -1,4 +1,70 @@
-start J=0.7446 {}
-pass0 w_bm25=0.6 J=0.7496 (best 0.7446) 59s
+start J=0.7463 {}
+pass0 w_bm25=0.6 J=0.7515 (best 0.7463) 53s
   -> new best w_bm25=0.6
-pass0 w_bm25=1.4 J=0.7434 (best 0.7496) 69s
+pass0 w_bm25=1.4 J=0.7441 (best 0.7515) 54s
+pass0 w_bm25_seg=0.0 J=0.7573 (best 0.7515) 54s
+  -> new best w_bm25_seg=0.0
+pass0 w_bm25_seg=0.3 J=0.7537 (best 0.7573) 54s
+pass0 w_bm25_seg=1.0 J=0.7476 (best 0.7573) 52s
+pass0 w_bm25_win=0.0 J=0.7584 (best 0.7573) 52s
+  -> new best w_bm25_win=0.0
+pass0 w_bm25_win=0.3 J=0.7644 (best 0.7584) 51s
+  -> new best w_bm25_win=0.3
+pass0 w_bm25_win=1.0 J=0.7567 (best 0.7644) 51s
+pass0 w_dense=0.3 J=0.7588 (best 0.7644) 53s
+pass0 w_dense=1.0 J=0.7623 (best 0.7644) 51s
+pass0 w_dense_seg=0.0 J=0.7619 (best 0.7644) 53s
+pass0 w_dense_seg=0.8 J=0.7618 (best 0.7644) 56s
+pass0 w_dense_win=0.0 J=0.7571 (best 0.7644) 54s
+pass0 w_dense_win=0.8 J=0.7667 (best 0.7644) 51s
+  -> new best w_dense_win=0.8
+pass0 w_thread=0.0 J=0.7557 (best 0.7667) 51s
+pass0 w_thread=0.25 J=0.7600 (best 0.7667) 52s
+pass0 w_thread=1.0 J=0.7593 (best 0.7667) 53s
+pass0 w_prf=0.0 J=0.7602 (best 0.7667) 52s
+pass0 w_prf=0.3 J=0.7652 (best 0.7667) 51s
+pass0 w_prf=1.0 J=0.7599 (best 0.7667) 51s
+pass0 w_entity=0.0 J=0.7634 (best 0.7667) 52s
+pass0 w_entity=0.2 J=0.7676 (best 0.7667) 52s
+  -> new best w_entity=0.2
+pass0 w_entity=0.8 J=0.7654 (best 0.7676) 51s
+pass0 w_time=0.0 J=0.7650 (best 0.7676) 52s
+pass0 w_time=0.25 J=0.7664 (best 0.7676) 51s
+pass0 w_time=1.0 J=0.7686 (best 0.7676) 51s
+  -> new best w_time=1.0
+pass0 rrf_k=20.0 J=0.7653 (best 0.7686) 51s
+pass0 rrf_k=100.0 J=0.7560 (best 0.7686) 51s
+pass0 f_cover=0.0 J=0.7586 (best 0.7686) 51s
+pass0 f_cover=0.3 J=0.7637 (best 0.7686) 51s
+pass0 f_cover=1.0 J=0.7562 (best 0.7686) 51s
+pass0 f_actor=0.0 J=0.7668 (best 0.7686) 52s
+pass0 f_actor=0.5 J=0.7672 (best 0.7686) 50s
+pass0 f_role=0.0 J=0.7395 (best 0.7686) 51s
+pass0 f_role=0.5 J=0.7629 (best 0.7686) 52s
+pass0 f_order=0.0 J=0.7687 (best 0.7686) 50s
+  -> new best f_order=0.0
+pass0 f_order=0.3 J=0.7677 (best 0.7687) 52s
+pass0 long_unit_tokens=150 J=0.7718 (best 0.7687) 51s
+  -> new best long_unit_tokens=150
+pass0 long_unit_tokens=350 J=0.7667 (best 0.7718) 50s
+pass0 snippet_sentences=3 J=0.7725 (best 0.7718) 50s
+  -> new best snippet_sentences=3
+pass0 snippet_sentences=6 J=0.7632 (best 0.7725) 50s
+pass0 prompt_merge_words=8 J=0.7716 (best 0.7725) 52s
+pass0 prompt_merge_words=20 J=0.7720 (best 0.7725) 51s
+pass0 expand_next=False J=0.7542 (best 0.7725) 72s
+pass0 count_div=False J=0.7795 (best 0.7725) 53s
+  -> new best count_div=False
+final 0.7794740000732991 {"w_bm25": 0.6, "w_bm25_seg": 0.0, "w_bm25_win": 0.3, "w_dense_win": 0.8, "w_entity": 0.2, "w_time": 1.0, "f_order": 0.0, "long_unit_tokens": 150, "snippet_sentences": 3, "count_div": false}
+collected 471 dev queries
+rrf dev J 0.7795
+linear 0.01 0.7882
+linear 0.1 0.7907
+gbdt {'max_iter': 150, 'learning_rate': 0.05, 'max_leaf_nodes': 15, 'min_samples_leaf': 40, 'l2_regularization': 1.0} 0.7821
+gbdt {'max_iter': 300, 'learning_rate': 0.05, 'max_leaf_nodes': 15, 'min_samples_leaf': 80, 'l2_regularization': 1.0} 0.7874
+gbdt {'max_iter': 150, 'learning_rate': 0.05, 'max_leaf_nodes': 7, 'min_samples_leaf': 80, 'l2_regularization': 1.0} 0.7858
+pack {'expand_next': False} 0.7881
+pack {'expand_next': False, 'expand_prev_q': False} 0.7952
+pack {'long_unit_tokens': 150} 0.7907
+pack {'snippet_sentences': 3} 0.7907
+final linear 0.1 ({'expand_next': False, 'expand_prev_q': False}, 0.7951949845186266) ablation None

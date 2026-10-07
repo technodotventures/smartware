@@ -1,8 +1,10 @@
 """Give every baseline the same dev-only tuning budget the ORP engine had.
 
-For each baseline, evaluate every combination in its class attribute TUNABLE (documented,
-user- or operator-exposed knobs chosen by the engineer who studied that project) on the DEV
-splits with the same objective used for ORP (bench.tune.objective), and record the best.
+For each baseline, every combination in its class attribute TUNABLE (documented, user- or
+operator-exposed knobs chosen by the engineer who studied that project) is screened on a fixed
+dev subset, and the best 4 are evaluated on the full DEV splits with the same objective used for
+ORP (bench.tune.objective); the best full-dev configuration is recorded. (Graphiti and Hindsight
+were evaluated on the full grid before screening was introduced to save time.)
 Test splits are never read.
 
 python -m bench.tune_baselines [names] [--workers 2]
@@ -32,18 +34,22 @@ def cls_of(name):
     return getattr(importlib.import_module(mod), c)
 
 
+SUBSET = {"locomo": 1, "lme": 20}  # stage-1 screen: 1 LoCoMo dev conversation + 20 LME-R dev questions
+TOP = 4  # configurations promoted to the full dev evaluation
+
+
 def job(args):
     global _ENC
-    name, cfg = args
+    name, cfg, subset = args
     if _ENC is None:
         _ENC = Encoders(DenseEncoder.load())
     C = cls_of(name)
     t0 = time.time()
     try:
-        r = evaluate(lambda: C(**cfg), enc=_ENC)
-        return name, cfg, objective(r), r, time.time() - t0
+        r = evaluate(lambda: C(**cfg), enc=_ENC, subset=subset)
+        return name, cfg, objective(r), r, time.time() - t0, subset is not None
     except Exception as e:  # a crashing combination is recorded, not fatal
-        return name, cfg, None, {"error": repr(e)}, time.time() - t0
+        return name, cfg, None, {"error": repr(e)}, time.time() - t0, subset is not None
 
 
 def main():
@@ -54,26 +60,36 @@ def main():
     base = ["graphiti", "hindsight", "mem0", "letta", "supermemory-company-brain", "gbrain", "supermemory", "onyx",
             "cognee", "basic-memory", "sylph", "mcp-memory", "memos", "langmem", "memoryos"]
     names = base if a.names == "all" else a.names.split(",")
-    jobs = []
+    res = json.load(open(OUT)) if os.path.exists(OUT) else {}
+    pool = Pool(a.workers)
+
+    def record(name, cfg, j, r, dt, screened):
+        e = res.setdefault(name, {"all": []})
+        (e.setdefault("screen", []) if screened else e["all"]).append({"cfg": cfg, "J": j, "dev": r,
+                                                                       "secs": round(dt, 1)})
+        ok = [x for x in e["all"] if x["J"] is not None]
+        if ok:
+            best = max(ok, key=lambda x: x["J"])
+            e["best"], e["best_J"] = best["cfg"], best["J"]
+        print(f"{name:26s} {'screen' if screened else 'full  '} J={j if j is None else round(j, 4)} "
+              f"{json.dumps(cfg)} {dt:.0f}s", flush=True)
+        json.dump(res, open(OUT, "w"), indent=1, default=str)
+
     for n in names:
+        if res.get(n, {}).get("best") is not None and len(res[n]["all"]) >= TOP:
+            continue  # already tuned (complete grid on full dev, or screened and promoted)
         tun = getattr(cls_of(n), "TUNABLE", {})
         keys = sorted(tun)
-        for combo in itertools.product(*[tun[k] for k in keys]):
-            jobs.append((n, dict(zip(keys, combo))))
-    res = json.load(open(OUT)) if os.path.exists(OUT) else {}
-    done = {(n, json.dumps(r["cfg"], sort_keys=True)) for n, v in res.items() for r in v.get("all", [])}
-    jobs = [j for j in jobs if (j[0], json.dumps(j[1], sort_keys=True)) not in done]
-    print(f"{len(jobs)} configurations to evaluate", flush=True)
-    with Pool(a.workers) as p:
-        for name, cfg, j, r, dt in p.imap_unordered(job, jobs):
-            e = res.setdefault(name, {"all": []})
-            e["all"].append({"cfg": cfg, "J": j, "dev": r, "secs": round(dt, 1)})
-            ok = [x for x in e["all"] if x["J"] is not None]
-            if ok:
-                best = max(ok, key=lambda x: x["J"])
-                e["best"], e["best_J"] = best["cfg"], best["J"]
-            print(f"{name:26s} J={j if j is None else round(j, 4)} {json.dumps(cfg)} {dt:.0f}s", flush=True)
-            json.dump(res, open(OUT, "w"), indent=1, default=str)
+        cfgs = [dict(zip(keys, combo)) for combo in itertools.product(*[tun[k] for k in keys])]
+        scr = []  # stage 1: screen every configuration on a fixed dev subset
+        for name, cfg, j, r, dt, s_ in pool.imap_unordered(job, [(n, c, SUBSET) for c in cfgs]):
+            record(name, cfg, j, r, dt, True)
+            scr.append((j if j is not None else -1, cfg))
+        top = [c for _, c in sorted(scr, key=lambda x: -x[0])[:TOP]]
+        # stage 2: full dev for the promoted configurations
+        for name, cfg, j, r, dt, s_ in pool.imap_unordered(job, [(n, c, None) for c in top]):
+            record(name, cfg, j, r, dt, False)
+    pool.close()
 
 
 if __name__ == "__main__":

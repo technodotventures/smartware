@@ -15,22 +15,31 @@ for ids, lvl in (("02 03 04 05 06 07 08 09 12 13 14 15 16 17 18 21 22 23 24 25 2
     for i in ids.split():
         LEVEL[f"M{i}"] = lvl
 META = {"M01", "M63", "M64", "M65"}
+LEVEL.update({"M66": "L3", "M67": "L3", "M68": "L2"})
 NA = {"M57": "no connectors ship with the reference engine"}
 
 
 def musts():
+    """MUSTs carry stable ids in the spec text as `[Mnn]`. Sentences with MUST/REQUIRED but no id are reported."""
     s = open(os.path.join(ROOT, "spec", "ORP-0.1.md")).read()
-    sec, out = "0", []
+    sec, out, missing = "0", [], []
     for line in s.split("\n"):
         m = re.match(r"^#{2,3} (\d+(\.\d+)?|Appendix \w)", line)
         if m:
             sec = m.group(1)
         if "RFC 2119" in line:
             continue
-        for sent in re.split(r"(?<=[.;])\s+(?=[A-Z`(])", line):
+        for sent in re.split(r"(?<=[.;\]])\s+(?=[A-Z`(])", line):
             if re.search(r"\bMUST\b|\bREQUIRED\b", sent):
-                out.append((sec, sent.strip().lstrip("-| ").strip()))
-    return [(f"M{i:02d}", sec, t) for i, (sec, t) in enumerate(out, 1)]
+                ids = re.findall(r"\[(M\d{2})\]", sent)
+                text = re.sub(r"\s*\[M\d{2}\]", "", sent).strip().lstrip("-| ").strip()
+                if not ids:
+                    missing.append(text[:80])
+                for i in ids:
+                    out.append((i, sec, text))
+    if missing:
+        print("MUST sentences without an id:", missing)
+    return sorted(out)
 
 
 def tests():
