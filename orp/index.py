@@ -39,10 +39,13 @@ class BM25:
         self.avg = float(lens.mean()) if self.n else 1.0
         self._norm = k1 * (1 - b + b * lens / max(self.avg, 1e-6))
 
-    def score(self, q: str, weights: dict[str, float] | None = None, mask: np.ndarray | None = None) -> np.ndarray:
+    def score(self, q: str, weights: dict[str, float] | None = None, mask: np.ndarray | None = None,
+              exact: bool = False) -> np.ndarray:
+        """exact=True (the ORP engine) always takes the masked computation when a mask is given, so a store and the
+        same store with inadmissible documents removed produce bit-identical scores (M67)."""
         out = np.zeros(self.n, dtype=np.float32)
         qt = Counter(terms(q)) if weights is None else weights
-        if mask is not None and not mask.all():
+        if mask is not None and (exact or not mask.all()):
             nm = int(mask.sum())
             if nm == 0:
                 return out

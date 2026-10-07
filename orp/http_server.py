@@ -24,14 +24,8 @@ _LOCK = threading.RLock()
 
 def make_handler(svc: Service, keys: dict[str, Principal], store: str | None):
     def persist():
-        if not store:
-            return
-        tenants = {p.tenant for p in keys.values()}
-        data = {t: svc.export(Principal("system", frozenset({"*"}), tenant=t)) for t in tenants}
-        tmp = store + ".tmp"
-        with open(tmp, "w") as f:
-            json.dump(data, f)
-        os.replace(tmp, store)
+        if store:
+            svc.save(store)  # full state: records, idempotency keys, re-ingest blocks, change feeds, audit log
 
     class H(BaseHTTPRequestHandler):
         server_version = "orp-reference/0.1"
@@ -89,7 +83,7 @@ def make_handler(svc: Service, keys: dict[str, Principal], store: str | None):
                     elif method == "GET" and verb == "changes":
                         out = svc.changes(int(q.get("cursor", 0)), pr)
                     elif method == "GET" and verb == "jobs" and len(parts) == 4:
-                        out = svc.job(parts[3])
+                        out = svc.job(parts[3], pr)
                     elif method == "POST" and verb == "approve" and len(parts) == 4:
                         out = svc.approve(parts[3], pr)
                         persist()
@@ -102,7 +96,7 @@ def make_handler(svc: Service, keys: dict[str, Principal], store: str | None):
                 code = {"unauthorized": 401, "forbidden": 403, "not_found": 404, "version_conflict": 409,
                         "rate_limited": 429}.get(e.code, 400)
                 self._send(code, e.to_json())
-            except (KeyError, ValueError, json.JSONDecodeError) as e:
+            except (KeyError, ValueError, TypeError, AttributeError, json.JSONDecodeError) as e:
                 self._send(400, {"error": {"code": "invalid_parameter", "message": str(e), "details": {}}})
 
         def do_GET(self):
@@ -118,13 +112,16 @@ def make_handler(svc: Service, keys: dict[str, Principal], store: str | None):
 
 
 def build(keys_path: str | None, store: str | None, embedder: str | None):
-    raw = json.load(open(keys_path)) if keys_path else {"dev": {"id": "dev", "groups": ["*"], "tenant": "default"}}
+    if keys_path:
+        with open(keys_path) as f:
+            raw = json.load(f)
+    else:
+        raw = {"dev": {"id": "dev", "groups": ["*"], "tenant": "default"}}
     keys = {k: Principal(v["id"], frozenset(v.get("groups", [])), tenant=v.get("tenant", "default"))
             for k, v in raw.items()}
     svc = Service(embedders.load(embedder))
     if store and os.path.exists(store):
-        for tenant, bundle in json.load(open(store)).items():
-            svc.import_(bundle, Principal("system", frozenset({"*"}), tenant=tenant))
+        svc.load(store)
     return svc, keys
 
 

@@ -142,7 +142,7 @@ class Server:
             return
         touched = set()
         for c in feed["changes"]:
-            m = self.svc.engine.mem.get(c["id"])
+            m = self.svc.engine.mem.get(self.svc._in(self.pr.tenant, c["id"]))
             touched.add(f"orp://{self.pr.tenant}/mem/{c['id']}")
             if m is not None and m.thread:
                 touched.add(f"orp://{self.pr.tenant}/thread/{m.thread}")
@@ -152,12 +152,8 @@ class Server:
     def persist(self):
         if not self.store:
             return
-        b = self.svc.export(Principal("system", frozenset({"*"}), tenant=self.pr.tenant))
-        tmp = self.store + ".tmp"
         os.makedirs(os.path.dirname(os.path.abspath(self.store)), exist_ok=True)
-        with open(tmp, "w") as f:
-            json.dump({self.pr.tenant: b}, f)
-        os.replace(tmp, self.store)
+        self.svc.save(self.store)  # full state, every tenant
 
     # ------------------------------------------------------------ dispatch
     def handle(self, msg: dict) -> dict | None:
@@ -220,8 +216,9 @@ class Server:
                                   "text": json.dumps(r["memories"][0], default=str)}]}
         if parts[1] == "thread":
             th = "/".join(parts[2:])
-            ms = sorted((m for m in self.svc.engine.mem.values() if m.thread == th and self.svc._can_read(m, self.pr)
-                         and m.status not in ("retracted", "draft")), key=lambda m: m.seq)
+            view = self.svc._view(self.pr)  # same admissibility as recall
+            ms = sorted((self.svc.engine.mem[i] for i in view if self.svc.engine.mem[i].thread == th),
+                        key=lambda m: (m.seq, m.id))
             txt = "\n".join(f"{m.actor}: {m.content}" for m in ms)
             return {"contents": [{"uri": uri, "mimeType": "text/markdown", "text": txt}]}
         raise ORPError("not_found", uri)
@@ -307,8 +304,7 @@ def main():
                    tenant=os.environ.get("ORP_TENANT", "default"))
     svc = Service(embedders.load(a.embedder))
     if a.store and os.path.exists(a.store):
-        for tenant, bundle in json.load(open(a.store)).items():
-            svc.import_(bundle, Principal("system", frozenset({"*"}), tenant=tenant))
+        svc.load(a.store)
     Server(svc, pr, a.store).serve()
 
 

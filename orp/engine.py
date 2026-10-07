@@ -16,7 +16,7 @@ Recall pipeline:
   2. Channels (each nominates its own top `depth` candidates): BM25(unit), window (unit + admissible
      neighbours), BM25 over 2-sentence segments max-pooled to units, dense(unit), dense(window),
      dense(segments), thread relevance, entity match, temporal window, RM3 pseudo-relevance feedback,
-     optional query decomposition and embedding-neighbour expansion.
+     optional query decomposition.
   3. Weighted reciprocal-rank fusion -> candidate pool.
   4. Ranking: multiplicative features (ranker="rrf") or a learned model over declared features
      (ranker="gbdt" | "linear").
@@ -26,7 +26,9 @@ Recall pipeline:
 from __future__ import annotations
 
 import hashlib
+import hmac
 import math
+import os
 import re
 from collections import Counter, defaultdict
 from dataclasses import dataclass
@@ -118,18 +120,43 @@ class Engine:
         self.collect = False
         self.last = None
         self.mutations = 0
+        self.tmut: Counter = Counter()  # per-tenant mutation counters (snapshots never reveal other tenants)
+        self.tcount: Counter = Counter()
+        self._epoch = 0
+        self._wseq = 0
+        self._secret = os.urandom(16)
+        self._view_sup: dict[str, str] = {}
+        self._has_expiry = False
 
     # ------------------------------------------------------------ write
-    def touch(self):
+    def touch(self, tenant: str | None = None):
+        """Mark the index stale. With a tenant, only that tenant's snapshot changes; without one (maintenance)
+        every tenant's snapshot changes."""
         self.mutations += 1
+        if tenant is None:
+            self._epoch += 1
+        else:
+            self.tmut[tenant] += 1
         self._dirty = True
 
-    def remember(self, items: Memory | list[Memory], principal: Principal = SYSTEM) -> list[str]:
+    def remember(self, items: Memory | list[Memory], principal: Principal = SYSTEM,
+                 chain_only: bool = False) -> list[str]:
+        """Store memories. chain_only (import): register claim chains without adding supersession permissions,
+        which the bundle carries; the caller resolves chains afterwards."""
         if isinstance(items, Memory):
             items = [items]
-        ids = []
+        ids, touched = [], set()
         for m in items:
-            h = m.meta.get("idempotency_key") or m.content_hash()
+            writer = m.meta.setdefault("_creator", principal.id)
+            if m.derived_from:  # provenance-closed access (§6.3) and label inheritance, before de-duplication
+                acl, labels = self._closure(m)
+                if acl is not None:
+                    m.readers = frozenset(acl) if m.readers is None else frozenset(set(m.readers) & acl)
+                m.labels = sorted(set(m.labels) | labels)
+            # de-duplication is scoped to tenant, writer and audience (M17): never resolves to another
+            # principal's record, never crosses tenants
+            ik = m.meta.get("idempotency_key")
+            h = ("key", m.tenant, writer, ik) if ik else m.dedup_key(writer)
             if h in self._hash and self._hash[h] in self.mem:
                 ids.append(self._hash[h])
                 continue
@@ -137,18 +164,9 @@ class Engine:
                 m.observed_at = datetime.now()
             if m.valid_from is None:
                 m.valid_from = m.event_time or m.observed_at
-            if m.derived_from:  # provenance-closed access (§6.3) and label inheritance
-                acl, labels = None, set(m.labels)
-                for s in m.derived_from:
-                    sm = self.mem.get(s)
-                    if sm is None:
-                        continue
-                    if sm.readers is not None:
-                        acl = set(sm.readers) if acl is None else acl & set(sm.readers)
-                    labels |= {l for l in sm.labels if l in ("secret", "pii", "health", "legal")}
-                if acl is not None:
-                    m.readers = frozenset(acl) if m.readers is None else frozenset(set(m.readers) & acl)
-                m.labels = sorted(labels)
+            m.meta.setdefault("_valid_to", m.valid_to.isoformat() if m.valid_to else None)
+            self._wseq += 1
+            m.meta.setdefault("_wseq", self._wseq)
             if self.p.resolve_dates and m.observed_at and m.kind in ("event", "document"):
                 refs = timeparse.resolve_relative(m.content, m.event_time or m.observed_at)
                 if refs:
@@ -156,41 +174,110 @@ class Engine:
             m.meta.setdefault("entities", _entities(m.content))
             self.mem[m.id] = m
             self.order.append(m.id)
+            self.tcount[m.tenant] += 1
+            self._has_expiry |= m.expires_at is not None
             self._hash[h] = m.id
+            if ik:
+                self._hash.setdefault(m.dedup_key(writer), m.id)
             if m.claim is not None and m.kind not in ("event", "document"):
-                self._supersede(m)
+                if chain_only:
+                    ch = self._claims[(m.tenant, m.claim.key())]
+                    if m.id not in ch:
+                        ch.append(m.id)
+                else:
+                    self._supersede(m, principal)
             self.audit.append({"op": "remember", "id": m.id, "by": principal.id, "at": datetime.now().isoformat()})
             ids.append(m.id)
-        self.touch()
+            touched.add(m.tenant)
+        for t in touched:
+            self.touch(t)
         return ids
 
-    def _supersede(self, m: Memory):
+    SENSITIVE = ("secret", "pii", "health", "legal")
+
+    def _closure(self, d: Memory) -> tuple[set | None, set]:
+        """Intersection of the sources' readers (None = unrestricted) and the union of their sensitivity labels."""
+        acl, labels = None, set()
+        for s in d.derived_from:
+            sm = self.mem.get(s)
+            if sm is None:
+                continue
+            if sm.readers is not None:
+                acl = set(sm.readers) if acl is None else acl & set(sm.readers)
+            labels |= {l for l in sm.labels if l in self.SENSITIVE}
+        return acl, labels
+
+    # ---- supersession (§5.6)
+    def _sup_order(self, i: str):
+        m = self.mem[i]
+        return (m.valid_from or datetime.min, m.observed_at or datetime.min, m.meta.get("_wseq", 0))
+
+    @staticmethod
+    def _covers(new: frozenset | None, old: frozenset | None) -> bool:
+        if new is None:
+            return True
+        return old is not None and set(new) >= set(old)
+
+    @staticmethod
+    def in_chain(m: Memory) -> bool:
+        """Claim records whose current version is decided by the claim-key rule (not explicit supersession)."""
+        return (m.claim is not None and m.claim.cardinality == "one" and m.kind not in ("event", "document")
+                and not m.meta.get("_explicit_superseded"))
+
+    def _authored_valid_to(self, m: Memory):
+        v = m.meta.get("_valid_to")
+        return datetime.fromisoformat(v) if isinstance(v, str) else v
+
+    def _supersede(self, m: Memory, principal: Principal = SYSTEM):
+        """Register m in its claim chain. A newer claim may supersede an older one only if whoever wrote the later
+        of the two records may write the record being superseded; such pairs are recorded on the older record
+        (`_supersedable_by`). Recall applies them over the asker's admissible set (so as_of, known_at and ACLs all
+        apply: an asker who can read both versions sees the newer one). The STORED status (what get/history show
+        and what every reader inherits) changes only when, in addition, every reader of the older version can read
+        the newer one, so no reader ever loses a fact without seeing its replacement."""
         key = (m.tenant, m.claim.key())
         chain = self._claims[key]
         if m.id not in chain:
             chain.append(m.id)
         if m.claim.cardinality != "one":
             return
-        # validity order (world time), then transaction time: backfilled old facts never override newer ones
-        chain.sort(key=lambda i: (self.mem[i].valid_from or datetime.min, self.mem[i].observed_at or datetime.min))
-        live = [i for i in chain if self.mem[i].status in ("active", "superseded")]
-        for a, b in zip(live, live[1:]):
-            ma, mb = self.mem[a], self.mem[b]
-            if ma.claim.object.strip().lower() == mb.claim.object.strip().lower():
+        for oid in chain:
+            o = self.mem.get(oid)
+            if oid == m.id or o is None or not self.in_chain(o):
                 continue
-            if ma.status != "superseded" or ma.superseded_by != b:
-                ma.status, ma.superseded_by, ma.valid_to = "superseded", b, mb.valid_from
-                ma.version += 1
-            if a not in mb.supersedes:
-                mb.supersedes.append(a)
-        if live:
-            last = self.mem[live[-1]]
-            if last.status != "active" or last.valid_to is not None:
-                last.status, last.superseded_by, last.valid_to = "active", None, None
-                last.version += 1
+            old, new = (o, m) if self._sup_order(oid) < self._sup_order(m.id) else (m, o)
+            if old is o and not self.can_write(o, principal):
+                continue
+            lst = old.meta.setdefault("_supersedable_by", [])
+            if new.id not in lst:
+                lst.append(new.id)
+        self.resolve_chain(key)
+
+    def resolve_chain(self, key):
+        chain = sorted((i for i in self._claims.get(key, []) if i in self.mem), key=self._sup_order)
+        live = [i for i in chain if self.mem[i].status in ("active", "superseded") and self.in_chain(self.mem[i])]
+        for r, i in enumerate(live):
+            x = self.mem[i]
+            ok = set(x.meta.get("_supersedable_by", ()))
+            obj = x.claim.object.strip().lower()
+            succ = next((j for j in live[r + 1:] if j in ok and self.mem[j].claim.object.strip().lower() != obj
+                         and self._covers(self.mem[j].readers, x.readers)), None)
+            if succ is not None:
+                if x.status != "superseded" or x.superseded_by != succ:
+                    x.status, x.superseded_by, x.valid_to = "superseded", succ, self.mem[succ].valid_from
+                    x.version += 1
+            elif x.status != "active" or x.superseded_by is not None:
+                x.status, x.superseded_by, x.valid_to = "active", None, self._authored_valid_to(x)
+                x.version += 1
+        for i in live:  # supersedes links mirror superseded_by inside the chain
+            y = self.mem[i]
+            y.supersedes = [j for j in y.supersedes if j not in chain or self.mem[j].superseded_by == i]
+            for j in live:
+                if self.mem[j].superseded_by == i and j not in y.supersedes:
+                    y.supersedes.append(j)
 
     def reclose(self, mem_id: str) -> list[str]:
-        """Re-apply provenance-closed ACL to everything derived (transitively) from mem_id."""
+        """Re-apply provenance-closed ACL and sensitivity labels to everything derived (transitively) from mem_id."""
         changed, frontier, seen = [], [mem_id], set()
         while frontier:
             cur = frontier.pop()
@@ -198,33 +285,24 @@ class Engine:
                 if cur not in d.derived_from or d.id in seen:
                     continue
                 seen.add(d.id)
-                acl = None
-                for s in d.derived_from:
-                    sm = self.mem.get(s)
-                    if sm is not None and sm.readers is not None:
-                        acl = set(sm.readers) if acl is None else acl & set(sm.readers)
+                acl, labels = self._closure(d)
                 new = d.readers if acl is None else frozenset(acl if d.readers is None else set(d.readers) & acl)
-                if new != d.readers:
-                    d.readers = new
+                new_labels = sorted(set(d.labels) | labels)
+                if new != d.readers or new_labels != sorted(d.labels):
+                    d.readers, d.labels = new, new_labels
                     d.version += 1
                     changed.append(d.id)
                 frontier.append(d.id)
-        self.touch()
+        m = self.mem.get(mem_id)
+        self.touch(m.tenant if m else None)
         return changed
 
     def forget(self, mem_id: str, mode: str = "retract", cascade: bool = True, principal: Principal = SYSTEM,
                reason: str = "") -> list[str]:
         """retract: hidden from recall, kept for audit. redact: content and derived metadata erased.
         purge: record removed. cascade: derived memories are retracted/redacted too (no laundering)."""
-        hit = [mem_id]
-        if cascade:
-            frontier = [mem_id]
-            while frontier:
-                cur = frontier.pop()
-                for m in self.mem.values():
-                    if cur in m.derived_from and m.id not in hit:
-                        hit.append(m.id)
-                        frontier.append(m.id)
+        hit = self.cascade_set([mem_id], cascade)
+        tenant = self.mem[mem_id].tenant if mem_id in self.mem else None
         for i in hit:
             m = self.mem.get(i)
             if not m:
@@ -232,21 +310,57 @@ class Engine:
             if mode == "purge":
                 del self.mem[i]
                 self.order.remove(i)
+                self.tcount[m.tenant] -= 1
                 for k in [k for k, v in self._hash.items() if v == i]:
                     del self._hash[k]
+                if mode == "purge":
+                    self._forget_cached_text(m.content)
             else:
                 m.status = "retracted"
                 m.version += 1
                 if mode == "redact":
+                    self._forget_cached_text(m.content)
                     m.content = "[redacted]"
                     for k in ("time_refs", "entities"):
                         m.meta.pop(k, None)
                     if m.claim is not None:
-                        m.claim.object = "[redacted]"
+                        m.claim.subject = m.claim.predicate = m.claim.object = "[redacted]"
+                    for s in m.sources:
+                        s.span = s.hash = ""
             self.audit.append({"op": f"forget:{mode}", "id": i, "by": principal.id, "reason": reason,
                                "at": datetime.now().isoformat()})
-        self.touch()
+        for key in {(self.mem[i].tenant, self.mem[i].claim.key()) for i in hit
+                    if i in self.mem and self.mem[i].claim is not None}:
+            self.resolve_chain(key)  # a retracted superseder restores the version it replaced
+        self.touch(tenant)
         return hit
+
+    def cascade_set(self, ids: list[str], cascade: bool = True) -> list[str]:
+        """Memories affected by forgetting `ids`. With cascade, everything derived (transitively) from them. Without,
+        derived memories are still included when none of their sources remains (M28: a derived memory never keeps
+        facts its sources no longer support)."""
+        hit = list(dict.fromkeys(ids))
+        changed = True
+        while changed:
+            changed = False
+            hs = set(hit)
+            for m in self.mem.values():
+                if not m.derived_from or m.id in hs:
+                    continue
+                gone = [s in hs or s not in self.mem or self.mem[s].status == "retracted" for s in m.derived_from]
+                if (cascade and any(s in hs for s in m.derived_from)) or all(gone):
+                    hit.append(m.id)
+                    changed = True
+        return hit
+
+    def _forget_cached_text(self, content: str):
+        cache = getattr(self.emb, "_cache", None)
+        if not isinstance(cache, dict) or not content:
+            return
+        for key in list(cache):
+            body = key.split(": ", 1)[-1]
+            if content in key or (len(body) > 12 and body in content):
+                del cache[key]
 
     def history(self, subject: str, predicate: str, tenant: str = "default") -> list[Memory]:
         key = (tenant, f"{subject.lower().strip()}|{predicate.lower().strip()}")
@@ -309,18 +423,6 @@ class Engine:
                 self.d_kn[k] = float(self.E[k] @ self.E[n_])
             if p_ >= 0 and n_ >= 0:
                 self.d_pn[k] = float(self.E[p_] @ self.E[n_])
-        self.xv_terms, self.XV = [], np.zeros((0, 1))
-        if self.p.w_qexp > 0:
-            surf = {}
-            for t in unit_txt:
-                for w in words(t):
-                    if w in STOPWORDS or len(w) < 3 or w.isdigit():
-                        continue
-                    st = stem(w)
-                    if st in self.bm.vocab and st not in surf:
-                        surf[st] = w
-            self.xv_terms = list(surf)
-            self.XV = self.emb.embed_many([surf[s] for s in self.xv_terms]) if surf else np.zeros((0, 1))
         self.ent = defaultdict(set)
         for k, m in enumerate(ms):
             for e in m.meta.get("entities", []):
@@ -373,11 +475,15 @@ class Engine:
         return True
 
     def _mask(self, req: RecallRequest) -> np.ndarray:
+        """Admissible set (§5.1, §5.2). Everything here depends only on the memory itself and the request, except
+        the claim view at the end, which is computed over admissible memories only."""
         as_of = req.as_of or datetime.now()
+        now = datetime.now()  # retention is real time, not the as_of view (§7)
         labels = tuple(req.filters.get("labels", ()))
         drafts = bool(req.filters.get("drafts"))
         sc = req.scope.rstrip("/")
         ok = np.zeros(len(self.ids), dtype=bool)
+        chain_ks = []
         for k, i in enumerate(self.ids):
             m = self.mem[i]
             if not self.readable(m, req.principal, labels):
@@ -388,16 +494,52 @@ class Engine:
                 continue
             if req.known_at and m.observed_at and m.observed_at > req.known_at:
                 continue
-            if not (req.include_history or self.valid_at(m, as_of)):
+            if m.expires_at and m.expires_at <= now:
                 continue
-            if m.expires_at and m.expires_at <= as_of:
+            chain = self.in_chain(m)
+            if m.valid_from and m.valid_from > as_of:
+                continue  # nothing from after as_of, with or without history
+            vt = self._authored_valid_to(m) if chain else m.valid_to
+            if vt and as_of >= vt and not req.include_history:
                 continue
             if sc and not (m.scope == sc or m.scope.startswith(sc + "/")):
                 continue
             if req.kinds and m.kind not in req.kinds:
                 continue
             ok[k] = True
+            if chain:
+                chain_ks.append(k)
+        # claim view: an admissible version is current unless a newer admissible version that may supersede it
+        # (recorded at write time, §5.6) states a different object
+        self._view_sup = {}
+        by = defaultdict(list)
+        for k in chain_ks:
+            m = self.mem[self.ids[k]]
+            by[(m.tenant, m.claim.key())].append(self.ids[k])
+        for ids in by.values():
+            if len(ids) < 2:
+                continue
+            ids.sort(key=self._sup_order)
+            for r, i in enumerate(ids):
+                x = self.mem[i]
+                okset = set(x.meta.get("_supersedable_by", ()))
+                obj = x.claim.object.strip().lower()
+                succ = next((j for j in ids[r + 1:] if j in okset and
+                             self.mem[j].claim.object.strip().lower() != obj), None)
+                if succ is not None:
+                    self._view_sup[i] = succ
+                    if not req.include_history:
+                        ok[self.pos[i]] = False
         return ok
+
+    def admissible(self, req: RecallRequest) -> list[str]:
+        """Ids admissible for the request (the same set every recall channel draws from)."""
+        if self._dirty:
+            self._build()
+        if not self.ids:
+            return []
+        mask = self._mask(req)
+        return [self.ids[k] for k in np.flatnonzero(mask)]
 
     # ------------------------------------------------------------ recall
     def recall(self, req: RecallRequest) -> ContextPack:
@@ -405,12 +547,13 @@ class Engine:
             self._build()
         n = len(self.ids)
         if n == 0:
-            return ContextPack([], 0, req.budget_tokens, 0.0, self._snapshot())
+            return ContextPack([], 0, req.budget_tokens, 0.0, self._snapshot(req.principal.tenant))
         p = self.p
         now = req.as_of or datetime.now()
         mask = self._mask(req)
         if not mask.any():
-            return ContextPack([], 0, req.budget_tokens, 0.0, self._snapshot(), ["no admissible memories"])
+            return ContextPack([], 0, req.budget_tokens, 0.0, self._snapshot(req.principal.tenant),
+                               ["no admissible memories"])
         notes: list[str] = []
         q = req.query
         self._qtext = q
@@ -445,7 +588,7 @@ class Engine:
             return np.where(ix >= 0, arr[np.maximum(ix, 0)], 0.0)
 
         chans: dict[str, tuple[float, dict[int, int]]] = {}
-        s_bm_all = self.bm.score(q, mask=smask)
+        s_bm_all = self.bm.score(q, mask=smask, exact=True)
         s_bm = s_bm_all if smask is None else np.where(mask, s_bm_all, 0.0)
         chans["bm25"] = (p.w_bm25, topranks(s_bm))
         chans["bm25_win"] = (p.w_bm25_win, topranks(s_bm + 0.5 * (nb(s_bm, pm) + nb(s_bm, nm))))
@@ -462,7 +605,7 @@ class Engine:
         segmask = mask[self.seg_unit]
         ub = np.zeros(n)
         np.maximum.at(ub, self.seg_unit, np.where(segmask, self.bm_seg.score(
-            q, mask=segmask if p.admissible_stats else None), 0.0))
+            q, mask=segmask if p.admissible_stats else None, exact=True), 0.0))
         ud = np.full(n, -1.0)
         np.maximum.at(ud, self.seg_unit, self.ES @ qvec)
         chans["bm25_seg"] = (p.w_bm25_seg, topranks(ub))
@@ -476,8 +619,10 @@ class Engine:
                 th_d[t] = float(s_dense[ks].mean())
         live = np.array([bool(mask[ks].any()) if p.admissible_stats else True for ks in self.thread_units])
         lt = np.flatnonzero(live)
+        # ties between threads break on each thread's first ADMISSIBLE position (M68), never on hidden units
+        first = np.array([int(ks[mask[ks]].min()) if mask[ks].any() else n for ks in self.thread_units])
         th_rank = np.zeros(len(self.threads))
-        th_rank[lt] = _rrf([np.lexsort((lt, -th_b[lt])), np.lexsort((lt, -th_d[lt]))], len(lt), k=10)
+        th_rank[lt] = _rrf([np.lexsort((first[lt], -th_b[lt])), np.lexsort((first[lt], -th_d[lt]))], len(lt), k=10)
         chans["thread"] = (p.w_thread, topranks(th_rank[self.thread_of] + 1e-6))
         qents = set()
         for w in re.findall(r"\b[A-Z][a-zA-Z'\-]+\b", q):
@@ -497,29 +642,12 @@ class Engine:
             inwin = (self.ts >= lo) & (self.ts <= hi)
             if (inwin & mask).any():
                 chans["time"] = (p.w_time, topranks(inwin * (s_bm + 0.1 * (s_dense + 1)) + 1e-6 * inwin))
-        if p.w_qexp > 0 and len(self.xv_terms):
-            wq = {t: 1.0 for t in qset}
-            for w in set(words(q)):
-                if w in STOPWORDS or len(w) < 3:
-                    continue
-                v = self.emb.embed(w)
-                if not v.any():
-                    continue
-                sims = self.XV @ v
-                for j in np.argsort(-sims)[:3]:
-                    t = self.xv_terms[j]
-                    if sims[j] < p.qexp_min:
-                        break
-                    if t not in qset and self.bm.df(t, mask) > 0:
-                        wq[t] = max(wq.get(t, 0), p.qexp_weight * float(sims[j]))
-            if len(wq) > len(qset):
-                chans["qexp"] = (p.w_qexp, topranks(self.bm.score("", weights=wq, mask=mask)))
         parts = _split_query(q)
         self._n_parts = len(parts)
         if len(parts) >= 2 and p.w_sub > 0:
             sub = np.zeros(n)
             for pt in parts:
-                for k, r in topranks(self.bm.score(pt, mask=mask), 60).items():
+                for k, r in topranks(self.bm.score(pt, mask=mask, exact=True), 60).items():
                     sub[k] = max(sub[k], 1.0 / (10 + r))
             chans["sub"] = (p.w_sub, topranks(sub))
         fused0 = self._fuse(chans, n)
@@ -544,7 +672,7 @@ class Engine:
                 wq = {t: 1.0 for t in qset}
                 for t, v in exp.items():
                     wq[t] = wq.get(t, 0) + p.prf_mix * v / mx
-                chans["prf"] = (p.w_prf, topranks(self.bm.score("", weights=wq, mask=mask)))
+                chans["prf"] = (p.w_prf, topranks(self.bm.score("", weights=wq, mask=mask, exact=True)))
         fused = self._fuse(chans, n)
         cand = adm[np.lexsort((adm, -fused[adm]))][: max(req.max_items * 4, p.pool)]
         cand = [int(k) for k in cand if fused[k] > 0]
@@ -613,7 +741,7 @@ class Engine:
         if ti.window:
             notes.append(f"time:{ti.window[0].date()}..{ti.window[1].date()}")
         return ContextPack(items, sum(i.tokens for i in items), req.budget_tokens, round(float(cov), 3),
-                           self._snapshot(), notes)
+                           self._snapshot(req.principal.tenant), notes)
 
     def _admissible_neighbours(self, mask: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         """Previous/next admissible unit in thread order (skipping inadmissible ones, so gaps are invisible)."""
@@ -722,8 +850,10 @@ class Engine:
             m = self.mem[self.ids[k]]
             if quotas and m.kind in quotas and kcount[m.kind] >= int(quotas[m.kind]):
                 continue
-            if gran == "thread":
+            if gran == "thread" and self.thread_named[self.thread_of[k]]:
                 members = [int(x) for x in self.thread_units[self.thread_of[k]] if mask[x] and x not in emitted]
+            elif gran == "thread":
+                members = [k]  # an unthreaded memory is its own thread
             else:
                 members = [k]
                 pk, nk = pm[k], nm[k]
@@ -760,20 +890,30 @@ class Engine:
                 ds = d.strftime("%Y-%m-%d (%a)") if d else ""
                 lab = m.meta.get("thread_label") or (m.thread.split(":")[-1] if m.thread else "")
                 head = f"## {ds} · {lab}\n" if lab else f"## {ds}\n"
-                seen_threads.add(tkey)
-            label = "current" if self.valid_at(m, as_of) else ("superseded" if m.status == "superseded"
-                                                               else "historical")
+            if self.in_chain(m):
+                label = "superseded" if m.id in self._view_sup else "current"
+            else:
+                label = "current" if self.valid_at(m, as_of) else ("superseded" if m.status == "superseded"
+                                                                   else "historical")
             text = head + "\n".join(lines)
             if label != "current":
                 text = f"[{label}] " + text
+            tok = count_tokens(text)
+            if req.budget_tokens and used + tok > req.budget_tokens:
+                continue  # greedy: skip what does not fit, keep filling (never exceed the budget, M43)
+            if head:
+                seen_threads.add(tkey)
             emitted.update(members)
             kcount[m.kind] += 1
-            tok = count_tokens(text)
             used += tok
             why = {c: round(w / (p.rrf_k + r[k] + 1), 5) for c, (w, r) in chans.items() if k in r and w > 0}
             if feats is not None and k in fidx and p.ranker != "rrf":
                 fv = feats[fidx[k]]
-                why["features"] = {nme: round(float(v), 4) for nme, v in zip(self.FEATURES, fv) if v}
+                why["features"] = {nme: round(float(v), 4) for nme, v in zip(self.FEATURES, fv)
+                                   if v and nme not in p.drop_features}
+                for kk, vv in self._mult.get(k, {}).items():  # post-ranker multipliers are features too (M41)
+                    if kk in ("prefer", "order"):
+                        why["features"][kk] = round(float(vv), 4)
             else:
                 why["features"] = {kk: round(float(vv), 4) for kk, vv in self._mult.get(k, {}).items()}
             why["ranker"] = p.ranker
@@ -783,8 +923,6 @@ class Engine:
                                                             self.mem[self.ids[j]].sources] or mids,
                                      valid=label,
                                      turn_ids=[self.mem[self.ids[j]].meta.get("turn_id", self.ids[j]) for j in claimed]))
-            if req.budget_tokens and used >= req.budget_tokens:
-                break
         return items
 
     def _body(self, k: int, qterms: list[str]) -> tuple[str, float]:
@@ -808,8 +946,14 @@ class Engine:
         txt = " ".join(out)
         return txt, len(txt) / max(1, len(m.content))
 
-    def _snapshot(self) -> str:
-        return hashlib.sha1(f"{self.mutations}|{len(self.mem)}".encode()).hexdigest()[:16]
+    def _snapshot(self, tenant: str = "default") -> str:
+        """Per-tenant, keyed: changes on every write, forget, approval or ACL change in this tenant (and on
+        retention expiry), reveals nothing about other tenants (M52)."""
+        now = datetime.now()
+        exp = sum(1 for m in self.mem.values() if m.tenant == tenant and m.expires_at and m.expires_at <= now) \
+            if self._has_expiry else 0
+        msg = f"{tenant}|{self.tmut[tenant]}|{self._epoch}|{self.tcount[tenant]}|{exp}".encode()
+        return hmac.new(self._secret, msg, hashlib.sha256).hexdigest()[:16]
 
 
 # ---------------------------------------------------------------- helpers

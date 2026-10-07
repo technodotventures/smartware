@@ -11,18 +11,23 @@ Every test question is asked by every principal:
   forbidden  = the principal can read no gold turn       -> leakage
 Measured per strategy:
   recall@1000         on permitted questions
-  text_leak           share of questions whose packed context contains text (8-word shingles) from any unit the
-                      asker cannot read, in this tenant or the other one
+  text_leak           share of questions whose packed context contains text from any unit the asker cannot read, in
+                      this tenant or the other one (per line: 8-word shingles, or the whole line when it is shorter,
+                      counted only when that text occurs nowhere the asker can read)
   answer_leak         share of forbidden questions whose context contains a gold turn's text
-  rank_side_channel   share of sampled questions whose top-10 ranking changes when the asker's inadmissible
-                      memories are removed from the store (it should never change)
+  rank_side_channel   share of sampled questions whose top-10 items (memory ids, text and scores, at unit and auto
+                      granularity) change when the asker's inadmissible memories are removed from the store
+
+Turns are inserted in a seeded interleaved order across sessions (as channels interleave in a real workspace), so
+tie-breaks that depend on hidden units would show up.
 
 Strategies (same ranker everywhere; only access control differs):
   orp                ORP §5.1/§6.3: admissibility before ranking, admissible-set statistics, masked expansion
   global_stats       admissibility before ranking, but collection statistics and neighbour features computed over
                      all memories (common when a search engine filters by ACL inside a shared index)
-  post_filter@10/@50 rank everything, cut to top-k, then drop unreadable items (e.g. Letta tag filters after the
-                     limit, Hindsight graph-arm tag filtering after its cut; reports/letta.md, hindsight.md §12)
+  post_filter@10/@50 rank with the shared index (global statistics, same spans), cut to the top k items, then drop
+                     every unit the asker cannot read from each item (e.g. Letta tag filters after the limit, Hindsight graph-arm
+                     tag filtering after its cut; reports/letta.md, hindsight.md §12)
   scope_only         no per-item ACL inside a workspace (tenant/user scoping only)
   derived_bank       per-item ACL on raw units, but derived summaries are workspace-scoped (bank/dataset-level
                      consolidation, emulated with the engine's own extractive summaries)
@@ -38,7 +43,7 @@ from dataclasses import replace
 
 from orp.api import Service
 from orp.engine import Params
-from orp.model import Principal
+from orp.model import Principal, RecallRequest
 
 from .data import load_locomo
 from .encoders import DenseEncoder, Encoders
@@ -49,15 +54,31 @@ N_PRINCIPALS = 6
 
 
 def shingles(text: str, n: int = 8) -> set[str]:
-    w = re.findall(r"[a-z0-9']+", text.lower())
-    return {" ".join(w[i:i + n]) for i in range(max(0, len(w) - n + 1))}
+    """Per line, without a leading 'Speaker:' and without headers: 8-word shingles, or the whole line if shorter."""
+    out = set()
+    for line in text.split("\n"):
+        if line.startswith("## "):
+            continue
+        line = re.sub(r"^\[[a-z]+\] ", "", line)
+        line = line.split(": ", 1)[1] if re.match(r"^[^:]{1,40}: ", line) else line
+        w = re.findall(r"[a-z0-9']+", line.lower())
+        if not w:
+            continue
+        if len(w) < n:
+            out.add(" ".join(w))
+        else:
+            out |= {" ".join(w[i:i + n]) for i in range(len(w) - n + 1)}
+    return out
 
 
-def run(params: Params, visibility: float = 0.5, private_share: float = 0.2):
+def run(params: Params, visibility: float = 0.5, private_share: float = 0.2, max_tasks: int | None = None,
+        max_queries: int | None = None):
     enc = Encoders(DenseEncoder.load())
     tasks = [t for t in load_locomo() if t.queries and t.queries[0].split == "test"]
+    if max_queries:  # smoke runs only
+        tasks = [type(t)(t.corpus, t.queries[:max_queries]) if hasattr(t, "corpus") else t for t in tasks]
     rows = defaultdict(list)
-    for ti, task in enumerate(tasks):
+    for ti, task in enumerate(tasks[:max_tasks] if max_tasks else tasks):
         c = task.corpus
         other = tasks[(ti + 1) % len(tasks)].corpus  # second tenant, same thread ids
         rng = random.Random(f"gov2:{c.id}:{visibility}")
@@ -78,10 +99,18 @@ def run(params: Params, visibility: float = 0.5, private_share: float = 0.2):
         admin = Principal("admin", frozenset({"*"}), tenant="org")
         admin2 = Principal("admin2", frozenset({"*"}), tenant="org2")
 
+        # interleave sessions: a seeded merge that keeps each session's own order
+        queues = {s: [t for t in c.turns if t.session_id == s] for s in sessions}
+        orng = random.Random(f"gov2-merge:{c.id}")
+        order = []
+        while any(queues.values()):
+            live_s = [s for s in sessions if queues[s]]
+            order.append(queues[orng.choice(live_s)].pop(0))
+
         def build(acl: bool, derived: str, p: Params, exclude_for: str | None = None):
             svc = Service(enc.dense, p)
             mems = []
-            for t in c.turns:
+            for t in order:
                 if exclude_for and not can_read(exclude_for, t.id):
                     continue
                 rd = None if not acl else [f"group:dm:{t.id}"] if t.id in private else [f"group:ch:{t.session_id}"]
@@ -134,12 +163,17 @@ def run(params: Params, visibility: float = 0.5, private_share: float = 0.2):
                 body = {"query": q.text, "as_of": q.time.isoformat(), "budget": {"tokens": 4000}}
                 res = {name: to_items(V[name].recall(body, pr), V[name])
                        for name in ("orp", "global_stats", "scope_only", "derived_bank")}
-                full_pack = V["orp"].recall(body, admin)
-                eng = V["orp"].engine
-                for k in (10, 50):  # correct per-item ACL check on every memory in the item, after the cut
-                    keep = [it for it in full_pack["items"][:k]
-                            if all(eng.readable(eng.mem[mid], pr) for mid in it["memory_ids"] if mid in eng.mem)]
-                    res[f"post_filter@{k}"] = to_items({"items": keep}, V["orp"])
+                gl = V["global_stats"].engine  # shared index: statistics over every memory
+                upk = gl.recall(RecallRequest(query=q.text, principal=admin, tenant="org", as_of=q.time,
+                                              budget_tokens=None, max_items=50, filters={"granularity": "auto"}))
+                for k in (10, 50):  # shared-index ranking, cut to top k, then a per-unit ACL check inside each item
+                    keep = []
+                    for it in upk.items[:k]:
+                        ok = [mid for mid in it.memory_ids if gl.readable(gl.mem[mid], pr)]
+                        if ok:
+                            keep.append({"memory_ids": ok,
+                                         "text": "\n".join(f"{gl.mem[m].actor}: {gl.mem[m].content}" for m in ok)})
+                    res[f"post_filter@{k}"] = to_items({"items": keep}, V["global_stats"])
                 for name, its in res.items():
                     cov, used, kept = pack(its, 1000, chars4, True)
                     ctx = set().union(*(shingles(it.text) for it in kept)) if kept else set()
@@ -155,11 +189,16 @@ def run(params: Params, visibility: float = 0.5, private_share: float = 0.2):
                 full_store = build(True, "none", p_)
                 changed = n = 0
                 for q in task.queries[::3]:
-                    body = {"query": q.text, "as_of": q.time.isoformat(), "budget": {"tokens": 4000},
-                            "granularity": "unit"}
-                    a = [it["text"] for it in full_store.recall(body, prins[u])["items"][:10]]
-                    b = [it["text"] for it in clean.recall(body, prins[u])["items"][:10]]
-                    changed += a != b
+                    diff = False
+                    for g in ("unit", "auto"):
+                        body = {"query": q.text, "as_of": q.time.isoformat(), "budget": {"tokens": 4000},
+                                "granularity": g}
+
+                        def sig(svc):
+                            return [([svc.engine.mem[m].meta.get("turn_id") for m in it["memory_ids"]], it["text"],
+                                     it["score"]) for it in svc.recall(body, prins[u])["items"][:10]]
+                        diff |= sig(full_store) != sig(clean)
+                    changed += diff
                     n += 1
                 rows[name + ":side"].append(changed / max(1, n))
     out = {}
@@ -184,6 +223,7 @@ def final_params() -> Params:
 
 if __name__ == "__main__":
     vis = float(sys.argv[2]) if len(sys.argv) > 2 else 0.5
-    r = run(final_params(), vis)
+    smoke = int(sys.argv[3]) if len(sys.argv) > 3 else 0
+    r = run(final_params(), vis, max_tasks=smoke or None, max_queries=12 if smoke else None)
     print(json.dumps(r, indent=1))
     json.dump(r, open(sys.argv[1] if len(sys.argv) > 1 else "results/governance.json", "w"), indent=1)

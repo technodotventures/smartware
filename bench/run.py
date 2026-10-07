@@ -69,6 +69,7 @@ def make(name: str, **kw):
 
 def run_one(args):
     name, bench, split, opts = args
+    raw_dir = opts.pop("_raw", RAW)
     enc = Encoders(DenseEncoder.load())
     tasks = get_tasks(bench)
     rows, build_ms, q_ms = [], [], []
@@ -82,19 +83,20 @@ def run_one(args):
             sysm.build(task.corpus, enc)
             build_ms.append((time.perf_counter() - t0) * 1000)
             t2s = {t.id: t.session_id for t in task.corpus.turns}
+            ttext = {t.id: t.text for t in task.corpus.turns}
             for q in qs:
                 t1 = time.perf_counter()
                 items = sysm.retrieve(q, k=50)
                 q_ms.append((time.perf_counter() - t1) * 1000)
-                m = score_query(items, q.gold_turns, q.gold_sessions, t2s, q.answer)
+                m = score_query(items, q.gold_turns, q.gold_sessions, t2s, q.answer, ttext)
                 m.update(qid=q.qid, category=q.category, split=q.split, n_items=len(items))
                 rows.append(m)
     except Exception:
         traceback.print_exc()
         return name, bench, None
     tag = opts.get("_tag", "")
-    os.makedirs(os.path.join(RAW, bench), exist_ok=True)
-    with open(os.path.join(RAW, bench, f"{name}{tag}.{split}.jsonl"), "w") as f:
+    os.makedirs(os.path.join(raw_dir, bench), exist_ok=True)
+    with open(os.path.join(raw_dir, bench, f"{name}{tag}.{split}.jsonl"), "w") as f:
         for r in rows:
             f.write(json.dumps(r) + "\n")
     lat = sorted(q_ms)
@@ -132,9 +134,10 @@ def main(argv=None):
     ap.add_argument("--split", default="test")
     ap.add_argument("--workers", type=int, default=2)
     ap.add_argument("--out", default=os.path.join(ROOT, "results", "summary.json"))
+    ap.add_argument("--raw", default=RAW, help="directory for per-query results")
     a = ap.parse_args(argv)
     names = list(REGISTRY) if a.systems == "all" else a.systems.split(",")
-    jobs = [(n, b, a.split, {}) for b in a.bench.split(",") for n in names]
+    jobs = [(n, b, a.split, {"_raw": a.raw}) for b in a.bench.split(",") for n in names]
     if a.split == "test":  # append-only record of every test-split invocation
         try:
             head = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=ROOT, capture_output=True,
@@ -145,7 +148,7 @@ def main(argv=None):
             head, dirty = "?", True
         with open(os.path.join(ROOT, "results", "TEST_RUNS.log"), "a") as f:
             f.write(f"{_dt.datetime.now().isoformat()} git={head}{'+dirty' if dirty else ''} bench={a.bench} "
-                    f"systems={','.join(names)}\n")
+                    f"systems={','.join(names)} out={os.path.relpath(a.out, ROOT)}\n")
     summary = json.load(open(a.out)) if os.path.exists(a.out) else {}
     with Pool(a.workers) as p:
         for name, bench, s in p.imap_unordered(run_one, jobs):

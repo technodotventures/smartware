@@ -28,9 +28,17 @@ class Principal:
     groups: frozenset[str] = frozenset()
     tenant: str = "default"
 
+    TOKEN_NAMESPACES = ("group", "channel", "role", "label", "team", "org")
+
     def tokens(self) -> frozenset[str]:
-        return frozenset({f"principal:{self.id}", "public", *(f"group:{g}" for g in self.groups),
-                          *(g for g in self.groups if g.startswith("label:"))})
+        """Access tokens (spec §6.1): principal:<id>, public, group:<g> for every group, and a group that already
+        carries a declared namespace (channel:C07, role:auditor, label:secret) is also a token as written."""
+        out = {f"principal:{self.id}", "public", *(f"group:{g}" for g in self.groups)}
+        for g in self.groups:
+            ns = g.split(":", 1)[0] if ":" in g else ""
+            if ns in self.TOKEN_NAMESPACES:
+                out.add(g)
+        return frozenset(out)
 
 
 SYSTEM = Principal("system", frozenset({"*"}))
@@ -55,6 +63,7 @@ class Source:
     uri: str  # e.g. slack://C123/p1712345, file://notes/a.md#L10-14, turn://conv/S1/3
     span: str = ""
     hash: str = ""
+    observed_at: str = ""
 
 
 @dataclass
@@ -91,6 +100,12 @@ class Memory:
 
     def content_hash(self) -> str:
         return hashlib.sha256(f"{self.tenant}|{self.thread}|{self.actor}|{self.content}".encode()).hexdigest()[:32]
+
+    def dedup_key(self, writer: str) -> tuple:
+        """Content de-duplication key (spec §4.1, M17): scoped to tenant AND writer AND access, so a write never
+        resolves to (or reveals) a record another principal wrote or one with a different audience."""
+        rd = tuple(sorted(self.readers)) if self.readers is not None else None
+        return ("content", self.tenant, writer, rd, tuple(sorted(self.labels)), self.content_hash())
 
     def to_json(self) -> dict:
         d = asdict(self)

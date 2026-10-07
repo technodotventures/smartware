@@ -9,6 +9,11 @@ Primary metrics (no prefix): tokens = characters/4 (format-neutral; does not pen
 JSON or ids), greedy skip-and-continue packing (charitable to systems that return
 large items). Secondary metrics (prefix s_): word-and-punctuation token estimate,
 stop-at-first-overflow packing.
+
+Evidence-text recall (prefix e_, primary packing): a gold turn counts only if an item that claims it is in the
+context AND those items' text contains at least half of the turn's distinct content terms. This removes credit
+for snippets or sentence-level units that claim a long turn without carrying its content (same rule for every
+system).
 """
 from __future__ import annotations
 
@@ -58,8 +63,22 @@ def pack(items: list[Item], budget: int, counter=None, skip: bool = False) -> tu
     return covered, used, kept
 
 
+E_SHARE = 0.5
+
+
+def evidence_hit(kept: list[Item], tid: str, text: str) -> bool:
+    need = set(terms(text))
+    have = set()
+    for it in kept:
+        if tid in it.turn_ids:
+            have.update(terms(it.text))
+    if not need:
+        return any(tid in it.turn_ids for it in kept)
+    return len(need & have) >= E_SHARE * len(need)
+
+
 def score_query(items: list[Item], gold_turns: set[str], gold_sessions: set[str], turn2sess: dict[str, str],
-                answer: str = "") -> dict:
+                answer: str = "", turn_text: dict[str, str] | None = None) -> dict:
     out = {}
     ans = set(terms(answer)) if answer else set()
     for prefix, counter, skip in (("", chars4, True), ("s_", count_tokens, False)):
@@ -74,6 +93,9 @@ def score_query(items: list[Item], gold_turns: set[str], gold_sessions: set[str]
                 hit = len(cov & gold_turns)
                 out[f"{prefix}recall@{b}"] = hit / len(gold_turns)
                 out[f"{prefix}full@{b}"] = float(hit == len(gold_turns))
+                if turn_text is not None and not prefix:
+                    eh = sum(evidence_hit(kept, g, turn_text.get(g, "")) for g in gold_turns if g in cov)
+                    out[f"e_recall@{b}"] = eh / len(gold_turns)
             out[f"{prefix}tokens@{b}"] = used
     # session-level ranking (LongMemEval style recall_any / recall_all @k)
     ranked_sess = []

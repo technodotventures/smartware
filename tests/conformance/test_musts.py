@@ -31,10 +31,16 @@ class Records(unittest.TestCase):
         self.s = make_service()
 
     def test_M02_ids_unique_per_tenant(self):
-        self.s.remember({"memories": [ev("acme note", id="shared-id")]}, ACME_ROOT)
-        with self.assertRaises(ORPError) as e:
-            self.s.remember({"memories": [ev("other note", id="shared-id")]}, OTHER_ROOT)
-        self.assertEqual(e.exception.code, "invalid_parameter")
+        # the same client id in two tenants names two independent records; neither tenant can detect the other
+        a = self.s.remember({"memories": [ev("acme note", id="shared-id")]}, ACME_ROOT)["ids"]
+        b = self.s.remember({"memories": [ev("other note", id="shared-id")]}, OTHER_ROOT)["ids"]
+        self.assertEqual(a, ["shared-id"])
+        self.assertEqual(b, ["shared-id"])
+        self.assertEqual(self.s.get(["shared-id"], ACME_ROOT)["memories"][0]["content"], "acme note")
+        self.assertEqual(self.s.get(["shared-id"], OTHER_ROOT)["memories"][0]["content"], "other note")
+        with self.assertRaises(ORPError) as e:  # same tenant, same id: a conflict, not a silent overwrite
+            self.s.remember({"memories": [ev("acme again", id="shared-id")]}, ACME_ROOT)
+        self.assertEqual(e.exception.code, "version_conflict")
 
     def test_M03_tenant_is_hard_boundary_even_for_admins(self):
         ids = self.s.remember({"memories": [ev("acme secret roadmap", thread="general")]}, ACME_ROOT)["ids"]
@@ -360,7 +366,9 @@ class Governance(unittest.TestCase):
         holder = Principal("sam", frozenset({"label:secret"}), tenant="acme")
         self.assertNotIn("sk-test", texts(recall(self.s, holder, "staging key")))  # must also ask for it
         self.assertIn("sk-test", texts(recall(self.s, holder, "staging key", include={"labels": ["secret"]})))
-        self.assertEqual(len(self.s.get(ids, holder)["memories"]), 1)
+        self.assertEqual(self.s.get(ids, holder)["memories"], [])  # get applies the same two conditions
+        self.assertEqual(len(self.s.get(ids, holder, labels=("secret",))["memories"]), 1)
+        self.assertEqual(self.s.get(ids, ALICE, labels=("secret",))["memories"], [])
 
     def test_M60b_derived_inherits_secret_label(self):
         a = self.s.remember({"memories": [ev("prod password hunter2", labels=["secret"], thread="t")]}, ADMIN)["ids"][0]

@@ -1,6 +1,6 @@
 # Open Recall Protocol (ORP) 0.1
 
-**Status:** Draft for review, revision 0.1.1 (after independent audit) · **Editor:** Steve Ghiassi, Techno Ventures · **Date:** October 2026
+**Status:** Draft for review, revision 0.1.2 (after two independent audits) · **Editor:** Steve Ghiassi, Techno Ventures · **Date:** October 2026
 **Working name.** "Open Recall Protocol" is a placeholder until a name is chosen.
 
 ORP is an open protocol for how AI agents and SaaS platforms **store, govern and recall** memory and context. It defines a memory record, a small set of verbs, normative recall semantics, an access-control model that holds up in multi-tenant products, transport bindings for MCP and HTTP, and a conformance and evaluation suite. A reference engine and benchmark harness ship with the spec.
@@ -21,7 +21,7 @@ We read the source of 15 leading open-source memory and "brain" projects (Graphi
 6. **Knobs lie.** We found parameters that are accepted but ignored in several projects (for example Onyx `hybrid_alpha`, MemOS `reference_time` and `visibility`, MemOS MCP `filter`; see Appendix C).
 7. **Benchmarks are not reproducible.** Headline LoCoMo/LongMemEval numbers mostly come from hosted engines, unpinned external harnesses, generous judges or tuning on the scored set.
 
-ORP turns the best mechanisms we found into requirements, and turns each failure into a MUST NOT. [M01]
+ORP turns the best mechanisms we found into requirements, and turns each failure into a prohibition. (Ids M01, M63 and M64 are retired: they described this document, not engines. Ids are never reused.)
 
 ## 1. Design principles
 
@@ -151,8 +151,8 @@ All verbs take a `principal` (bound server-side from credentials, never from mod
 ```
 
 - `mode`: `append` (default) · `upsert` (by client id, requires `if_version` when the record exists) · `supersede` (explicitly replaces `supersedes[]`) · `propose` (creates `draft` for approval).
-- Engines MUST be idempotent on `idempotency_key` (or, absent one, on `(tenant, thread, actor, content-hash)` within a declared window) and MUST return the original ids on replay. [M17]
-- Engines MUST reject unknown top-level fields and unsupported enum values with `unsupported_parameter`, not ignore them (P5). [M18]
+- Engines MUST be idempotent on `idempotency_key` (or, absent one, on content) and MUST return the original ids on replay. [M17] Idempotency and content de-duplication MUST be scoped to the tenant and the authenticated writer, and content de-duplication also to the record's `readers` and `labels`: a write never resolves to, replaces or reveals a record another principal wrote, and never crosses tenants; the window MUST be declared in `capabilities.dedup`. [M70]
+- Engines MUST reject unknown fields and unsupported enum values, at every nesting level, with `unsupported_parameter`, and values of the wrong type with `invalid_parameter`; they never ignore or coerce them (P5). [M18]
 - `wait`: `accepted \| stored \| indexed`. The response states which stage was reached, so clients get read-your-writes when they need it.
 - Engines SHOULD resolve relative time expressions against `observed_at` at write time and store the absolute value (e.g. "last month" observed on 2026-05-12 → `event_time ≈ 2026-04`), keeping the original text.
 - `origin: observed` records are evidence and MUST NOT be rewritten by consolidation. [M19]
@@ -172,7 +172,6 @@ Request:
   "budget": {"tokens": 1500, "items": 50},
   "granularity": "auto",
   "include": {"history": false, "drafts": false, "neighbours": "auto", "explain": true},
-  "time": {"window": null, "order": null},
   "mode": "balanced",
   "min_coverage": null,
   "cursor": null
@@ -180,9 +179,9 @@ Request:
 ```
 
 - `as_of` defaults to the request time. It sets the validity view (§5.2) **and** the "now" for all relative reasoning and recency. Engines MUST NOT use wall-clock time when `as_of` is given. [M20]
-- `known_at` answers "what did we know then?" by excluding records observed after it.
+- `known_at` answers "what did we know then?": records observed after it are inadmissible, and which version of a claim is current is decided among the remaining records only, so a correction learned later does not hide what was known then. [M76] A request without `as_of` is evaluated at the engine's clock; the resolved `as_of` is part of the request's identity for determinism (§5.9).
 - `scope.within` narrows admissibility by path segment (`org/acme` covers `org/acme/...`, not `org/acme-x`); `scope.prefer` is a soft prior that MUST NOT filter. [M21]
-- `kinds` is a list (restrict to these kinds) or a per-kind quota map (at most N items of each kind). Engines MUST honour both forms or reject them. [M22]
+- `kinds` is a list (restrict to these kinds) or a per-kind quota map (restrict to the listed kinds, at most N items of each). Engines MUST honour both forms or reject them. [M22]
 - `budget.tokens` is a hard cap on the rendered pack. Engines MUST report the tokeniser they count with. [M23] If omitted, the engine's default budget applies and MUST be declared in `capabilities.defaults`. [M24]
 - `granularity`: `unit \| span \| thread \| auto`. `auto` lets the engine return dialogue spans (§5.5).
 - `mode`: `fast` (no second pass), `balanced` (default), `deep` (may use model-based reranking or query decomposition; MUST declare it in `explain`). [M25]
@@ -225,8 +224,9 @@ Returns `load: always` memories for a subject (user, agent, team) within a token
 ```
 
 - `dry_run: true` MUST return the full set of ids that would be affected (including cascaded derived memories) and change nothing. [M27]
-- `cascade` retracts or re-derives every memory whose `derived_from` includes an affected id, transitively. A summary MUST NOT keep facts its sources no longer support. [M28]
-- `retract` blocks re-ingestion of the same content hash by new writes unless the request sets `allow_reingest`. A replay of the original write with the same `idempotency_key` still returns the original ids (now `retracted`); it does not re-create the memory.
+- `cascade: true` (the default) retracts or re-derives every memory whose `derived_from` includes an affected id, transitively. With `cascade: false`, derived memories that keep at least one other active source stay; those left with none are forgotten anyway. A derived memory MUST NOT keep facts its sources no longer support. [M28]
+- `retract` blocks re-ingestion of the same content by new writes, and blocks `upsert` of the retracted record, unless the write sets `allow_reingest`. The block applies only to writers who could read (or wrote) the retracted record, so it never tells anyone that hidden content existed. A replay of the original write with the same `idempotency_key` still returns the original ids (now `retracted`); it does not re-create the memory.
+- `dry_run` and the response list only ids the caller may read. Cascaded records the caller cannot read are still forgotten.
 - Forget on records readable by others REQUIRES `writers` permission, not just read permission.
 - Over MCP, engines SHOULD use elicitation to confirm destructive forgets (§8.1).
 
@@ -251,7 +251,7 @@ Starts an async job that produces derived memories (`observation`, `summary`, `p
 
 ### 5.1 Admissibility comes first
 
-Before any channel scores a candidate, the engine MUST compute the admissible set: same tenant; [M32] `readers ∩ principal.tokens ≠ ∅` (or `readers = null`); status admissible under §5.2; `observed_at ≤ known_at` if given; within `scope.within`; matching `kinds`. Every channel (lexical, dense, graph, temporal, entity, neighbour expansion, profile) MUST draw only from the admissible set, and collection statistics used for scoring (document frequencies, average lengths, thread and window aggregates, feature normalisers) MUST be computed over the admissible set, so that inadmissible memories cannot change the ranking an asker sees. [M33] Neighbour relations used for ranking or expansion MUST be computed over admissible units only (a unit's neighbour is the nearest admissible unit in thread order), so that the existence of hidden units is not revealed either. [M66] Equivalently: for any principal, recall over a store MUST return exactly what it would return over the same store with every memory that principal cannot read removed. [M67] Filtering after a top-k cut is non-conformant: it leaks information through ranking and, when the asker can read only a small share of memory, it silently loses recall (ORP-Bench governance: at 15% visibility, filtering after the top 10 loses 11.7 points of recall).
+Before any channel scores a candidate, the engine MUST compute the admissible set: same tenant; [M32] `readers ∩ principal.tokens ≠ ∅` (or `readers = null`); status admissible under §5.2; `observed_at ≤ known_at` if given; within `scope.within`; matching `kinds`. Every channel (lexical, dense, graph, temporal, entity, neighbour expansion, profile) MUST draw only from the admissible set, and collection statistics used for scoring (document frequencies, average lengths, thread and window aggregates, feature normalisers) MUST be computed over the admissible set, so that inadmissible memories cannot change the ranking an asker sees. [M33] Neighbour relations used for ranking or expansion MUST be computed over admissible units only (a unit's neighbour is the nearest admissible unit in thread order), so that the existence of hidden units is not revealed either. [M66] Equivalently: for any principal, recall over a store MUST return exactly what it would return over the same store with every memory that principal cannot read removed. [M67] Filtering after a top-k cut is non-conformant: it leaks information through ranking and, when the asker can read only a small share of memory, it silently loses recall. ORP-Gov (§10) measures both effects.
 
 ### 5.2 Validity view
 
@@ -276,7 +276,7 @@ Engines MAY apply declared features after fusion: query coverage, actor/subject 
 
 ### 5.6 Supersession
 
-When two active `fact`/`preference` memories share a claim key `(subject, predicate)` with `cardinality: one` and different objects, the one with the later `valid_from` (then later `observed_at`) is current; the other becomes `superseded` with `valid_to` set to the newer `valid_from`. Ordering MUST use event/validity time, not ingestion order, so backfilled old data never overrides newer facts. [M48] Engines MUST NOT supersede on similarity alone without exposing the decision (`supersedes` link + `why.superseded_by_rule`). [M49] `cardinality: many` claims never supersede each other.
+When two `fact` or `preference` memories share a claim key `(subject, predicate)` with `cardinality: one` and different objects, the one with the later `valid_from` (then later `observed_at`) supersedes the other, subject to two conditions. Ordering MUST use event or validity time, not ingestion order, so backfilled old data never overrides newer facts. [M48] A version may supersede another only if whoever wrote the later-written of the two may write the superseded record; recall applies such pairs over the asker's admissible set, so an asker who can read both versions sees the newer one. The stored status (`superseded`, `superseded_by`, `valid_to`, which every reader of the old version inherits) changes only when, in addition, every reader of the older version can read the newer one. Nobody can hide a fact they cannot write, and no reader loses a fact without seeing its replacement. [M69] Engines MUST NOT supersede on similarity alone without exposing the decision (a `supersedes` link plus `why.superseded_by_rule`). [M49] `cardinality: many` claims never supersede each other. Retracting a superseding version restores the version it replaced.
 
 ### 5.7 Coverage and abstention
 
@@ -288,7 +288,7 @@ If any channel, index or model is unavailable, the response MUST list it in `deg
 
 ### 5.9 Determinism
 
-Given the same request and `snapshot`, an engine MUST return the same pack. [M52] `snapshot` identifies the index state used and changes on every write, forget, approval or ACL change. Ties MUST be broken by a rule that does not depend on inadmissible memories (e.g. by position among admissible units). [M68]
+Given the same request and `snapshot`, an engine MUST return the same pack. [M52] `snapshot` identifies the index state used and changes on every write, forget, approval, ACL change or retention expiry in the tenant. Snapshots and change-feed cursors MUST be per tenant and MUST NOT reveal anything about other tenants (for example a global write counter). [M73] Ties MUST be broken by a rule that does not depend on inadmissible memories (e.g. by position among admissible units). [M68]
 
 ### 5.10 Declared rankers
 
@@ -302,11 +302,11 @@ A single recall MAY span several scopes the principal can read (organisation, te
 
 ### 6.1 Principals and tokens
 
-Credentials bind to a principal server-side. The engine computes `principal.tokens` (`principal:<id>`, `group:<g>`, `channel:<c>`, `role:<r>`, `public`). Clients MUST NOT be able to assert tokens through tool arguments. [M56] Connectors MUST write source-system ACLs into `readers` at ingest and keep them in sync through `remember(mode: upsert)` with metadata-only updates (no re-embedding). [M57]
+Credentials bind to a principal server-side. Access tokens have the form `principal:<id>`, `public`, or `<namespace>:<value>` with namespace `group`, `channel`, `role`, `label`, `team` or `org` (engines MAY declare more in `capabilities.tokens`). A principal holds `principal:<its id>`, `public`, `group:<g>` for each group membership, and every namespaced membership it holds as written (membership `channel:C07` is token `channel:C07`). Engines MUST compute tokens this way. [M77] Clients MUST NOT be able to assert tokens through tool arguments. [M56] The engine records the authenticated writer of every record (`written_by`); `actor` is client-asserted attribution. Connectors MUST write source-system ACLs into `readers` at ingest and keep them in sync through `remember(mode: upsert)` with metadata-only updates (no re-embedding). [M57]
 
 ### 6.2 Read and write are separate
 
-`readers` controls recall, get, neighbours, profile, export. `writers` controls upsert, supersede, forget, approve. Get-by-id, neighbours and history MUST check `readers` exactly like recall. [M58]
+`readers` controls recall, get, neighbours, profile, export. `writers` controls upsert, supersede, forget, approve. Get-by-id, neighbours and history MUST check `readers` exactly like recall. [M58] Responses MUST NOT contain ids of records the caller cannot read, including links (`supersedes`, `superseded_by`, `derived_from`), `forget` results and change feeds. [M74]
 
 ### 6.3 Provenance-closed access (the laundering rule)
 
@@ -316,11 +316,11 @@ For any derived memory `d` with sources `S = derived_from(d)`:
 readers(d) ⊆ ⋂_{s ∈ S} readers(s)
 ```
 
-with `null` treated as the universal set. Engines MUST enforce this at write time (narrowing `readers(d)`) and on every source ACL change (re-narrowing or retracting `d`). [M59] A summary, profile, observation, edge or entity description built from a private DM can therefore never surface in a shared channel. Derived memories also inherit their sources' sensitivity labels (§6.4).
+with `null` treated as the universal set. Engines MUST enforce this at write time (narrowing `readers(d)`) and on every source ACL change (re-narrowing or retracting `d`). [M59] Derived memories also inherit their sources' sensitivity labels (§6.4), at write time and whenever a source's labels change. [M72] A summary, profile, observation, edge or entity description built from a private DM can therefore never surface in a shared channel. A consolidation job MUST NOT supersede a derived memory whose audience differs from its output's. [M31]
 
 ### 6.4 Labels and redaction
 
-Memories labelled `secret` MUST NOT be returned unless the request includes the label in `include.labels` and the principal holds `label:secret`. [M60] `redact` erases content in the record and every derived record and index, keeping an auditable tombstone.
+Memories labelled `secret` MUST NOT be returned by any verb unless the request includes the label (`include.labels`, or `labels` on `get`) and the principal holds `label:secret`; export requires `label:secret`. [M60] `redact` erases content in the record and every derived record and index (including claim fields, source spans and hashes, and embedding caches), keeping an auditable tombstone.
 
 ### 6.5 Audit
 
@@ -331,6 +331,7 @@ Every write, forget, approval and ACL change is appended to a tenant audit log `
 - **Tiers.** Raw evidence (`event`, `document`) is lossless and never rewritten. Derived tiers (`fact`, `preference`, `procedure`, `observation`, `summary`, `profile`) are rebuildable.
 - **Consolidation** runs as `reflect` jobs with declared triggers (`every N units`, `on thread close`, `nightly`, `on compaction`), never inline in `remember` unless `wait: indexed` asks for it.
 - **Forgetting** is explicit (`forget`), time-based (`expires_at`) or policy-based (declared per scope). Silent FIFO or LFU deletion is non-conformant. Reads MUST NOT mutate state (no heat counters on read); usage signals go through `feedback(used)`. [M61]
+- **Retention** is enforced in real time: a record past its `expires_at` is never returned, whatever the request's `as_of`. Time travel is a view over validity, not a way round retention. [M75] (This is the one place an engine reads its clock during recall; it changes the snapshot, §5.9.)
 - **Procedures** (standing rules, skills) are versioned memories with `load: always|on_scope`, created through `propose` and activated by approval.
 
 ## 8. Bindings
@@ -362,7 +363,7 @@ ORP over MCP maps verbs to tools with JSON Schema `inputSchema` and `outputSchem
 
 ### 8.3 Bundle format
 
-An ORP bundle is a directory or `.orp` zip containing `manifest.json` (spec version, tenant, counts, hashes, engine capabilities, consolidation config), `memories.jsonl` (records, all tiers, all statuses including tombstones), `edges.jsonl`, `audit.jsonl` (optional) and `render/` (optional Markdown rendering: one file per thread or entity, frontmatter = record fields). Import MUST be lossless: `export → import → export` yields identical `memories.jsonl` modulo engine-assigned ids, which are remapped through `manifest.id_map`. [M62] Secrets in `meta` are scrubbed unless the exporter holds `label:secret`.
+An ORP bundle is a directory or `.orp` zip containing `manifest.json` (spec version, tenant, counts, hashes, engine capabilities, consolidation config), `memories.jsonl` (records, all tiers, all statuses including tombstones), `edges.jsonl`, `audit.jsonl` (optional) and `render/` (optional Markdown rendering: one file per thread or entity, frontmatter = record fields). Import is restricted to tenant administrators, because bundles carry engine-set fields such as `observed_at`; every record and edge MUST belong to the importing tenant, edges MUST connect records of that tenant, and closure, labels, de-duplication and claim chains MUST be re-applied. [M71] Import MUST be lossless: `export → import → export` yields identical `memories.jsonl` modulo engine-assigned ids, which are remapped through `manifest.id_map`. [M62] Secrets in `meta` are scrubbed unless the exporter holds `label:secret`.
 
 ## 9. Conformance
 
@@ -373,7 +374,7 @@ An ORP bundle is a directory or `.orp` zip containing `manifest.json` (spec vers
 | L3 | Governed | Pre-ranking admissibility on every channel and verb, removal equivalence, provenance-closed ACL, read/write separation, redact with cascade, `dry_run`, audit, per-session subscriptions |
 | L4 | Adaptive | `reflect` jobs with lineage, `feedback` incl. draft→final, `profile` with budget, rule proposals via `draft`, bundle export/import round-trip |
 
-`spec/MUSTS.md` lists every MUST in this document with a stable id, its level and the conformance test (`tests/conformance/`) that checks it. [M63] A MUST without a test is listed as untested. [M64] An engine claims a level only if it passes every test at that level, and MUST NOT claim a level containing a MUST it knowingly violates. [M65]
+`spec/MUSTS.md` lists every requirement in this document with its stable id, level and the conformance tests (`tests/conformance/`) that check it, and marks requirements without a test as untested. An engine claims a level only if it passes every test at that level, and MUST NOT claim a level containing a MUST it knowingly violates. [M65]
 
 ## 10. Evaluation (ORP-Bench)
 
