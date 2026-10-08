@@ -188,6 +188,45 @@ def facts_track() -> list[str]:
     return md
 
 
+def retuned_track() -> list[str]:
+    """Re-tuned fact track (pre-registered in METHODOLOGY): knobs and ORP's ranker refitted on dev fact stores,
+    configuration chosen on dev (results/facts_dev2.json), scored once per benchmark."""
+    D = load("facts_dev2.json")
+    if not D:
+        return []
+    md = ["## Re-tuned LLM-extraction track", "",
+          "Same shared facts; every baseline's knobs re-tuned on dev fact stores and ORP's ranker refitted on them; "
+          "each system's configuration (raw turns, facts, facts re-tuned; ORP also evidence plus facts) chosen on "
+          "dev. HotpotQA-50 has no dev split, so it uses each system's best mean dev configuration; it is the only "
+          "benchmark whose test results had not been seen.", ""]
+    for bench, title in (("locomo", "LoCoMo-10 test, n=1152"), ("lme", "LME-R test, n=382"),
+                         ("hotpot", "HotpotQA-50 (held out), n=50")):
+        F = load(f"summary_ft_{bench}.json").get(bench, {}).get("test", {})
+        if not F:
+            continue
+        ch = D["choice"][bench]
+        orp = ch["orp"]
+        pool = {ch[b]: F[ch[b]] for b in BASE if ch.get(b) in F}
+        mets = [m for m in METRICS if m[0] in HEAD and m[0] != "e_recall@1000"] if bench != "hotpot" else \
+            [("ans@500", "Ans@500"), ("ans@1000", "Ans@1000"), ("ans@2000", "Ans@2000"), ("ans@4000", "Ans@4000")]
+        summ = {**pool, "orp": F[orp]}
+        vt, t = verdict(bench, summ, list(pool), mets, orp=orp)
+        for k in t:
+            RETUNED[k] = RETUNED.get(k, 0) + t[k]
+        md += [f"### {title}", "", f"ORP configuration chosen on dev: `{orp}`. Against the best of the 15: "
+               f"**{t['win']} better, {t['tie']} no significant difference, {t['loss']} worse**.", "", vt, ""]
+        rows = ["| System (configuration) | " + " | ".join(h for _, h in mets) + " |", "|---|" + "---|" * len(mets)]
+        for n in [orp] + sorted(pool, key=lambda n: -(F[n].get(mets[1][0]) or 0)) + ["bm25+facts"]:
+            if n in F:
+                rows.append(f"| {'**ORP**' if n == orp else label(n.split('@')[0]) if '@' in n else '_BM25 (facts)_'}"
+                            f" `{n}` | " + " | ".join(f(F[n].get(k)) for k, _ in mets) + " |")
+        md += rows + [""]
+    return md
+
+
+RETUNED: dict = {}
+
+
 TRACK: dict = {}
 
 
@@ -266,6 +305,7 @@ def main():
                  f"ORP is better on {tally_all['win']}, not significantly different on {tally_all['tie']} and worse on "
                  f"{tally_all['loss']}.**\n")
     md += facts_track()
+    md += retuned_track()
     for vis in ("50", "15"):
         G = load(f"governance_v{vis}.json")
         if not G:

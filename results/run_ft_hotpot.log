@@ -1,0 +1,17 @@
+hotpot  bm25+facts                   R@500=0.000 R@1000=0.000 R@2000=0.000 sR@1000=0.000 ans@1000=0.940 sessAll@5=1.000 mrr=0.000 p50=0.6ms
+hotpot  basic-memory@ftuned+facts    R@500=0.000 R@1000=0.000 R@2000=0.000 sR@1000=0.000 ans@1000=0.802 sessAll@5=1.000 mrr=0.000 p50=17.2ms
+hotpot  cognee@tuned+facts           R@500=0.000 R@1000=0.000 R@2000=0.000 sR@1000=0.000 ans@1000=0.855 sessAll@5=1.000 mrr=0.000 p50=4.1ms
+hotpot  gbrain@ftuned+facts          R@500=0.000 R@1000=0.000 R@2000=0.000 sR@1000=0.000 ans@1000=0.715 sessAll@5=1.000 mrr=0.000 p50=2.4ms
+hotpot  graphiti@tuned+facts         R@500=0.000 R@1000=0.000 R@2000=0.000 sR@1000=0.000 ans@1000=0.920 sessAll@5=1.000 mrr=0.000 p50=4.0ms
+hotpot  hindsight@ftuned+facts       R@500=0.000 R@1000=0.000 R@2000=0.000 sR@1000=0.000 ans@1000=0.882 sessAll@5=1.000 mrr=0.000 p50=4.4ms
+hotpot  langmem@ftuned+facts         R@500=0.000 R@1000=0.000 R@2000=0.000 sR@1000=0.000 ans@1000=0.775 sessAll@5=1.000 mrr=0.000 p50=0.3ms
+hotpot  letta@ftuned+facts           R@500=0.000 R@1000=0.000 R@2000=0.000 sR@1000=0.000 ans@1000=0.828 sessAll@5=1.000 mrr=0.000 p50=1.6ms
+hotpot  mcp-memory@ftuned+facts      R@500=0.000 R@1000=0.000 R@2000=0.000 sR@1000=0.000 ans@1000=0.875 sessAll@5=1.000 mrr=0.000 p50=12.2ms
+hotpot  memoryos@tuned               R@500=0.000 R@1000=0.000 R@2000=0.000 sR@1000=0.000 ans@1000=0.000 sessAll@5=1.000 mrr=0.000 p50=0.0ms
+hotpot  memos@tuned+facts            R@500=0.000 R@1000=0.000 R@2000=0.000 sR@1000=0.000 ans@1000=0.722 sessAll@5=1.000 mrr=0.000 p50=2.1ms
+hotpot  onyx@ftuned+facts            R@500=0.000 R@1000=0.000 R@2000=0.000 sR@1000=0.000 ans@1000=0.828 sessAll@5=1.000 mrr=0.000 p50=2.5ms
+hotpot  mem0@ftuned+facts            R@500=0.000 R@1000=0.000 R@2000=0.000 sR@1000=0.000 ans@1000=0.870 sessAll@5=1.000 mrr=0.000 p50=3.7ms
+hotpot  supermemory-company-brain@ftuned+facts R@500=0.000 R@1000=0.000 R@2000=0.000 sR@1000=0.000 ans@1000=0.857 sessAll@5=1.000 mrr=0.000 p50=2.7ms
+hotpot  orp-ft+facts                 R@500=0.000 R@1000=0.000 R@2000=0.000 sR@1000=0.000 ans@1000=0.933 sessAll@5=1.000 mrr=0.000 p50=19.7ms
+hotpot  supermemory@tuned+facts      R@500=0.000 R@1000=0.000 R@2000=0.000 sR@1000=0.000 ans@1000=0.823 sessAll@5=1.000 mrr=0.000 p50=3.0ms
+hotpot  sylph@ftuned+facts           R@500=0.000 R@1000=0.000 R@2000=0.000 sR@1000=0.000 ans@1000=0.752 sessAll@5=1.000 mrr=0.000 p50=6.6ms

@@ -1,0 +1,17 @@
+locomo  bm25+facts                   R@500=0.743 R@1000=0.797 R@2000=0.852 sR@1000=0.798 ans@1000=0.756 sessAll@5=0.776 mrr=0.597 p50=0.4ms
+locomo  basic-memory@ftuned+facts    R@500=0.341 R@1000=0.605 R@2000=0.722 sR@1000=0.580 ans@1000=0.635 sessAll@5=0.719 mrr=0.692 p50=1.6ms
+locomo  cognee@ftuned+facts          R@500=0.660 R@1000=0.743 R@2000=0.833 sR@1000=0.739 ans@1000=0.732 sessAll@5=0.745 mrr=0.549 p50=1.1ms
+locomo  gbrain@tuned+facts           R@500=0.274 R@1000=0.481 R@2000=0.617 sR@1000=0.464 ans@1000=0.572 sessAll@5=0.600 mrr=0.561 p50=0.9ms
+locomo  graphiti@tuned+facts         R@500=0.698 R@1000=0.767 R@2000=0.834 sR@1000=0.745 ans@1000=0.734 sessAll@5=0.770 mrr=0.546 p50=2.4ms
+locomo  hindsight@ftuned+facts       R@500=0.446 R@1000=0.629 R@2000=0.775 sR@1000=0.606 ans@1000=0.655 sessAll@5=0.438 mrr=0.279 p50=3.4ms
+locomo  langmem@ftuned+facts         R@500=0.526 R@1000=0.652 R@2000=0.763 sR@1000=0.669 ans@1000=0.687 sessAll@5=0.584 mrr=0.420 p50=0.2ms
+locomo  letta@ftuned+facts           R@500=0.679 R@1000=0.741 R@2000=0.799 sR@1000=0.715 ans@1000=0.711 sessAll@5=0.775 mrr=0.590 p50=1.1ms
+locomo  mcp-memory@tuned+facts       R@500=0.523 R@1000=0.565 R@2000=0.605 sR@1000=0.565 ans@1000=0.630 sessAll@5=0.641 mrr=0.443 p50=0.7ms
+locomo  mem0@ftuned+facts            R@500=0.744 R@1000=0.797 R@2000=0.853 sR@1000=0.797 ans@1000=0.763 sessAll@5=0.781 mrr=0.593 p50=1.0ms
+locomo  memoryos@tuned               R@500=0.326 R@1000=0.407 R@2000=0.478 sR@1000=0.355 ans@1000=0.568 sessAll@5=0.482 mrr=0.289 p50=0.5ms
+locomo  memos@tuned+facts            R@500=0.492 R@1000=0.593 R@2000=0.711 sR@1000=0.574 ans@1000=0.656 sessAll@5=0.589 mrr=0.418 p50=1.8ms
+locomo  onyx@ftuned+facts            R@500=0.386 R@1000=0.663 R@2000=0.788 sR@1000=0.636 ans@1000=0.683 sessAll@5=0.778 mrr=0.756 p50=1.4ms
+locomo  supermemory-company-brain@tuned+facts R@500=0.731 R@1000=0.796 R@2000=0.841 sR@1000=0.796 ans@1000=0.752 sessAll@5=0.782 mrr=0.690 p50=3.3ms
+locomo  orp-ft+facts                 R@500=0.802 R@1000=0.856 R@2000=0.904 sR@1000=0.856 ans@1000=0.792 sessAll@5=0.799 mrr=0.640 p50=10.6ms
+locomo  supermemory@tuned+facts      R@500=0.647 R@1000=0.726 R@2000=0.726 sR@1000=0.726 ans@1000=0.701 sessAll@5=0.714 mrr=0.575 p50=4.5ms
+locomo  sylph@tuned+facts            R@500=0.255 R@1000=0.408 R@2000=0.490 sR@1000=0.387 ans@1000=0.546 sessAll@5=0.521 mrr=0.346 p50=2.4ms

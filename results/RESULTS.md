@@ -306,6 +306,107 @@ ORP's dev choice: `orp+facts`. Against the best of the 15: **0 better, 0 no sign
 
 Extraction lifts almost every system, and plain BM25 over the facts is competitive with the best baselines, so much of the gain comes from the facts themselves. On LME-R the strongest fact stores (Hindsight's and mem0's recall paths) beat ORP.
 
+## Re-tuned LLM-extraction track
+
+Same shared facts; every baseline's knobs re-tuned on dev fact stores and ORP's ranker refitted on them; each system's configuration (raw turns, facts, facts re-tuned; ORP also evidence plus facts) chosen on dev. HotpotQA-50 has no dev split, so it uses each system's best mean dev configuration; it is the only benchmark whose test results had not been seen.
+
+### LoCoMo-10 test, n=1152
+
+ORP configuration chosen on dev: `orp-ft+facts`. Against the best of the 15: **6 better, 0 no significant difference, 0 worse**.
+
+| Metric | ORP | Best of the 15 (tuned) | Difference [95% CI] | Verdict |
+|---|---|---|---|---|
+| R@500 | 80.2 | 74.4 (mem0@ftuned+facts) | +5.8 [+4.4, +7.3] | ORP better |
+| R@1000 | 85.6 | 79.7 (mem0@ftuned+facts) | +5.8 [+4.5, +7.3] | ORP better |
+| R@2000 | 90.4 | 85.3 (mem0@ftuned+facts) | +5.1 [+3.8, +6.5] | ORP better |
+| Ans@500 | 73.9 | 70.7 (mem0@ftuned+facts) | +3.2 [+2.0, +4.5] | ORP better |
+| Ans@1000 | 79.2 | 76.3 (mem0@ftuned+facts) | +2.9 [+1.7, +4.0] | ORP better |
+| Ans@2000 | 83.6 | 81.2 (mem0@ftuned+facts) | +2.4 [+1.5, +3.3] | ORP better |
+
+| System (configuration) | R@500 | R@1000 | R@2000 | Ans@500 | Ans@1000 | Ans@2000 |
+|---|---|---|---|---|---|---|
+| **ORP** `orp-ft+facts` | 80.2 | 85.6 | 90.4 | 73.9 | 79.2 | 83.6 |
+| mem0 `mem0@ftuned+facts` | 74.4 | 79.7 | 85.3 | 70.7 | 76.3 | 81.2 |
+| Supermemory Company Brain `supermemory-company-brain@tuned+facts` | 73.1 | 79.6 | 84.1 | 69.3 | 75.2 | 79.3 |
+| Graphiti (Zep) `graphiti@tuned+facts` | 69.8 | 76.7 | 83.4 | 66.9 | 73.4 | 79.3 |
+| Cognee `cognee@ftuned+facts` | 66.0 | 74.3 | 83.3 | 65.3 | 73.2 | 80.5 |
+| Letta `letta@ftuned+facts` | 67.9 | 74.1 | 79.9 | 64.3 | 71.1 | 76.6 |
+| Supermemory `supermemory@tuned+facts` | 64.7 | 72.6 | 72.6 | 63.4 | 70.1 | 70.1 |
+| Onyx `onyx@ftuned+facts` | 38.6 | 66.3 | 78.8 | 46.0 | 68.3 | 77.6 |
+| LangMem `langmem@ftuned+facts` | 52.6 | 65.2 | 76.3 | 57.8 | 68.7 | 77.7 |
+| Hindsight `hindsight@ftuned+facts` | 44.6 | 62.9 | 77.5 | 51.4 | 65.5 | 75.8 |
+| Basic Memory `basic-memory@ftuned+facts` | 34.1 | 60.5 | 72.2 | 42.4 | 63.5 | 73.9 |
+| MemOS `memos@tuned+facts` | 49.2 | 59.3 | 71.1 | 55.3 | 65.6 | 75.4 |
+| MCP memory server `mcp-memory@tuned+facts` | 52.3 | 56.5 | 60.5 | 56.1 | 63.0 | 70.1 |
+| GBrain `gbrain@tuned+facts` | 27.4 | 48.1 | 61.7 | 38.0 | 57.2 | 69.3 |
+| Sylph `sylph@tuned+facts` | 25.5 | 40.8 | 49.0 | 38.8 | 54.6 | 61.8 |
+| MemoryOS `memoryos@tuned` | 32.6 | 40.7 | 47.8 | 45.9 | 56.8 | 62.9 |
+| _BM25 (facts)_ `bm25+facts` | 74.3 | 79.7 | 85.2 | 69.9 | 75.6 | 81.0 |
+
+### LME-R test, n=382
+
+ORP configuration chosen on dev: `orp-ft+facts`. Against the best of the 15: **0 better, 1 no significant difference, 5 worse**.
+
+| Metric | ORP | Best of the 15 (tuned) | Difference [95% CI] | Verdict |
+|---|---|---|---|---|
+| R@500 | 80.4 | 83.5 (hindsight@tuned+facts) | -3.1 [-6.4, +0.1] | no significant difference |
+| R@1000 | 85.1 | 90.7 (hindsight@tuned+facts) | -5.7 [-8.3, -3.2] | ORP worse |
+| R@2000 | 88.0 | 93.8 (hindsight@tuned+facts) | -5.7 [-8.3, -3.3] | ORP worse |
+| Ans@500 | 60.6 | 65.6 (letta@ftuned+facts) | -5.0 [-8.8, -1.4] | ORP worse |
+| Ans@1000 | 68.3 | 74.4 (letta@ftuned+facts) | -6.1 [-9.4, -2.7] | ORP worse |
+| Ans@2000 | 75.2 | 79.4 (letta@ftuned+facts) | -4.2 [-7.1, -1.3] | ORP worse |
+
+| System (configuration) | R@500 | R@1000 | R@2000 | Ans@500 | Ans@1000 | Ans@2000 |
+|---|---|---|---|---|---|---|
+| **ORP** `orp-ft+facts` | 80.4 | 85.1 | 88.0 | 60.6 | 68.3 | 75.2 |
+| Hindsight `hindsight@tuned+facts` | 83.5 | 90.7 | 93.8 | 63.5 | 69.8 | 78.2 |
+| mem0 `mem0@ftuned+facts` | 82.4 | 87.9 | 92.5 | 63.3 | 69.7 | 77.6 |
+| Graphiti (Zep) `graphiti@tuned+facts` | 80.8 | 87.5 | 93.0 | 63.2 | 70.1 | 76.5 |
+| LangMem `langmem@ftuned+facts` | 72.6 | 82.1 | 91.9 | 59.8 | 68.5 | 76.5 |
+| Cognee `cognee@tuned+facts` | 68.1 | 81.6 | 86.1 | 61.9 | 73.6 | 76.9 |
+| Letta `letta@ftuned+facts` | 74.6 | 81.2 | 86.3 | 65.6 | 74.4 | 79.4 |
+| Supermemory Company Brain `supermemory-company-brain@ftuned+facts` | 72.1 | 81.0 | 87.8 | 63.6 | 74.0 | 79.3 |
+| MCP memory server `mcp-memory@ftuned+facts` | 61.5 | 69.3 | 74.0 | 50.4 | 58.8 | 68.1 |
+| Supermemory `supermemory@ftuned+facts` | 60.9 | 68.8 | 68.8 | 52.9 | 62.0 | 62.0 |
+| MemOS `memos@tuned+facts` | 52.6 | 68.5 | 80.9 | 53.1 | 63.1 | 73.4 |
+| MemoryOS `memoryos@ftuned+facts` | 44.8 | 55.7 | 65.8 | 45.6 | 55.7 | 66.5 |
+| Basic Memory `basic-memory@ftuned+facts` | 22.2 | 51.9 | 75.4 | 44.9 | 54.2 | 70.7 |
+| Sylph `sylph@ftuned+facts` | 23.3 | 51.5 | 74.0 | 29.6 | 55.3 | 67.5 |
+| Onyx `onyx@ftuned+facts` | 8.9 | 44.9 | 71.5 | 23.2 | 52.8 | 70.3 |
+| GBrain `gbrain@ftuned+facts` | 14.4 | 40.1 | 63.2 | 30.3 | 46.1 | 65.5 |
+| _BM25 (facts)_ `bm25+facts` | 78.5 | 85.5 | 90.1 | 61.4 | 69.3 | 77.3 |
+
+### HotpotQA-50 (held out), n=50
+
+ORP configuration chosen on dev: `orp-ft+facts`. Against the best of the 15: **0 better, 4 no significant difference, 0 worse**.
+
+| Metric | ORP | Best of the 15 (tuned) | Difference [95% CI] | Verdict |
+|---|---|---|---|---|
+| Ans@500 | 81.7 | 83.5 (cognee@tuned+facts) | -1.9 [-9.3, +4.8] | no significant difference |
+| Ans@1000 | 93.3 | 92.0 (graphiti@tuned+facts) | +1.3 [-2.0, +6.0] | no significant difference |
+| Ans@2000 | 94.0 | 94.0 (letta@ftuned+facts) | +0.0 [+0.0, +0.0] | no significant difference |
+| Ans@4000 | 94.0 | 95.3 (onyx@ftuned+facts) | -1.3 [-6.0, +1.3] | no significant difference |
+
+| System (configuration) | Ans@500 | Ans@1000 | Ans@2000 | Ans@4000 |
+|---|---|---|---|---|
+| **ORP** `orp-ft+facts` | 81.7 | 93.3 | 94.0 | 94.0 |
+| Graphiti (Zep) `graphiti@tuned+facts` | 81.5 | 92.0 | 94.0 | 94.0 |
+| Hindsight `hindsight@ftuned+facts` | 73.9 | 88.2 | 92.2 | 92.2 |
+| MCP memory server `mcp-memory@ftuned+facts` | 78.8 | 87.5 | 89.5 | 89.9 |
+| mem0 `mem0@ftuned+facts` | 76.8 | 87.0 | 89.0 | 89.0 |
+| Supermemory Company Brain `supermemory-company-brain@ftuned+facts` | 75.0 | 85.7 | 91.3 | 94.0 |
+| Cognee `cognee@tuned+facts` | 83.5 | 85.5 | 87.5 | 89.5 |
+| Letta `letta@ftuned+facts` | 75.5 | 82.8 | 94.0 | 94.0 |
+| Onyx `onyx@ftuned+facts` | 68.9 | 82.8 | 90.4 | 95.3 |
+| Supermemory `supermemory@tuned+facts` | 76.1 | 82.3 | 82.3 | 82.3 |
+| Basic Memory `basic-memory@ftuned+facts` | 65.8 | 80.2 | 86.2 | 86.2 |
+| LangMem `langmem@ftuned+facts` | 63.2 | 77.5 | 82.5 | 91.3 |
+| Sylph `sylph@ftuned+facts` | 58.8 | 75.2 | 75.2 | 75.2 |
+| MemOS `memos@tuned+facts` | 57.2 | 72.2 | 82.5 | 88.3 |
+| GBrain `gbrain@ftuned+facts` | 62.7 | 71.5 | 81.5 | 89.0 |
+| MemoryOS `memoryos@tuned` | 0.0 | 0.0 | 0.0 | 0.0 |
+| _BM25 (facts)_ `bm25+facts` | 84.0 | 94.0 | 94.0 | 94.0 |
+
 ## ORP-Gov v2, 50% channel visibility (same ranker; access control differs)
 
 | Strategy | Recall@1000 (permitted) | Questions with unreadable text in context | Forbidden askers shown gold evidence | Rankings changed by unreadable memories |

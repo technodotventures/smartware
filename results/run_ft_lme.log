@@ -1,0 +1,17 @@
+lme     bm25+facts                   R@500=0.785 R@1000=0.855 R@2000=0.901 sR@1000=0.859 ans@1000=0.693 sessAll@5=0.798 mrr=0.695 p50=0.5ms
+lme     basic-memory@ftuned+facts    R@500=0.222 R@1000=0.519 R@2000=0.754 sR@1000=0.544 ans@1000=0.542 sessAll@5=0.804 mrr=0.866 p50=3.1ms
+lme     cognee@tuned+facts           R@500=0.681 R@1000=0.816 R@2000=0.861 sR@1000=0.817 ans@1000=0.736 sessAll@5=0.809 mrr=0.656 p50=1.5ms
+lme     gbrain@ftuned+facts          R@500=0.144 R@1000=0.401 R@2000=0.632 sR@1000=0.466 ans@1000=0.461 sessAll@5=0.754 mrr=0.780 p50=6.0ms
+lme     graphiti@tuned+facts         R@500=0.808 R@1000=0.875 R@2000=0.930 sR@1000=0.854 ans@1000=0.701 sessAll@5=0.840 mrr=0.727 p50=2.9ms
+lme     langmem@ftuned+facts         R@500=0.726 R@1000=0.821 R@2000=0.919 sR@1000=0.838 ans@1000=0.685 sessAll@5=0.819 mrr=0.659 p50=0.3ms
+lme     hindsight@tuned+facts        R@500=0.835 R@1000=0.907 R@2000=0.938 sR@1000=0.906 ans@1000=0.698 sessAll@5=0.880 mrr=0.706 p50=4.7ms
+lme     letta@ftuned+facts           R@500=0.746 R@1000=0.812 R@2000=0.863 sR@1000=0.784 ans@1000=0.744 sessAll@5=0.793 mrr=0.696 p50=1.4ms
+lme     mcp-memory@ftuned+facts      R@500=0.615 R@1000=0.693 R@2000=0.740 sR@1000=0.694 ans@1000=0.588 sessAll@5=0.626 mrr=0.562 p50=2.7ms
+lme     memoryos@ftuned+facts        R@500=0.448 R@1000=0.557 R@2000=0.658 sR@1000=0.547 ans@1000=0.557 sessAll@5=0.743 mrr=0.515 p50=0.6ms
+lme     memos@tuned+facts            R@500=0.526 R@1000=0.685 R@2000=0.809 sR@1000=0.671 ans@1000=0.631 sessAll@5=0.772 mrr=0.584 p50=2.1ms
+lme     onyx@ftuned+facts            R@500=0.089 R@1000=0.449 R@2000=0.715 sR@1000=0.526 ans@1000=0.528 sessAll@5=0.812 mrr=0.851 p50=1.5ms
+lme     mem0@ftuned+facts            R@500=0.824 R@1000=0.879 R@2000=0.925 sR@1000=0.880 ans@1000=0.697 sessAll@5=0.827 mrr=0.697 p50=2.7ms
+lme     supermemory-company-brain@ftuned+facts R@500=0.721 R@1000=0.810 R@2000=0.878 sR@1000=0.811 ans@1000=0.740 sessAll@5=0.848 mrr=0.745 p50=2.0ms
+lme     orp-ft+facts                 R@500=0.804 R@1000=0.851 R@2000=0.880 sR@1000=0.851 ans@1000=0.683 sessAll@5=0.783 mrr=0.723 p50=13.7ms
+lme     sylph@ftuned+facts           R@500=0.233 R@1000=0.515 R@2000=0.740 sR@1000=0.525 ans@1000=0.553 sessAll@5=0.764 mrr=0.681 p50=4.9ms
+lme     supermemory@ftuned+facts     R@500=0.609 R@1000=0.688 R@2000=0.688 sR@1000=0.688 ans@1000=0.620 sessAll@5=0.665 mrr=0.701 p50=6.8ms

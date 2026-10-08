@@ -158,6 +158,29 @@ def main():
   <div class="charts">{bars(disp, ["orp"] + [n.replace("+facts", "") for n in pool], 'recall@1000', 'Evidence recall in 1,000 tokens, fact stores')}
   {bars(disp, ["orp"] + [n.replace("+facts", "") for n in pool], 'ans@1000', 'Answer recall in 1,000 tokens, fact stores')}</div>
 </section>""")
+    D2 = load("facts_dev2.json")
+    for bench, ttl in (("locomo", "LoCoMo"), ("lme", "LME-R"), ("hotpot", "HotpotQA-50")):
+        F = load(f"summary_ft_{bench}.json").get(bench, {}).get("test", {})
+        if not (F and D2):
+            continue
+        ch = D2["choice"][bench]
+        pool = [ch[b] for b in BASE if ch.get(b) in F]
+        summ = {**{n: F[n] for n in pool}, "orp": F[ch["orp"]]}
+        hm = [m for m in METRICS if m[0] in HEAD and m[0] != "e_recall@1000"] if bench != "hotpot" else \
+            [("ans@500", "Ans@500"), ("ans@1000", "Ans@1000"), ("ans@2000", "Ans@2000"), ("ans@4000", "Ans@4000")]
+        _, t = verdict(bench, summ, pool, hm, orp=ch["orp"])
+        tallies[f"{ttl}, facts re-tuned"] = t
+        disp = {n.split("@")[0]: v for n, v in summ.items()}
+        sections.append(f"""
+<section id="ft-{bench}" aria-labelledby="h-ft-{bench}">
+  <h2 id="h-ft-{bench}">{ttl}: LLM facts, everything re-tuned</h2>
+  <p class="lede">Every baseline's knobs re-tuned on dev fact stores and ORP's ranker refitted on them; each system's
+  best configuration picked on dev{'' if bench != 'hotpot' else ' (mean of both benchmarks, as HotpotQA has no dev split)'}.</p>
+  <p class="tally"><span class="pill win">{t['win']} better</span><span class="pill tie">{t['tie']} level</span>
+  <span class="pill loss">{t['loss']} worse</span></p>
+  {verdict_rows(bench, summ, pool, hm, orp=ch["orp"])}
+  <div class="charts">{bars(disp, ["orp"] + [n.split("@")[0] for n in pool], hm[1][0], hm[1][1] + ', re-tuned fact stores')}</div>
+</section>""")
     gov = []
     for vis in ("50", "15"):
         G = load(f"governance_v{vis}.json")
