@@ -1,0 +1,42 @@
+orp+facts                            J=0.7822 R@1000=0.843 ans@1000=0.720
+orp                                  J=0.7756 R@1000=0.843 ans@1000=0.711
+bm25                                 J=0.7201 R@1000=0.724 ans@1000=0.719
+bm25+facts                           J=0.8030 R@1000=0.847 ans@1000=0.740
+dense                                J=0.7070 R@1000=0.714 ans@1000=0.676
+dense+facts                          J=0.7861 R@1000=0.877 ans@1000=0.720
+graphiti@tuned+facts                 J=0.7984 R@1000=0.863 ans@1000=0.716
+hindsight@tuned+facts                J=0.8120 R@1000=0.917 ans@1000=0.737
+orp+evidence                         J=0.7573 R@1000=0.823 ans@1000=0.685
+letta@tuned+facts                    J=0.7867 R@1000=0.826 ans@1000=0.770
+supermemory-company-brain@tuned+facts J=0.7674 R@1000=0.831 ans@1000=0.755
+gbrain@tuned+facts                   J=0.4340 R@1000=0.379 ans@1000=0.525
+mem0@tuned+facts                     J=0.8006 R@1000=0.870 ans@1000=0.730
+onyx@tuned+facts                     J=0.4828 R@1000=0.450 ans@1000=0.586
+supermemory@tuned+facts              J=0.6661 R@1000=0.738 ans@1000=0.647
+basic-memory@tuned+facts             J=0.5876 R@1000=0.520 ans@1000=0.614
+cognee@tuned+facts                   J=0.7739 R@1000=0.855 ans@1000=0.778
+mcp-memory@tuned+facts               J=0.6655 R@1000=0.709 ans@1000=0.645
+memos@tuned+facts                    J=0.6498 R@1000=0.633 ans@1000=0.613
+langmem@tuned+facts                  J=0.7738 R@1000=0.855 ans@1000=0.701
+sylph@tuned+facts                    J=0.5044 R@1000=0.500 ans@1000=0.561
+memoryos@tuned+facts                 J=0.5890 R@1000=0.609 ans@1000=0.631
+{
+ "orp": "orp+facts",
+ "bm25": "bm25+facts",
+ "dense": "dense+facts",
+ "graphiti@tuned": "graphiti@tuned+facts",
+ "hindsight@tuned": "hindsight@tuned+facts",
+ "mem0@tuned": "mem0@tuned+facts",
+ "letta@tuned": "letta@tuned+facts",
+ "supermemory-company-brain@tuned": "supermemory-company-brain@tuned+facts",
+ "gbrain@tuned": "gbrain@tuned+facts",
+ "supermemory@tuned": "supermemory@tuned+facts",
+ "onyx@tuned": "onyx@tuned+facts",
+ "cognee@tuned": "cognee@tuned+facts",
+ "basic-memory@tuned": "basic-memory@tuned+facts",
+ "sylph@tuned": "sylph@tuned+facts",
+ "mcp-memory@tuned": "mcp-memory@tuned+facts",
+ "memos@tuned": "memos@tuned+facts",
+ "langmem@tuned": "langmem@tuned+facts",
+ "memoryos@tuned": "memoryos@tuned+facts"
+}
