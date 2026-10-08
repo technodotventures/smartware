@@ -134,48 +134,57 @@ def cat_table(summ: dict, names: list[str]) -> str:
 
 
 def facts_track() -> list[str]:
-    """LLM-extraction track (LoCoMo): every system may store the shared Haiku-extracted facts; each system's store
-    (raw turns or facts; ORP also evidence plus facts) is chosen on dev (results/facts_dev.json)."""
-    F, D = load("summary_facts.json"), load("facts_dev.json")
-    if not F or not D:
-        return []
-    S = {**load_tuned().get("locomo", {}).get("test", {}), **F["locomo"]["test"]}
-    ch = D["choice"]
-    pool = {ch[f"{b}@tuned"]: S[ch[f"{b}@tuned"]] for b in BASE if ch.get(f"{b}@tuned") in S}
-    orp = ch["orp"]
-    summ = {**pool, "orp": S[orp]}
-    for k in list(summ):
-        pass
-    md = ["## LLM-extraction track (LoCoMo-10 test, n=1152)", "",
-          "Facts extracted once by Claude Haiku sub-agents with a mem0-style brief (`bench/extraction/EXTRACT.md`), "
-          "frozen in `results/extraction/` and shared by every system, like the encoders. Each system's store (raw "
-          "turns or extracted facts; for ORP also raw turns as evidence plus facts as derived memories) was chosen "
-          f"on the dev conversations only. ORP's dev choice: `{orp}`.", ""]
-    out = ["| Metric | ORP | Best of the 15 | Difference [95% CI] | Verdict |", "|---|---|---|---|---|"]
-    tally = {"win": 0, "tie": 0, "loss": 0}
-    for k, h in [m for m in METRICS if m[0] in HEAD and m[0] != "e_recall@1000"]:
-        bv, bn = max((v.get(k) or 0, n) for n, v in pool.items())
-        r = paired("locomo", orp, bn, k)
-        st = "win" if r[1] > 0 else "loss" if r[2] < 0 else "tie"
-        tally[st] += 1
-        out.append(f"| {h} | {f(S[orp][k])} | {f(bv)} ({label(bn.replace('+facts', ''))}"
-                   f"{', facts' if bn.endswith('+facts') else ''}) | {r[0] * 100:+.1f} [{r[1] * 100:+.1f}, "
-                   f"{r[2] * 100:+.1f}] | {dict(win='ORP better', tie='no significant difference', loss='ORP worse')[st]} |")
-    md += [f"ORP against the best of the 15: **{tally['win']} better, {tally['tie']} no significant difference, "
-           f"{tally['loss']} worse**.", ""] + out + [""]
-    names = ["orp+evidence", "orp+facts"] + sorted(pool, key=lambda n: -(S[n].get("recall@1000") or 0)) + \
-        ["bm25+facts", "dense+facts"]
-    rows = ["| System (store) | " + " | ".join(h for _, h in METRICS if _ != "e_recall@1000") + " |",
-            "|---|" + "---|" * (len(METRICS) - 1)]
-    for n in names:
-        if n in S:
-            lab = {"orp+evidence": "**ORP (turns as evidence + facts)**", "orp+facts": "ORP (facts only)",
-                   "bm25+facts": "_BM25 (facts)_", "dense+facts": "_Dense (facts)_"}.get(
-                n, label(n.replace("+facts", "")) + (" (facts)" if n.endswith("+facts") else " (turns)"))
-            rows.append(f"| {lab} | " + " | ".join(f(S[n].get(k)) for k, _ in METRICS if k != "e_recall@1000") + " |")
-    md += rows + ["", "Extraction lifts almost every system; plain BM25 over the extracted facts lands level with "
-                  "the best baseline, so much of the gain comes from the facts themselves.", ""]
-    TRACK.update(tally)
+    """LLM-extraction track: every system may store the shared Haiku-extracted facts; each system's store (raw turns
+    or facts; ORP also evidence plus facts) is chosen on that benchmark's dev split (results/facts_dev*.json)."""
+    md = []
+    for bench, sfile, dfile, title in (("locomo", "summary_facts.json", "facts_dev.json", "LoCoMo-10 test, n=1152"),
+                                       ("lme", "summary_facts_lme.json", "facts_dev_lme.json", "LME-R test, n=382")):
+        F, D = load(sfile), load(dfile)
+        if not F or not D:
+            continue
+        S = {**load_tuned().get(bench, {}).get("test", {}), **F[bench]["test"]}
+        ch = D["choice"]
+        pool = {ch[f"{b}@tuned"]: S[ch[f"{b}@tuned"]] for b in BASE if ch.get(f"{b}@tuned") in S}
+        orp = ch["orp"]
+        if not md:
+            md += ["## LLM-extraction track", "",
+                   "Facts extracted once by Claude Haiku sub-agents with a mem0-style brief "
+                   "(`bench/extraction/EXTRACT.md`), frozen in `results/extraction/` and shared by every system, like "
+                   "the encoders. Each system's store (raw turns or extracted facts; for ORP also raw turns as evidence "
+                   "plus facts as derived memories) was chosen on that benchmark's dev split only.", ""]
+        out = ["| Metric | ORP | Best of the 15 | Difference [95% CI] | Verdict |", "|---|---|---|---|---|"]
+        tally = {"win": 0, "tie": 0, "loss": 0}
+        for k, h in [m for m in METRICS if m[0] in HEAD and m[0] != "e_recall@1000"]:
+            bv, bn = max((v.get(k) or 0, n) for n, v in pool.items())
+            r = paired(bench, orp, bn, k)
+            st = "win" if r[1] > 0 else "loss" if r[2] < 0 else "tie"
+            tally[st] += 1
+            out.append(f"| {h} | {f(S[orp][k])} | {f(bv)} ({label(bn.replace('+facts', ''))}"
+                       f"{', facts' if bn.endswith('+facts') else ''}) | {r[0] * 100:+.1f} [{r[1] * 100:+.1f}, "
+                       f"{r[2] * 100:+.1f}] | "
+                       f"{dict(win='ORP better', tie='no significant difference', loss='ORP worse')[st]} |")
+        md += [f"### {title}", "", f"ORP's dev choice: `{orp}`. Against the best of the 15: **{tally['win']} better, "
+               f"{tally['tie']} no significant difference, {tally['loss']} worse**.", ""] + out + [""]
+        names = ["orp+evidence", "orp+facts"] + sorted(pool, key=lambda n: -(S[n].get("recall@1000") or 0)) + \
+            ["bm25+facts", "dense+facts"]
+        rows = ["| System (store) | " + " | ".join(h for k, h in METRICS if k != "e_recall@1000") + " |",
+                "|---|" + "---|" * (len(METRICS) - 1)]
+        for n in names:
+            if n in S:
+                lab = {"orp+evidence": "ORP (turns as evidence + facts)", "orp+facts": "ORP (facts only)",
+                       "bm25+facts": "_BM25 (facts)_", "dense+facts": "_Dense (facts)_"}.get(
+                    n, label(n.replace("+facts", "")) + (" (facts)" if n.endswith("+facts") else " (turns)"))
+                if n == orp:
+                    lab = f"**{lab}**"
+                rows.append(f"| {lab} | " + " | ".join(f(S[n].get(k)) for k, _ in METRICS if k != "e_recall@1000")
+                            + " |")
+        md += rows + [""]
+        for k in tally:
+            TRACK[k] = TRACK.get(k, 0) + tally[k]
+    if md:
+        md += ["Extraction lifts almost every system, and plain BM25 over the facts is competitive with the best "
+               "baselines, so much of the gain comes from the facts themselves. On LME-R the strongest fact stores "
+               "(Hindsight's and mem0's recall paths) beat ORP.", ""]
     return md
 
 

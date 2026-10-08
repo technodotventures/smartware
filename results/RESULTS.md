@@ -230,11 +230,13 @@ ORP against the best of the 15: 0 better, 4 no significant difference, 0 worse.
 | _BM25 over turns (reference)_ | 82.7 | 91.0 | 96.0 | 96.0 |
 | _Dense over turns (reference)_ | 64.4 | 81.7 | 83.7 | 92.0 |
 
-## LLM-extraction track (LoCoMo-10 test, n=1152)
+## LLM-extraction track
 
-Facts extracted once by Claude Haiku sub-agents with a mem0-style brief (`bench/extraction/EXTRACT.md`), frozen in `results/extraction/` and shared by every system, like the encoders. Each system's store (raw turns or extracted facts; for ORP also raw turns as evidence plus facts as derived memories) was chosen on the dev conversations only. ORP's dev choice: `orp+evidence`.
+Facts extracted once by Claude Haiku sub-agents with a mem0-style brief (`bench/extraction/EXTRACT.md`), frozen in `results/extraction/` and shared by every system, like the encoders. Each system's store (raw turns or extracted facts; for ORP also raw turns as evidence plus facts as derived memories) was chosen on that benchmark's dev split only.
 
-ORP against the best of the 15: **5 better, 1 no significant difference, 0 worse**.
+### LoCoMo-10 test, n=1152
+
+ORP's dev choice: `orp+evidence`. Against the best of the 15: **5 better, 1 no significant difference, 0 worse**.
 
 | Metric | ORP | Best of the 15 | Difference [95% CI] | Verdict |
 |---|---|---|---|---|
@@ -267,7 +269,42 @@ ORP against the best of the 15: **5 better, 1 no significant difference, 0 worse
 | _BM25 (facts)_ | 74.3 | 79.7 | 85.2 | 69.9 | 75.6 | 81.0 | 77.6 | 59.7 |
 | _Dense (facts)_ | 60.8 | 69.1 | 78.1 | 61.9 | 70.0 | 77.2 | 66.4 | 43.2 |
 
-Extraction lifts almost every system; plain BM25 over the extracted facts lands level with the best baseline, so much of the gain comes from the facts themselves.
+### LME-R test, n=382
+
+ORP's dev choice: `orp+facts`. Against the best of the 15: **0 better, 0 no significant difference, 6 worse**.
+
+| Metric | ORP | Best of the 15 | Difference [95% CI] | Verdict |
+|---|---|---|---|---|
+| R@500 | 79.7 | 83.5 (Hindsight, facts) | -3.8 [-7.2, -0.5] | ORP worse |
+| R@1000 | 84.1 | 90.7 (Hindsight, facts) | -6.6 [-9.5, -4.0] | ORP worse |
+| R@2000 | 87.5 | 93.8 (Hindsight, facts) | -6.3 [-8.9, -3.9] | ORP worse |
+| Ans@500 | 61.0 | 65.3 (Letta, facts) | -4.3 [-8.1, -0.6] | ORP worse |
+| Ans@1000 | 67.5 | 74.1 (Letta, facts) | -6.6 [-9.9, -3.4] | ORP worse |
+| Ans@2000 | 74.6 | 78.9 (Supermemory Company Brain, facts) | -4.3 [-7.4, -1.4] | ORP worse |
+
+| System (store) | R@500 | R@1000 | R@2000 | Ans@500 | Ans@1000 | Ans@2000 | SessAll@5 | MRR |
+|---|---|---|---|---|---|---|---|---|
+| ORP (turns as evidence + facts) | 71.1 | 81.3 | 85.2 | 56.5 | 63.9 | 72.4 | 78.8 | 69.7 |
+| **ORP (facts only)** | 79.7 | 84.1 | 87.5 | 61.0 | 67.5 | 74.6 | 76.4 | 72.8 |
+| Hindsight (facts) | 83.5 | 90.7 | 93.8 | 63.5 | 69.8 | 78.2 | 88.0 | 70.6 |
+| mem0 (facts) | 82.0 | 87.7 | 92.0 | 63.2 | 69.8 | 78.1 | 82.7 | 69.6 |
+| Graphiti (Zep) (facts) | 80.8 | 87.5 | 93.0 | 63.2 | 70.1 | 76.5 | 84.0 | 72.7 |
+| Cognee (facts) | 68.1 | 81.6 | 86.1 | 61.9 | 73.6 | 76.9 | 80.9 | 65.6 |
+| LangMem (facts) | 71.2 | 81.2 | 90.9 | 59.2 | 69.0 | 76.5 | 80.6 | 65.3 |
+| Letta (facts) | 74.6 | 80.5 | 82.4 | 65.3 | 74.1 | 78.2 | 79.6 | 69.4 |
+| Supermemory Company Brain (facts) | 71.4 | 80.3 | 86.3 | 62.9 | 73.6 | 78.9 | 84.3 | 74.1 |
+| MCP memory server (facts) | 61.2 | 69.2 | 74.0 | 50.6 | 59.1 | 68.1 | 61.8 | 56.4 |
+| Supermemory (facts) | 61.0 | 68.9 | 68.9 | 52.8 | 61.9 | 61.9 | 66.5 | 70.2 |
+| MemOS (facts) | 52.6 | 68.5 | 80.9 | 53.1 | 63.1 | 73.4 | 77.2 | 58.4 |
+| MemoryOS (facts) | 45.5 | 55.6 | 66.5 | 45.8 | 56.1 | 66.5 | 74.6 | 51.2 |
+| Basic Memory (facts) | 22.2 | 51.9 | 75.4 | 44.9 | 54.2 | 70.7 | 80.4 | 86.6 |
+| Sylph (facts) | 22.5 | 51.4 | 73.9 | 30.3 | 55.7 | 67.3 | 76.2 | 67.7 |
+| Onyx (facts) | 8.4 | 44.7 | 72.0 | 22.9 | 52.0 | 70.7 | 81.9 | 85.3 |
+| GBrain (facts) | 9.3 | 43.0 | 61.6 | 23.6 | 54.4 | 68.0 | 75.4 | 69.3 |
+| _BM25 (facts)_ | 78.5 | 85.5 | 90.1 | 61.4 | 69.3 | 77.3 | 79.8 | 69.5 |
+| _Dense (facts)_ | 74.8 | 84.3 | 92.4 | 61.4 | 70.9 | 77.5 | 80.6 | 65.5 |
+
+Extraction lifts almost every system, and plain BM25 over the facts is competitive with the best baselines, so much of the gain comes from the facts themselves. On LME-R the strongest fact stores (Hindsight's and mem0's recall paths) beat ORP.
 
 ## ORP-Gov v2, 50% channel visibility (same ranker; access control differs)
 

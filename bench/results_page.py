@@ -134,26 +134,29 @@ def main():
   {verdict_rows("hotpot", hot, tn, hm)}
   <div class="charts">{bars(hot, names, 'ans@1000', 'Answer recall in 1,000 tokens (Ans@1000)')}</div>
 </section>""")
-    F, D = load("summary_facts.json"), load("facts_dev.json")
-    if F and D:
-        S = {**tuned.get("locomo", {}).get("test", {}), **F["locomo"]["test"]}
+    for bench, sfile, dfile, ttl in (("locomo", "summary_facts.json", "facts_dev.json", "LoCoMo"),
+                                     ("lme", "summary_facts_lme.json", "facts_dev_lme.json", "LME-R")):
+        F, D = load(sfile), load(dfile)
+        if not (F and D):
+            continue
+        S = {**tuned.get(bench, {}).get("test", {}), **F[bench]["test"]}
         ch = D["choice"]
         pool = [ch[f"{b}@tuned"] for b in BASE if ch.get(f"{b}@tuned") in S]
         summ = {**{n: S[n] for n in pool}, "orp": S[ch["orp"]]}
         hm = [m for m in METRICS if m[0] in HEAD and m[0] != "e_recall@1000"]
-        _, t = verdict("locomo", summ, pool, hm, orp=ch["orp"])
-        tallies["LoCoMo, LLM facts"] = t
+        _, t = verdict(bench, summ, pool, hm, orp=ch["orp"])
+        tallies[f"{ttl}, LLM facts"] = t
         disp = {n.replace("+facts", ""): v for n, v in summ.items()}
         sections.append(f"""
-<section id="facts" aria-labelledby="h-facts">
-  <h2 id="h-facts">LoCoMo with LLM-extracted facts</h2>
-  <p class="lede">Claude Haiku extracted facts from every conversation once, the way mem0 does at write time, and
-  every system was allowed to store them. Each system's choice of store was made on dev conversations only. ORP keeps
-  raw turns as evidence and stores the facts as derived memories.</p>
+<section id="facts-{bench}" aria-labelledby="h-facts-{bench}">
+  <h2 id="h-facts-{bench}">{ttl} with LLM-extracted facts</h2>
+  <p class="lede">Claude Haiku extracted facts from every session once, the way mem0 does at write time, and every
+  system was allowed to store them. Each system's choice of store was made on dev data only.</p>
   <p class="tally"><span class="pill win">{t['win']} better</span><span class="pill tie">{t['tie']} level</span>
   <span class="pill loss">{t['loss']} worse</span></p>
-  {verdict_rows("locomo", summ, pool, hm, orp=ch["orp"])}
-  <div class="charts">{bars(disp, ["orp"] + [n.replace("+facts", "") for n in pool], 'ans@1000', 'Answer recall in 1,000 tokens, LLM-fact stores')}</div>
+  {verdict_rows(bench, summ, pool, hm, orp=ch["orp"])}
+  <div class="charts">{bars(disp, ["orp"] + [n.replace("+facts", "") for n in pool], 'recall@1000', 'Evidence recall in 1,000 tokens, fact stores')}
+  {bars(disp, ["orp"] + [n.replace("+facts", "") for n in pool], 'ans@1000', 'Answer recall in 1,000 tokens, fact stores')}</div>
 </section>""")
     gov = []
     for vis in ("50", "15"):
