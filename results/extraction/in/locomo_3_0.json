@@ -1,0 +1,1521 @@
+[
+{
+"session": "conv-42:S1",
+"date": "2022-01-21 19:31",
+"turns": [
+{
+"id": "conv-42:D1:1",
+"speaker": "Nate",
+"text": "Hey Joanna! Long time no see! What's up? Anything fun going on?"
+},
+{
+"id": "conv-42:D1:2",
+"speaker": "Joanna",
+"text": "Hey Nate! Long time no see! I've been working on a project lately - it's been pretty cool. What about you - any fun projects or hobbies?"
+},
+{
+"id": "conv-42:D1:3",
+"speaker": "Nate",
+"text": "Hey Joanna! That's cool! I won my first video game tournament last week - so exciting!"
+},
+{
+"id": "conv-42:D1:4",
+"speaker": "Joanna",
+"text": "Wow Nate! Congrats on winning! Tell me more - what game was it?"
+},
+{
+"id": "conv-42:D1:5",
+"speaker": "Nate",
+"text": "Thanks! it's a team shooter game."
+},
+{
+"id": "conv-42:D1:6",
+"speaker": "Joanna",
+"text": "Wow, great job! What was is called?"
+},
+{
+"id": "conv-42:D1:7",
+"speaker": "Nate",
+"text": "The game was called Counter-Strike: Global Offensive, and me and my team had a blast to the very end!"
+},
+{
+"id": "conv-42:D1:8",
+"speaker": "Joanna",
+"text": "Cool, Nate! Sounds like a fun experience, even if I'm not into games."
+},
+{
+"id": "conv-42:D1:9",
+"speaker": "Nate",
+"text": "It was! How about you? Do you have any hobbies you love?"
+},
+{
+"id": "conv-42:D1:10",
+"speaker": "Joanna",
+"text": "Yeah! Besides writing, I also enjoy reading, watching movies, and exploring nature. Anything else you enjoy doing, Nate?"
+},
+{
+"id": "conv-42:D1:11",
+"speaker": "Nate",
+"text": "Playing video games and watching movies are my main hobbies."
+},
+{
+"id": "conv-42:D1:12",
+"speaker": "Joanna",
+"text": "Cool, Nate! So we both have similar interests. What type of movies do you like best?"
+},
+{
+"id": "conv-42:D1:13",
+"speaker": "Nate",
+"text": "I love action and sci-fi movies, the effects are so cool! What about you, what's your favorite genre?"
+},
+{
+"id": "conv-42:D1:14",
+"speaker": "Joanna",
+"text": "I'm all about dramas and romcoms. I love getting immersed in the feelings and plots."
+},
+{
+"id": "conv-42:D1:15",
+"speaker": "Nate",
+"text": "Wow, movies can be so powerful! Do you have any recommendations for me?"
+},
+{
+"id": "conv-42:D1:16",
+"speaker": "Joanna",
+"text": "Yeah, totally! Have you seen this romantic drama that's all about memory and relationships? It's such a good one. [shares a photo: a photo of a poster of a man and a woman sitting on a bench]"
+},
+{
+"id": "conv-42:D1:17",
+"speaker": "Nate",
+"text": "Oh cool! I might check that one out some time soon! I do love watching classics."
+},
+{
+"id": "conv-42:D1:18",
+"speaker": "Joanna",
+"text": "Yep, that movie is awesome. I first watched it around 3 years ago. I even went out and got a physical copy! [shares a photo: a photo of a dvd on a table with a blurry background]"
+},
+{
+"id": "conv-42:D1:19",
+"speaker": "Nate",
+"text": "Sounds cool! Have you seen it a lot? sounds like you know the movie well!"
+},
+{
+"id": "conv-42:D1:20",
+"speaker": "Joanna",
+"text": "A few times. It's one of my favorites! I really like the idea and the acting."
+},
+{
+"id": "conv-42:D1:21",
+"speaker": "Nate",
+"text": "Cool! I'll definitely check it out. Thanks for the recommendation!"
+},
+{
+"id": "conv-42:D1:22",
+"speaker": "Joanna",
+"text": "No problem, Nate! Let me know if you like it!"
+}
+]
+},
+{
+"session": "conv-42:S2",
+"date": "2022-01-23 14:01",
+"turns": [
+{
+"id": "conv-42:D2:1",
+"speaker": "Joanna",
+"text": "Hey Nate! Haven't talked in a few days. Crazy things happened to me!"
+},
+{
+"id": "conv-42:D2:2",
+"speaker": "Nate",
+"text": "Hi Joanna! Long time no see! What's been going on? You sound excited!"
+},
+{
+"id": "conv-42:D2:3",
+"speaker": "Joanna",
+"text": "Woo! I finally finished my first full screenplay and printed it last Friday. I've been working on for a while, such a relief to have it all done! [shares a photo: a photography of a book with a page of text on it]"
+},
+{
+"id": "conv-42:D2:4",
+"speaker": "Nate",
+"text": "Wow, that sounds awesome! What's it about? Glad it's all down!"
+},
+{
+"id": "conv-42:D2:5",
+"speaker": "Joanna",
+"text": "Thanks, Nate! It's a mix of drama and romance!"
+},
+{
+"id": "conv-42:D2:6",
+"speaker": "Nate",
+"text": "Wow, that's amazing! How do you feel now that it's finished? Do you have any new plans for it?"
+},
+{
+"id": "conv-42:D2:7",
+"speaker": "Joanna",
+"text": "Woohoo, Nate! I'm feeling a rollercoaster of emotions - relief, excitement, some anxiety - over finishing this project. Now I'm gonna submit it to some film festivals and (hopefully) get producers and directors to check it out. Here's hoping!"
+},
+{
+"id": "conv-42:D2:8",
+"speaker": "Nate",
+"text": "Congrats, Joanna! That sounds like a wild experience. Rock on and I hope they love it!"
+},
+{
+"id": "conv-42:D2:9",
+"speaker": "Joanna",
+"text": "Thanks Nate! A mix of emotions for sure. Hopefully, it leads to positive feedback and new opportunities."
+},
+{
+"id": "conv-42:D2:10",
+"speaker": "Nate",
+"text": "Yeah, for sure. Hoping for the best! I like having some of these little ones around to keep me calm when things are super important and I'm nervous. [shares a photo: a photography of a turtle and a turtleling sitting on a rock]"
+},
+{
+"id": "conv-42:D2:11",
+"speaker": "Joanna",
+"text": "Awww! How long have you had them?"
+},
+{
+"id": "conv-42:D2:12",
+"speaker": "Nate",
+"text": "I've had them for 3 years now and they bring me tons of joy!"
+},
+{
+"id": "conv-42:D2:13",
+"speaker": "Joanna",
+"text": "They sure lookl like they do! Adorable!"
+},
+{
+"id": "conv-42:D2:14",
+"speaker": "Nate",
+"text": "Thanks! The turtles might be small, but both sure have big personalities. I really reccomend having something like these little guys for times of stress."
+},
+{
+"id": "conv-42:D2:15",
+"speaker": "Joanna",
+"text": "Good idea, Nate! I'll think about it and maybe get pets of my own soon if I can find any I'm not allergic to. Have you been up to anything recently?"
+},
+{
+"id": "conv-42:D2:16",
+"speaker": "Nate",
+"text": "Yeah actually! I start to hang out with some people outside of my circle at the tournament. They're pretty cool!"
+},
+{
+"id": "conv-42:D2:17",
+"speaker": "Joanna",
+"text": "Oh? That sounds sweet! Is it a weird relationship with them being competitors and all?"
+},
+{
+"id": "conv-42:D2:18",
+"speaker": "Nate",
+"text": "Oh, kind of. Some people are more competitive then others, so I tend to just stick around the more chill people here."
+},
+{
+"id": "conv-42:D2:19",
+"speaker": "Joanna",
+"text": "That makes sense! Are you gonna cheer them on even if you lose?"
+},
+{
+"id": "conv-42:D2:20",
+"speaker": "Nate",
+"text": "Absolutely! I don't expect to win big here, I just like playing for fun!  You mentioned you were allergic to pets earlier, how bad is it?"
+},
+{
+"id": "conv-42:D2:21",
+"speaker": "Joanna",
+"text": "Oh, its really bad. My face gets all puffy and itchy when I'm around certain animals, so I've always just stayed away."
+},
+{
+"id": "conv-42:D2:22",
+"speaker": "Nate",
+"text": "Sorry to hear that. Allergies can be tough. What specifically are you allergic to?"
+},
+{
+"id": "conv-42:D2:23",
+"speaker": "Joanna",
+"text": "I'm allergic to most reptiles and animals with fur. It can be a bit of a drag, but I find other ways to be happy."
+},
+{
+"id": "conv-42:D2:24",
+"speaker": "Nate",
+"text": "Awesome! There are lots of things that can bring you joy without pets. What else brings you joy?"
+},
+{
+"id": "conv-42:D2:25",
+"speaker": "Joanna",
+"text": "Writing and hanging with friends! That way I can express myself through stories, or just have a good time with people."
+},
+{
+"id": "conv-42:D2:26",
+"speaker": "Nate",
+"text": "That's great to hear! Those are both great things. I'm glad to hear you've got other things to help you get through times of axiousness despite not being able to have animals!"
+},
+{
+"id": "conv-42:D2:27",
+"speaker": "Joanna",
+"text": "Thanks, Nate! Writing helps me create wild worlds with awesome characters. Plus, it's a great way to express my feelings. I can't imagine life without it."
+},
+{
+"id": "conv-42:D2:28",
+"speaker": "Nate",
+"text": "Wow, Joanna, that sounds amazing! Keep doing what you love!"
+},
+{
+"id": "conv-42:D2:29",
+"speaker": "Joanna",
+"text": "Thanks, Nate! I'll definitely keep pursuing my passion for writing. It means a lot."
+}
+]
+},
+{
+"session": "conv-42:S3",
+"date": "2022-02-07 09:27",
+"turns": [
+{
+"id": "conv-42:D3:1",
+"speaker": "Joanna",
+"text": "Hey Nate, long time no see! The screenplay I sent in to the film festival has been on my mind all day everyday. I keep bouncing between crazy emotions like relief, excitement and worry! Fingers crossed a producer or director falls in love with it and it ends up on the big screen - that would be awesome!"
+},
+{
+"id": "conv-42:D3:2",
+"speaker": "Nate",
+"text": "Hey Joanna! It is a big deal! I'm sure its been a wild ride. Sending some positive vibes and hoping someone likes it enough to get it on the big screen - that would be awesome!"
+},
+{
+"id": "conv-42:D3:3",
+"speaker": "Joanna",
+"text": "Thanks Nate, your support really means a lot. I put a lot of effort into it and I'm crossing my fingers. What about you? Anything new and exciting happening in your life?"
+},
+{
+"id": "conv-42:D3:4",
+"speaker": "Nate",
+"text": "Thanks, Joanna. Not much has changed for me, but I just discovered that I can make coconut milk icecream and gave it a try. It was actually pretty good, so I'm proud of myself. [shares a photo: a photo of a bowl of ice cream with a spoon in it]"
+},
+{
+"id": "conv-42:D3:5",
+"speaker": "Joanna",
+"text": "Looks delish! Glad you tried something new and it went well. What did you think of it?"
+},
+{
+"id": "conv-42:D3:6",
+"speaker": "Nate",
+"text": "Super good! It was rich and creamy - might be my new favorite snack!"
+},
+{
+"id": "conv-42:D3:7",
+"speaker": "Joanna",
+"text": "Great! I love when you try something new and it actually works out. Will you give it another go?"
+},
+{
+"id": "conv-42:D3:8",
+"speaker": "Nate",
+"text": "Yep, it could be fun! I'm looking forward to trying out different flavors and toppings."
+},
+{
+"id": "conv-42:D3:9",
+"speaker": "Joanna",
+"text": "Yum! Sounds great. Got any favorite flavors for dairy-free desserts?"
+},
+{
+"id": "conv-42:D3:10",
+"speaker": "Nate",
+"text": "I love coconut milk, but I also enjoy chocolate and mixed berry flavors."
+},
+{
+"id": "conv-42:D3:11",
+"speaker": "Joanna",
+"text": "Wow, those sound great! Who can say no to chocolate and berries? I'm tempted to try dairy-free flavors now! [shares a photo: a photo of a piece of cake with berries on a plate]"
+},
+{
+"id": "conv-42:D3:12",
+"speaker": "Nate",
+"text": "Well I also made a dairy-free chocolate cake with berries on it the other day, maybe you would like that!"
+},
+{
+"id": "conv-42:D3:13",
+"speaker": "Joanna",
+"text": "Wow! That sounds yummy! You're so talented. Thanks for sharing your amazing creations! I should really try making one or just pay you a visit and try one for myself!"
+},
+{
+"id": "conv-42:D3:14",
+"speaker": "Nate",
+"text": "I couldn't agree more! It's always fun experimenting in the kitchen."
+},
+{
+"id": "conv-42:D3:15",
+"speaker": "Joanna",
+"text": "I can tell! Your cooking skills are awesome. Seen any good movies lately?"
+},
+{
+"id": "conv-42:D3:16",
+"speaker": "Nate",
+"text": "Not recently. Any good ones you'd recommend?"
+},
+{
+"id": "conv-42:D3:17",
+"speaker": "Joanna",
+"text": "I just watched \"Little Women\" and it was amazing! It's a great story about sisterhood, love, and reaching for your dreams. Definitely a must-see!"
+},
+{
+"id": "conv-42:D3:18",
+"speaker": "Nate",
+"text": "Oh, that sounds like a great one! I'll definitely add it to my list. Thanks for the recommendation!"
+},
+{
+"id": "conv-42:D3:19",
+"speaker": "Joanna",
+"text": "Anytime! I'm always down to give movie reccomendations."
+},
+{
+"id": "conv-42:D3:20",
+"speaker": "Nate",
+"text": "Good to know! I'll be sure to give you a shout whenever I run out of things to watch!"
+},
+{
+"id": "conv-42:D3:21",
+"speaker": "Joanna",
+"text": "Sounds great! Let me know what you think of it when your done!"
+},
+{
+"id": "conv-42:D3:22",
+"speaker": "Nate",
+"text": "You bet! You'll be the first to know."
+},
+{
+"id": "conv-42:D3:23",
+"speaker": "Joanna",
+"text": "Awesome! Enjoy yourself!"
+},
+{
+"id": "conv-42:D3:24",
+"speaker": "Nate",
+"text": "You too, take care!"
+},
+{
+"id": "conv-42:D3:25",
+"speaker": "Joanna",
+"text": "Later, take care!"
+}
+]
+},
+{
+"session": "conv-42:S4",
+"date": "2022-02-25 13:07",
+"turns": [
+{
+"id": "conv-42:D4:1",
+"speaker": "Nate",
+"text": "Hey Joanna! Sorry I haven't been around. I made my friend some ice cream and they loved it!"
+},
+{
+"id": "conv-42:D4:2",
+"speaker": "Joanna",
+"text": "No worries, Nate! Glad to hear it. What flavor did you make?"
+},
+{
+"id": "conv-42:D4:3",
+"speaker": "Nate",
+"text": "I whipped up some chocolate and vanilla swirl. [shares a photo: a photo of a person holding a chocolate and vanilla ice cream cone]"
+},
+{
+"id": "conv-42:D4:4",
+"speaker": "Joanna",
+"text": "That looks delicious! Unfortunately, I can't have dairy, so no ice cream for me. Do you happen to have a dairy-free recipe that I could try?"
+},
+{
+"id": "conv-42:D4:5",
+"speaker": "Nate",
+"text": "Sure, I know one recipe using coconut milk. Would you like me to send it to you?"
+},
+{
+"id": "conv-42:D4:6",
+"speaker": "Joanna",
+"text": "Yeah, definitely! I'm keen to try your recipe. Always up for something sweet."
+},
+{
+"id": "conv-42:D4:7",
+"speaker": "Nate",
+"text": "Cool, I'll do that. I'm all about these desserts, let me know what you think!"
+},
+{
+"id": "conv-42:D4:8",
+"speaker": "Joanna",
+"text": "Definitely keeping you posted! Love your creations!"
+},
+{
+"id": "conv-42:D4:9",
+"speaker": "Nate",
+"text": "Thanks, Joanna! It means a lot that you enjoy the desserts I bake."
+},
+{
+"id": "conv-42:D4:10",
+"speaker": "Joanna",
+"text": "Yeah Nate, your cooking is amazing! I can't stop thinking about the screenplay, so I just started writing another one while I wait to hear back about how the first one did."
+},
+{
+"id": "conv-42:D4:11",
+"speaker": "Nate",
+"text": "I hear that, taking your mind of something like that is very challenging. What's the new one about?"
+},
+{
+"id": "conv-42:D4:12",
+"speaker": "Joanna",
+"text": "It's about a thirty year old woman on a journey of self-discovery after a loss. Somewhat similar to the last one, but hey, that's just the kind of thing I'm inspired to write about!"
+},
+{
+"id": "conv-42:D4:13",
+"speaker": "Nate",
+"text": "Interesting! That's a deep topic. Love to hear more about it."
+},
+{
+"id": "conv-42:D4:14",
+"speaker": "Joanna",
+"text": "Thanks, Nate! It's my own story. The main character is dealing with some tough stuff: loss and trying to figure out who they are. They take a road trip to heal and grow."
+},
+{
+"id": "conv-42:D4:15",
+"speaker": "Nate",
+"text": "Wow, Joanna, that sounds awesome. I love stories that tackle important issues. What inspired you to this one?"
+},
+{
+"id": "conv-42:D4:16",
+"speaker": "Joanna",
+"text": "Thanks, Nate! It was inspired by personal experiences and my own journey of self-discovery."
+},
+{
+"id": "conv-42:D4:17",
+"speaker": "Nate",
+"text": "Wow, Joanna, that takes guts! I can't wait to see it all come together. I'm also pumped to see how your first one will do!"
+},
+{
+"id": "conv-42:D4:18",
+"speaker": "Joanna",
+"text": "Thanks, Nate! Appreciate your support. Hoping my screenplay gets noticed and makes it to the screen. Fingers crossed!"
+},
+{
+"id": "conv-42:D4:19",
+"speaker": "Nate",
+"text": "Crossing my fingers for you! Hope your screenplay finds a fan and is given its due. Good luck!"
+}
+]
+},
+{
+"session": "conv-42:S5",
+"date": "2022-03-18 18:59",
+"turns": [
+{
+"id": "conv-42:D5:1",
+"speaker": "Joanna",
+"text": "Hey Nate, it's been a minute! I wrapped up my second script, and the feels have been wild. Sometimes I'm so relieved, but other times I just feel anxious about what comes next. It's a mix of excitement and terror, thinking about my work getting noticed and hitting the big screen."
+},
+{
+"id": "conv-42:D5:2",
+"speaker": "Nate",
+"text": "Hey Joanna! Awesome to hear from you! Congrats on wrapping up a second one! All that hard work and dedication will definitely shine through and get noticed, no doubt. Hope you've been able to take some time to relax after everything!"
+},
+{
+"id": "conv-42:D5:3",
+"speaker": "Joanna",
+"text": "Thanks Nate! It's been a wild ride. I've been decompressing, but it's hard to switch off. There's always this tug-of-war of hope and doubt."
+},
+{
+"id": "conv-42:D5:4",
+"speaker": "Nate",
+"text": "It's normal to have doubts, but you've worked hard and put tons of passion into it. Believe in yourself and things will work out. Here, look at this cute pic - walking them always reminds me to enjoy the small stuff! [shares a photo: a photography of two tortoises laying on the ground in a jungle]"
+},
+{
+"id": "conv-42:D5:5",
+"speaker": "Joanna",
+"text": "That pic's adorable! They always look so relaxed outside. What made you choose them as pets?"
+},
+{
+"id": "conv-42:D5:6",
+"speaker": "Nate",
+"text": "I'm drawn to turtles. They're unique and their slow pace is a nice change from the rush of life. They're also low-maintenance and calming. Check out this moment I snapped! [shares a photo: a photography of three turtles sitting on rocks in a pond]"
+},
+{
+"id": "conv-42:D5:7",
+"speaker": "Joanna",
+"text": "They look so peaceful! It's amazing how these creatures bring so much calm and joy. Is taking care of them tough?"
+},
+{
+"id": "conv-42:D5:8",
+"speaker": "Nate",
+"text": "No, not really. Just keep their area clean, feed them properly, and make sure they get enough light. It's actually kind of fun."
+},
+{
+"id": "conv-42:D5:9",
+"speaker": "Joanna",
+"text": "Sounds great! Having pets must be a wonderful experience."
+},
+{
+"id": "conv-42:D5:10",
+"speaker": "Nate",
+"text": "Pets definitely bring tons of joy. They are always there for us and they're so cute! Relaxing with them is a great way to chill."
+},
+{
+"id": "conv-42:D5:11",
+"speaker": "Joanna",
+"text": "I wish I wasn't allergic! I would get two turtles today if I could! I found out recently I'm allergic to cockroaches as well, so who knows if I'll ever get a pet."
+},
+{
+"id": "conv-42:D5:12",
+"speaker": "Nate",
+"text": "Sorry! Maybe there are other animals you could consider! In the meantime though, I'll be sure to send you pics of my turtles so you can still watch them grow without getting too close."
+},
+{
+"id": "conv-42:D5:13",
+"speaker": "Joanna",
+"text": "Great idea! I'm already really invested in those little guys!"
+},
+{
+"id": "conv-42:D5:14",
+"speaker": "Nate",
+"text": "Pets really seem to do that to everyone don't they! So, what about your script now? Any ideas for the next steps?"
+},
+{
+"id": "conv-42:D5:15",
+"speaker": "Joanna",
+"text": "I've been doing my fair share of research and networking non-stop for it. It's tough, but I'm determined to make it happen."
+},
+{
+"id": "conv-42:D5:16",
+"speaker": "Nate",
+"text": "Great idea! that should hopefully get some more eyes on it. Keep up the hard work!"
+},
+{
+"id": "conv-42:D5:17",
+"speaker": "Joanna",
+"text": "Thanks so much, Nate! Your support means a lot. I'll keep working at it and hopefully the next steps will become clearer soon."
+},
+{
+"id": "conv-42:D5:18",
+"speaker": "Nate",
+"text": "Just make sure you don't quit - the path forward will show up soon. You got this!"
+},
+{
+"id": "conv-42:D5:19",
+"speaker": "Joanna",
+"text": "Appreciated! I think just having someone to support me throughout the whole process is such a blessing. It gives me the motivation to keep pushing forward."
+},
+{
+"id": "conv-42:D5:20",
+"speaker": "Nate",
+"text": "Glad to hear my support makes a difference, Joanna. I'm here for you!"
+},
+{
+"id": "conv-42:D5:21",
+"speaker": "Joanna",
+"text": "Always good to hear! See you later! [shares a photo: a photo of a cinema ticket on a chair]"
+}
+]
+},
+{
+"session": "conv-42:S6",
+"date": "2022-03-24 13:43",
+"turns": [
+{
+"id": "conv-42:D6:1",
+"speaker": "Nate",
+"text": "Hey Joanna! Long time no talk, how's it going? Crazy stuff's been happening since we last chatted."
+},
+{
+"id": "conv-42:D6:2",
+"speaker": "Joanna",
+"text": "Hey Nate! Been quite a ride - in a good way - had an audition yesterday for a writing gig."
+},
+{
+"id": "conv-42:D6:3",
+"speaker": "Nate",
+"text": "Congrats! How did it go? Are you excited?"
+},
+{
+"id": "conv-42:D6:4",
+"speaker": "Joanna",
+"text": "Thanks, Nate! It went alright. Mixed emotions - definitely excited but also a bit anxious. Keep those fingers crossed!"
+},
+{
+"id": "conv-42:D6:5",
+"speaker": "Nate",
+"text": "Yeah, I get it. Mixed emotions are rough, but I have faith in you! Keep me posted - you got this!"
+},
+{
+"id": "conv-42:D6:6",
+"speaker": "Joanna",
+"text": "Thanks, Nate! Your support means a lot. I'll make sure to keep you updated. Anything new on your end?"
+},
+{
+"id": "conv-42:D6:7",
+"speaker": "Nate",
+"text": "Yeah actually - I'm currently participating in the video game tournament again and it's INTENSE! There's so much adrenaline flowing."
+},
+{
+"id": "conv-42:D6:8",
+"speaker": "Joanna",
+"text": "Best of luck in the tournament! It sounds like it would be difficult to go through so many days of intense gaming! This is my go-to place for writing inspiration. It helps me stay sharp and motivated. [shares a photo: a photo of a book shelf filled with books and magazines]"
+},
+{
+"id": "conv-42:D6:9",
+"speaker": "Nate",
+"text": "Wow, that's a lot of books. Do you have any advice for someone like me who wants to pursue writing?"
+},
+{
+"id": "conv-42:D6:10",
+"speaker": "Joanna",
+"text": "Definitely! Read lots and try out different genres. Build a solid understanding of literature. Don't be afraid to write and share, even if it's just with friends. Practicing and gathering feedback will make you better. Have faith in yourself and continue following your writing dreams - it's tough but worth it."
+},
+{
+"id": "conv-42:D6:11",
+"speaker": "Nate",
+"text": "Thanks, Joanna. Really appreciate your help and kind words. I'm going to keep working hard on it and see what happens. Good luck with your project, I'm sure it will turn out great!"
+},
+{
+"id": "conv-42:D6:12",
+"speaker": "Joanna",
+"text": "Thanks Nate! Appreciate your kind words and support. Let's keep going for our dreams and work hard. Catch you later!"
+},
+{
+"id": "conv-42:D6:13",
+"speaker": "Nate",
+"text": "Bye Joanna! Take care!"
+}
+]
+},
+{
+"session": "conv-42:S7",
+"date": "2022-04-15 19:37",
+"turns": [
+{
+"id": "conv-42:D7:1",
+"speaker": "Nate",
+"text": "Hey Jo, guess what I did? Dyed my hair last week - come see!"
+},
+{
+"id": "conv-42:D7:2",
+"speaker": "Joanna",
+"text": "Wow, Nate! Can't wait to see it. Must feel so liberating! How're you feeling?"
+},
+{
+"id": "conv-42:D7:3",
+"speaker": "Nate",
+"text": "I'm so stoked about it! Check it out! [shares a photo: a photography of a man with purple hair and glasses taking a selfie]"
+},
+{
+"id": "conv-42:D7:4",
+"speaker": "Joanna",
+"text": "Wow, your new hair color looks amazing! What made you choose that shade? Tell me all about it!"
+},
+{
+"id": "conv-42:D7:5",
+"speaker": "Nate",
+"text": "Thanks Jo! I picked this color because it's bright and bold - like me! I wanted to stand out from the regular options."
+},
+{
+"id": "conv-42:D7:6",
+"speaker": "Joanna",
+"text": "That's amazing, Nate! Your boldness really inspired me. It reminded me of this gorgeous sunset I saw while hiking the other day. It made me realize the importance of showing the world who we are. [shares a photo: a photo of a street with a stop sign and a cloudy sky]"
+},
+{
+"id": "conv-42:D7:7",
+"speaker": "Nate",
+"text": "Wow, that sunset looks awesome! Jealous! I bet you had a great time. Are there any more exciting trips coming up for you?"
+},
+{
+"id": "conv-42:D7:8",
+"speaker": "Joanna",
+"text": "I did! the sky was so gorgeous! Wish I had a vacation lined up, but right now my writing is consuming me. Hoping for some good news soon!"
+},
+{
+"id": "conv-42:D7:9",
+"speaker": "Nate",
+"text": "I understand, Joanna. Big projects can be so taxing. Keep me posted on how it goes, alright?"
+},
+{
+"id": "conv-42:D7:10",
+"speaker": "Joanna",
+"text": "Cheers, Nate! Your support means a lot. I'll definitely keep you updated."
+},
+{
+"id": "conv-42:D7:11",
+"speaker": "Nate",
+"text": "Sounds great, See you soon?"
+},
+{
+"id": "conv-42:D7:12",
+"speaker": "Joanna",
+"text": "Totally! Bye Nate!"
+},
+{
+"id": "conv-42:D7:13",
+"speaker": "Nate",
+"text": "Take care!"
+}
+]
+},
+{
+"session": "conv-42:S8",
+"date": "2022-04-17 18:44",
+"turns": [
+{
+"id": "conv-42:D8:1",
+"speaker": "Nate",
+"text": "Hey Joanna! Haven't talked with you in a while - how's it going?"
+},
+{
+"id": "conv-42:D8:2",
+"speaker": "Joanna",
+"text": "Hey Nate! Great to hear from you. I've been reading a lot in the past week! There's a lot of good books I forgot I owned."
+},
+{
+"id": "conv-42:D8:3",
+"speaker": "Nate",
+"text": "Sounds fun! I probably also have loads of books I haven't read in years. Sounds like a blast from the past!"
+},
+{
+"id": "conv-42:D8:4",
+"speaker": "Joanna",
+"text": "It really is! On a different note, I found an awesome hiking trail in my hometown yesterday! It was gorgeous. Nature is so inspiring, and it's a great way to reset. Do you know of any good hiking spots?"
+},
+{
+"id": "conv-42:D8:5",
+"speaker": "Nate",
+"text": "I'm not really into hiking but I'm curious to see what the trail looks like! I heard there's a nice trail just north of where I live."
+},
+{
+"id": "conv-42:D8:6",
+"speaker": "Joanna",
+"text": "Maybe I'll have to convince you to go with me one of these times!"
+},
+{
+"id": "conv-42:D8:7",
+"speaker": "Nate",
+"text": "Maybe! I do like nature, so that might be fun going with someone else."
+},
+{
+"id": "conv-42:D8:8",
+"speaker": "Joanna",
+"text": "Yeah, nature's awesome! I'm a huge fan of it, that's why I go!"
+},
+{
+"id": "conv-42:D8:9",
+"speaker": "Nate",
+"text": "Agreed, nature has a way of being so inspiring! I'm glad you found a way to reset and find peace in it."
+},
+{
+"id": "conv-42:D8:10",
+"speaker": "Joanna",
+"text": "Nature's always been my haven. Walking in it, feeling it, hearing the sounds - it's so calming. Worries and stress seem to vanish, and it's just me and the beauty around me."
+},
+{
+"id": "conv-42:D8:11",
+"speaker": "Nate",
+"text": "It's so crucial to find a little peace and remember life's beauty. For me, it's spending time with my pets and engaging in my hobbies; they let me take a break from reality. It's wild how small things can have such a powerful effect on our happiness, right?"
+},
+{
+"id": "conv-42:D8:12",
+"speaker": "Joanna",
+"text": "Yeah, Nate! Even the small things make life enjoyable and worth it. Taking time for your little friends and doing activities you love are like treasures that remind us how great and peaceful life is. We just gotta savor them!"
+},
+{
+"id": "conv-42:D8:13",
+"speaker": "Nate",
+"text": "Speaking of which, here they go again! [shares a photo: a photo of a turtle and a strawberry in a bowl]"
+},
+{
+"id": "conv-42:D8:14",
+"speaker": "Joanna",
+"text": "So cute! I love your turtles so much!"
+},
+{
+"id": "conv-42:D8:15",
+"speaker": "Nate",
+"text": "Me too! I love watching them play to simply enjoy the peaceful moments of life. Sometimes I even bring them in the kitchen so they can watch me make food like this! [shares a photo: a photo of a bowl of ice cream and a bowl of sprinkles]"
+},
+{
+"id": "conv-42:D8:16",
+"speaker": "Joanna",
+"text": "I love your icecream so much! I wish I could make it the way you do!"
+},
+{
+"id": "conv-42:D8:17",
+"speaker": "Nate",
+"text": "Thanks! It's dairy-free and so easy. Wanna get the recipe?"
+},
+{
+"id": "conv-42:D8:18",
+"speaker": "Joanna",
+"text": "Sure! I'm lactose intolerant, so I'll just need the dairy-free recipe! "
+},
+{
+"id": "conv-42:D8:19",
+"speaker": "Nate",
+"text": "No prob. I made it with coconut milk, vanilla extract, sugar, and a pinch of salt. After chilling it in the fridge, I put it in the ice cream maker and froze it until it was scoopable."
+},
+{
+"id": "conv-42:D8:20",
+"speaker": "Joanna",
+"text": "Wow, sounds delicious! I'm going to try making it tonight! Thank you for sharing the recipe!"
+},
+{
+"id": "conv-42:D8:21",
+"speaker": "Nate",
+"text": "Hey Joanna, glad I could help. Let me know how it turns out!"
+},
+{
+"id": "conv-42:D8:22",
+"speaker": "Joanna",
+"text": "Got it, Nate. I'll definitely let you know how it turns out. Thanks for sharing the recipe!"
+}
+]
+},
+{
+"session": "conv-42:S9",
+"date": "2022-04-21 19:44",
+"turns": [
+{
+"id": "conv-42:D9:1",
+"speaker": "Joanna",
+"text": "Hey Nate! Long time no talk! I wanted to tell ya I just joined a writers group. It's unbelievable--such inspirational people who really get my writing. I'm feeling so motivated and supported, it's like I finally belong somewhere! [shares a photo: a photo of a notebook with a notepad and a piece of paper]"
+},
+{
+"id": "conv-42:D9:2",
+"speaker": "Nate",
+"text": "Hey Joanna! That's awesome! Having a supportive group around you can really make a difference. What kind of projects are you working on with them? [shares a photo: a photo of a cup of ice cream with a cherry on top]"
+},
+{
+"id": "conv-42:D9:3",
+"speaker": "Joanna",
+"text": "Thanks, Nate! We've made some great progress. I'm working on one with my group called \"Finding Home.\" It's a script about a girl on a journey to find her true home. I find it really rewarding and emotional. What about you? Any upcoming gaming tournaments?"
+},
+{
+"id": "conv-42:D9:4",
+"speaker": "Nate",
+"text": "Hi Joanna! \"Finding Home\" sounds really special. Must be so meaningful to work on. I've got a gaming tournament next month and I'm feeling good about it. It's gonna be my 4th one!"
+},
+{
+"id": "conv-42:D9:5",
+"speaker": "Joanna",
+"text": "Yeah, I bet the nerves and excitement are quite a rush! I remember when I did my first play, I was so nervous I forgot my lines. It was embarrassing, but it taught me how important it is to prepare and stay in the moment. [shares a photo: a photography of a man in a striped suit is performing on stage]"
+},
+{
+"id": "conv-42:D9:6",
+"speaker": "Nate",
+"text": "Sounds like you had an interesting time on stage! It's always a learning experience. Have you ever considered going back to acting? Is that you in the photo?"
+},
+{
+"id": "conv-42:D9:7",
+"speaker": "Joanna",
+"text": "Yeah, that's me in that photo! Acting was my first passion, but now I really shine in writing. It helps me express myself in a new way, but who knows, maybe I'll go back to acting someday. Never say never!"
+},
+{
+"id": "conv-42:D9:8",
+"speaker": "Nate",
+"text": "Go for it! Follow your passion for writing, but if acting really makes you happy, give it a shot as well. Who knows what'll happen! Any particular movies that spark your writing? [shares a photo: a photo of a turtle laying on a bed of rocks and gravel]"
+},
+{
+"id": "conv-42:D9:9",
+"speaker": "Joanna",
+"text": "Thanks Nate! I'm gonna keep writing, but if acting calls out I might give it a try. I really enjoy dramas and emotionally-driven films. What about you? What inspires your passion?"
+},
+{
+"id": "conv-42:D9:10",
+"speaker": "Nate",
+"text": "I love fantasy and sci-fi movies, they're a great escape and get my imagination going. Playing video games is a great way to express my creativity and passion. [shares a photo: a photography of a black xbox controller sitting on top of a wooden table]"
+},
+{
+"id": "conv-42:D9:11",
+"speaker": "Joanna",
+"text": "That's awesome! I love how video games can really spark your imagination. Do you have a favorite fantasy or sci-fi movie?"
+},
+{
+"id": "conv-42:D9:12",
+"speaker": "Nate",
+"text": "Yeah, for sure! This trilogy is one of my faves. The world building, battles, and storytelling always blow me away! [shares a photo: a photo of a shelf with a lot of books on it]"
+},
+{
+"id": "conv-42:D9:13",
+"speaker": "Joanna",
+"text": "Wow, that's great to hear! What books do you enjoy? I'm always up for some new book recommendations."
+},
+{
+"id": "conv-42:D9:14",
+"speaker": "Nate",
+"text": "I love this series. It has adventures, magic, and great characters - it's a must-read! [shares a photo: a photo of a bunch of books on a table]"
+},
+{
+"id": "conv-42:D9:15",
+"speaker": "Joanna",
+"text": "Heard of that series! It's been on my list forever. Thanks for the recommendation, Nate. I'm definitely going to check it out!"
+},
+{
+"id": "conv-42:D9:16",
+"speaker": "Nate",
+"text": "No problem, glad to see an interest. Let me know what you think when you check it out."
+},
+{
+"id": "conv-42:D9:17",
+"speaker": "Joanna",
+"text": "Thanks Nate! I'll definitely let you know my thoughts. Take care and have a great day!"
+},
+{
+"id": "conv-42:D9:18",
+"speaker": "Nate",
+"text": "See you! Good chatting with you! Have a great day!"
+}
+]
+},
+{
+"session": "conv-42:S10",
+"date": "2022-05-02 11:54",
+"turns": [
+{
+"id": "conv-42:D10:1",
+"speaker": "Joanna",
+"text": "Hey Nate, how's it going? I took your reccomendation and watched \"The Lord of the Rings\" Trilogy last night! It was awesome! [shares a photo: a photo of a person holding a book openhemer]"
+},
+{
+"id": "conv-42:D10:2",
+"speaker": "Nate",
+"text": "Glad to hear you enjoyed it! It's probably the greatest trilogy of all time! As for me, life's been ok, just taking care of this. [shares a photo: a photo of a gaming room with a computer and a gaming chair]"
+},
+{
+"id": "conv-42:D10:3",
+"speaker": "Joanna",
+"text": "Wow, Nate! I'm proud of what you did. Your gaming room looks great - have you been gaming a lot recently?"
+},
+{
+"id": "conv-42:D10:4",
+"speaker": "Nate",
+"text": "Gaming has been my focus - practicing a lot and even winning a few tournaments. Last week I won my second tournament! [shares a photo: a photo of a woman with purple hair and a black dress]"
+},
+{
+"id": "conv-42:D10:5",
+"speaker": "Joanna",
+"text": "Wow, congrats! What game were you playing?"
+},
+{
+"id": "conv-42:D10:6",
+"speaker": "Nate",
+"text": "Thanks! I usually play CS:GO, but I tried my hand at the local Street Fighter tournament this time since I play that game a lot with my friends, and turns out I'm really good!"
+},
+{
+"id": "conv-42:D10:7",
+"speaker": "Joanna",
+"text": "Nice! That must have been a surprise. How did it feel to finally win one?"
+},
+{
+"id": "conv-42:D10:8",
+"speaker": "Nate",
+"text": "It was super awesome! So much adrenaline went into that last match, and the other finalist even shook my hand! Enough about me though, how about you? What have you been up to?"
+},
+{
+"id": "conv-42:D10:9",
+"speaker": "Joanna",
+"text": "Not much is new other than the screenplay. Been working on some projects and testing out dairy-free dessert recipes for friends and fam. Here's a pic of a cake I made recently! [shares a photo: a photo of a cake with white frosting on a wooden table]"
+},
+{
+"id": "conv-42:D10:10",
+"speaker": "Nate",
+"text": "That looks really good! I love the way the frosting turned out!"
+},
+{
+"id": "conv-42:D10:11",
+"speaker": "Joanna",
+"text": "Thanks! It's dairy-free vanilla with strawberry filling and coconut cream frosting. I gotta say, I really like your coconut reccomendation you gave a while back!"
+},
+{
+"id": "conv-42:D10:12",
+"speaker": "Nate",
+"text": "Wow, Joanna, that looks amazing! I bet it tastes great - you're so talented at making dairy-free desserts!"
+},
+{
+"id": "conv-42:D10:13",
+"speaker": "Joanna",
+"text": "Thanks Nate! I really appreciate it. I love experimenting in the kitchen, coming up with something tasty. Cooking and baking are my creative outlets. Especially when I'm snackin' dairy-free, trying to make the desserts just as delicious - it's a rewarding challenge! Seeing the smiles on everyone's faces when they try it - it's a total win!"
+},
+{
+"id": "conv-42:D10:14",
+"speaker": "Nate",
+"text": "That's great, Joanna! It must be so rewarding to see everyone enjoying your creations. Keep up the good work!"
+},
+{
+"id": "conv-42:D10:15",
+"speaker": "Joanna",
+"text": "Thanks, Nate! Appreciate all the help. Gonna keep trying new things. See ya later!"
+},
+{
+"id": "conv-42:D10:16",
+"speaker": "Nate",
+"text": "Bye!"
+}
+]
+},
+{
+"session": "conv-42:S11",
+"date": "2022-05-12 15:35",
+"turns": [
+{
+"id": "conv-42:D11:1",
+"speaker": "Joanna",
+"text": "Hey Nate! Great to hear from you! Quite a week since we last talked - something awesome happened to me!"
+},
+{
+"id": "conv-42:D11:2",
+"speaker": "Nate",
+"text": "Hey Jo! Great hearing from you! What happened?"
+},
+{
+"id": "conv-42:D11:3",
+"speaker": "Joanna",
+"text": "I went hiking and found some more amazing trails in my town. It was such an awesome experience! I think I am an expert hiker now."
+},
+{
+"id": "conv-42:D11:4",
+"speaker": "Nate",
+"text": "Sounds great, Jo! Happy you had an awesome experience. Did you happen to take any photos of it?"
+},
+{
+"id": "conv-42:D11:5",
+"speaker": "Joanna",
+"text": "Yeah, I did! Loved this spot on the hike. The rush of the water was so soothing. [shares a photo: a photo of a waterfall with a dark sky in the background]"
+},
+{
+"id": "conv-42:D11:6",
+"speaker": "Nate",
+"text": "Wow, looks great! Where did you take this picture? I love the dark sky and green scenery."
+},
+{
+"id": "conv-42:D11:7",
+"speaker": "Joanna",
+"text": "Thanks! I took this photo at a beautiful location called Whispering Falls. It was really peaceful and serene."
+},
+{
+"id": "conv-42:D11:8",
+"speaker": "Nate",
+"text": "I wish I could have been there! Your hikes sound like a blast."
+},
+{
+"id": "conv-42:D11:9",
+"speaker": "Joanna",
+"text": "It was awesome, Nate. The sound of that place and the beauty of nature made me so calm and peaceful. Everything else faded away and all that mattered was the present."
+},
+{
+"id": "conv-42:D11:10",
+"speaker": "Nate",
+"text": "That's great. Glad you found a spot that calms you down - nature sure can be a break from the craziness."
+},
+{
+"id": "conv-42:D11:11",
+"speaker": "Joanna",
+"text": "Nature totally inspires me and it's so calming to be surrounded by its beauty. Hiking has opened up a whole new world for me and I feel like a different person now."
+},
+{
+"id": "conv-42:D11:12",
+"speaker": "Nate",
+"text": "Wow, Jo, that's really cool! It's great to have something that gets those creative juices flowing."
+},
+{
+"id": "conv-42:D11:13",
+"speaker": "Joanna",
+"text": "I always feel like I could write a whole movie when I'm out there in cool places like that!"
+},
+{
+"id": "conv-42:D11:14",
+"speaker": "Nate",
+"text": "Wow! That's really cool that it inspires you that much! For me I just get deep in thought and think about my life or new recipes."
+},
+{
+"id": "conv-42:D11:15",
+"speaker": "Joanna",
+"text": "I think about my life too sometimes when I'm out and about, but there was something special about these trails that made me feel like writing a drama."
+},
+{
+"id": "conv-42:D11:16",
+"speaker": "Nate",
+"text": "Hey, we should go together sometime, don't you think? Maybe I'll start to think of a drama myself and publish my own screenplay."
+},
+{
+"id": "conv-42:D11:17",
+"speaker": "Joanna",
+"text": "Haha, now that would be something! Sure, you should come down and join me on the trails sometime!"
+},
+{
+"id": "conv-42:D11:18",
+"speaker": "Nate",
+"text": "Sounds like a plan! Thanks for the invite Joanna!"
+},
+{
+"id": "conv-42:D11:19",
+"speaker": "Joanna",
+"text": "Sure thing Nate! See you later!"
+},
+{
+"id": "conv-42:D11:20",
+"speaker": "Nate",
+"text": "See ya!"
+}
+]
+},
+{
+"session": "conv-42:S12",
+"date": "2022-05-20 19:49",
+"turns": [
+{
+"id": "conv-42:D12:1",
+"speaker": "Nate",
+"text": "Hey Joanna! How've you been? Been a busy week since we talked."
+},
+{
+"id": "conv-42:D12:2",
+"speaker": "Joanna",
+"text": "Hey Nate! Just finished something - pretty wild journey!"
+},
+{
+"id": "conv-42:D12:3",
+"speaker": "Nate",
+"text": "Way to go! I just got a new addition to the family, this is Max! [shares a photo: a photo of a dog laying on a couch in a living room]"
+},
+{
+"id": "conv-42:D12:4",
+"speaker": "Joanna",
+"text": "Wow, he's adorable! How long have you had him? I can see why you're thrilled!"
+},
+{
+"id": "conv-42:D12:5",
+"speaker": "Nate",
+"text": "Thanks! It's awesome - he's adopted and so full of energy, and he's filling my life with so much joy. He's even keeping my other pets active."
+},
+{
+"id": "conv-42:D12:6",
+"speaker": "Joanna",
+"text": "Pets sure do make life better! Glad Max is bringing you lots of joy."
+},
+{
+"id": "conv-42:D12:7",
+"speaker": "Nate",
+"text": "Yep, totally! Pets make us so much happier and never let us down. Have you thought any more of getting one of your own?"
+},
+{
+"id": "conv-42:D12:8",
+"speaker": "Joanna",
+"text": "Unfortunately, allergies make it so I don't really want to get any, and I'm too lazy to research alternative pets for my allergies."
+},
+{
+"id": "conv-42:D12:9",
+"speaker": "Nate",
+"text": "Aww, that's unfortunate. It's nice seeing the joy pets bring to others, though. How do you find comfort when you don't have any?"
+},
+{
+"id": "conv-42:D12:10",
+"speaker": "Joanna",
+"text": "Writing and creative projects are what get me through tough times. I'm also grateful for my supportive friends."
+},
+{
+"id": "conv-42:D12:11",
+"speaker": "Nate",
+"text": "Wow, that's awesome! Those both can definitely be therapeutic. It's great to have such positive relationships that make such a great impact."
+},
+{
+"id": "conv-42:D12:12",
+"speaker": "Joanna",
+"text": "Yeah. It's so nice to have friends who understand and appreciate my work - it's priceless being able to talk about it together and receive feedback. Here's a look at what I've been working on \u2013 it's been quite a journey, but I made it! [shares a photo: a photo of a notepad with a dog on it and a pen]"
+},
+{
+"id": "conv-42:D12:13",
+"speaker": "Nate",
+"text": "Wow, that looks great Joanna! Is that your third one?"
+},
+{
+"id": "conv-42:D12:14",
+"speaker": "Joanna",
+"text": "Yep! I chose to write about this because it's really personal. It's about loss, identity, and connection. It's a story I've had for ages but just got the guts to write it. It was hard, but I'm so proud of it."
+},
+{
+"id": "conv-42:D12:15",
+"speaker": "Nate",
+"text": "That sounds impressive. You really do like writing about sadness and loss don't you."
+},
+{
+"id": "conv-42:D12:16",
+"speaker": "Joanna",
+"text": "Thanks, Nate! Yeah I really do. I had to be vulnerable and dig deep into those topics. But I think meaningful stories come from personal experiences and feelings. It was scary, but I found that I write best when I'm being true to myself - even if it's hard."
+},
+{
+"id": "conv-42:D12:17",
+"speaker": "Nate",
+"text": "Well done, Joanna! It takes guts to explore your experiences and feelings. I'm proud of you for staying strong and being true to yourself. Keep it up!"
+},
+{
+"id": "conv-42:D12:18",
+"speaker": "Joanna",
+"text": "Thanks, Nate! Your support really means a lot. Knowing I've got people like you cheering me on makes this journey way easier."
+},
+{
+"id": "conv-42:D12:19",
+"speaker": "Nate",
+"text": "No worries, Joanna! Keep going and reach for your dreams. You've got tons of talent and potential!"
+}
+]
+},
+{
+"session": "conv-42:S13",
+"date": "2022-05-25 15:00",
+"turns": [
+{
+"id": "conv-42:D13:1",
+"speaker": "Nate",
+"text": "Hey Jo! Been ages since we last talked. Here's something cool that happened the other day - I took Max for a walk and ran into this super nice couple who had a dog. It turns out they live close by. We decided to do doggy playdates, which is awesome considering we all need friends for our pets."
+},
+{
+"id": "conv-42:D13:2",
+"speaker": "Joanna",
+"text": "Hey Nate! Great to hear from you. Sounds like a nice encounter on your walk. Connecting with others who have pets can be uplifting and rewarding."
+},
+{
+"id": "conv-42:D13:3",
+"speaker": "Nate",
+"text": "It's like fate. Having a walking buddy forMax will be great. He really likes the other dog too!"
+},
+{
+"id": "conv-42:D13:4",
+"speaker": "Joanna",
+"text": "Awesome! Did you get to know the couple very well? What were they like?"
+},
+{
+"id": "conv-42:D13:5",
+"speaker": "Nate",
+"text": "They actually didn't share a whole lot in common with me besides the love of animals, but I think that was all we needed to share in common to be good friends!"
+},
+{
+"id": "conv-42:D13:6",
+"speaker": "Joanna",
+"text": "That's really cool that you can just go out and meet people like that, keep it up Nate!"
+},
+{
+"id": "conv-42:D13:7",
+"speaker": "Nate",
+"text": "Thanks! I just really enjoy watching our pets play with one another. Its like a dream come true seeing my dog so happy."
+},
+{
+"id": "conv-42:D13:8",
+"speaker": "Joanna",
+"text": "I can see why having a peaceful presence around could help relieve stress. Having someone or something to come home to for a sense of calm would be helpful for relaxation."
+},
+{
+"id": "conv-42:D13:9",
+"speaker": "Nate",
+"text": "Yep, Joanna. It's great! Looky here, I got this new pup for you! [shares a photo: a photo of a stuffed animal laying on a bed]"
+},
+{
+"id": "conv-42:D13:10",
+"speaker": "Joanna",
+"text": "Awww! It's so cute! I love the thought Nate!"
+},
+{
+"id": "conv-42:D13:11",
+"speaker": "Nate",
+"text": "Thanks! It's a stuffed animal to remind you of the good vibes."
+},
+{
+"id": "conv-42:D13:12",
+"speaker": "Joanna",
+"text": "That's so sweet! I'll cherish that little guy with all my heart!"
+},
+{
+"id": "conv-42:D13:13",
+"speaker": "Nate",
+"text": "Yeah! It's like having joy in your pocket. It always makes me grin when I look at it."
+},
+{
+"id": "conv-42:D13:14",
+"speaker": "Joanna",
+"text": "That's great, Nate! Appreciate the small joys like that cute stuffed animal. It's a nice reminder!"
+},
+{
+"id": "conv-42:D13:15",
+"speaker": "Nate",
+"text": "Agreed, those little things sure do make life better!"
+},
+{
+"id": "conv-42:D13:16",
+"speaker": "Joanna",
+"text": "I'll always remember those moments that bring us happiness and remind us that life is great!"
+},
+{
+"id": "conv-42:D13:17",
+"speaker": "Nate",
+"text": "Sure, Joanna! It's all about finding those little things and cherishing them, otherwise it's easy to get down!"
+},
+{
+"id": "conv-42:D13:18",
+"speaker": "Joanna",
+"text": "Thinking back to the tough times finishing my screenplay made me realize it's those moments that bring joy and make the journey worth it."
+},
+{
+"id": "conv-42:D13:19",
+"speaker": "Nate",
+"text": "Yeah, those little moments make it all worth it, especially during tough times. Enjoying the ride is key."
+},
+{
+"id": "conv-42:D13:20",
+"speaker": "Joanna",
+"text": "Appreciating the journey and being aware of those happy moments can be a game-changer! It keeps us focused on our dreams. Can't wait to show it to you. I value your opinion!"
+},
+{
+"id": "conv-42:D13:21",
+"speaker": "Nate",
+"text": "Can't wait to see it, Joanna! I'm here to support you."
+},
+{
+"id": "conv-42:D13:22",
+"speaker": "Joanna",
+"text": "Thanks, Nate! Your support is greatly appreciated. I'll make sure to keep you updated."
+},
+{
+"id": "conv-42:D13:23",
+"speaker": "Nate",
+"text": "No worries! You've got this. Keep it up!"
+}
+]
+},
+{
+"session": "conv-42:S14",
+"date": "2022-06-03 17:44",
+"turns": [
+{
+"id": "conv-42:D14:1",
+"speaker": "Joanna",
+"text": "Nate, after finishing my screenplay I got a rejection letter from a major company. It really bummed me out."
+},
+{
+"id": "conv-42:D14:2",
+"speaker": "Nate",
+"text": "Sorry to hear that, Joanna. Rejection stinks, but it doesn't mean you're not talented. Don't give up on your dreams!"
+},
+{
+"id": "conv-42:D14:3",
+"speaker": "Joanna",
+"text": "Thanks, Nate. It can feel like a step back sometimes. But I appreciate your kind words and encouragement."
+},
+{
+"id": "conv-42:D14:4",
+"speaker": "Nate",
+"text": "Sure, just make sure you keep going and believing in yourself. Did something happen with the company?"
+},
+{
+"id": "conv-42:D14:5",
+"speaker": "Joanna",
+"text": "They just sent me a generic rejection letter without much feedback. It's disheartening not knowing why it didn't work out."
+},
+{
+"id": "conv-42:D14:6",
+"speaker": "Nate",
+"text": "Ugh, that's so frustrating. But don't get discouraged, just keep going."
+},
+{
+"id": "conv-42:D14:7",
+"speaker": "Joanna",
+"text": "Yeah, you're right. I won't let this bring me down. Thanks for your support. What have you been up to lately?"
+},
+{
+"id": "conv-42:D14:8",
+"speaker": "Nate",
+"text": "I've been doing great - I just won another regional video game tournament last week! It was so cool, plus I met some new people. Connecting with fellow gamers is always awesome."
+},
+{
+"id": "conv-42:D14:9",
+"speaker": "Joanna",
+"text": "Way to go, Nate! Congratulations on your victory in the tournament! It must feel great to be recognized for your gaming skills."
+},
+{
+"id": "conv-42:D14:10",
+"speaker": "Nate",
+"text": "Thanks, Joanna! Winning was a huge confidence boost and shows my hard work paid off. I'm really happy with my progress."
+},
+{
+"id": "conv-42:D14:11",
+"speaker": "Joanna",
+"text": "I am as well! It's great to hear from you about your tournaments throughout the years!"
+},
+{
+"id": "conv-42:D14:12",
+"speaker": "Nate",
+"text": "Thanks! I has been a while since my first tournament hasn't it? I appreciate your support!"
+},
+{
+"id": "conv-42:D14:13",
+"speaker": "Joanna",
+"text": "Anytime Nate! I'm here for you every step of the way."
+},
+{
+"id": "conv-42:D14:14",
+"speaker": "Nate",
+"text": "I talked to some of the guys at the tournament afterwards, and they said they wanted to hang out later! [shares a photo: a photo of a purple and blue controller with a star field design]"
+},
+{
+"id": "conv-42:D14:15",
+"speaker": "Joanna",
+"text": "Sounds like fun! It's good to have friends that share your interests!"
+},
+{
+"id": "conv-42:D14:16",
+"speaker": "Nate",
+"text": "For sure! They asked for some tips in how to improve their game, so I said I could help."
+},
+{
+"id": "conv-42:D14:17",
+"speaker": "Joanna",
+"text": "Good on you for helping strangers out! Stepping outside your comfort zone is always great."
+},
+{
+"id": "conv-42:D14:18",
+"speaker": "Nate",
+"text": "Thanks, I just like helping people. Do you have any plans for the weekend?"
+},
+{
+"id": "conv-42:D14:19",
+"speaker": "Joanna",
+"text": "Yep, I'm hiking with some buddies this weekend. We're checking out a new trail with a rad waterfall. Can't wait! Do you have any fun plans?"
+},
+{
+"id": "conv-42:D14:20",
+"speaker": "Nate",
+"text": "Sounds great! Have fun with that. I'm organizing a gaming party two weekends later - it'll be hectic but fun!"
+},
+{
+"id": "conv-42:D14:21",
+"speaker": "Joanna",
+"text": "Oh? Are you going to invite your tournament friends?"
+},
+{
+"id": "conv-42:D14:22",
+"speaker": "Nate",
+"text": "Definitely! And some old friends and teamates from other tournaments."
+},
+{
+"id": "conv-42:D14:23",
+"speaker": "Joanna",
+"text": "Sounds like fun, Nate! I wish you the best on your party. Have a blast!"
+},
+{
+"id": "conv-42:D14:24",
+"speaker": "Nate",
+"text": "Thanks Joanna! I'm sure it'll be a blast. I'm even getting everyone custom controller decorations just for coming!"
+},
+{
+"id": "conv-42:D14:25",
+"speaker": "Joanna",
+"text": "Wow, I bet they'll love that! What a sweet idea."
+},
+{
+"id": "conv-42:D14:26",
+"speaker": "Nate",
+"text": "I know right? Have a great hike. Take lots of pics! See ya later!"
+},
+{
+"id": "conv-42:D14:27",
+"speaker": "Joanna",
+"text": "Thanks Nate! See you later!"
+}
+]
+}
+]

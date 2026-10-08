@@ -1,0 +1,1806 @@
+[
+{
+"session": "conv-44:S1",
+"date": "2023-03-27 13:10",
+"turns": [
+{
+"id": "conv-44:D1:1",
+"speaker": "Audrey",
+"text": "Hey Andrew! Good to see ya! What's been up since we last talked?"
+},
+{
+"id": "conv-44:D1:2",
+"speaker": "Andrew",
+"text": "Hey Audrey! So, I started a new job as a Financial Analyst last week - it's been quite a change from my previous job. How about you? Anything interesting happening?"
+},
+{
+"id": "conv-44:D1:3",
+"speaker": "Audrey",
+"text": "Congrats on the new job! So I got these new collars and tags for my dogs - so cute!"
+},
+{
+"id": "conv-44:D1:4",
+"speaker": "Andrew",
+"text": "Thanks! That sounds cute. Can I see a picture?"
+},
+{
+"id": "conv-44:D1:5",
+"speaker": "Audrey",
+"text": "Sure! See them with their new collars, cute right? [shares a photo: a photography of two dogs are standing in the grass with their mouths open]"
+},
+{
+"id": "conv-44:D1:6",
+"speaker": "Andrew",
+"text": "Cute little guys! What are their names and how long have you had them?"
+},
+{
+"id": "conv-44:D1:7",
+"speaker": "Audrey",
+"text": "I've had them for 3 years! Their names are Pepper, Precious and Panda. I can't live without my little ones!"
+},
+{
+"id": "conv-44:D1:8",
+"speaker": "Andrew",
+"text": "That's awesome! Have you always wanted a dog, even with living in the city? Can they still go on adventures?"
+},
+{
+"id": "conv-44:D1:9",
+"speaker": "Audrey",
+"text": "Absolutely! They're city dogs and we explore all the time. They love trying out new parks and trails. We go on adventures together very often."
+},
+{
+"id": "conv-44:D1:10",
+"speaker": "Andrew",
+"text": "Wow, sounds like they make life so awesome! Kinda jealous of all those fun outings with them."
+},
+{
+"id": "conv-44:D1:11",
+"speaker": "Audrey",
+"text": "They really do! It's great how much happiness they bring. Do you have any pets?"
+},
+{
+"id": "conv-44:D1:12",
+"speaker": "Andrew",
+"text": "No, no pets right now. But I do love animals."
+},
+{
+"id": "conv-44:D1:13",
+"speaker": "Audrey",
+"text": "That's great to hear! Animals are truly amazing. Do you have a favorite animal?"
+},
+{
+"id": "conv-44:D1:14",
+"speaker": "Andrew",
+"text": "I've always been awed by birds. Their power to soar and explore new spots is amazing."
+},
+{
+"id": "conv-44:D1:15",
+"speaker": "Audrey",
+"text": "Yeah, birds are amazing! I can imagine it feels incredible to soar and see the world from up high. Do you have a favorite type of bird?"
+},
+{
+"id": "conv-44:D1:16",
+"speaker": "Andrew",
+"text": "Eagles have always mesmerized me; they're so strong and graceful! [shares a photo: a photo of two birds flying in the sky with a sun shining behind them]"
+},
+{
+"id": "conv-44:D1:17",
+"speaker": "Audrey",
+"text": "Yeah they're beautiful. Do you go bird-watching? It must be awesome to see them up close."
+},
+{
+"id": "conv-44:D1:18",
+"speaker": "Andrew",
+"text": "Haven't specifically gone out for bird-watching, but I do spot them when I hike."
+},
+{
+"id": "conv-44:D1:19",
+"speaker": "Audrey",
+"text": "Nice, spotting pretty birds while hiking must be great. Do you have any favorite hiking spots?"
+},
+{
+"id": "conv-44:D1:20",
+"speaker": "Andrew",
+"text": "Fox Hollow is a great trail to hike on weekends; the views are awesome!"
+},
+{
+"id": "conv-44:D1:21",
+"speaker": "Audrey",
+"text": "Cool, gonna give it a try. Thanks for the suggestion!"
+},
+{
+"id": "conv-44:D1:22",
+"speaker": "Andrew",
+"text": "No problem! Let me know how you like it. Have fun hiking!"
+},
+{
+"id": "conv-44:D1:23",
+"speaker": "Audrey",
+"text": "Thanks! I'll let you know. Have a good one!"
+},
+{
+"id": "conv-44:D1:24",
+"speaker": "Andrew",
+"text": "Take care and have a good one! See ya!"
+}
+]
+},
+{
+"session": "conv-44:S2",
+"date": "2023-04-02 14:42",
+"turns": [
+{
+"id": "conv-44:D2:1",
+"speaker": "Audrey",
+"text": "Hey Andrew, I got a surprise for you! We adopted another puppy called Pixie. She's SO cute! Isn't she just the cutest? [shares a photo: a photo of a small white dog sitting on a carpet]"
+},
+{
+"id": "conv-44:D2:2",
+"speaker": "Andrew",
+"text": "That's awesome! Pixie is so cute! Did you ever check out that hiking spot we talked about last time?"
+},
+{
+"id": "conv-44:D2:3",
+"speaker": "Audrey",
+"text": "Thanks! I know right? She's so cute! Pixie's been keeping us busy, so I haven't had a chance to check out that hiking spot yet."
+},
+{
+"id": "conv-44:D2:4",
+"speaker": "Andrew",
+"text": "Yeah, I get it. A puppy really takes some work. Has she settled in okay? Is she getting along with the other pups?"
+},
+{
+"id": "conv-44:D2:5",
+"speaker": "Audrey",
+"text": "Pixie's fitting in great! It took her a few days to get used to the other dogs, but now they're awesome friends. They love playing and exploring the house - so cute!\n [shares a photo: a photography of a dog playing with a group of other dogs]"
+},
+{
+"id": "conv-44:D2:6",
+"speaker": "Andrew",
+"text": "That's awesome! Is Pepper adjusting well to her?"
+},
+{
+"id": "conv-44:D2:7",
+"speaker": "Audrey",
+"text": "Pepper took a bit to get used to her, but now they're always together! [shares a photo: a photography of two dogs standing in the grass near a fence]"
+},
+{
+"id": "conv-44:D2:8",
+"speaker": "Andrew",
+"text": "That's great to hear! I'm considering getting a dog too, but it can be challenging finding a dog-friendly place in the city. Do you have any tips on finding such a place?"
+},
+{
+"id": "conv-44:D2:9",
+"speaker": "Audrey",
+"text": "We used websites that helped us find a place that allowed dogs. They had filters that made it super easy. Found a perfect spot thanks to them! [shares a photo: a photography of a dog sitting in a field of flowers]"
+},
+{
+"id": "conv-44:D2:10",
+"speaker": "Andrew",
+"text": "Wow, that's so cool! I'll give those websites a try, thanks for the info!"
+},
+{
+"id": "conv-44:D2:11",
+"speaker": "Audrey",
+"text": "You got it! I hope you find a great spot soon!"
+},
+{
+"id": "conv-44:D2:12",
+"speaker": "Andrew",
+"text": "Thanks! Fingers crossed for the apartment and that furry friend."
+},
+{
+"id": "conv-44:D2:13",
+"speaker": "Audrey",
+"text": "I'm keeping my fingers crossed for you to find a great furry friend and an apartment."
+},
+{
+"id": "conv-44:D2:14",
+"speaker": "Andrew",
+"text": "Hope I find one soon. Can't wait!"
+},
+{
+"id": "conv-44:D2:15",
+"speaker": "Audrey",
+"text": "You'll love them! They're great for cuddles and companionship."
+},
+{
+"id": "conv-44:D2:16",
+"speaker": "Andrew",
+"text": "It'd be so great to have a furry buddy to cuddle and hang with. Here's a photo of my family's dog on a couch.  [shares a photo: a photo of a dog sitting on a couch in a living room]"
+},
+{
+"id": "conv-44:D2:17",
+"speaker": "Audrey",
+"text": "Our furry friends make great cuddle buddies. Here's one of them enjoying some lazy couch time! [shares a photo: a photography of a dog laying on a couch with a pillow]"
+},
+{
+"id": "conv-44:D2:18",
+"speaker": "Andrew",
+"text": "That pic is so cute! It would be fun to hang out with a dog, cuddling away. Got me thinking of my old hiking pics and how much I miss exploring nature trails with my family's dog. Ah, the peaceful moments out in nature! [shares a photo: a photo of a man walking a dog on a trail]"
+},
+{
+"id": "conv-44:D2:19",
+"speaker": "Audrey",
+"text": " Taking them on hikes must be awesome! That makes me want to hike with my dogs."
+},
+{
+"id": "conv-44:D2:20",
+"speaker": "Andrew",
+"text": "Hiking with a dog is way fun, it's a great way to bond and create memories together. [shares a photo: a photography of a man sitting on a rock with a dog]"
+},
+{
+"id": "conv-44:D2:21",
+"speaker": "Audrey",
+"text": "Yeah! Exploring nature with them and making memories is awesome!"
+},
+{
+"id": "conv-44:D2:22",
+"speaker": "Andrew",
+"text": "Definitely! I miss those moments. I need to find a dog-friendly spot soon so I can get exploring again!"
+},
+{
+"id": "conv-44:D2:23",
+"speaker": "Audrey",
+"text": "Yep! I hope you find the perfect dog-friendly spot soon so you can make new memories with them."
+},
+{
+"id": "conv-44:D2:24",
+"speaker": "Andrew",
+"text": "Thanks! I'll keep looking until I find it. Super excited for what's next!"
+},
+{
+"id": "conv-44:D2:25",
+"speaker": "Audrey",
+"text": "So excited for you! I can't wait to see where you and your furry friend decide to hang out. All the best!"
+},
+{
+"id": "conv-44:D2:26",
+"speaker": "Andrew",
+"text": "I'll keep you posted. Ttyl, Bye!"
+}
+]
+},
+{
+"session": "conv-44:S3",
+"date": "2023-04-16 16:19",
+"turns": [
+{
+"id": "conv-44:D3:1",
+"speaker": "Andrew",
+"text": "Hey Audrey! What's up? Missed chatting with ya! Check it out, my girl & I tried out that new cafe scene in the city last weekend! Super fun but kinda sad not being out in nature - that's when I feel like I'm really thriving. Oh man, I miss the peacefulness of being out on a hike."
+},
+{
+"id": "conv-44:D3:2",
+"speaker": "Audrey",
+"text": "Hey Andrew! That cafe sounds pretty awesome, glad you enjoyed it. Yeah, I know what you mean. That feeling of being out in nature, surrounded by beauty and peace, is unbeatable, compared to being surrounded by concrete jungles. "
+},
+{
+"id": "conv-44:D3:3",
+"speaker": "Andrew",
+"text": "Yeah, being out in the nature really has a way of taking my breath away. It's like a home for my soul! I feel connected when I'm there."
+},
+{
+"id": "conv-44:D3:4",
+"speaker": "Audrey",
+"text": "I totally get it. Nature has a way of bringing us back down to earth and reminding us that we're part of something bigger. It's amazing."
+},
+{
+"id": "conv-44:D3:5",
+"speaker": "Andrew",
+"text": "Yeah, it's like hitting the reset button when life gets too chaotic. Nature has a way of being really soothing."
+},
+{
+"id": "conv-44:D3:6",
+"speaker": "Audrey",
+"text": "Definitely! For me, taking my dogs for a walk in the park helps me find my center and recharges me. "
+},
+{
+"id": "conv-44:D3:7",
+"speaker": "Andrew",
+"text": "I hear ya. Can\u2019t do that here unfortunately, city living makes it hard. Really miss that connection and companionship."
+},
+{
+"id": "conv-44:D3:8",
+"speaker": "Audrey",
+"text": "Must be tough living in the city without the opportunity to go outside. Sure is a different experience."
+},
+{
+"id": "conv-44:D3:9",
+"speaker": "Andrew",
+"text": "Yeah, it really does. Sometimes it feels like I'm missing out."
+},
+{
+"id": "conv-44:D3:10",
+"speaker": "Audrey",
+"text": "It must be tough. City life can get overwhelming, so it's great to find ways to connect to nature. What kind of things do you like to do in the city?"
+},
+{
+"id": "conv-44:D3:11",
+"speaker": "Andrew",
+"text": "My girlfriend and I love to discover new places to eat around town. It's a great way to try something new and wind down after a long week."
+},
+{
+"id": "conv-44:D3:12",
+"speaker": "Audrey",
+"text": "Wow, that sounds like a great way to explore the city! Trying new places and food is always fun. Have you discovered any new favorite spots recently?"
+},
+{
+"id": "conv-44:D3:13",
+"speaker": "Andrew",
+"text": "We found an awesome cafe with amazing pastries - the smell was just irresistible!"
+},
+{
+"id": "conv-44:D3:14",
+"speaker": "Audrey",
+"text": "Sounds amazing! Did you take a photo? I'd love to see!"
+},
+{
+"id": "conv-44:D3:15",
+"speaker": "Andrew",
+"text": "Yep, I got them! Check out this photo of the delicious pastries we had at the cafe. [shares a photo: a photo of a bakery display with pastries and coffee]"
+},
+{
+"id": "conv-44:D3:16",
+"speaker": "Audrey",
+"text": "Wow, they look great! What did you get? Now I'm craving pastries!"
+},
+{
+"id": "conv-44:D3:17",
+"speaker": "Andrew",
+"text": "They taste great too! We had some delicious croissants, muffins, and tarts! It was amazing!"
+},
+{
+"id": "conv-44:D3:18",
+"speaker": "Audrey",
+"text": "Wow, sounds amazing! Glad you got to enjoy them. Since you metioned pastries, I made some of my favorite treats last week. Let's have a pastry party sometime!  [shares a photo: a photo of a muffin pan filled with blueberries and muffins]"
+},
+{
+"id": "conv-44:D3:19",
+"speaker": "Andrew",
+"text": "That looks delicious! A pastry party sounds awesome, count me in!"
+},
+{
+"id": "conv-44:D3:20",
+"speaker": "Audrey",
+"text": "Awesome! My dogs will tag along. My furry friends would love it!"
+},
+{
+"id": "conv-44:D3:21",
+"speaker": "Andrew",
+"text": "Definitely! They'll have a great time at the party! Can't wait for the party!"
+},
+{
+"id": "conv-44:D3:22",
+"speaker": "Audrey",
+"text": "Same! Looking forward to it. This would be a good chance for you to hang out with them."
+},
+{
+"id": "conv-44:D3:23",
+"speaker": "Andrew",
+"text": "Yeah! It's gonna be awesome to see all of them together and chowing down. Super excited!"
+},
+{
+"id": "conv-44:D3:24",
+"speaker": "Audrey",
+"text": "Yay! This'll be awesome! Seeing them all together, having fun and enjoying treats is the best. I can't imagine life without them, they bring so much joy. [shares a photo: a photography of a dog running with three other dogs in the background]"
+},
+{
+"id": "conv-44:D3:25",
+"speaker": "Andrew",
+"text": "Aww, so cute! I bet their happy faces means a lot to you."
+},
+{
+"id": "conv-44:D3:26",
+"speaker": "Audrey",
+"text": "I know right? They mean the world to me. So much that I got tattoos of them on my arm. [shares a photo: a photo of a woman with a tattoo of a dog and sunflowers]"
+},
+{
+"id": "conv-44:D3:27",
+"speaker": "Andrew",
+"text": "Wow, that tattoo looks great!"
+},
+{
+"id": "conv-44:D3:28",
+"speaker": "Audrey",
+"text": "Thanks! I got it a while ago. It represents my love for my pups and nature's beauty. [shares a photo: a photography of a woman walking with her dogs in the woods]"
+},
+{
+"id": "conv-44:D3:29",
+"speaker": "Andrew",
+"text": "Aww, that's cute! What made you getting the tattoo?"
+},
+{
+"id": "conv-44:D3:30",
+"speaker": "Audrey",
+"text": "I've always had a strong bond with them \u2013 they make me so happy, and I just want to see their happy faceseven when thry're not with me."
+},
+{
+"id": "conv-44:D3:31",
+"speaker": "Andrew",
+"text": "That's awesome, I'm glad they bring so much joy into your life."
+}
+]
+},
+{
+"session": "conv-44:S4",
+"date": "2023-05-03 17:41",
+"turns": [
+{
+"id": "conv-44:D4:1",
+"speaker": "Audrey",
+"text": "Hey Andrew! Long time no talk! Last week I finally went on a hike and had this amazing experience with a hummingbird. It was so cool watching it dart around with its wings! Nature is so beautiful. [shares a photo: a photography of a hummingbird sitting on a branch with its wings spread]"
+},
+{
+"id": "conv-44:D4:2",
+"speaker": "Andrew",
+"text": "Hey Audrey! Glad to hear from you. That hummingbird was awesome! Nature's the best. Remember I was feeling down because I couldn't get out more? Well, good news - I found a new open space to hike nearby - feels so refreshing! [shares a photo: a photo of a view of a lake and mountains at sunset]"
+},
+{
+"id": "conv-44:D4:3",
+"speaker": "Audrey",
+"text": "That looks great! How often are you able to go hiking now?"
+},
+{
+"id": "conv-44:D4:4",
+"speaker": "Andrew",
+"text": "So I usually try to escape the city at least once a weekend - it's my much-needed break!"
+},
+{
+"id": "conv-44:D4:5",
+"speaker": "Audrey",
+"text": "Nice! I Bet it's great to get away like that."
+},
+{
+"id": "conv-44:D4:6",
+"speaker": "Andrew",
+"text": "Yep! Nature is so therapeutic for me. It's hard to put into words how great it feels to be surrounded by greenery or standing on top of a mountain breathing in the fresh air. So peaceful and invigorating.\n\n [shares a photo: a photo of a mountain range with a sunset in the background]"
+},
+{
+"id": "conv-44:D4:7",
+"speaker": "Audrey",
+"text": "Wow, that view looks great! It really captures that calming and peaceful feeling. It must be really satisfying to capture that tranquility."
+},
+{
+"id": "conv-44:D4:8",
+"speaker": "Andrew",
+"text": "Yeah! I try to capture those special moments and share that feeling with others."
+},
+{
+"id": "conv-44:D4:9",
+"speaker": "Audrey",
+"text": "That's really cool! Spreading that peaceful feeling to others is such a great way to bring happiness and motivation."
+},
+{
+"id": "conv-44:D4:10",
+"speaker": "Andrew",
+"text": "I agree! It brings me joy to spread that feeling and motivate people to find their own peace - it's like a ripple effect, spreading positivity."
+},
+{
+"id": "conv-44:D4:11",
+"speaker": "Audrey",
+"text": "Absolutely. Not only the receiving end feels great, the person spreading it will feel great as well!"
+},
+{
+"id": "conv-44:D4:12",
+"speaker": "Andrew",
+"text": "Yeah, it's crazy how that can bring such great joy and calm to people."
+},
+{
+"id": "conv-44:D4:13",
+"speaker": "Audrey",
+"text": "Yeah, by sharing something can make a big difference to others."
+},
+{
+"id": "conv-44:D4:14",
+"speaker": "Andrew",
+"text": "Yup! We don't realize it, but even the littlest gestures can have a big effect. Spreading good vibes and joy, that's the goal right? So what's up? Anything new or fun going on?"
+},
+{
+"id": "conv-44:D4:15",
+"speaker": "Audrey",
+"text": "Not much has changed since we last talked. I'm busy taking care of my pets and spending time with them. It's really fulfilling. [shares a photo: a photography of a group of dogs sitting on top of a lush green field]"
+},
+{
+"id": "conv-44:D4:16",
+"speaker": "Andrew",
+"text": "I bet it's awesome hanging out with them - do your dogs enjoy going on hikes?"
+},
+{
+"id": "conv-44:D4:17",
+"speaker": "Audrey",
+"text": "My dogs go nuts when we go on hikes! They love exploring new scents and being in nature - it's their happy place. I can tell by their wagging tails and expressions how much they love it. It's so great to see them having so much fun! [shares a photo: a photo of a dog running in a field with other dogs]"
+},
+{
+"id": "conv-44:D4:18",
+"speaker": "Andrew",
+"text": "Wow, that's great! I was wondering if you have any tips or tricks for keeping dogs safe when they're out and about?"
+},
+{
+"id": "conv-44:D4:19",
+"speaker": "Audrey",
+"text": "Definitely! Safety is super important for me. I even got them something special. They sure look funny, but it works! [shares a photo: a photo of a dog with a leash and shoes on]"
+},
+{
+"id": "conv-44:D4:20",
+"speaker": "Andrew",
+"text": "Awesome to see that you take such good care of your dogs! What else do you do when you walk them?"
+},
+{
+"id": "conv-44:D4:21",
+"speaker": "Audrey",
+"text": "When I take them out, we usually play fetch with a ball or frisbee. They love chasing it! We also meet other dog owners in the park and have a doggie playdate. It's a great way for me to chat with people and for them to make new friends. [shares a photo: a photography of a dog catching a frisbee in a field]"
+},
+{
+"id": "conv-44:D4:22",
+"speaker": "Andrew",
+"text": "Wow, looks like fun! They sure look excited about playing fetch!"
+},
+{
+"id": "conv-44:D4:23",
+"speaker": "Audrey",
+"text": "They absolutely adore it! They have tons of energy and love meeting new pals at playdates. Plus, they always get excited when I bring those out. [shares a photo: a photo of a dog wearing a party hat sitting on a couch]"
+},
+{
+"id": "conv-44:D4:24",
+"speaker": "Andrew",
+"text": "Aww, that's so cute! Do they enjoy wearing the party hats? And where did you find their playdates?"
+},
+{
+"id": "conv-44:D4:25",
+"speaker": "Audrey",
+"text": "The hats don't bother them, they just put them on for fun and treats. And the dog park is great place to start! They can run and mingle with other pooches. It's such a fun spot for playdates! [shares a photo: a photography of a dog jumping through a ring in a park]"
+},
+{
+"id": "conv-44:D4:26",
+"speaker": "Andrew",
+"text": "That sounds great! Where is it located?"
+},
+{
+"id": "conv-44:D4:27",
+"speaker": "Audrey",
+"text": "It's right by the park we usually walk. It's a great spot with lots of trees and benches for us to watch the dogs play."
+},
+{
+"id": "conv-44:D4:28",
+"speaker": "Andrew",
+"text": "That's awesome, not too far away then! I'll have to check it out. Thanks for the suggestion!"
+},
+{
+"id": "conv-44:D4:29",
+"speaker": "Audrey",
+"text": "Yup! Not at all! Let me know how it goes."
+},
+{
+"id": "conv-44:D4:30",
+"speaker": "Andrew",
+"text": "Sure, I'll let you know. Always great chatting with you! Ttyl."
+}
+]
+},
+{
+"session": "conv-44:S5",
+"date": "2023-05-06 10:47",
+"turns": [
+{
+"id": "conv-44:D5:1",
+"speaker": "Andrew",
+"text": "Hey! Since we last spoke, I've been looking for a doggo to adopt - browsing websites, visiting shelters and asking friends of theirs. It's been both fun and annoying! [shares a photo: a photography of a dog looking through a cage at the camera]"
+},
+{
+"id": "conv-44:D5:2",
+"speaker": "Audrey",
+"text": "Sounds like a fun and demanding task! Getting to meet new pups must bring so much happiness. What  do you think you can do to make the process smoother? [shares a photo: a photo of two dogs running in a field with a ball in their mouth]"
+},
+{
+"id": "conv-44:D5:3",
+"speaker": "Andrew",
+"text": "Meeting all these adorable pups has been awesome! For those considering getting a pup, the size of living space and the exercise needs of the breed are important. For me, a person living in an apartment, a smaller dog would be best, but if one is active, consider getting one that loves to play and run."
+},
+{
+"id": "conv-44:D5:4",
+"speaker": "Audrey",
+"text": "That's some good advice! It's important to consider the space and energy needs of a dog."
+},
+{
+"id": "conv-44:D5:5",
+"speaker": "Andrew",
+"text": "Yeah! Finding a pet-friendly place to live has been tough too. I'm contacting landlords and checking out neighborhoods to find the perfect spot."
+},
+{
+"id": "conv-44:D5:6",
+"speaker": "Audrey",
+"text": "Guessing it's tough to find housing. Any particular part of town you want to live in?"
+},
+{
+"id": "conv-44:D5:7",
+"speaker": "Andrew",
+"text": "I'm looking for a place near a park or woods, so I can stay close to nature and give the dog a large open space to run around"
+},
+{
+"id": "conv-44:D5:8",
+"speaker": "Audrey",
+"text": "That's a good plan! I'm lucky to have a park near me - it's great for my pup's walks. Last Friday we took a road trip - we went to a beautiful national park and my dogs had a blast! It was an awesome trip! [shares a photo: a photography of three dogs running through a field of grass]"
+},
+{
+"id": "conv-44:D5:9",
+"speaker": "Andrew",
+"text": "Nice! Glad the pups had a great road trip. Do you take them on road trips often?"
+},
+{
+"id": "conv-44:D5:10",
+"speaker": "Audrey",
+"text": "I take them on road trips once every couple of months. It's a great way for them to explore and stay active."
+},
+{
+"id": "conv-44:D5:11",
+"speaker": "Andrew",
+"text": "Wow, that's awesome! I really wish I could go on a road trip with a furry companion."
+},
+{
+"id": "conv-44:D5:12",
+"speaker": "Audrey",
+"text": "It's a cool experience. Having your furry friends on a road trip is an amazing experience. They make it really fun and exciting. It's definitely something to look forward to!"
+},
+{
+"id": "conv-44:D5:13",
+"speaker": "Andrew",
+"text": "Adding that to my bucket list! Can't wait for the day I actually go on a trip with my dog!"
+},
+{
+"id": "conv-44:D5:14",
+"speaker": "Audrey",
+"text": "Good luck with your search! Fingers crossed you find the perfect one."
+},
+{
+"id": "conv-44:D5:15",
+"speaker": "Andrew",
+"text": "Thanks! Your help is much appreciated. I'm still on the lookout for the perfect furry friend."
+},
+{
+"id": "conv-44:D5:16",
+"speaker": "Audrey",
+"text": "Not a problem, I'm glad to help! Good luck with your search!"
+},
+{
+"id": "conv-44:D5:17",
+"speaker": "Andrew",
+"text": "Thanks! I'll let you know how it goes. "
+},
+{
+"id": "conv-44:D5:18",
+"speaker": "Audrey",
+"text": "Definitely, keep me posted and let me know if you need any suggestions or help."
+},
+{
+"id": "conv-44:D5:19",
+"speaker": "Andrew",
+"text": "Will do! Really apprecieate it. "
+},
+{
+"id": "conv-44:D5:20",
+"speaker": "Audrey",
+"text": "Yup! You got it, I'll be expecting a pic of your dog soon! :)"
+},
+{
+"id": "conv-44:D5:21",
+"speaker": "Andrew",
+"text": "Haha I can't wait. I'll ttyl, gotta check out another shelter soon."
+},
+{
+"id": "conv-44:D5:22",
+"speaker": "Audrey",
+"text": "Have fun! Ttyl!"
+}
+]
+},
+{
+"session": "conv-44:S6",
+"date": "2023-05-11 14:03",
+"turns": [
+{
+"id": "conv-44:D6:1",
+"speaker": "Andrew",
+"text": "Hi Audrey! I had a great hike last weekend with some friends and my girlfriend at the spot we found recently. Nature was so peaceful \u2013 it was so nice to just relax and take it in. How's your week been? Anything exciting going on lately? [shares a photo: a photography of a dirt path leading to a grassy hill]"
+},
+{
+"id": "conv-44:D6:2",
+"speaker": "Audrey",
+"text": "Hey Andrew! That hike sounds great. Nature is good for the soul, right? My week's been good - taking care of my four doggies and making sure they're happy and healthy took up most of my free time. Also, exciting news! I signed up for a workshop about bonding with my pet next month. Can't wait to learn new stuff and strengthen my bond with my pets. What's up with you? [shares a photo: a photography of a group of dogs with a yellow circle]"
+},
+{
+"id": "conv-44:D6:3",
+"speaker": "Andrew",
+"text": "That's awesome! Glad have the opportunity to bond with your pets. That workshop sounds cool. Where did you hear about it? And the one in the picture is adorable!"
+},
+{
+"id": "conv-44:D6:4",
+"speaker": "Audrey",
+"text": "I know right? I saw this workshop flyer at my local pet store. It was a positive reinforcement training class and I wanted to give it a shot. The volunteer in the store was nice enough to let me meet their dog \u2013 he was so friendly and playful!"
+},
+{
+"id": "conv-44:D6:5",
+"speaker": "Andrew",
+"text": "Cool! Positive reinforcement can really help you bond with your dogs. Do you think they'll catch on quickly?"
+},
+{
+"id": "conv-44:D6:6",
+"speaker": "Audrey",
+"text": "I'm sure they'll catch on really quick! They're quick learners and love rewards! Can't wait to learn how to train them better."
+},
+{
+"id": "conv-44:D6:7",
+"speaker": "Andrew",
+"text": "That's awesome! Keep me updated on their progress."
+},
+{
+"id": "conv-44:D6:8",
+"speaker": "Audrey",
+"text": "Definitely! I'll keep you updated on how it all goes and how my pups are doing. Fingers crossed they'll be extra behaved. And I'll let you know some tips on training your future dog as well!"
+},
+{
+"id": "conv-44:D6:9",
+"speaker": "Andrew",
+"text": "Thanks! I'm excited to hear about it. Have a great time at the workshop!"
+},
+{
+"id": "conv-44:D6:10",
+"speaker": "Audrey",
+"text": "I'll definitely have a good time and make the most of it. I'm sure this is a must learn for any dog owner."
+},
+{
+"id": "conv-44:D6:11",
+"speaker": "Andrew",
+"text": "You think so? Wow, you must be a good salesperson because I'm almost sold on this class haha."
+},
+{
+"id": "conv-44:D6:12",
+"speaker": "Audrey",
+"text": "Haha, I just think its important to have pets learn how to behave on a positive reinforcement way. Punishment is never the proper way for pets ya know?"
+},
+{
+"id": "conv-44:D6:13",
+"speaker": "Andrew",
+"text": "Yeah I would't want to be punished, let alone puppies and dogs."
+},
+{
+"id": "conv-44:D6:14",
+"speaker": "Audrey",
+"text": "Right!? I don't want to hurt any of my dogs. Just by thinking of it gives me pain."
+},
+{
+"id": "conv-44:D6:15",
+"speaker": "Andrew",
+"text": "Yeah I feel you. Anyways, let me look into their classes. I'll talk to you soon, have fun!"
+},
+{
+"id": "conv-44:D6:16",
+"speaker": "Audrey",
+"text": "Yup, ttyl!"
+}
+]
+},
+{
+"session": "conv-44:S7",
+"date": "2023-06-02 11:27",
+"turns": [
+{
+"id": "conv-44:D7:1",
+"speaker": "Audrey",
+"text": "Hey how's it going? Yesterday took my pups to the park, it was awesome! Seeing them running around and playing without a leash was awesome. It filled my heart with joy - their happiness brought me so much peace. "
+},
+{
+"id": "conv-44:D7:2",
+"speaker": "Andrew",
+"text": "That sounds amazing! Must have been so happy watching them running around. It's moments like that which show us how amazing animals are. Glad you had a great time. By the way, I think you mentioned before that you've taken them on a hiking trip?  [shares a photo: a photo of a sunset over a mountain range with a horse grazing]"
+},
+{
+"id": "conv-44:D7:3",
+"speaker": "Audrey",
+"text": "Yeah, I took them for a hike before. We went to a national park last week and made it to this beautiful peak. It was stunning during the sunset, and I'll never forget it. My furry pals were running around as it was so awesome. It felt like a slice of paradise. The breeze was nice and you could hear birds chirping."
+},
+{
+"id": "conv-44:D7:4",
+"speaker": "Andrew",
+"text": "That sounds amazing! I'm sure it was a memorable experience. Did you manage to capture it? I'd love to see a photo!"
+},
+{
+"id": "conv-44:D7:5",
+"speaker": "Audrey",
+"text": "Yep! I took a bunch of photos. This one of my favorites. [shares a photo: a photo of two horses in a field with a fence]"
+},
+{
+"id": "conv-44:D7:6",
+"speaker": "Andrew",
+"text": "Wow, incredible sunset and the scenery! Must have been magical. Thanks for sharing!"
+},
+{
+"id": "conv-44:D7:7",
+"speaker": "Audrey",
+"text": "It was really special. Nature always cheers me up and makes me feel grateful. Glad you could experience it too. Oh, how are things going with your search for a furry friend?"
+},
+{
+"id": "conv-44:D7:8",
+"speaker": "Andrew",
+"text": "I'm still on the hunt, but it's tough finding a pet-friendly spot in the city. Been checking out some places, but no luck so far. A bit discouraged but I'm determined to find the right place and dog."
+},
+{
+"id": "conv-44:D7:9",
+"speaker": "Audrey",
+"text": "Oof, Hang in there, you'll find the perfect place for you and your new furry friend."
+},
+{
+"id": "conv-44:D7:10",
+"speaker": "Andrew",
+"text": "Thanks! I won't give up. "
+},
+{
+"id": "conv-44:D7:11",
+"speaker": "Audrey",
+"text": "I'm here to support! Email me your criterias so I can help you find a great spot for your furry friend."
+},
+{
+"id": "conv-44:D7:12",
+"speaker": "Andrew",
+"text": "Thanks! Your assistance is greatly appreciated. So thankful for your help."
+},
+{
+"id": "conv-44:D7:13",
+"speaker": "Audrey",
+"text": "Not a problem at all! We'll keep searching. Stay positive!"
+}
+]
+},
+{
+"session": "conv-44:S8",
+"date": "2023-06-13 17:23",
+"turns": [
+{
+"id": "conv-44:D8:1",
+"speaker": "Andrew",
+"text": "Hey! Long time no chat. Last Sunday was awesome - my friends and I took a rock climbing class and I made it to the top! It was a fantastic experience and now I'm hooked. Think I'm going to try to do more outdoor activities like this every week!"
+},
+{
+"id": "conv-44:D8:2",
+"speaker": "Audrey",
+"text": "That's awesome! Glad you had such a rad experience rock climbing. I'm always in awe of people who can climb mountains. Got any pics or videos from your climb? Would love to see the view from the top!"
+},
+{
+"id": "conv-44:D8:3",
+"speaker": "Andrew",
+"text": "Rock climbing was awesome! It was a challenge, but so satisfying. The view was stunning, and I was really proud of myself. Nature sure is amazing!\n\n[Shares a photo of the view from the top of the rock climbed during the rock climbing class] [shares a photo: a photography of a man climbing on a rock face to face]"
+},
+{
+"id": "conv-44:D8:4",
+"speaker": "Audrey",
+"text": "Wow that view is stunning! Congrats on reaching the top, that must have been a huge accomplishment. Nature really reminds us how tiny we are in comparison, yeah? Was it challenging getting there?"
+},
+{
+"id": "conv-44:D8:5",
+"speaker": "Andrew",
+"text": "Thanks! It was a big achievement for me. The climb was tricky, especially since I'm still a newbie. But I made it with the support and cheer from my friends."
+},
+{
+"id": "conv-44:D8:6",
+"speaker": "Audrey",
+"text": "Nice! Having a solid support group really helps when things get tough. You're lucky to have such great friends! Does this adventure encourage you to try more outdoor activities?"
+},
+{
+"id": "conv-44:D8:7",
+"speaker": "Andrew",
+"text": "Yeah, rock climbing was awesome - I felt so accomplished reaching the top. It has definitely encouraged me to try more outdoor activities like kayaking and maybe bungee jumping? Nature always pushes me out of my comfort zone!"
+},
+{
+"id": "conv-44:D8:8",
+"speaker": "Audrey",
+"text": "Wow going all in huh? Have fun with kayaking and bungee jumping! Last week, I found a great spot for my dogs' walk. It's a small park with a trail surrounded by trees. It's so nice and I think my dogs like it too. Would you like to come along?"
+},
+{
+"id": "conv-44:D8:9",
+"speaker": "Andrew",
+"text": "Sounds great, Audrey! I'd love to join you and your pups for a walk. Being in nature with dogs sounds like a great time!"
+},
+{
+"id": "conv-44:D8:10",
+"speaker": "Audrey",
+"text": "Awesome! Can't wait to have fun with everyone. My dogs love meeting new people. "
+},
+{
+"id": "conv-44:D8:11",
+"speaker": "Andrew",
+"text": "Sames, can't wait to meet them and take a stroll in the park."
+},
+{
+"id": "conv-44:D8:12",
+"speaker": "Audrey",
+"text": "This was taken during the walk in the park. See how happy they are? [shares a photo: a photo of two dogs running in a field with a ball in their mouth]"
+},
+{
+"id": "conv-44:D8:13",
+"speaker": "Andrew",
+"text": "Aww, they look like they're really enjoying themselves. How long do you usually walk them for?"
+},
+{
+"id": "conv-44:D8:14",
+"speaker": "Audrey",
+"text": "Varies depending on the day, but usually for about an hour. We let them explore at their own pace."
+},
+{
+"id": "conv-44:D8:15",
+"speaker": "Andrew",
+"text": "Cool, that's a good amount of time for them to have a nice stroll and take a look around."
+},
+{
+"id": "conv-44:D8:16",
+"speaker": "Audrey",
+"text": "They need exercise and to explore - they always go home with a smile and tired."
+},
+{
+"id": "conv-44:D8:17",
+"speaker": "Andrew",
+"text": "Nice! Letting them explore and have fun is important. I'm sure they must be loving it!"
+},
+{
+"id": "conv-44:D8:18",
+"speaker": "Audrey",
+"text": "Yeah, they love it! It's their favorite part of the day! Their faces blightens up as soon as I get ready for a walk."
+},
+{
+"id": "conv-44:D8:19",
+"speaker": "Andrew",
+"text": "Of course! Nature always makes us and our pets so happy."
+},
+{
+"id": "conv-44:D8:20",
+"speaker": "Audrey",
+"text": "Definitely! Dogs and nature bring me so much joy and peace."
+},
+{
+"id": "conv-44:D8:21",
+"speaker": "Andrew",
+"text": "Yeah, I agree, it's really nice."
+},
+{
+"id": "conv-44:D8:22",
+"speaker": "Audrey",
+"text": "So check out how happy they are in this meadow! They make me so happy. [shares a photo: a photo of two dogs playing with a frisbee in a field]"
+},
+{
+"id": "conv-44:D8:23",
+"speaker": "Andrew",
+"text": "Aww so cute. Your dogs look so content in that picture. The meadow looks so nice. It's great that nature brings your pets joy!"
+},
+{
+"id": "conv-44:D8:24",
+"speaker": "Audrey",
+"text": "Being outdoors with them puts me in my happy place. It's peaceful and inspiring."
+},
+{
+"id": "conv-44:D8:25",
+"speaker": "Andrew",
+"text": "Glad you found something that puts you in your happy place. It's true, being outdoors has a way of inspiring and calming us."
+},
+{
+"id": "conv-44:D8:26",
+"speaker": "Audrey",
+"text": "Yeah! It's incredible how nature can make us think differently."
+},
+{
+"id": "conv-44:D8:27",
+"speaker": "Andrew",
+"text": "Agreed! It's great for refreshing the mind and giving a different outlook. Whenever I'm in need of a reset, I turn to nature."
+},
+{
+"id": "conv-44:D8:28",
+"speaker": "Audrey",
+"text": "Nature has a way of making us feel alive and centered. Let's appreciate what it gives us."
+}
+]
+},
+{
+"session": "conv-44:S9",
+"date": "2023-06-26 13:51",
+"turns": [
+{
+"id": "conv-44:D9:1",
+"speaker": "Audrey",
+"text": "Woohoo! I got a new place with a bigger backyard for the pooches! Take a look! [shares a photo: a photography of two dogs sitting on the grass in front of a house]"
+},
+{
+"id": "conv-44:D9:2",
+"speaker": "Andrew",
+"text": "That's awesome! Your new place looks great. Your fur babies must be thrilled with the bigger backyard. I'm sure they're having a blast running around. How are they settling in?"
+},
+{
+"id": "conv-44:D9:3",
+"speaker": "Audrey",
+"text": "Thanks! They love it - so much space to run and explore, sniffing out new smells. It's awesome to see them having fun."
+},
+{
+"id": "conv-44:D9:4",
+"speaker": "Andrew",
+"text": "Awesome! They must love it. Makes me happy seeing them have fun. Any plans on making it even more pup-friendly?"
+},
+{
+"id": "conv-44:D9:5",
+"speaker": "Audrey",
+"text": "Yep, I set up a doggy play area in the backyard with agility stuff and toys - they're loving it!"
+},
+{
+"id": "conv-44:D9:6",
+"speaker": "Andrew",
+"text": "Wow you really went in huh!?  Now they have a great place to play and explore, that's awesome! Take a look at this place I'm at. [shares a photo: a photo of a group of dogs playing with a ball in a large indoor area]"
+},
+{
+"id": "conv-44:D9:7",
+"speaker": "Audrey",
+"text": "That looks fun! Where are you at? I would love to take the dogs there sometime soon."
+},
+{
+"id": "conv-44:D9:8",
+"speaker": "Andrew",
+"text": "This is the doggy daycare near me, it has a big indoor space for dogs to play."
+},
+{
+"id": "conv-44:D9:9",
+"speaker": "Audrey",
+"text": "Ooo, I'll definitely take a look at it. Thanks for the tip."
+},
+{
+"id": "conv-44:D9:10",
+"speaker": "Andrew",
+"text": "Not a problem at all! Let me know if you need any help finding more places for dogs."
+},
+{
+"id": "conv-44:D9:11",
+"speaker": "Audrey",
+"text": "Thanks! Appreciate the offer. Super nice to have friends who understand our love for our pets!"
+},
+{
+"id": "conv-44:D9:12",
+"speaker": "Andrew",
+"text": "Haha yeah! People who understand the love for dogs are awesome. They really bring so much joy!"
+},
+{
+"id": "conv-44:D9:13",
+"speaker": "Audrey",
+"text": "Right!? Animals are great! They really bring so much joy. Can't imagine life without them!"
+},
+{
+"id": "conv-44:D9:14",
+"speaker": "Andrew",
+"text": "Yeah, I'm glad we both appreciate them. Not everyone feel this way."
+},
+{
+"id": "conv-44:D9:15",
+"speaker": "Audrey",
+"text": "For sure! I don't really get some people hating on pets or even hurting them. They're like family to people."
+},
+{
+"id": "conv-44:D9:16",
+"speaker": "Andrew",
+"text": "Definitely! So what's new with you? Anything going on lately? Take a look at this park in my neighborhood that has these flowers. [shares a photo: a photography of a flower bed with many different colored flowers]"
+},
+{
+"id": "conv-44:D9:17",
+"speaker": "Audrey",
+"text": "Oh wow those flowers look beautiful. Well aside from moving to a new house, its just me getting unboxing all the packed boxes. What about you?"
+},
+{
+"id": "conv-44:D9:18",
+"speaker": "Andrew",
+"text": "Last Friday, I hiked with some friends. The weather was great and it felt so good to be outdoors. We got some awesome pictures too. "
+},
+{
+"id": "conv-44:D9:19",
+"speaker": "Audrey",
+"text": "Sounds like a good time! You want to share some awesome outdoor pics with me? Also tell me all about your hike."
+},
+{
+"id": "conv-44:D9:20",
+"speaker": "Andrew",
+"text": "Haven't gone through the photos yet. Maybe soon! It was lovely being out in the open, hearing the bird songs and smelling the trees. Lately, I've been really missing that connection with nature and the peace it brings. I'm definitely looking forward to exploring more!"
+},
+{
+"id": "conv-44:D9:21",
+"speaker": "Audrey",
+"text": "Nature has a way of soothing us and helping us recharge. It's something special. I hope you get to experience it again soon. I really want to do something like this right now. [shares a photo: a photo of a person's feet resting on a rock overlooking a lake]"
+},
+{
+"id": "conv-44:D9:22",
+"speaker": "Andrew",
+"text": "That looks so nice. It looks so chilled out! How was it?"
+},
+{
+"id": "conv-44:D9:23",
+"speaker": "Audrey",
+"text": "So a few years back my friends and I went on a hike and stumbled across this stunning lake in the mountains. We sat by it, chat and admiring the peacefulness of nature. I'll never forget those moments. [shares a photo: a photography of a person sitting on a rock overlooking a lake]"
+},
+{
+"id": "conv-44:D9:24",
+"speaker": "Andrew",
+"text": "Wow, that looks so peaceful. It must have been a great spot!"
+},
+{
+"id": "conv-44:D9:25",
+"speaker": "Audrey",
+"text": "It really was! Nature and the lake were so calming, exactly what I needed."
+},
+{
+"id": "conv-44:D9:26",
+"speaker": "Andrew",
+"text": "Sounds like you had a really peaceful and calming experience! Glad you got to appreciate the beauty of life. "
+},
+{
+"id": "conv-44:D9:27",
+"speaker": "Audrey",
+"text": "Yeah! We shold really appreciate the small things in life and not take anything for granted. :)"
+}
+]
+},
+{
+"session": "conv-44:S10",
+"date": "2023-07-03 20:32",
+"turns": [
+{
+"id": "conv-44:D10:1",
+"speaker": "Audrey",
+"text": "Hey! It's been a while. I'm taking a dog training course and it's challenging but rewarding. My dogs are doing better already. What's new with you?"
+},
+{
+"id": "conv-44:D10:2",
+"speaker": "Andrew",
+"text": "Hey great to hear from you! Life's thrown me a few curveballs lately. Still can't seem to find any dog-friendly spots to rent. That's a bummer. Have you been able to do any exploring on new trails?"
+},
+{
+"id": "conv-44:D10:3",
+"speaker": "Audrey",
+"text": "Aw, sorry about the search for dog-friendly spots. I haven't had a ton of time for new trails either. The dog-training course has been a big time sink but it's paid off because they're doing great."
+},
+{
+"id": "conv-44:D10:4",
+"speaker": "Andrew",
+"text": "That's great news! It must feel so rewarding to see them doing well. I understand how it feels on missing the peace of being out on the trails, but for now, it's just urban adventures then."
+},
+{
+"id": "conv-44:D10:5",
+"speaker": "Audrey",
+"text": "Seeing them do well is super rewarding! They give me so much love and happiness. I get how frustrating it can be not to find pet-friendly spots. Nature is so calming and restorative with them around. See how happy they are when they're out. [shares a photo: a photo of two dogs running in a field with a ball in their mouth]"
+},
+{
+"id": "conv-44:D10:6",
+"speaker": "Andrew",
+"text": "I don't think I ever asked what breed they are right? Also, what do they enjoy doing the most? Looks like they're having a blast!"
+},
+{
+"id": "conv-44:D10:7",
+"speaker": "Audrey",
+"text": "They're all mutts. Two of them are Jack Russell mixes and the other two are Chihuahua mixes. They love running and playing fetch, you should see them sometimes. [shares a photo: a photo of two dogs curled up in a dog bed]"
+},
+{
+"id": "conv-44:D10:8",
+"speaker": "Andrew",
+"text": "They look so comfy in that bed. It's clear they're well loved. How old are they? How are they getting along now?"
+},
+{
+"id": "conv-44:D10:9",
+"speaker": "Audrey",
+"text": "They're all 3-year-old and they are a great pack. We had a doggy playdate last Friday. It was a bit crazy but still lots of fun! [shares a photo: a photo of two dogs laying on a couch with a blanket]"
+},
+{
+"id": "conv-44:D10:10",
+"speaker": "Andrew",
+"text": "They look adorable! Doggy playdates sound like a lot of fun. Glad they all get along."
+},
+{
+"id": "conv-44:D10:11",
+"speaker": "Audrey",
+"text": "Thanks! They really are my universe. So anything new you've been into lately?"
+},
+{
+"id": "conv-44:D10:12",
+"speaker": "Andrew",
+"text": "Lately I've been finding new hobbies since I can't hike. I've been getting into cooking more and trying out new recipes - it's been enjoyable. Do you enjoy cooking? Any favorite recipes?"
+},
+{
+"id": "conv-44:D10:13",
+"speaker": "Audrey",
+"text": "I love cooking! My favorite recipe is Chicken Pot Pie. It's so cozy and delicious, especially on a cold day. If you want, I can share the recipe with you. [shares a photo: a photo of a pie on a wooden board with a knife]"
+},
+{
+"id": "conv-44:D10:14",
+"speaker": "Andrew",
+"text": "Mmm that looks nice! Mind sharing the recipe so I can give it a try? What inspired you to make it?"
+},
+{
+"id": "conv-44:D10:15",
+"speaker": "Audrey",
+"text": "Sure! Let me send you the recipe in a bit. You really should give it a try! It's my family's recipe that's been around for years. The flavors always remind me of my grandma's kitchen - makes me think of all the conversations we used to have at the table. I hope you like it! Oh, and how's the cooking going? [shares a photo: a photo of a pie with a lattice on top of it]"
+},
+{
+"id": "conv-44:D10:16",
+"speaker": "Andrew",
+"text": "Thanks! I'll give it a try. Cooking has been helping me de-stress and be creative. I'm still a rookie, but I'm having fun experimenting. So what makes you like cooking so much?"
+},
+{
+"id": "conv-44:D10:17",
+"speaker": "Audrey",
+"text": "I love trying out new recipes and experimenting in the kitchen - it's like an escape for me. It's great for de-stressing and letting my creativity flow."
+},
+{
+"id": "conv-44:D10:18",
+"speaker": "Andrew",
+"text": "Oh I feel you! It gives me an escape and allows me to try something new. Plus, there's always the bonus of enjoying the food afterwards. It's slowly becoming one of my favorite hobbies, as it's really relaxing and allows me to express my creativity."
+},
+{
+"id": "conv-44:D10:19",
+"speaker": "Audrey",
+"text": "Agreed! Cooking and eating the food is so rewarding; it's like a form of self-care. I love throwing on some music, pouring a glass of wine, and just going with the flow in the kitchen. It's so therapeutic. See how beautiful this dish is? [shares a photo: a photo of a plate of food with a lot of vegetables]"
+},
+{
+"id": "conv-44:D10:20",
+"speaker": "Andrew",
+"text": "Ooo, that looks great! Cooking can be so calming, right? What's your go-to ingredient in the kitchen?"
+},
+{
+"id": "conv-44:D10:21",
+"speaker": "Audrey",
+"text": "Yeah! Cooking is definitely calming. Garlic is my go-to ingredient. I love the smell and taste it adds to dishes."
+},
+{
+"id": "conv-44:D10:22",
+"speaker": "Andrew",
+"text": "Garlic is indeed delicious! Do you have a favorite dish that you like to make with it? If so, would you like to share the recipe?"
+},
+{
+"id": "conv-44:D10:23",
+"speaker": "Audrey",
+"text": "Sure! Roasted Chicken is one of my favorites - sure I'll send you the recipe in a bit. [shares a photo: a photography of a pan of chicken and potatoes on a stove]"
+},
+{
+"id": "conv-44:D10:24",
+"speaker": "Andrew",
+"text": "Wow I can't wait to make it! That looks amazing. What inspired you to make it?"
+},
+{
+"id": "conv-44:D10:25",
+"speaker": "Audrey",
+"text": "I'm glad you're interested! This recipe is based on my love for Mediterranean flavors. It's a tasty dish that's easy to make and loaded with healthy stuff like chicken, garlic, lemon, and herbs. It's my favorite comfort meal!"
+},
+{
+"id": "conv-44:D10:26",
+"speaker": "Andrew",
+"text": "Wow, that sounds delicious and healthy! I'm always looking for new meal ideas, especially ones that are healthier. Really appreciate you sharing this with me, thanks!"
+},
+{
+"id": "conv-44:D10:27",
+"speaker": "Audrey",
+"text": "No problem! I hope you enjoy making and eating it. Let me know how it turns out!"
+},
+{
+"id": "conv-44:D10:28",
+"speaker": "Andrew",
+"text": "Yep, will do! I'll keep you posted. Talk later!"
+},
+{
+"id": "conv-44:D10:29",
+"speaker": "Audrey",
+"text": "Excited to hear about it. Talk later!"
+}
+]
+},
+{
+"session": "conv-44:S11",
+"date": "2023-07-08 09:48",
+"turns": [
+{
+"id": "conv-44:D11:1",
+"speaker": "Andrew",
+"text": "Hey how's it going? Last Friday was amazing - I had a picnic with my girlfriend and it was so much fun! Being in the nature can be so refreshing and it always brings me joy.  [shares a photo: a photo of a picnic table with a variety of snacks and drinks]"
+},
+{
+"id": "conv-44:D11:2",
+"speaker": "Audrey",
+"text": "Wow sounds like the picnic was awesome! Yeah being in the nature is so nice. My furry friends always make me happy. We had a great walk the other day - felt really good!"
+},
+{
+"id": "conv-44:D11:3",
+"speaker": "Andrew",
+"text": "That's awesome! Dogs really make life more fun doesn't it. I wish I could get one, but like I said, it's tough to find a place and find the right dog. How did you get yours? [shares a photo: a photo of a dog wearing a sweater sitting in the grass]"
+},
+{
+"id": "conv-44:D11:4",
+"speaker": "Audrey",
+"text": "Thanks! I got lucky finding a breeder nearby that has the dogs I wanted. Yeah places that allows dogs are really hard to find unfortunately ."
+},
+{
+"id": "conv-44:D11:5",
+"speaker": "Andrew",
+"text": "Yeah it's tough. I found a few parks where you can take your pup on a leash, but it's not the same as having an open area where they can run and play. If I find something, I'll let you know.  [shares a photo: a photo of a group of dogs running around a park]"
+},
+{
+"id": "conv-44:D11:6",
+"speaker": "Audrey",
+"text": "Cool, I should join you for a hike and bring my dogs. It would be great to have a chance where they can run freely."
+},
+{
+"id": "conv-44:D11:7",
+"speaker": "Andrew",
+"text": "Yeah definitely ! I'm down for a hike with you and your furry friends. Let's do it next month when the weather is more pleasant. Here's the trail that I think it'd be great for the dogs. [shares a photo: a photo of a woman walking up a steep hill with a view of the ocean]"
+},
+{
+"id": "conv-44:D11:8",
+"speaker": "Audrey",
+"text": "That'd be awesome! I can't wait to take them hiking. Fingers crossed we find a spot with a great view and lots of room for them to explore and have a blast."
+},
+{
+"id": "conv-44:D11:9",
+"speaker": "Andrew",
+"text": "Looking forward to seeing them have fun hiking. Let's get planning for next month! Here's the map for the trail. [shares a photo: a photo of a map of a park with a lot of trees]"
+},
+{
+"id": "conv-44:D11:10",
+"speaker": "Audrey",
+"text": "Yep! I'm gonna look into the trail for my furry friend to run around."
+},
+{
+"id": "conv-44:D11:11",
+"speaker": "Andrew",
+"text": "Sounds good! Let's make sure the trail is safe for the dogs to run around and have fun."
+},
+{
+"id": "conv-44:D11:12",
+"speaker": "Audrey",
+"text": "Yep! After all safety is top priority when the dogs are outside running around."
+},
+{
+"id": "conv-44:D11:13",
+"speaker": "Andrew",
+"text": "Agreed! It's going to be a great with the dogs!"
+},
+{
+"id": "conv-44:D11:14",
+"speaker": "Audrey",
+"text": "Yup! Btw, there's going to be some cool stuff happening today. [shares a photo: a photo of three dogs sitting on the floor with leashes]"
+},
+{
+"id": "conv-44:D11:15",
+"speaker": "Andrew",
+"text": "Woah! They look so cute! What is going on here? They look ready for an adventure."
+},
+{
+"id": "conv-44:D11:16",
+"speaker": "Audrey",
+"text": "Haha yeah! They're all set for their next outdoor adventure!"
+},
+{
+"id": "conv-44:D11:17",
+"speaker": "Andrew",
+"text": "Aw man, can't wait to meet them! They seem like a blast!"
+},
+{
+"id": "conv-44:D11:18",
+"speaker": "Audrey",
+"text": "Yeah, they definitely do! They really are a lot of fun."
+},
+{
+"id": "conv-44:D11:19",
+"speaker": "Andrew",
+"text": "Oh I'm sure, dogs definitely add lots of fun to our daily life."
+},
+{
+"id": "conv-44:D11:20",
+"speaker": "Audrey",
+"text": "Yep! They bring me so much joy. Can't get bored at all. [shares a photo: a photo of two dogs running in a field with a ball in their mouth]"
+},
+{
+"id": "conv-44:D11:21",
+"speaker": "Andrew",
+"text": "Aww, they look adorable playing in the park! Seeing them have so much fun must be so rewarding."
+},
+{
+"id": "conv-44:D11:22",
+"speaker": "Audrey",
+"text": "Yeah it sure does. Seeing them so happy and bouncy makes me really happy."
+},
+{
+"id": "conv-44:D11:23",
+"speaker": "Andrew",
+"text": "Yep, they're so happy it's contagious. It makes me happy just by looking at the photos."
+},
+{
+"id": "conv-44:D11:24",
+"speaker": "Audrey",
+"text": "Haha that's great! They're so full of energy, always bringing a smile to my face!"
+},
+{
+"id": "conv-44:D11:25",
+"speaker": "Andrew",
+"text": "They make everyone smile. Can't wait to go hiking with them!"
+},
+{
+"id": "conv-44:D11:26",
+"speaker": "Audrey",
+"text": "Yep! It'll be great to see them enjoy themselves on the hike!"
+},
+{
+"id": "conv-44:D11:27",
+"speaker": "Andrew",
+"text": "Yep! I can't wait to see them have fun on the hike. Super excited!"
+},
+{
+"id": "conv-44:D11:28",
+"speaker": "Audrey",
+"text": "I'm 100% sure that it's gonna be a great day! Just take a look how happy my dogs are just at out local park. [shares a photo: a photography of a dog playing with a group of other dogs]"
+},
+{
+"id": "conv-44:D11:29",
+"speaker": "Andrew",
+"text": "Aww look at them, so cute! It'll definitely be a great day! I love being outdoors and seeing others enjoy it too."
+},
+{
+"id": "conv-44:D11:30",
+"speaker": "Audrey",
+"text": "Yeah! Being outside and seeing people happy is awesome. Here's a pic from a hike last year. Such a pretty sunset! [shares a photo: a photo of a person standing on a mountain with a view of the sky]"
+},
+{
+"id": "conv-44:D11:31",
+"speaker": "Andrew",
+"text": "Wow, that's stunning! Mind telling me where this is? "
+},
+{
+"id": "conv-44:D11:32",
+"speaker": "Audrey",
+"text": "I hiked this last year! It was a 3 hour drive from me and the sunset was amazing!"
+},
+{
+"id": "conv-44:D11:33",
+"speaker": "Andrew",
+"text": "Nice! That sunset with the view is amazing, especially with nature around."
+},
+{
+"id": "conv-44:D11:34",
+"speaker": "Audrey",
+"text": "It was a beautiful moment indeed! The colors were so vibrant, and it felt so peaceful. I'm so grateful for moments like these that remind me of the beauty of nature and to appreciate the small things. [shares a photo: a photo of a view of a lake and mountains at sunset]"
+},
+{
+"id": "conv-44:D11:35",
+"speaker": "Andrew",
+"text": "Yeah! It's incredible how nature can have such awesome surprises."
+},
+{
+"id": "conv-44:D11:36",
+"speaker": "Audrey",
+"text": "Nature really has awesome surprises. All those vibrant colors gives me that feeling of peace - it's breathtaking!"
+},
+{
+"id": "conv-44:D11:37",
+"speaker": "Andrew",
+"text": "Yeah! It is stunning! Life's pretty awesome when we take time to appreciate these moments right?"
+},
+{
+"id": "conv-44:D11:38",
+"speaker": "Audrey",
+"text": "Yep, taking a second to appreciate those moments makes like much better!"
+}
+]
+},
+{
+"session": "conv-44:S12",
+"date": "2023-07-11 10:05",
+"turns": [
+{
+"id": "conv-44:D12:1",
+"speaker": "Andrew",
+"text": "Hey! So much has changed since last time we talked - meet Toby, my puppy. He's a bundle of joy and I couldn't resist taking him home, city living and all. How've you been? [shares a photo: a photo of a dog sitting on a leash in a room]"
+},
+{
+"id": "conv-44:D12:2",
+"speaker": "Audrey",
+"text": "OMG! Toby looks so adorable! Congrats on your new addition. I'm sure you're really happy right now! I so happy for you!"
+},
+{
+"id": "conv-44:D12:3",
+"speaker": "Andrew",
+"text": "Haha yeah! Toby's definitely bringing a lot of joy. Since we last talked, work has been piling up and I've been stuck inside. I miss the peace and feeling of freedom that comes with going for a hike."
+},
+{
+"id": "conv-44:D12:4",
+"speaker": "Audrey",
+"text": "Yeah you're really stressed then! When work's non-stop, it's hard to get outdoors. Hiking is a great way to relax and take in nature. Do you have plans to go hiking soon? We should plan a trip for both of us and our pups!"
+},
+{
+"id": "conv-44:D12:5",
+"speaker": "Andrew",
+"text": "Yeah work's been stressful lately and I need a break. I have plans for a hike next month and thought it'd be cool if you and the pups could come along. We can enjoy nature and have a fun time!"
+},
+{
+"id": "conv-44:D12:6",
+"speaker": "Audrey",
+"text": "Sounds great! I'm in for the hike, and my dogs can come too. Thanks for inviting us! I made these personalized tags for them. Take a look!  [shares a photo: a photo of a group of wooden keychains with engraved names]"
+},
+{
+"id": "conv-44:D12:7",
+"speaker": "Andrew",
+"text": "Wow, those look great! Did you make them? It's really cool!"
+},
+{
+"id": "conv-44:D12:8",
+"speaker": "Audrey",
+"text": "Thanks! Yeah, I made them myself. I wanted each one to be special and fit their personalities."
+},
+{
+"id": "conv-44:D12:9",
+"speaker": "Andrew",
+"text": "Wow, that's so cool. You really put so much love into making them, which makes them extra special."
+},
+{
+"id": "conv-44:D12:10",
+"speaker": "Audrey",
+"text": "Thanks! I did put a lot of love into making these tags. I want my pets to feel seen and loved."
+},
+{
+"id": "conv-44:D12:11",
+"speaker": "Andrew",
+"text": "It really are the small things like these show we care a ton about out pets."
+},
+{
+"id": "conv-44:D12:12",
+"speaker": "Audrey",
+"text": "Yep! Small acts of love like that make a big difference in our relationships with our furry pals. Let's make sure they know how much we care!"
+},
+{
+"id": "conv-44:D12:13",
+"speaker": "Andrew",
+"text": "Definitely! They bring us so much joy, so it's only fair that we show them how special they are. Can't wait for our hike - and for Toby and your pups to meet!"
+},
+{
+"id": "conv-44:D12:14",
+"speaker": "Audrey",
+"text": "Can't wait either! It's going to be loads of fun and a great memory."
+},
+{
+"id": "conv-44:D12:15",
+"speaker": "Andrew",
+"text": "Yep! It'll be an adventure alright. "
+},
+{
+"id": "conv-44:D12:16",
+"speaker": "Audrey",
+"text": "Counting down the days 'til our hike! Gotta get them ready soon!"
+},
+{
+"id": "conv-44:D12:17",
+"speaker": "Andrew",
+"text": "Same here! It's gonna be awesome. Let's talk later k?"
+}
+]
+},
+{
+"session": "conv-44:S13",
+"date": "2023-07-27 15:52",
+"turns": [
+{
+"id": "conv-44:D13:1",
+"speaker": "Andrew",
+"text": "Hey Audrey! How are you? My GF and I just had a great experience volunteering at a pet shelter on Monday - it was so rewarding! We loved spending time with those cute animals and it gave us so much joy. It was so rewarding, it reminded me just how much I love them!"
+},
+{
+"id": "conv-44:D13:2",
+"speaker": "Audrey",
+"text": "Hi Andrew! I'm good, thanks. That's awesome about the pet shelter volunteering. Helping animals really is great and you can tell when they're happy! So happy for you getting to experience that! I should do that someday too!"
+},
+{
+"id": "conv-44:D13:3",
+"speaker": "Andrew",
+"text": "Thanks! Seeing them so content makes me happy, it really makes me realize how special and full of love they are! Have you ever volunteered at an animal shelter? It can be so rewarding. "
+},
+{
+"id": "conv-44:D13:4",
+"speaker": "Audrey",
+"text": "Never been to an animal shelter before, but it must be great! My four fur babies are more important to me than anything! Here's a pic of us from a fun day out at the park. [shares a photo: a photo of a woman kissing a dog in a park]"
+},
+{
+"id": "conv-44:D13:5",
+"speaker": "Andrew",
+"text": "Aww that's a cute photo! How are their personalities? Tell me more!"
+},
+{
+"id": "conv-44:D13:6",
+"speaker": "Audrey",
+"text": "Well the oldest one is the most relaxed, like a wise old sage. The second one is always ready for a game. The third one can be naughty but loves a good cuddle. And the youngest one is full of life and always up for an adventure. They all have their own individual personalities and I adore them."
+},
+{
+"id": "conv-44:D13:7",
+"speaker": "Andrew",
+"text": "Wow, they sound amazing! They must remind you of your childhood pup. That photo of you with your dog is so cute, he looks like the most playful one ever! Pets really do bring so much joy in your life! [shares a photo: a photo of a dog is sitting on the floor with a tennis ball]"
+},
+{
+"id": "conv-44:D13:8",
+"speaker": "Audrey",
+"text": "Thanks! That one is Max, my childhood dog. He had lots of energy and loved a game of fetch. I have lots of great memories with him. Pets sure bring a lot of joy."
+},
+{
+"id": "conv-44:D13:9",
+"speaker": "Andrew",
+"text": "Yeah! Their love and energy can really brighten up a day. It's amazing how close we can get to them and the memories they create for us. Do you have any other special memories with Max that you remember fondly?"
+},
+{
+"id": "conv-44:D13:10",
+"speaker": "Audrey",
+"text": "Max and I would take long walks in the neighborhood when I was a kid. We explored new paths, him sniffing and marking his territory. We grew really close, and I shared my worries and hopes with him. He was a great listener, always there for me. Those days are some of my favorite memories. "
+},
+{
+"id": "conv-44:D13:11",
+"speaker": "Andrew",
+"text": "Pets are more than just pets - they become friends and confidantes. They always know how to listen and provide comfort when we need it. They can make us feel so loved and understood, leaving a lasting mark on our lives."
+},
+{
+"id": "conv-44:D13:12",
+"speaker": "Audrey",
+"text": "Pets truly make our lives so much better. They listen without judging and give us the best unconditional love. They always leave a mark in our hearts and remind us how it feels to be seen and understood. I'm thankful to have them around - they bring so much joy, comfort, and love."
+},
+{
+"id": "conv-44:D13:13",
+"speaker": "Andrew",
+"text": "You nailed it! That's why we went volunteering with animals. It has been one of the most rewarding things I've ever done. They really do lift our spirits with all their love, joy, and comfort."
+},
+{
+"id": "conv-44:D13:14",
+"speaker": "Audrey",
+"text": "I'm so glad you guys got to experience that! Animals really have a way of brightening our day and giving us lots of love and joy. I'm sure the pet shelter really appreciated your help too!"
+},
+{
+"id": "conv-44:D13:15",
+"speaker": "Andrew",
+"text": "Yeah we had a blast volunteering. It's our way of giving back and making their lives better!"
+},
+{
+"id": "conv-44:D13:16",
+"speaker": "Audrey",
+"text": "I'm sure your kindness and care will make them happier no doubt!"
+}
+]
+},
+{
+"session": "conv-44:S14",
+"date": "2023-08-04 11:05",
+"turns": [
+{
+"id": "conv-44:D14:1",
+"speaker": "Andrew",
+"text": "Hey, Audrey! I can't wait for the weekend. My girlfriend, Toby and I are going camping. It's been forever since I've been in nature. [shares a photo: a photo of a woman setting up a tent on a rocky hill]"
+},
+{
+"id": "conv-44:D14:2",
+"speaker": "Audrey",
+"text": "That's awesome! That must be fun! I just started agility classes with my pups at a dog park. It's awesome to watch them learn and build relationships with other dogs. Seeing them face and conquer challenges really warms my heart. [shares a photo: a photo of a dog in a field of flowers and grass]"
+},
+{
+"id": "conv-44:D14:3",
+"speaker": "Andrew",
+"text": "Wow it's amazing to watch them grow together. They look so cool overcoming obstacles like that. Impressive stuff! [shares a photo: a photography of a dog jumping through a ring in the air]"
+},
+{
+"id": "conv-44:D14:4",
+"speaker": "Audrey",
+"text": "Thanks! They've come a long way. They have so much fun with it, it's a great physical and mental workout. I take them to the park twice a week for practice - it's been a great bonding experience. [shares a photo: a photography of a group of dogs sitting on a dirt road]"
+},
+{
+"id": "conv-44:D14:5",
+"speaker": "Andrew",
+"text": "Awesome! You're having fun with them and keeping them busy - how's that going? Btw look at the trail that I was just at. Cool right? [shares a photo: a photography of a dirt path in the woods with rocks and trees]"
+},
+{
+"id": "conv-44:D14:6",
+"speaker": "Audrey",
+"text": "It's been tough at times, but overall it's going great. We're all growing together. Check out this pic of us on a trail hike! [shares a photo: a photography of a woman walking her dogs down a path]"
+},
+{
+"id": "conv-44:D14:7",
+"speaker": "Andrew",
+"text": "Wow, nice hike! How long was the trail?"
+},
+{
+"id": "conv-44:D14:8",
+"speaker": "Audrey",
+"text": "The hike took us two hours and it was stunning! We saw lots of amazing views and it was great to explore nature."
+},
+{
+"id": "conv-44:D14:9",
+"speaker": "Andrew",
+"text": "That sounds awesome! Being able to just be in nature and appreciate it is really cool. I wish I could do that more often."
+},
+{
+"id": "conv-44:D14:10",
+"speaker": "Audrey",
+"text": "Nature really refreshes you, right? It's nice to appreciate all the beauty around us. Are there any outdoor activities you enjoy lately?"
+},
+{
+"id": "conv-44:D14:11",
+"speaker": "Andrew",
+"text": "Well for me hiking is the best. Being out in nature with all the trees and fresh air always refreshes me. Reaching the top of a challenging trail is amazing too - it feels like all worries just vanish when you get to the top."
+},
+{
+"id": "conv-44:D14:12",
+"speaker": "Audrey",
+"text": "Yeah, totally. It's like you've achieved something and all worries just fade away. Nature is pretty special, huh?"
+},
+{
+"id": "conv-44:D14:13",
+"speaker": "Andrew",
+"text": "Yeah, nature really calms me down and relaxes my mind. It's like a break from the craziness of city living."
+},
+{
+"id": "conv-44:D14:14",
+"speaker": "Audrey",
+"text": "Yeah! It's a refuge from the busy city life and it's even better when you can share it with someone special. My pets have been my good ol' buddies during all the tough times! They make me so happy and I love them so much."
+},
+{
+"id": "conv-44:D14:15",
+"speaker": "Andrew",
+"text": "Agreed! Sharing something you enjoy with someone is great. Plus, those types of bonds bring loads of joy and love."
+},
+{
+"id": "conv-44:D14:16",
+"speaker": "Audrey",
+"text": "Yeah, humans and animals have a cool connection. They bring us so much joy and love. I'm blessed to have my furry friends in my life. They're my companions and always make my day better. [shares a photo: a photo of a dog laying in a dog bed in a living room]"
+},
+{
+"id": "conv-44:D14:17",
+"speaker": "Andrew",
+"text": "They're pretty lucky to have you as their owner. Hoping for the day I can have such a deep bond with Toby and experience that special bond too. [shares a photo: a photo of a stream running through a lush green forest]"
+},
+{
+"id": "conv-44:D14:18",
+"speaker": "Audrey",
+"text": "Yeah they really mean the world to me. Btw, I never really asked, what breed is Toby? [shares a photo: a photo of three dogs sitting on a wooden floor looking up]"
+},
+{
+"id": "conv-44:D14:19",
+"speaker": "Andrew",
+"text": "He's a German Shepherd - they're so smart and loyal! What do you think?"
+},
+{
+"id": "conv-44:D14:20",
+"speaker": "Audrey",
+"text": "German Shepherds are indeed awesome! They are super loyal and smart. You'll have an amazing connection with one!"
+},
+{
+"id": "conv-44:D14:21",
+"speaker": "Andrew",
+"text": "I hope so! I shold take him hiking with me, they would be great hiking buddies, so smart and loyal. [shares a photo: a photo of a dog sitting on a rock in the woods]"
+},
+{
+"id": "conv-44:D14:22",
+"speaker": "Audrey",
+"text": "Yep! German Shepherds are known for their loyalty and smarts. They love new journeys and would love exploring the outside with you. I can totally see you and your pup conquering trails together! [shares a photo: a photo of a dog sitting on a trail with a view of a city]"
+},
+{
+"id": "conv-44:D14:23",
+"speaker": "Andrew",
+"text": "Yeah, having someone who enjoys similar things would be great for hiking. Do you have any advice for city-dwellers that owns a pup?"
+},
+{
+"id": "conv-44:D14:24",
+"speaker": "Audrey",
+"text": "My advice would be to make sure you have enough time and energy for a pup - they need lots of attention and walks! Especially for a German Shepherd like Toby, he'll need to offset a lot of energy."
+},
+{
+"id": "conv-44:D14:25",
+"speaker": "Andrew",
+"text": "Thanks for the advice! I'll definitely keep that in mind. I want to make sure I'm not limiting Toby's growth but not taking him out not enough."
+},
+{
+"id": "conv-44:D14:26",
+"speaker": "Audrey",
+"text": "No worries, Andrew! It's important to be prepared and give a pup the love it deserves. Good luck with Toby!"
+},
+{
+"id": "conv-44:D14:27",
+"speaker": "Andrew",
+"text": "Thanks! Gotta take Toby out for a small hike at the local trail. Ttyl!"
+}
+]
+}
+]

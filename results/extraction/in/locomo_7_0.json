@@ -1,0 +1,1847 @@
+[
+{
+"session": "conv-48:S1",
+"date": "2023-01-23 16:06",
+"turns": [
+{
+"id": "conv-48:D1:1",
+"speaker": "Deborah",
+"text": "Hey Jolene, nice to meet you! How's your week going? Anything fun happened?"
+},
+{
+"id": "conv-48:D1:2",
+"speaker": "Jolene",
+"text": "Hi Deb! Good to meet you! Yeah, my week's been busy. I finished an electrical engineering project last week - took a lot of work, but it's done now. Anything fun happening for you?"
+},
+{
+"id": "conv-48:D1:3",
+"speaker": "Deborah",
+"text": "Congrats! Last week I visited a place that holds a lot of memories for me. It was my mother`s old house."
+},
+{
+"id": "conv-48:D1:4",
+"speaker": "Jolene",
+"text": "Why does it hold such special memories for you?"
+},
+{
+"id": "conv-48:D1:5",
+"speaker": "Deborah",
+"text": "It was full of memories, she passed away a few years ago. This is our last photo together. [shares a photo: a photo of a woman in a wheelchair hugging a woman in a wheelchair]"
+},
+{
+"id": "conv-48:D1:6",
+"speaker": "Jolene",
+"text": "Sorry about your loss, Deb. My mother also passed away last year. This is my room in her house, I also have many memories there. Is there anything special about it you remember? [shares a photo: a photo of a room with a bench and a window]"
+},
+{
+"id": "conv-48:D1:7",
+"speaker": "Deborah",
+"text": "My mom's house had a special bench near the window. She loved to sit there every morning and take in the view. I come to sit here sometimes, it helps me stay connected to her."
+},
+{
+"id": "conv-48:D1:8",
+"speaker": "Jolene",
+"text": "Staying connected is super important. Do you have something to remember her by? This pendant reminds me of my mother, she gave it to me in 2010  in Paris. [shares a photo: a photo of a heart shaped pendant with a bird on it]"
+},
+{
+"id": "conv-48:D1:9",
+"speaker": "Deborah",
+"text": "Yes, I also have a pendant that reminds me of my mother. And what is special for you about your jewelry?"
+},
+{
+"id": "conv-48:D1:10",
+"speaker": "Jolene",
+"text": "It has a special symbol on it that represents freedom for me. It's a nice reminder to go for my goals and not get held back."
+},
+{
+"id": "conv-48:D1:11",
+"speaker": "Deborah",
+"text": "It should really give you strength and energy!"
+},
+{
+"id": "conv-48:D1:12",
+"speaker": "Jolene",
+"text": "Do you have goals?"
+},
+{
+"id": "conv-48:D1:13",
+"speaker": "Deborah",
+"text": "One of my goals is to keep teaching yoga and supporting my community. I'm passionate about helping people find peace and joy through it."
+},
+{
+"id": "conv-48:D1:14",
+"speaker": "Jolene",
+"text": "What inspired you to go down this route?"
+},
+{
+"id": "conv-48:D1:15",
+"speaker": "Deborah",
+"text": "Yoga helped me find peace during a rough time, and now I'm passionate about sharing that with others."
+},
+{
+"id": "conv-48:D1:16",
+"speaker": "Jolene",
+"text": "It is truly inspiring!"
+},
+{
+"id": "conv-48:D1:17",
+"speaker": "Deborah",
+"text": "Gotta run, bye!"
+},
+{
+"id": "conv-48:D1:18",
+"speaker": "Jolene",
+"text": "Looking forward to the next chat!"
+}
+]
+},
+{
+"session": "conv-48:S2",
+"date": "2023-01-27 09:49",
+"turns": [
+{
+"id": "conv-48:D2:1",
+"speaker": "Deborah",
+"text": "Hey Jolene, sorry to tell you this but my dad passed away two days ago. It's been really tough on us all - his sudden death left us all kinda shell-shocked. I'm trying to channel my grief by spending more time with family and cherishing the memories. These moments remind me to live life fully. [shares a photo: a photo of a woman hugging a woman who is sitting on a couch]"
+},
+{
+"id": "conv-48:D2:2",
+"speaker": "Jolene",
+"text": "Sorry to hear about your dad, Deborah. Losing a parent is tough - how's it going for you and your family?"
+},
+{
+"id": "conv-48:D2:3",
+"speaker": "Deborah",
+"text": "Even though it's hard, it's comforting to look back on the great memories. We looked at the family album. Photos give me peace during difficult times. This is my parents' wedding in 1993. [shares a photo: a photo of a bride and groom posing for a picture]"
+},
+{
+"id": "conv-48:D2:4",
+"speaker": "Jolene",
+"text": "They were a beautiful couple!"
+},
+{
+"id": "conv-48:D2:5",
+"speaker": "Deborah",
+"text": "My husband and I are trying to be as good a family as my parents were!"
+},
+{
+"id": "conv-48:D2:6",
+"speaker": "Jolene",
+"text": "What do you value in your relationship?"
+},
+{
+"id": "conv-48:D2:7",
+"speaker": "Deborah",
+"text": "It is love, and openness that have kept us close all these years. Being there for each other has made us both happy. Look what letter I received yesterday! [shares a photo: a photo of a note written to someone on a piece of paper]"
+},
+{
+"id": "conv-48:D2:8",
+"speaker": "Jolene",
+"text": "What touching words! Who is this letter from?"
+},
+{
+"id": "conv-48:D2:9",
+"speaker": "Deborah",
+"text": "The group members sent this to me! They thanked me for the positive influence I had on them. Those moments remind me why I'm so passionate about yoga."
+},
+{
+"id": "conv-48:D2:10",
+"speaker": "Jolene",
+"text": "Where do you most often do yoga?"
+},
+{
+"id": "conv-48:D2:11",
+"speaker": "Deborah",
+"text": "This is one of the places where I do it. [shares a photo: a photo of a living room with a television and a window]"
+},
+{
+"id": "conv-48:D2:12",
+"speaker": "Jolene",
+"text": "Where is it?"
+},
+{
+"id": "conv-48:D2:13",
+"speaker": "Deborah",
+"text": "That's my old home. I go there now and then for my mom, who passed away. Sitting in that spot by the window gives me peace."
+},
+{
+"id": "conv-48:D2:14",
+"speaker": "Jolene",
+"text": "Must be great to have that place where you feel connected to her."
+},
+{
+"id": "conv-48:D2:15",
+"speaker": "Deborah",
+"text": "Yeah, it's special. I can feel her presence when I sit there and it comforts me. [shares a photo: a photo of a window seat in a room with a window]"
+},
+{
+"id": "conv-48:D2:16",
+"speaker": "Jolene",
+"text": "Wow, it sounds like that spot holds a lot of sentimental value. Does it bring back any special memories?"
+},
+{
+"id": "conv-48:D2:17",
+"speaker": "Deborah",
+"text": "Yeah, Jolene. She'd sit there every night with a book and a smile, reading was one of her hobbies. It was one of her favorite places in the house.  [shares a photo: a photo of a view of the sky from an airplane window]"
+},
+{
+"id": "conv-48:D2:18",
+"speaker": "Jolene",
+"text": "What other hobbies did your mother have?"
+},
+{
+"id": "conv-48:D2:19",
+"speaker": "Deborah",
+"text": "Travel was also her great passion!"
+},
+{
+"id": "conv-48:D2:20",
+"speaker": "Jolene",
+"text": "I want to show you one of my snakes! They always calm me down and make me happy. This is Susie. [shares a photo: a photo of a bed with a snake head sticking out of it]"
+},
+{
+"id": "conv-48:D2:21",
+"speaker": "Deborah",
+"text": "Having a pet totally brightens up your life. It's great that it brings you comfort. Do you have any fun moments with your pet that you'd like to share?"
+},
+{
+"id": "conv-48:D2:22",
+"speaker": "Jolene",
+"text": " I was playing video games and my pet just slinked out of her cage and coiled up next to me - it was too funny! My second snake Seraphim did it. Look at her sly eyes! [shares a photo: a photo of a snake sticking its head out of a blanket]"
+},
+{
+"id": "conv-48:D2:23",
+"speaker": "Deborah",
+"text": "Awww, that's so nice! "
+},
+{
+"id": "conv-48:D2:24",
+"speaker": "Jolene",
+"text": "I bought it a year ago in Paris."
+},
+{
+"id": "conv-48:D2:25",
+"speaker": "Deborah",
+"text": "Cool, Jolene! Pets bring so much happiness!"
+},
+{
+"id": "conv-48:D2:26",
+"speaker": "Jolene",
+"text": "They are very unusual pets! Here's me and my partner gaming last week - it's so fun. We played the game \"Detroit\" on the console. We are both crazy about this activity! [shares a photo: a photo of a person laying in bed with a dog watching tv]"
+},
+{
+"id": "conv-48:D2:27",
+"speaker": "Deborah",
+"text": "Did your boyfriend teach you to play?"
+},
+{
+"id": "conv-48:D2:28",
+"speaker": "Jolene",
+"text": "Even as a child I learned to play on my own."
+},
+{
+"id": "conv-48:D2:29",
+"speaker": "Deborah",
+"text": "Do you only play old games or try new ones?"
+},
+{
+"id": "conv-48:D2:30",
+"speaker": "Jolene",
+"text": "We are planning to play \"Walking Dead\" next Saturday."
+},
+{
+"id": "conv-48:D2:31",
+"speaker": "Deborah",
+"text": "Take care and keep spreading those good vibes!"
+},
+{
+"id": "conv-48:D2:32",
+"speaker": "Jolene",
+"text": "Thanks, Deb! You too, take care. See ya!"
+}
+]
+},
+{
+"session": "conv-48:S3",
+"date": "2023-02-01 19:03",
+"turns": [
+{
+"id": "conv-48:D3:1",
+"speaker": "Jolene",
+"text": "Hi Deb! How're you? I've been busy. My engineering professor gave us a huge robotics project. It's tough but fun, it's making me get creative and problem-solve. [shares a photo: a photo of a table with a robot on it and a laptop]"
+},
+{
+"id": "conv-48:D3:2",
+"speaker": "Deborah",
+"text": "Hey Jolene! It's great to hear from you. It sounds challenging but interesting! It must be really putting your creative and problem-solving skills to the test. How did you feel when you first received the project? Are you enjoying working on it?"
+},
+{
+"id": "conv-48:D3:3",
+"speaker": "Jolene",
+"text": "When I got it, I felt a mix of emotions - excited and nervous. But now, I'm really enjoying it! It's like trying to solve a puzzle, figuring out the best design and programming. Seeing the robot come together is awesome too!"
+},
+{
+"id": "conv-48:D3:4",
+"speaker": "Deborah",
+"text": "That's awesome, Jolene! You're enjoying the process. It must be really satisfying to see it come together. Keep up the good work! Oh, by the way, I met my new neighbor Anna yesterday! [shares a photo: a photo of a yellow sign with a picture of a family]"
+},
+{
+"id": "conv-48:D3:5",
+"speaker": "Jolene",
+"text": "How did you two meet?"
+},
+{
+"id": "conv-48:D3:6",
+"speaker": "Deborah",
+"text": "It happened at yoga in the park."
+},
+{
+"id": "conv-48:D3:7",
+"speaker": "Jolene",
+"text": "Wow, that's awesome! It's great connecting with people who have similar interests. Did you two talk about it?"
+},
+{
+"id": "conv-48:D3:8",
+"speaker": "Deborah",
+"text": "Yeah, we talked about how it has improved our lives and the sense of community it gives."
+},
+{
+"id": "conv-48:D3:9",
+"speaker": "Jolene",
+"text": "Sounds great! [shares a photo: a photo of a purse with a plant on a table]"
+},
+{
+"id": "conv-48:D3:10",
+"speaker": "Deborah",
+"text": "Have you ever thought about resuming yoga?"
+},
+{
+"id": "conv-48:D3:11",
+"speaker": "Jolene",
+"text": "Well... we planned to play the console with my partner."
+},
+{
+"id": "conv-48:D3:12",
+"speaker": "Deborah",
+"text": "It's also good that you have something to do together."
+},
+{
+"id": "conv-48:D3:13",
+"speaker": "Jolene",
+"text": "Thanks for the kind words!"
+},
+{
+"id": "conv-48:D3:14",
+"speaker": "Deborah",
+"text": "Gotta run bye!"
+},
+{
+"id": "conv-48:D3:15",
+"speaker": "Jolene",
+"text": "See you soon!"
+}
+]
+},
+{
+"session": "conv-48:S4",
+"date": "2023-02-04 09:48",
+"turns": [
+{
+"id": "conv-48:D4:1",
+"speaker": "Jolene",
+"text": "Hey Deborah! Good to hear from you. How've you been? I've been on an emotional rollercoaster lately, but I'm coping."
+},
+{
+"id": "conv-48:D4:2",
+"speaker": "Deborah",
+"text": "Hey Jolene! Good to hear from you. All good here - how about you? Anything new happening lately?"
+},
+{
+"id": "conv-48:D4:3",
+"speaker": "Jolene",
+"text": "I had a major milestone last week and it went really well - I'm so relieved and proud. It was a huge accomplishment for me as an engineer."
+},
+{
+"id": "conv-48:D4:4",
+"speaker": "Deborah",
+"text": "That's awesome. You must have worked really hard for that. I'm so proud of you. Care to share more about it?"
+},
+{
+"id": "conv-48:D4:5",
+"speaker": "Jolene",
+"text": "Thanks so much! I had to plan and research a lot to design and build a sustainable water purifier for a rural community in need. It was tough, but I loved the experience."
+},
+{
+"id": "conv-48:D4:6",
+"speaker": "Deborah",
+"text": "Your engineering skills really made a difference for people in a rural area. That's amazing! How did it feel when you saw it working?"
+},
+{
+"id": "conv-48:D4:7",
+"speaker": "Jolene",
+"text": "It was such a surreal moment. Seeing it working and providing clean water to the community was incredibly satisfying. It reminded me of how engineering can make a difference in people's lives. It made me feel like I had a purpose and had done something good."
+},
+{
+"id": "conv-48:D4:8",
+"speaker": "Deborah",
+"text": "So, what are your career aspirations now?"
+},
+{
+"id": "conv-48:D4:9",
+"speaker": "Jolene",
+"text": " I want to keep working in engineering and continue to make a positive impact on communities in need by creating sustainable solutions. My goal is to contribute towards making the world a better place with my work."
+},
+{
+"id": "conv-48:D4:10",
+"speaker": "Deborah",
+"text": " I'm sure great things will keep coming your way. Keep up the good work and follow your passions!"
+},
+{
+"id": "conv-48:D4:11",
+"speaker": "Jolene",
+"text": "Your support means a lot. I'm determined to keep going and make a difference. Your encouragement really motivates me to pursue my passions."
+},
+{
+"id": "conv-48:D4:12",
+"speaker": "Deborah",
+"text": "When things get tough, just take a deep breath and remember why you're doing this. This is where I spend a lot of my time, teaching yoga. It's a great way to find balance and reconnect with ourselves. I bonded with Anna during yesterday's l yoga class. [shares a photo: a photo of two women in a dance studio doing a dance pose]"
+},
+{
+"id": "conv-48:D4:13",
+"speaker": "Jolene",
+"text": "Wow, that's awesome! What new poses did you try?"
+},
+{
+"id": "conv-48:D4:14",
+"speaker": "Deborah",
+"text": "We were trying out different dance poses, like Warrior II, which builds strength and boosts focus. [shares a photo: a photo of a woman doing a yoga pose on a chair]"
+},
+{
+"id": "conv-48:D4:15",
+"speaker": "Jolene",
+"text": "Is it difficult to do?"
+},
+{
+"id": "conv-48:D4:16",
+"speaker": "Deborah",
+"text": "Yes, but this brought us closer to Anna! We supported each other, that means a lot."
+},
+{
+"id": "conv-48:D4:17",
+"speaker": "Jolene",
+"text": "Can you explain how to do it?"
+},
+{
+"id": "conv-48:D4:18",
+"speaker": "Deborah",
+"text": "Sure! To do this modified pose, sit on the edge of a chair with your feet planted. Twist your torso to one side and use your hand on your knee for support. You'll feel a stretch in your back and shoulders as you hold it for a few breaths, then switch sides. It's great for relaxing tense muscles."
+},
+{
+"id": "conv-48:D4:19",
+"speaker": "Jolene",
+"text": "Sounds really hard! Here's my bookshelf! [shares a photo: a photo of a book shelf with a lot of books on it]"
+},
+{
+"id": "conv-48:D4:20",
+"speaker": "Deborah",
+"text": "That's quite a collection! Have you had a favorite book lately? I'd love to hear your thoughts."
+},
+{
+"id": "conv-48:D4:21",
+"speaker": "Jolene",
+"text": "Thanks Deborah! I'm really into this book called \"Sapiens\" - it's a fascinating look at human history and how technology has affected us. It's giving me a lot to think about!"
+},
+{
+"id": "conv-48:D4:22",
+"speaker": "Deborah",
+"text": "Great, this is interesting! Have you come across any recent ones that really struck you?"
+},
+{
+"id": "conv-48:D4:23",
+"speaker": "Jolene",
+"text": "Two weeks ago I read \"Avalanche\" by Neal Stephenson in one sitting! "
+},
+{
+"id": "conv-48:D4:24",
+"speaker": "Deborah",
+"text": "That sounds cool, Jolene. Stories can be so powerful - they can teach us, motivate us, and bring us together. "
+},
+{
+"id": "conv-48:D4:25",
+"speaker": "Jolene",
+"text": "I also read a recent story about someone who became successful despite facing numerous challenges. It really showed me that anything is possible if you believe and work hard."
+},
+{
+"id": "conv-48:D4:26",
+"speaker": "Deborah",
+"text": "That's a really powerful message. It reminds me of someone special and their grace and strength when they faced hardships. Check out this creation! [shares a photo: a photo of a bouquet of flowers in a vase on a table]"
+},
+{
+"id": "conv-48:D4:27",
+"speaker": "Jolene",
+"text": "Wow, Deb! That's beautiful! Can you tell me the backstory of that bouquet?"
+},
+{
+"id": "conv-48:D4:28",
+"speaker": "Deborah",
+"text": "My friend gave me this bouquet when I was struggling, and it gives me hope and courage. I'm filled with warmth and appreciation when I look at it."
+},
+{
+"id": "conv-48:D4:29",
+"speaker": "Jolene",
+"text": "That's really sweet. Such a small thing can make a real difference."
+},
+{
+"id": "conv-48:D4:30",
+"speaker": "Deborah",
+"text": "It's amazing how something as simple as flowers can make a real difference. Nature sure is beautiful."
+},
+{
+"id": "conv-48:D4:31",
+"speaker": "Jolene",
+"text": "Where are some of your favorite nature spots?"
+},
+{
+"id": "conv-48:D4:32",
+"speaker": "Deborah",
+"text": "Oh, there's so many great places! My favorite is a park with a forest trail - it's so calming getting lost in nature. Then there's this beach nearby that I love - the sound of the waves and the sand under my feet make me feel all peaceful and happy. Do you have any favorite spots, Jolene?"
+},
+{
+"id": "conv-48:D4:33",
+"speaker": "Jolene",
+"text": "Here's a picture I took on vacation last summer in Bogota. It was so beautiful and calming watching the sunset over the water. It definitely made me appreciate nature's calming power. [shares a photo: a photo of a person walking on the beach with a surfboard]"
+},
+{
+"id": "conv-48:D4:34",
+"speaker": "Deborah",
+"text": "That sounds great, Jolene. Nature's calming for sure. Guess it helps us forget the daily craziness and find inner peace. No wonder you're a fan! I like to come to this spot by the water near my mom's old house. It's where I reflect on her life and find some peace. Being surrounded by nature helps a lot. [shares a photo: a photo of a small island with a lone boat in the water]"
+},
+{
+"id": "conv-48:D4:35",
+"speaker": "Jolene",
+"text": "That's so touching! Do you have any little traditions that you do when you come to reflect on your mom?"
+},
+{
+"id": "conv-48:D4:36",
+"speaker": "Deborah",
+"text": "Do you remember this amulet from her? Whenever I come here, I bring it with me. It's how I feel her love and stay close to her. Holding it brings me comfort. [shares a photo: a photo of a woman wearing a white shirt and a gold chain necklace]"
+},
+{
+"id": "conv-48:D4:37",
+"speaker": "Jolene",
+"text": "It's amazing how something so small can have such a big impact, huh?"
+},
+{
+"id": "conv-48:D4:38",
+"speaker": "Deborah",
+"text": "Yeah, even small things like this can make a big difference. It's a reminder of all the love and strength we have inside, connecting us to people we've lost and comforting us."
+},
+{
+"id": "conv-48:D4:39",
+"speaker": "Jolene",
+"text": "It can keep them close in our hearts every day."
+},
+{
+"id": "conv-48:D4:40",
+"speaker": "Deborah",
+"text": "Anna also has a pendant that she wears in memory of her mother! This also brought us closer."
+},
+{
+"id": "conv-48:D4:41",
+"speaker": "Jolene",
+"text": "It's nice to have those reminders as a source of strength when we need it."
+},
+{
+"id": "conv-48:D4:42",
+"speaker": "Deborah",
+"text": "Life's tough but hang in there. Look to your sources of strength and you'll do great. Stay in touch, take care of yourself, and know I'm always here to cheer you on!"
+},
+{
+"id": "conv-48:D4:43",
+"speaker": "Jolene",
+"text": "Thanks, Deb! Your encouragement means a lot to me. I'll definitely stay in touch. Bye, take care and keep shining!"
+},
+{
+"id": "conv-48:D4:44",
+"speaker": "Deborah",
+"text": "Stay safe!  Bye!"
+}
+]
+},
+{
+"session": "conv-48:S5",
+"date": "2023-02-09 21:03",
+"turns": [
+{
+"id": "conv-48:D5:1",
+"speaker": "Jolene",
+"text": "Hey Deborah! Been a few days since we last talked so I wanted to fill you in on something cool. Last Wednesday I did a mini retreat to assess where I'm at in life. It was a dope experience that totally gave me a new outlook."
+},
+{
+"id": "conv-48:D5:2",
+"speaker": "Deborah",
+"text": "Hey Jolene! Sounds great. Taking time to reflect can be really awesome. Did you gain any new insights from it?"
+},
+{
+"id": "conv-48:D5:3",
+"speaker": "Jolene",
+"text": "Yep! I achieved so much more than I imagined. It was a real confidence boost."
+},
+{
+"id": "conv-48:D5:4",
+"speaker": "Deborah",
+"text": "You deserve credit for stepping outside your comfort zone and believing in yourself. What cool stuff did you accomplish at the retreat?"
+},
+{
+"id": "conv-48:D5:5",
+"speaker": "Jolene",
+"text": "I really accomplished something with my engineering project - I came up with some neat solutions and I'm really excited about it."
+},
+{
+"id": "conv-48:D5:6",
+"speaker": "Deborah",
+"text": "Let's go into more detail."
+},
+{
+"id": "conv-48:D5:7",
+"speaker": "Jolene",
+"text": " Green tech could really make a difference in disadvantaged areas. I'd like to look into it and see how I can contribute. Hey, speaking of helping out, I had an idea: a volunteer program where engineers teach STEM to underprivileged kids. What do you think of that?"
+},
+{
+"id": "conv-48:D5:8",
+"speaker": "Deborah",
+"text": "That sounds great, Jolene! It's a great way to help and inspire others. They would benefit a lot from your knowledge. Have you thought of a plan yet?"
+},
+{
+"id": "conv-48:D5:9",
+"speaker": "Jolene",
+"text": "Haven't finished planning yet but I'm thinking of teaming up with local schools/centers to do workshops. We could even invite engineers as guest speakers to show kids their career options."
+},
+{
+"id": "conv-48:D5:10",
+"speaker": "Deborah",
+"text": "Having guest speakers, like them, would definitely give the kids a real-world view. Have you reached out to any schools or centers yet?"
+},
+{
+"id": "conv-48:D5:11",
+"speaker": "Jolene",
+"text": "No, not yet. I want to solidify the plan first. Can't wait to start reaching out, though!"
+},
+{
+"id": "conv-48:D5:12",
+"speaker": "Deborah",
+"text": "That makes sense. I'm excited to hear how you reach out and help those kids. Let me know how it goes!"
+},
+{
+"id": "conv-48:D5:13",
+"speaker": "Jolene",
+"text": "I'll keep you posted! Appreciate the support! Here are my sketches in the planner. [shares a photo: a photo of a notebook with a pen and a notebook with a page of notes]"
+},
+{
+"id": "conv-48:D5:14",
+"speaker": "Deborah",
+"text": "Sounds like you're doing great. Let me know if you need more tips or information."
+},
+{
+"id": "conv-48:D5:15",
+"speaker": "Jolene",
+"text": "Thanks, Deb! If I need anything else, I'll let you know. You're awesome!"
+},
+{
+"id": "conv-48:D5:16",
+"speaker": "Deborah",
+"text": "You're awesome too! Take care!"
+},
+{
+"id": "conv-48:D5:17",
+"speaker": "Jolene",
+"text": "Stay safe!"
+}
+]
+},
+{
+"session": "conv-48:S6",
+"date": "2023-02-22 16:12",
+"turns": [
+{
+"id": "conv-48:D6:1",
+"speaker": "Jolene",
+"text": "Hey Deborah, totally buzzing! Had a great night out last night - dinner, and drinks with my friends. So glad I got to let my hair down. You? [shares a photo: a photo of a plate of food and a glass of wine]"
+},
+{
+"id": "conv-48:D6:2",
+"speaker": "Deborah",
+"text": "Sounds great, Jolene! I just visited this place and it was so calming. Nostalgic too. [shares a photo: a photo of a garden with a bunch of flowers in buckets]"
+},
+{
+"id": "conv-48:D6:3",
+"speaker": "Jolene",
+"text": "Wow, those flowers are beautiful! What type are they? It looks so peaceful there."
+},
+{
+"id": "conv-48:D6:4",
+"speaker": "Deborah",
+"text": "The roses and dahlias bring me peace. I lost a friend last week, so I've been spending time in the garden to find some comfort."
+},
+{
+"id": "conv-48:D6:5",
+"speaker": "Jolene",
+"text": "Sorry to hear about your friend, Deb. Losing someone can be really tough. How are you holding up?"
+},
+{
+"id": "conv-48:D6:6",
+"speaker": "Deborah",
+"text": "Thanks for the kind words. It's been tough, but I'm comforted by remembering our time together. It reminds me of how special life is."
+},
+{
+"id": "conv-48:D6:7",
+"speaker": "Jolene",
+"text": "Memories can give us so much comfort and joy."
+},
+{
+"id": "conv-48:D6:8",
+"speaker": "Deborah",
+"text": "Memories keep our loved ones close. This is the last photo with Karlie which was taken last summer when we hiked. It was our last one. We had such a great time! Every time I see it, I can't help but smile. [shares a photo: a photo of two women are riding on a motorcycle on a dirt road]"
+},
+{
+"id": "conv-48:D6:9",
+"speaker": "Jolene",
+"text": "Wow, looks like a great trip! Where else have you traveled?"
+},
+{
+"id": "conv-48:D6:10",
+"speaker": "Deborah",
+"text": "I've been blessed to travel to a few places and Bali last year was one of my favs. It was a gorgeous island that gave me peace, great for yoga. [shares a photo: a photo of a swing on a beach with a blue sky]"
+},
+{
+"id": "conv-48:D6:11",
+"speaker": "Jolene",
+"text": "Wow, that's great! Is yoga on the beach a thing? I've been wanting to try it."
+},
+{
+"id": "conv-48:D6:12",
+"speaker": "Deborah",
+"text": "The sound of the waves and the fresh air is wonderful!"
+},
+{
+"id": "conv-48:D6:13",
+"speaker": "Jolene",
+"text": "I'll definitely give it a go! It sounds peaceful. Thanks!"
+},
+{
+"id": "conv-48:D6:14",
+"speaker": "Deborah",
+"text": "Let me know how it goes. Enjoy it!"
+},
+{
+"id": "conv-48:D6:15",
+"speaker": "Jolene",
+"text": "I'll keep you posted if I decide to go there."
+},
+{
+"id": "conv-48:D6:16",
+"speaker": "Deborah",
+"text": "Take care!"
+}
+]
+},
+{
+"session": "conv-48:S7",
+"date": "2023-02-25 16:50",
+"turns": [
+{
+"id": "conv-48:D7:1",
+"speaker": "Jolene",
+"text": "Hi Deborah, it's been a while! Since we last talked, so much has happened. Balancing engineering school with my partner's video games is quite a feat. But I'm also setting aside time for myself, doing yoga and meditation. It helps give me calm amidst the craziness."
+},
+{
+"id": "conv-48:D7:2",
+"speaker": "Deborah",
+"text": "Hey Jolene! Great to hear from you. Taking a break is key. How have those practices been helping with everything?"
+},
+{
+"id": "conv-48:D7:3",
+"speaker": "Jolene",
+"text": "They seriously saved me. I chill out and gain perspective when I do yoga. Afterward, I'm more alert and motivated. Here is my last photo. [shares a photo: a photo of a woman sitting on a yoga mat doing a yoga pose]"
+},
+{
+"id": "conv-48:D7:4",
+"speaker": "Deborah",
+"text": "Wow, cool that yoga has been helping you out! Do they also do yoga with you? Does your partner do yoga with you?"
+},
+{
+"id": "conv-48:D7:5",
+"speaker": "Jolene",
+"text": "He started joining me sometimes, which is nice for bonding and relaxing. It's brought us closer. This is just our random photo. [shares a photo: a photo of a man and a woman holding hands with rings on them]"
+},
+{
+"id": "conv-48:D7:6",
+"speaker": "Deborah",
+"text": "Aw, that's wonderful! How long have you been married?"
+},
+{
+"id": "conv-48:D7:7",
+"speaker": "Jolene",
+"text": "We're not married yet but we've been together for three years. We're taking it slow and loving the ride. This ring on his hand is just a decoration, not a wedding ring."
+},
+{
+"id": "conv-48:D7:8",
+"speaker": "Deborah",
+"text": "Sounds nice, Jolene. Enjoying the journey is the main thing. So, how did you two meet?"
+},
+{
+"id": "conv-48:D7:9",
+"speaker": "Jolene",
+"text": "We actually met in an engineering class in college and quickly became friends. It eventually blossomed into something more and it's been great! [shares a photo: a photo of a book and a calculator on a table]"
+},
+{
+"id": "conv-48:D7:10",
+"speaker": "Deborah",
+"text": "Wow, your relationship started from a strong friendship. Do you still enjoy working on engineering projects together?"
+},
+{
+"id": "conv-48:D7:11",
+"speaker": "Jolene",
+"text": "Yep, teaming up for these projects feels great! We get each other's struggles and both love it. [shares a photo: a photo of a group of men standing in front of a building]"
+},
+{
+"id": "conv-48:D7:12",
+"speaker": "Deborah",
+"text": "Have yoga or meditation helped with any stress?"
+},
+{
+"id": "conv-48:D7:13",
+"speaker": "Jolene",
+"text": "Whenever I'm overwhelmed, I just take a break and do some breathing or meditate. It really helps me feel calmer and clearer, so I'm able to handle challenges more easily."
+},
+{
+"id": "conv-48:D7:14",
+"speaker": "Deborah",
+"text": "It's been great to see your progress since we last chatted - keep it up!"
+},
+{
+"id": "conv-48:D7:15",
+"speaker": "Jolene",
+"text": "Thanks, Deb! Your support really means a lot. I'm gonna keep pushing forward and continue taking time for myself."
+},
+{
+"id": "conv-48:D7:16",
+"speaker": "Deborah",
+"text": " Always rooting for you. Remember to listen to your heart and take good care. Here's a photo I took while reflecting outdoors. It's a reminder to find peace even in chaos. [shares a photo: a photo of a person sitting on a bench looking at the sunset]"
+},
+{
+"id": "conv-48:D7:17",
+"speaker": "Jolene",
+"text": " I'm curious, what does your daily routine look like?"
+},
+{
+"id": "conv-48:D7:18",
+"speaker": "Deborah",
+"text": "In the morning, I meditate, do yoga, and teach classes. And yesterday I went for a morning jog for the first time in a nearby park. I will now incorporate this into my daily routine. And in the evenings, I spend time with loved ones."
+},
+{
+"id": "conv-48:D7:19",
+"speaker": "Jolene",
+"text": "Why did you decide that?"
+},
+{
+"id": "conv-48:D7:20",
+"speaker": "Deborah",
+"text": "Exercise is key for me - it makes me feel connected to my body. "
+},
+{
+"id": "conv-48:D7:21",
+"speaker": "Jolene",
+"text": "This is a great healthy habit!"
+},
+{
+"id": "conv-48:D7:22",
+"speaker": "Deborah",
+"text": "It's like they say - \"Can't pour from an empty cup.\" Looking out for ourselves gives us the energy to help others. And don't forget, you're worth it too!"
+},
+{
+"id": "conv-48:D7:23",
+"speaker": "Jolene",
+"text": "Thanks, Deb. Your words really mean something to me. I'll keep remembering to prioritize self-care."
+}
+]
+},
+{
+"session": "conv-48:S8",
+"date": "2023-03-02 19:18",
+"turns": [
+{
+"id": "conv-48:D8:1",
+"speaker": "Deborah",
+"text": "Hey Jolene, Anna got me a vegan stir-fry the other day - tofu and veg with ginger and soy sauce. It was really tasty! Food is such a wonderful source of pleasure and nourishment. What dishes are comforting to you?"
+},
+{
+"id": "conv-48:D8:2",
+"speaker": "Jolene",
+"text": "One of my favorite dishes is lasagna! Comfort food can be a great pick-me-up. I've got a lot going on with my studies and exams."
+},
+{
+"id": "conv-48:D8:3",
+"speaker": "Deborah",
+"text": "Have you been able to find time for yourself lately?"
+},
+{
+"id": "conv-48:D8:4",
+"speaker": "Jolene",
+"text": "I've been trying to squeeze in some me-time. Last Friday, I did yoga and meditation to relax. Did you find time for yourself too? [shares a photo: a photo of a room with a wooden floor and a window]"
+},
+{
+"id": "conv-48:D8:5",
+"speaker": "Deborah",
+"text": " I also did the same, it helped me reset my mind. How does it make you feel?"
+},
+{
+"id": "conv-48:D8:6",
+"speaker": "Jolene",
+"text": "It's amazing how a few quiet moments can work wonders for the soul. [shares a photo: a photo of a purse with a plant on a table]"
+},
+{
+"id": "conv-48:D8:7",
+"speaker": "Deborah",
+"text": "Have you been able to get outside lately?"
+},
+{
+"id": "conv-48:D8:8",
+"speaker": "Jolene",
+"text": "I did take Seraphim to the park last Sunday. She loved it and here's a pic. [shares a photo: a photo of a lizard laying on the ground surrounded by leaves]"
+},
+{
+"id": "conv-48:D8:9",
+"speaker": "Deborah",
+"text": "Looks like you guys had fun!"
+},
+{
+"id": "conv-48:D8:10",
+"speaker": "Jolene",
+"text": "We explored new places. People are surprised when they see a tamed snake. What do you like about being outdoors?"
+},
+{
+"id": "conv-48:D8:11",
+"speaker": "Deborah",
+"text": "Hmm... The birds chirping and the breeze gently blowing! It reminds me of what really matters."
+},
+{
+"id": "conv-48:D8:12",
+"speaker": "Jolene",
+"text": "Yep, it's like a reminder to slow down and appreciate the little things."
+},
+{
+"id": "conv-48:D8:13",
+"speaker": "Deborah",
+"text": "Is there anything you want to be more mindful of right now?"
+},
+{
+"id": "conv-48:D8:14",
+"speaker": "Jolene",
+"text": "I need to be more mindful of my stress levels and take care of my mental health. Sometimes I get too caught up in my studies and forget to prioritize self-care."
+},
+{
+"id": "conv-48:D8:15",
+"speaker": "Deborah",
+"text": " Life can get hectic and it's easy to forget about ourselves. "
+},
+{
+"id": "conv-48:D8:16",
+"speaker": "Jolene",
+"text": "Exams and deadlines got me feeling overwhelmed. Just look at my to-do list! It seems never-ending... Trying my best but it's been challenging. [shares a photo: a photo of a desk with a notebook and a computer monitor]"
+},
+{
+"id": "conv-48:D8:17",
+"speaker": "Deborah",
+"text": "Your efforts will bear fruit, don't give up!"
+},
+{
+"id": "conv-48:D8:18",
+"speaker": "Jolene",
+"text": "Thanks, Deb. Any tips on studying or time management?"
+},
+{
+"id": "conv-48:D8:19",
+"speaker": "Deborah",
+"text": "My tip is to break it into smaller pieces and set goals for yourself. For time management, planners or schedulers help you stay organized and give you time for yourself. Let me know if you need help with a study plan!"
+},
+{
+"id": "conv-48:D8:20",
+"speaker": "Jolene",
+"text": "I appreciate your help with that."
+},
+{
+"id": "conv-48:D8:21",
+"speaker": "Deborah",
+"text": "Take care and good luck with your exams. I'll give you a mug just like this one! It encourages. [shares a photo: a photo of a yellow coffee cup with a handwritten message]"
+},
+{
+"id": "conv-48:D8:22",
+"speaker": "Jolene",
+"text": "Thanks, Deb! This really cheered me up. All the best with your classes. Bye!"
+},
+{
+"id": "conv-48:D8:23",
+"speaker": "Deborah",
+"text": "Thanks, Jolene! Glad I could bring a smile to your face. Take care and make sure to give yourself some time to relax. Bye!"
+}
+]
+},
+{
+"session": "conv-48:S9",
+"date": "2023-03-13 11:22",
+"turns": [
+{
+"id": "conv-48:D9:1",
+"speaker": "Deborah",
+"text": "Hi Jolene! We haven't corresponded for a long time!"
+},
+{
+"id": "conv-48:D9:2",
+"speaker": "Jolene",
+"text": "Hey Deb, yeah life can get chaotic. How's it been going lately?"
+},
+{
+"id": "conv-48:D9:3",
+"speaker": "Deborah",
+"text": "So much has been going on lately. I started this yoga class in the neighborhood - it's such a good feeling! Now I get to share the exercise with my neighbors and watch it really transform them."
+},
+{
+"id": "conv-48:D9:4",
+"speaker": "Jolene",
+"text": " Congrats. How did you do this?"
+},
+{
+"id": "conv-48:D9:5",
+"speaker": "Deborah",
+"text": "Thanks! My neighbors were interested in trying yoga, so I hosted a class for them on Friday. It was great to see everyone embrace and enjoy it. Here is our photo together. [shares a photo: a photo of a group of women posing for a picture]"
+},
+{
+"id": "conv-48:D9:6",
+"speaker": "Jolene",
+"text": "That's cool! What made you want to start teaching it?"
+},
+{
+"id": "conv-48:D9:7",
+"speaker": "Deborah",
+"text": "I find it calming and wanted to share that with others. Giving people peace and awareness brings me so much happiness."
+},
+{
+"id": "conv-48:D9:8",
+"speaker": "Jolene",
+"text": "Wow, Deb! It's awesome when we can share something we love and make things better for others."
+},
+{
+"id": "conv-48:D9:9",
+"speaker": "Deborah",
+"text": "Teaching it is awesome because it can help others and I've made such great friends through it. It's really nice for building community connections."
+},
+{
+"id": "conv-48:D9:10",
+"speaker": "Jolene",
+"text": "That's really motivating. It's great to have support in tough times."
+},
+{
+"id": "conv-48:D9:11",
+"speaker": "Deborah",
+"text": "It's one of life's best parts, right?"
+},
+{
+"id": "conv-48:D9:12",
+"speaker": "Jolene",
+"text": "Yeah, having someone to rely on is key in tough times. It really makes a difference in how we handle life. Plus, there's something I wanted to tell you."
+},
+{
+"id": "conv-48:D9:13",
+"speaker": "Deborah",
+"text": "What's up? I'm listening. We'll figure it out."
+},
+{
+"id": "conv-48:D9:14",
+"speaker": "Jolene",
+"text": "I'm having a hard time dealing with my Engineering assignments. It's a lot to manage and I'm struggling to keep up. Can we still talk about time management?"
+},
+{
+"id": "conv-48:D9:15",
+"speaker": "Deborah",
+"text": "Sure, Jolene. Let's find a time that works for both of us."
+},
+{
+"id": "conv-48:D9:16",
+"speaker": "Jolene",
+"text": "Let's find a time to chat - I'll check my schedule and get back to you."
+},
+{
+"id": "conv-48:D9:17",
+"speaker": "Deborah",
+"text": "Take your time, Jolene. We'll work it out. Take care of yourself, OK?"
+},
+{
+"id": "conv-48:D9:18",
+"speaker": "Jolene",
+"text": " I'll make sure to take it. See you soon!"
+},
+{
+"id": "conv-48:D9:19",
+"speaker": "Deborah",
+"text": " I'm here for you if you need me. Let's catch up soon."
+},
+{
+"id": "conv-48:D9:20",
+"speaker": "Jolene",
+"text": "Have a great day!"
+}
+]
+},
+{
+"session": "conv-48:S10",
+"date": "2023-03-22 17:35",
+"turns": [
+{
+"id": "conv-48:D10:1",
+"speaker": "Deborah",
+"text": "Hey Jolene, it's been a while. Hope you're doing okay with all your exams and deadlines. I know it's difficult for you right now."
+},
+{
+"id": "conv-48:D10:2",
+"speaker": "Jolene",
+"text": "Hey Deb! Yeah, it can be tough. Trying to find time for everything is like playing catch-up - really stressful!"
+},
+{
+"id": "conv-48:D10:3",
+"speaker": "Deborah",
+"text": " How do you manage your time and stay organized with all the projects and deadlines?"
+},
+{
+"id": "conv-48:D10:4",
+"speaker": "Jolene",
+"text": "I'm using the Pomodoro Technique - 25 minutes work, 5-minute break - to avoid burnout but I'm still struggling to prioritize. Do you have any other tips on time management?"
+},
+{
+"id": "conv-48:D10:5",
+"speaker": "Deborah",
+"text": "I create a daily schedule or to-do list. Here's my example for today. [shares a photo: a photo of a notepad with a list of things to do]"
+},
+{
+"id": "conv-48:D10:6",
+"speaker": "Jolene",
+"text": "I tried making one but it's kinda overwhelming when it's a big stack of tasks. Here's an example from last Friday. [shares a photo: a photo of a notepad with notes on it on a counter]"
+},
+{
+"id": "conv-48:D10:7",
+"speaker": "Deborah",
+"text": "Have you tried breaking it down or prioritizing the tasks?"
+},
+{
+"id": "conv-48:D10:8",
+"speaker": "Jolene",
+"text": "It can often feel overwhelming and difficult to figure out where to start."
+},
+{
+"id": "conv-48:D10:9",
+"speaker": "Deborah",
+"text": "I get it, Jolene. When I'm overloaded, I use a certain method. It helps me figure out what's important and urgent so I'm more organized. Do you know about it?"
+},
+{
+"id": "conv-48:D10:10",
+"speaker": "Jolene",
+"text": "Nah, I'm not familiar with that one. What's it about?"
+},
+{
+"id": "conv-48:D10:11",
+"speaker": "Deborah",
+"text": "Want me to tell you about it? It helps you organize things based on how important and urgent they are."
+},
+{
+"id": "conv-48:D10:12",
+"speaker": "Jolene",
+"text": "Sure, tell me more about it! It sounds useful."
+},
+{
+"id": "conv-48:D10:13",
+"speaker": "Deborah",
+"text": "The Eisenhower Matrix sorts tasks into four boxes, categorizing them based on their urgency and importance. It can be really useful for organizing and prioritizing. Here's a breakdown.  [shares a photo: a photo of a pair of scissors sitting on top of a piece of paper]"
+},
+{
+"id": "conv-48:D10:14",
+"speaker": "Jolene",
+"text": "The visualization is helpful too. Thanks for sharing!"
+},
+{
+"id": "conv-48:D10:15",
+"speaker": "Deborah",
+"text": "I am glad, it was helpful. Let's give it a try and see if it helps you stay focused and less stressed. "
+},
+{
+"id": "conv-48:D10:16",
+"speaker": "Jolene",
+"text": "Yeah, I'll give it a go. Fingers crossed it'll help me. Thanks for the help!"
+},
+{
+"id": "conv-48:D10:17",
+"speaker": "Deborah",
+"text": "Don't forget to take it easy and look after yourself. Wishing you all the best! Recently, Anna and I were sitting by the sea, watching the sunset and talking about each other. And we realized that we inspire each other. What thoughts does the sea in this photo make you think of? [shares a photo: a photo of a person walking on the beach with a surfboard]"
+},
+{
+"id": "conv-48:D10:18",
+"speaker": "Jolene",
+"text": "This gets me thinking of when I'll learn to surf. Gotta find that spare time!"
+},
+{
+"id": "conv-48:D10:19",
+"speaker": "Deborah",
+"text": "Surfing, huh Jolene? Chase your dreams, don't be daunted. Have you thought about the steps you can take?"
+},
+{
+"id": "conv-48:D10:20",
+"speaker": "Jolene",
+"text": "Definitely! I've been gathering information, watching videos, and I even got a beginners' guide to surfing. Just need to find the right time and place to get a lesson."
+},
+{
+"id": "conv-48:D10:21",
+"speaker": "Deborah",
+"text": "Way to go! Taking those first steps is key. Believe in yourself and keep going! [shares a photo: a photo of a row of surfboards leaning against a palm tree]"
+},
+{
+"id": "conv-48:D10:22",
+"speaker": "Jolene",
+"text": "Thanks for the support! Those got me pumped to try surfing. Gonna keep pushing myself to make it happen."
+},
+{
+"id": "conv-48:D10:23",
+"speaker": "Deborah",
+"text": "Keep it up, Jolene! Remember, the experience matters just as much as the end result. Step by step and have fun along the way. You can do it!"
+},
+{
+"id": "conv-48:D10:24",
+"speaker": "Jolene",
+"text": "Thanks for the boost!"
+}
+]
+},
+{
+"session": "conv-48:S11",
+"date": "2023-03-28 16:03",
+"turns": [
+{
+"id": "conv-48:D11:1",
+"speaker": "Jolene",
+"text": "Hey Deb, long time no talk. A lot's happened! On Friday I had a breakthrough with my engineering project. Finally found a solution to a prob that's been bugging me. Feels great to see my hard work paying off. [shares a photo: a photo of a person's hand holding a pair of scissors]"
+},
+{
+"id": "conv-48:D11:2",
+"speaker": "Deborah",
+"text": "You've really proven your skills. Feels great, right? Keep it up! And I bought new props for the yoga class! Here it is in action. [shares a photo: a photo of a group of people doing yoga in a room]"
+},
+{
+"id": "conv-48:D11:3",
+"speaker": "Jolene",
+"text": "Oh, I also have new details for this case! Rate it! [shares a photo: a photo of a cardboard mat with a cup of coffee on it]"
+},
+{
+"id": "conv-48:D11:4",
+"speaker": "Deborah",
+"text": "That`s cool! I also bought this candle for the atmosphere and to improve my yoga practice. How about you? When you do it, what feelings do you get? [shares a photo: a photo of a candle with a sprig of rosemary on a table]"
+},
+{
+"id": "conv-48:D11:5",
+"speaker": "Jolene",
+"text": "I feel relaxed during this activity. I love creating a serene space with soothing scents like lavender and rosemary. Do you have any favorite scents or rituals for when you do it?"
+},
+{
+"id": "conv-48:D11:6",
+"speaker": "Deborah",
+"text": "I'm also a big fan of scents like this! Candles and essential oils add warmth and calm to my yoga session. It's amazing how certain smells can transport you to a place of peace.  Do you have any other ways to enhance your yoga practice?"
+},
+{
+"id": "conv-48:D11:7",
+"speaker": "Jolene",
+"text": "I find music helps me. Any favorite tracks?"
+},
+{
+"id": "conv-48:D11:8",
+"speaker": "Deborah",
+"text": "I find instrumental tracks with mellow melodies and rhythms help create a peaceful vibe. One of my favorites is a track called \"Savana.\" What songs/artists do you like listening to during your practice?"
+},
+{
+"id": "conv-48:D11:9",
+"speaker": "Jolene",
+"text": "I love listening to Nils Frahm and Olafur Arnalds during my practice. Their music is so calming and puts me in a different headspace. Do you have any recommendations for other similar artists or tracks I should check out?"
+},
+{
+"id": "conv-48:D11:10",
+"speaker": "Deborah",
+"text": "Also, I'm listening to an album called 'Sleep,' which is great for meditation and deep relaxation. Hope you find it as calming as I do!"
+},
+{
+"id": "conv-48:D11:11",
+"speaker": "Jolene",
+"text": "Thanks for the tips, Deborah! I'm gonna check them out. It's always good to have some new tunes for yoga!"
+},
+{
+"id": "conv-48:D11:12",
+"speaker": "Deborah",
+"text": " Let me know your thoughts on the albums!"
+},
+{
+"id": "conv-48:D11:13",
+"speaker": "Jolene",
+"text": "See you!"
+},
+{
+"id": "conv-48:D11:14",
+"speaker": "Deborah",
+"text": "Take care and keep up the good work!"
+}
+]
+},
+{
+"session": "conv-48:S12",
+"date": "2023-04-09 16:30",
+"turns": [
+{
+"id": "conv-48:D12:1",
+"speaker": "Deborah",
+"text": "Hey Jolene! Great to see you! Had a blast biking nearby with my neighbor last week - was so freeing and beautiful. Checked out an art show with a friend today - really cool and inspiring stuff. Reminded me of my mom. [shares a photo: a photo of a large brown and white photo of a person]"
+},
+{
+"id": "conv-48:D12:2",
+"speaker": "Jolene",
+"text": "Hey Deborah! Sounds like you had a blast biking and at the art show. Your photo looks like you were really into it! Did it make you think profound thoughts?"
+},
+{
+"id": "conv-48:D12:3",
+"speaker": "Deborah",
+"text": "My mom was interested in art. She believed art could give out strong emotions and uniquely connect us. When I go to an art show, it's like we're still experiencing it together even though she's gone. It's hard but comforting."
+},
+{
+"id": "conv-48:D12:4",
+"speaker": "Jolene",
+"text": "Losing someone is hard, but finding something that helps you cope is great."
+},
+{
+"id": "conv-48:D12:5",
+"speaker": "Deborah",
+"text": "Finding ways to keep her memory alive gives me peace. It's amazing how something simple like artwork can bring back powerful emotions and remind us of those we've lost. It's about finding solace in the things we love, and art has done that for me."
+},
+{
+"id": "conv-48:D12:6",
+"speaker": "Jolene",
+"text": "Even though my snakes can't chat or understand what I'm going through, our time together is valuable and teaches me to take time and be in tune with myself. Similarly, playing video games with my partner after a long day is a great way for me to relax."
+},
+{
+"id": "conv-48:D12:7",
+"speaker": "Deborah",
+"text": "Simple things can indeed bring us the most happiness. How have these activities helped you during tough times?"
+},
+{
+"id": "conv-48:D12:8",
+"speaker": "Jolene",
+"text": "It brings us closer together!"
+},
+{
+"id": "conv-48:D12:9",
+"speaker": "Deborah",
+"text": "This kind of comfort can be really helpful when times get tough."
+},
+{
+"id": "conv-48:D12:10",
+"speaker": "Jolene",
+"text": "Just so you know, I've been working on a big project lately - it's been tough but also really cool to watch it take shape. Can't wait to see the final result!"
+},
+{
+"id": "conv-48:D12:11",
+"speaker": "Deborah",
+"text": "I am waiting to hear how everything turns out. Keep up the good work!"
+},
+{
+"id": "conv-48:D12:12",
+"speaker": "Jolene",
+"text": "Thanks Deb! Your support means a lot. I'll keep you updated on the progress of the project."
+},
+{
+"id": "conv-48:D12:13",
+"speaker": "Deborah",
+"text": "Glad my support means a lot to you! I'll always be here for you. "
+},
+{
+"id": "conv-48:D12:14",
+"speaker": "Jolene",
+"text": "Take care!"
+},
+{
+"id": "conv-48:D12:15",
+"speaker": "Deborah",
+"text": "Enjoy your day and make time for the things that bring you joy. See ya!"
+},
+{
+"id": "conv-48:D12:16",
+"speaker": "Jolene",
+"text": " I'll make sure to find time for that. Have a good one!"
+}
+]
+},
+{
+"session": "conv-48:S13",
+"date": "2023-06-06 15:56",
+"turns": [
+{
+"id": "conv-48:D13:1",
+"speaker": "Jolene",
+"text": "Hey Deborah! Long time no talk - I had lots of stuff going on. Remember the tough engineering project? I finally wrapped that up last month. Look at the result! [shares a photo: a photo of a solar powered vehicle with a solar panel on the back]"
+},
+{
+"id": "conv-48:D13:2",
+"speaker": "Deborah",
+"text": "Jolene! Congrats on wrapping up your with it! You really put in the work and it paid off. "
+},
+{
+"id": "conv-48:D13:3",
+"speaker": "Jolene",
+"text": " I'm really proud of myself for sticking it out despite the problems and finishing it. It's definitely a big milestone."
+},
+{
+"id": "conv-48:D13:4",
+"speaker": "Deborah",
+"text": "Now that you've reached this big milestone, what do you have planned next?"
+},
+{
+"id": "conv-48:D13:5",
+"speaker": "Jolene",
+"text": " I'm interning at a well-known engineering firm. It's been a great opportunity to test my skills and gain real-world experience. These are my new colleagues! [shares a photo: a photo of a group of construction workers posing for a picture]"
+},
+{
+"id": "conv-48:D13:6",
+"speaker": "Deborah",
+"text": "What's been the best part of it so far?"
+},
+{
+"id": "conv-48:D13:7",
+"speaker": "Jolene",
+"text": "The best part so far has been being able to apply what I learned in school to real projects. It's so fulfilling to see my ideas come to life."
+},
+{
+"id": "conv-48:D13:8",
+"speaker": "Deborah",
+"text": "Mind if I ask how the internship has impacted you?"
+},
+{
+"id": "conv-48:D13:9",
+"speaker": "Jolene",
+"text": "It has had a positive impact on my life. It has stoked my love of engineering and has encouraged me to keep striving for my dreams."
+},
+{
+"id": "conv-48:D13:10",
+"speaker": "Deborah",
+"text": " How has it inspired you to keep striving for your dreams?"
+},
+{
+"id": "conv-48:D13:11",
+"speaker": "Jolene",
+"text": "Hanging out with people who love what they do has really inspired me to stay focused and keep working towards my goals. It's shown me that with dedication and effort, anything is possible."
+},
+{
+"id": "conv-48:D13:12",
+"speaker": "Deborah",
+"text": "Have you been able to find a good work-life balance during your internship?"
+},
+{
+"id": "conv-48:D13:13",
+"speaker": "Jolene",
+"text": "Honestly, finding that balance has been tough. I've been slogging away and it's been hard to make time for my hobbies and chilling out."
+},
+{
+"id": "conv-48:D13:14",
+"speaker": "Deborah",
+"text": " Have you considered taking some breaks and finding activities like yoga to help you relax and unwind? That might make a difference."
+},
+{
+"id": "conv-48:D13:15",
+"speaker": "Jolene",
+"text": "Yeah, I`m trying to do it. Here's an example of how I spent yesterday morning, yoga on top of mount Talkeetna. [shares a photo: a photo of a man standing on a rock with his arms outstretched]"
+},
+{
+"id": "conv-48:D13:16",
+"speaker": "Deborah",
+"text": "Nice job, Jolene! How long have you been doing yoga and meditation? It looks like it's really helping you regroup and recharge."
+},
+{
+"id": "conv-48:D13:17",
+"speaker": "Jolene",
+"text": "I've been doing them sporadically for about 3 years now and they've had a real positive effect on me."
+},
+{
+"id": "conv-48:D13:18",
+"speaker": "Deborah",
+"text": "Has it benefited you in any way? Have you found it helpful in difficult moments?"
+},
+{
+"id": "conv-48:D13:19",
+"speaker": "Jolene",
+"text": "It has helped me with stress and kept me centered."
+},
+{
+"id": "conv-48:D13:20",
+"speaker": "Deborah",
+"text": "Glad they've been helpful for you!"
+},
+{
+"id": "conv-48:D13:21",
+"speaker": "Jolene",
+"text": "No idea how I would've survived without them!"
+},
+{
+"id": "conv-48:D13:22",
+"speaker": "Deborah",
+"text": "This is my favorite studio and it's always so calming.  [shares a photo: a photo of a room with a bench and a window]"
+},
+{
+"id": "conv-48:D13:23",
+"speaker": "Jolene",
+"text": " I was wondering if you have any advice on calming the mind and breathing during yoga?"
+},
+{
+"id": "conv-48:D13:24",
+"speaker": "Deborah",
+"text": "I'd recommend practicing mindful breathing for yoga. Set aside a few minutes each day to sit with your eyes closed, take deep breaths, and focus on how the air feels entering and leaving your body. "
+},
+{
+"id": "conv-48:D13:25",
+"speaker": "Jolene",
+"text": "Thanks, Deborah! I'll definitely give it a try. Appreciate the advice!"
+},
+{
+"id": "conv-48:D13:26",
+"speaker": "Deborah",
+"text": " If you need more tips or help, just let me know. Take care!"
+},
+{
+"id": "conv-48:D13:27",
+"speaker": "Jolene",
+"text": "See you!"
+}
+]
+},
+{
+"session": "conv-48:S14",
+"date": "2023-06-26 09:17",
+"turns": [
+{
+"id": "conv-48:D14:1",
+"speaker": "Deborah",
+"text": "Hey Jolene! How's it going? We haven't talked in a while. I've been busy getting ready for a yoga retreat with some buddies. A chance to hang out with people who think like me and find peace and understanding. Sounds awesome! [shares a photo: a photo of a group of people doing yoga in a park]"
+},
+{
+"id": "conv-48:D14:2",
+"speaker": "Jolene",
+"text": "Hey Deb! Been super hectic with internship and stuff. That retreat sounds awesome, I could definitely use a break!"
+},
+{
+"id": "conv-48:D14:3",
+"speaker": "Deborah",
+"text": "By the way, I tried a new pose - Dancer Pose (Natarajasana). Rate, did I succeed? [shares a photo: a photo of a woman doing a yoga pose on the beach]"
+},
+{
+"id": "conv-48:D14:4",
+"speaker": "Jolene",
+"text": "You are amazing as always! Here are new photos of Seraphim in the new aquarium that I bought the day before yesterday. [shares a photo: a photo of a snake curled up in a plant filled area]"
+},
+{
+"id": "conv-48:D14:5",
+"speaker": "Deborah",
+"text": "Where'd you get it? I'm always drawn to animals, they bring so much joy. What's its story?"
+},
+{
+"id": "conv-48:D14:6",
+"speaker": "Jolene",
+"text": " I got her last year, she's a great pet. She always cheers me up and brings a sense of peace. Spending time with her is so comforting."
+},
+{
+"id": "conv-48:D14:7",
+"speaker": "Deborah",
+"text": "Pets really do make life more enjoyable and bright.  [shares a photo: a photo of a group of people doing yoga in a field]"
+},
+{
+"id": "conv-48:D14:8",
+"speaker": "Jolene",
+"text": " I'm so thankful it's here. Plus, it's nice to have a calm creature around."
+},
+{
+"id": "conv-48:D14:9",
+"speaker": "Deborah",
+"text": "How have things been besides that?"
+},
+{
+"id": "conv-48:D14:10",
+"speaker": "Jolene",
+"text": "Things have been intense lately. I'm really pushing myself to succeed, and sometimes it feels overwhelming. But I'm determined to overcome any obstacles and achieve my goals."
+},
+{
+"id": "conv-48:D14:11",
+"speaker": "Deborah",
+"text": "Keep up the hard work and remember to relax too."
+},
+{
+"id": "conv-48:D14:12",
+"speaker": "Jolene",
+"text": "Thanks, Deborah! I had a big breakthrough with this project - so exciting and rewarding! [shares a photo: a photo of a drawing of a house with a ruler and a ruler]"
+},
+{
+"id": "conv-48:D14:13",
+"speaker": "Deborah",
+"text": "Awesome, Jolene! I'm really glad your project worked out. "
+},
+{
+"id": "conv-48:D14:14",
+"speaker": "Jolene",
+"text": "Stop talking about me, tell me more about your retreat."
+},
+{
+"id": "conv-48:D14:15",
+"speaker": "Deborah",
+"text": "I'd rather show you a photo. This is also a new yoga pose that we tried. It is a tree pose. [shares a photo: a photo of three people standing in front of a large statue]"
+},
+{
+"id": "conv-48:D14:16",
+"speaker": "Jolene",
+"text": "What's that statue in the picture?"
+},
+{
+"id": "conv-48:D14:17",
+"speaker": "Deborah",
+"text": "It's a symbol of peace and enlightenment."
+},
+{
+"id": "conv-48:D14:18",
+"speaker": "Jolene",
+"text": "Wow, it looks gorgeous! I'd love to visit a retreat like that. It seems like the ideal spot to find peace and refreshment."
+},
+{
+"id": "conv-48:D14:19",
+"speaker": "Deborah",
+"text": "It's perfect for reflecting and getting centered."
+},
+{
+"id": "conv-48:D14:20",
+"speaker": "Jolene",
+"text": "I could really use some chill time like that. Sounds so peaceful."
+},
+{
+"id": "conv-48:D14:21",
+"speaker": "Deborah",
+"text": "Yeah, we all need some peaceful time to relax."
+},
+{
+"id": "conv-48:D14:22",
+"speaker": "Jolene",
+"text": "Gotta run, have a nice day!"
+},
+{
+"id": "conv-48:D14:23",
+"speaker": "Deborah",
+"text": "See you! [shares a photo: a photo of a sunset reflecting in a lake with a boat]"
+}
+]
+},
+{
+"session": "conv-48:S15",
+"date": "2023-07-09 19:37",
+"turns": [
+{
+"id": "conv-48:D15:1",
+"speaker": "Deborah",
+"text": "Hey Jolene! I started a running group with Anna - it's awesome connecting with people who care about fitness! [shares a photo: a photo of three men standing next to each other on a road]"
+},
+{
+"id": "conv-48:D15:2",
+"speaker": "Jolene",
+"text": "Cool, Deb! Glad you found some people to get fit with. I'm trying to add workouts into my studying schedule, which has been tough but fun. How about you? Any challenges with the running group?"
+},
+{
+"id": "conv-48:D15:3",
+"speaker": "Deborah",
+"text": "Oh, I'm having a blast with it! We help and push each other during our runs, which makes it so much easier to stay motivated.  I have a lot of my photos from this activity. [shares a photo: a photo of a woman standing on a sidewalk with a skateboard]"
+},
+{
+"id": "conv-48:D15:4",
+"speaker": "Jolene",
+"text": "Deborah, that's awesome! Being part of a supportive group must be super motivating. Finding a team that's passionate about something makes a huge difference. Just thinking about my own journey too."
+},
+{
+"id": "conv-48:D15:5",
+"speaker": "Deborah",
+"text": "Having people who can cheer you on and give you advice really makes a difference. What has it been like for you finding supportive folks?"
+},
+{
+"id": "conv-48:D15:6",
+"speaker": "Jolene",
+"text": "Gaming's been tough lately, but I'm grateful I have someone who's also into it. My partner helps me stay focused on our goals. We have a lot of cute photos, I want to share with you. [shares a photo: a photo of a man and a woman sitting in a chair in front of a computer]"
+},
+{
+"id": "conv-48:D15:7",
+"speaker": "Deborah",
+"text": " What do you like best about gaming together?"
+},
+{
+"id": "conv-48:D15:8",
+"speaker": "Jolene",
+"text": "We get to tackle challenges and have a shared experience. It's always a blast when we're into the same game and achieve something tough. Plus, it's a great way to bond and get closer."
+},
+{
+"id": "conv-48:D15:9",
+"speaker": "Deborah",
+"text": "Woah, that's cool! Gaming is so good for strengthening relationships. Do you two have a favorite game to play together?"
+},
+{
+"id": "conv-48:D15:10",
+"speaker": "Jolene",
+"text": "Yeah, we love playing \"It takes two\" together! It's a fun team-strategy game and it's competitive. Plus, it's a great way for us to bond. Do you have any activities you like doing with people?"
+},
+{
+"id": "conv-48:D15:11",
+"speaker": "Deborah",
+"text": "Yep, I do running and yoga/meditation with others. Connecting with people and creating a community is great. Plus, I love organizing workshops and events to practice mindfulness and self-care. It's an awesome way to have fun, build relationships, and support each other's growth. [shares a photo: a photo of a group of people doing yoga in a park]"
+},
+{
+"id": "conv-48:D15:12",
+"speaker": "Jolene",
+"text": "Sounds like a great way to relax. What do your workshops and events involve?"
+},
+{
+"id": "conv-48:D15:13",
+"speaker": "Deborah",
+"text": "It involves various activities such as yoga, meditation, and self-reflection. They aim to cultivate self-awareness, promote mental and emotional well-being, and help individuals find inner peace. It's a space where people can connect, explore, and grow."
+},
+{
+"id": "conv-48:D15:14",
+"speaker": "Jolene",
+"text": " Your events are awesome for helping people connect and learn, it is so important. How has everything been going for you?"
+},
+{
+"id": "conv-48:D15:15",
+"speaker": "Deborah",
+"text": "Thanks, Jolene! It's been great seeing everyone come together and support each other. It's amazing to witness the growth and transformation that happens through these workshops. I'm honored to be a part of it. [shares a photo: a photo of a game board with a bunch of cards on it]"
+},
+{
+"id": "conv-48:D15:16",
+"speaker": "Jolene",
+"text": "Wow, Deb! I can imagine how rewarding it must be to create a space for growth and change. It's great to hear that everything's going well. You can always count on me for support! I just want to share a photo with you. [shares a photo: a photo of a snake on a branch with a book]"
+},
+{
+"id": "conv-48:D15:17",
+"speaker": "Deborah",
+"text": "Thanks, Jolene! Your support means a lot to me. I'm here for you too. By the way, I noticed your pet in the picture. What made you decide to get a snake?"
+},
+{
+"id": "conv-48:D15:18",
+"speaker": "Jolene",
+"text": " I was fascinated by reptiles, and it felt like the perfect pet for me. Taking care of it has been really calming, and it's a great way to connect with nature."
+},
+{
+"id": "conv-48:D15:19",
+"speaker": "Deborah",
+"text": " Glad you found something that gives you peace and calm. Do you have a favorite memory with \"it\" to share?"
+},
+{
+"id": "conv-48:D15:20",
+"speaker": "Jolene",
+"text": "I have lots of great memories, like our little 'snake adventure'. She got out and I spent hours searching, so relieved when I finally found her snuggling under the bed. It really showed how much I love her. [shares a photo: a photo of a snake in a tank with sand and plants]"
+},
+{
+"id": "conv-48:D15:21",
+"speaker": "Deborah",
+"text": "What was it like when you found her? I can imagine the relief!"
+},
+{
+"id": "conv-48:D15:22",
+"speaker": "Jolene",
+"text": "Seeing her snuggled under the bed made me feel so much love and gratitude. It made me realize how important she is to me."
+},
+{
+"id": "conv-48:D15:23",
+"speaker": "Deborah",
+"text": "They bring so much joy and remind us of what's important."
+},
+{
+"id": "conv-48:D15:24",
+"speaker": "Jolene",
+"text": "Animals teach us a lot about love and gratitude, and they bring so much joy. "
+},
+{
+"id": "conv-48:D15:25",
+"speaker": "Deborah",
+"text": "I haven't introduced you to my pets yet! I don't like dogs, that's why I have cats. [shares a photo: a photography of two cats sitting on a couch with a blanket]"
+},
+{
+"id": "conv-48:D15:26",
+"speaker": "Jolene",
+"text": "Looks like they're having a blast! How often do you take them out?"
+},
+{
+"id": "conv-48:D15:27",
+"speaker": "Deborah",
+"text": "Exercise and nature are really important to me, so I make sure to take them out for a run in the park every morning and evening. [shares a photo: a photo of a person walking on the beach with a surfboard]"
+},
+{
+"id": "conv-48:D15:28",
+"speaker": "Jolene",
+"text": "Wow Deb, that's great! I'd love to experience that every day."
+},
+{
+"id": "conv-48:D15:29",
+"speaker": "Deborah",
+"text": "Nature helps me find peace every day - it's so refreshing!"
+},
+{
+"id": "conv-48:D15:30",
+"speaker": "Jolene",
+"text": "It's a pity that my snakes don't run!  I'd love to do that more often. They would motivate me and together it would be more fun. [shares a photo: a photo of a person walking on the beach with a surfboard]"
+},
+{
+"id": "conv-48:D15:31",
+"speaker": "Deborah",
+"text": " It's like hitting a reset button that helps me put things into perspective and gives me time to reflect."
+},
+{
+"id": "conv-48:D15:32",
+"speaker": "Jolene",
+"text": "Yeah, I totally get it. Whenever I can, I love going for walks to take it all in. And I take photos like this [shares a photo: a photo of a sunset over a body of water]"
+},
+{
+"id": "conv-48:D15:33",
+"speaker": "Deborah",
+"text": "It's amazing how nature has the power to bring us peace and clarity."
+},
+{
+"id": "conv-48:D15:34",
+"speaker": "Jolene",
+"text": "This photo captures the peacefulness of a lake surrounded by trees. [shares a photo: a photo of a dock on a lake with trees in the background]"
+},
+{
+"id": "conv-48:D15:35",
+"speaker": "Deborah",
+"text": "Why did you choose that spot? It looks so calm."
+},
+{
+"id": "conv-48:D15:36",
+"speaker": "Jolene",
+"text": "It's such a hidden gem! It makes me feel so peaceful and tranquil."
+},
+{
+"id": "conv-48:D15:37",
+"speaker": "Deborah",
+"text": "Lucky you for having somewhere to relax and tune out!"
+},
+{
+"id": "conv-48:D15:38",
+"speaker": "Jolene",
+"text": "We'll definitely go there together sometime!"
+},
+{
+"id": "conv-48:D15:39",
+"speaker": "Deborah",
+"text": "We all need a timeout!"
+}
+]
+}
+]
