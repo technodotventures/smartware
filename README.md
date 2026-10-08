@@ -50,3 +50,5 @@ python3 -m bench.report                                                     # wr
 ```
 
 Data: the vendored LoCoMo-10 file, the LongMemEval oracle file with recombined haystacks (LME-R, see `bench/data.py`), and Cognee's HotpotQA-50 set (held-out, added after the v0.1.1 freeze). Every test-split invocation is logged in `results/TEST_RUNS.log`. Methodology and limitations: `results/METHODOLOGY.md`.
+
+Datasets are read from upstream repositories cloned next to this one (`../vendor/`): `snap-research/locomo` (LoCoMo-10), `getzep/graphiti` (`tests/evals/data/longmemeval_data/longmemeval_oracle.json`) and `topoteretes/cognee` (`evals/old/hotpot_50_*.json`). They are not redistributed here. The code studies of the 15 projects are in `../reports/`.
