@@ -1,0 +1,6 @@
+lme     mem0@tuned                   R@500=0.717 R@1000=0.798 R@2000=0.865 sR@1000=0.784 ans@1000=0.700 sessAll@5=0.819 mrr=0.587 p50=4.5ms
+lme     graphiti@tuned               R@500=0.680 R@1000=0.786 R@2000=0.862 sR@1000=0.728 ans@1000=0.683 sessAll@5=0.817 mrr=0.503 p50=5.6ms
+lme     hindsight@tuned              R@500=0.713 R@1000=0.832 R@2000=0.886 sR@1000=0.808 ans@1000=0.671 sessAll@5=0.874 mrr=0.674 p50=24.4ms
+lme     letta@tuned                  R@500=0.629 R@1000=0.697 R@2000=0.765 sR@1000=0.575 ans@1000=0.664 sessAll@5=0.830 mrr=0.640 p50=2.1ms
+lme     supermemory-company-brain@tuned R@500=0.603 R@1000=0.666 R@2000=0.765 sR@1000=0.619 ans@1000=0.714 sessAll@5=0.827 mrr=0.597 p50=4.7ms
+lme     gbrain@tuned                 R@500=0.040 R@1000=0.278 R@2000=0.385 sR@1000=0.280 ans@1000=0.516 sessAll@5=0.749 mrr=0.499 p50=2.3ms

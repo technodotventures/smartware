@@ -1,0 +1,339 @@
+{
+ "systems": [
+  "bm25",
+  "hindsight@tuned",
+  "mem0@tuned",
+  "orp",
+  "supermemory-company-brain@tuned"
+ ],
+ "accuracy": {
+  "locomo": {
+   "bm25": {
+    "acc": 0.6466666666666666,
+    "n": 150
+   },
+   "hindsight@tuned": {
+    "acc": 0.64,
+    "n": 150
+   },
+   "mem0@tuned": {
+    "acc": 0.6066666666666667,
+    "n": 150
+   },
+   "orp": {
+    "acc": 0.6733333333333333,
+    "n": 150
+   },
+   "supermemory-company-brain@tuned": {
+    "acc": 0.6266666666666667,
+    "n": 150
+   }
+  },
+  "lme": {
+   "bm25": {
+    "acc": 0.7058823529411765,
+    "n": 119
+   },
+   "hindsight@tuned": {
+    "acc": 0.7563025210084033,
+    "n": 119
+   },
+   "mem0@tuned": {
+    "acc": 0.7142857142857143,
+    "n": 119
+   },
+   "orp": {
+    "acc": 0.7563025210084033,
+    "n": 119
+   },
+   "supermemory-company-brain@tuned": {
+    "acc": 0.6470588235294118,
+    "n": 119
+   }
+  }
+ },
+ "orp_minus": {
+  "locomo": {
+   "bm25": {
+    "diff": 0.02666666666666667,
+    "ci95": [
+     -0.03333333333333333,
+     0.09333333333333334
+    ]
+   },
+   "hindsight@tuned": {
+    "diff": 0.03333333333333333,
+    "ci95": [
+     -0.02,
+     0.08666666666666667
+    ]
+   },
+   "mem0@tuned": {
+    "diff": 0.06666666666666667,
+    "ci95": [
+     0.013333333333333334,
+     0.12666666666666668
+    ]
+   },
+   "supermemory-company-brain@tuned": {
+    "diff": 0.04666666666666667,
+    "ci95": [
+     -0.013333333333333334,
+     0.10666666666666667
+    ]
+   }
+  },
+  "lme": {
+   "bm25": {
+    "diff": 0.05042016806722689,
+    "ci95": [
+     -0.03361344537815126,
+     0.14285714285714285
+    ]
+   },
+   "hindsight@tuned": {
+    "diff": 0.0,
+    "ci95": [
+     -0.08403361344537816,
+     0.09243697478991597
+    ]
+   },
+   "mem0@tuned": {
+    "diff": 0.04201680672268908,
+    "ci95": [
+     -0.03361344537815126,
+     0.12605042016806722
+    ]
+   },
+   "supermemory-company-brain@tuned": {
+    "diff": 0.1092436974789916,
+    "ci95": [
+     0.03361344537815126,
+     0.19327731092436976
+    ]
+   }
+  }
+ },
+ "by_category": {
+  "locomo:multi-hop": {
+   "orp": {
+    "acc": 0.3333333333333333,
+    "n": 27
+   },
+   "supermemory-company-brain@tuned": {
+    "acc": 0.2222222222222222,
+    "n": 27
+   },
+   "mem0@tuned": {
+    "acc": 0.2962962962962963,
+    "n": 27
+   },
+   "hindsight@tuned": {
+    "acc": 0.4074074074074074,
+    "n": 27
+   },
+   "bm25": {
+    "acc": 0.4444444444444444,
+    "n": 27
+   }
+  },
+  "locomo:open-domain": {
+   "orp": {
+    "acc": 0.3,
+    "n": 10
+   },
+   "supermemory-company-brain@tuned": {
+    "acc": 0.3,
+    "n": 10
+   },
+   "mem0@tuned": {
+    "acc": 0.4,
+    "n": 10
+   },
+   "hindsight@tuned": {
+    "acc": 0.3,
+    "n": 10
+   },
+   "bm25": {
+    "acc": 0.3,
+    "n": 10
+   }
+  },
+  "locomo:single-hop": {
+   "orp": {
+    "acc": 0.7831325301204819,
+    "n": 83
+   },
+   "supermemory-company-brain@tuned": {
+    "acc": 0.7831325301204819,
+    "n": 83
+   },
+   "mem0@tuned": {
+    "acc": 0.7108433734939759,
+    "n": 83
+   },
+   "hindsight@tuned": {
+    "acc": 0.7469879518072289,
+    "n": 83
+   },
+   "bm25": {
+    "acc": 0.7710843373493976,
+    "n": 83
+   }
+  },
+  "locomo:temporal": {
+   "orp": {
+    "acc": 0.8,
+    "n": 30
+   },
+   "supermemory-company-brain@tuned": {
+    "acc": 0.6666666666666666,
+    "n": 30
+   },
+   "mem0@tuned": {
+    "acc": 0.6666666666666666,
+    "n": 30
+   },
+   "hindsight@tuned": {
+    "acc": 0.6666666666666666,
+    "n": 30
+   },
+   "bm25": {
+    "acc": 0.6,
+    "n": 30
+   }
+  },
+  "lme:knowledge-update": {
+   "orp": {
+    "acc": 0.9473684210526315,
+    "n": 19
+   },
+   "supermemory-company-brain@tuned": {
+    "acc": 0.9473684210526315,
+    "n": 19
+   },
+   "mem0@tuned": {
+    "acc": 1.0,
+    "n": 19
+   },
+   "hindsight@tuned": {
+    "acc": 0.8947368421052632,
+    "n": 19
+   },
+   "bm25": {
+    "acc": 0.8421052631578947,
+    "n": 19
+   }
+  },
+  "lme:multi-session": {
+   "orp": {
+    "acc": 0.59375,
+    "n": 32
+   },
+   "supermemory-company-brain@tuned": {
+    "acc": 0.28125,
+    "n": 32
+   },
+   "mem0@tuned": {
+    "acc": 0.4375,
+    "n": 32
+   },
+   "hindsight@tuned": {
+    "acc": 0.53125,
+    "n": 32
+   },
+   "bm25": {
+    "acc": 0.34375,
+    "n": 32
+   }
+  },
+  "lme:single-session-assistant": {
+   "orp": {
+    "acc": 0.9285714285714286,
+    "n": 14
+   },
+   "supermemory-company-brain@tuned": {
+    "acc": 0.9285714285714286,
+    "n": 14
+   },
+   "mem0@tuned": {
+    "acc": 0.9285714285714286,
+    "n": 14
+   },
+   "hindsight@tuned": {
+    "acc": 0.7142857142857143,
+    "n": 14
+   },
+   "bm25": {
+    "acc": 0.9285714285714286,
+    "n": 14
+   }
+  },
+  "lme:single-session-preference": {
+   "orp": {
+    "acc": 0.875,
+    "n": 8
+   },
+   "supermemory-company-brain@tuned": {
+    "acc": 0.75,
+    "n": 8
+   },
+   "mem0@tuned": {
+    "acc": 0.625,
+    "n": 8
+   },
+   "hindsight@tuned": {
+    "acc": 0.75,
+    "n": 8
+   },
+   "bm25": {
+    "acc": 0.875,
+    "n": 8
+   }
+  },
+  "lme:single-session-user": {
+   "orp": {
+    "acc": 1.0,
+    "n": 17
+   },
+   "supermemory-company-brain@tuned": {
+    "acc": 0.8823529411764706,
+    "n": 17
+   },
+   "mem0@tuned": {
+    "acc": 0.8823529411764706,
+    "n": 17
+   },
+   "hindsight@tuned": {
+    "acc": 0.9411764705882353,
+    "n": 17
+   },
+   "bm25": {
+    "acc": 0.8823529411764706,
+    "n": 17
+   }
+  },
+  "lme:temporal-reasoning": {
+   "orp": {
+    "acc": 0.5517241379310345,
+    "n": 29
+   },
+   "supermemory-company-brain@tuned": {
+    "acc": 0.5517241379310345,
+    "n": 29
+   },
+   "mem0@tuned": {
+    "acc": 0.6551724137931034,
+    "n": 29
+   },
+   "hindsight@tuned": {
+    "acc": 0.8275862068965517,
+    "n": 29
+   },
+   "bm25": {
+    "acc": 0.7586206896551724,
+    "n": 29
+   }
+  }
+ }
+}

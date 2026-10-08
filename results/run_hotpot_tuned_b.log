@@ -1,0 +1,9 @@
+hotpot  supermemory@tuned            R@500=0.000 R@1000=0.000 R@2000=0.000 sR@1000=0.000 ans@1000=0.807 sessAll@5=1.000 mrr=0.000 p50=30.9ms
+hotpot  onyx@tuned                   R@500=0.000 R@1000=0.000 R@2000=0.000 sR@1000=0.000 ans@1000=0.900 sessAll@5=1.000 mrr=0.000 p50=7.1ms
+hotpot  cognee@tuned                 R@500=0.000 R@1000=0.000 R@2000=0.000 sR@1000=0.000 ans@1000=0.870 sessAll@5=1.000 mrr=0.000 p50=50.2ms
+hotpot  basic-memory@tuned           R@500=0.000 R@1000=0.000 R@2000=0.000 sR@1000=0.000 ans@1000=0.815 sessAll@5=1.000 mrr=0.000 p50=64.8ms
+hotpot  sylph@tuned                  R@500=0.000 R@1000=0.000 R@2000=0.000 sR@1000=0.000 ans@1000=0.757 sessAll@5=1.000 mrr=0.000 p50=15.8ms
+hotpot  mcp-memory@tuned             R@500=0.000 R@1000=0.000 R@2000=0.000 sR@1000=0.000 ans@1000=0.842 sessAll@5=1.000 mrr=0.000 p50=22.9ms
+hotpot  memos@tuned                  R@500=0.000 R@1000=0.000 R@2000=0.000 sR@1000=0.000 ans@1000=0.730 sessAll@5=1.000 mrr=0.000 p50=7.4ms
+hotpot  langmem@tuned                R@500=0.000 R@1000=0.000 R@2000=0.000 sR@1000=0.000 ans@1000=0.787 sessAll@5=1.000 mrr=0.000 p50=0.6ms
+hotpot  memoryos@tuned               R@500=0.000 R@1000=0.000 R@2000=0.000 sR@1000=0.000 ans@1000=0.000 sessAll@5=1.000 mrr=0.000 p50=0.1ms

@@ -1,0 +1,136 @@
+locomo  mem0@tuned                   R@500=0.620 R@1000=0.690 R@2000=0.743 sR@1000=0.677 ans@1000=0.666 sessAll@5=0.766 mrr=0.456 p50=1.3ms
+locomo  graphiti@tuned               R@500=0.603 R@1000=0.680 R@2000=0.743 sR@1000=0.628 ans@1000=0.557 sessAll@5=0.738 mrr=0.405 p50=7.6ms
+locomo  hindsight@tuned              R@500=0.462 R@1000=0.631 R@2000=0.737 sR@1000=0.589 ans@1000=0.647 sessAll@5=0.533 mrr=0.251 p50=7.4ms
+locomo  letta@tuned                  R@500=0.529 R@1000=0.590 R@2000=0.727 sR@1000=0.560 ans@1000=0.609 sessAll@5=0.776 mrr=0.428 p50=0.8ms
+locomo  supermemory-company-brain@tuned R@500=0.640 R@1000=0.748 R@2000=0.809 sR@1000=0.735 ans@1000=0.715 sessAll@5=0.790 mrr=0.589 p50=7.3ms
+locomo  gbrain@tuned                 R@500=0.115 R@1000=0.416 R@2000=0.565 sR@1000=0.393 ans@1000=0.503 sessAll@5=0.590 mrr=0.546 p50=0.8ms
+Traceback (most recent call last):
+  File "/home/claude/mp/orp/bench/run.py", line 81, in run_one
+    sysm = make(name, **opts)
+  File "/home/claude/mp/orp/bench/run.py", line 64, in make
+    tuned = json.load(open(os.path.join(ROOT, "results", "baseline_tuning.json")))[base]["best"]
+            ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/json/__init__.py", line 298, in load
+    return loads(fp.read(),
+        cls=cls, object_hook=object_hook,
+        parse_float=parse_float, parse_int=parse_int,
+        parse_constant=parse_constant, object_pairs_hook=object_pairs_hook, **kw)
+  File "/usr/lib/python3.13/json/__init__.py", line 352, in loads
+    return _default_decoder.decode(s)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^
+  File "/usr/lib/python3.13/json/decoder.py", line 345, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/json/decoder.py", line 361, in raw_decode
+    obj, end = self.scan_once(s, idx)
+               ~~~~~~~~~~~~~~^^^^^^^^
+json.decoder.JSONDecodeError: Expecting property name enclosed in double quotes: line 2169 column 7 (char 57372)
+FAILED mem0@tuned lme
+Traceback (most recent call last):
+  File "/home/claude/mp/orp/bench/run.py", line 81, in run_one
+    sysm = make(name, **opts)
+  File "/home/claude/mp/orp/bench/run.py", line 64, in make
+    tuned = json.load(open(os.path.join(ROOT, "results", "baseline_tuning.json")))[base]["best"]
+            ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/json/__init__.py", line 298, in load
+    return loads(fp.read(),
+        cls=cls, object_hook=object_hook,
+        parse_float=parse_float, parse_int=parse_int,
+        parse_constant=parse_constant, object_pairs_hook=object_pairs_hook, **kw)
+  File "/usr/lib/python3.13/json/__init__.py", line 352, in loads
+    return _default_decoder.decode(s)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^
+  File "/usr/lib/python3.13/json/decoder.py", line 345, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/json/decoder.py", line 361, in raw_decode
+    obj, end = self.scan_once(s, idx)
+               ~~~~~~~~~~~~~~^^^^^^^^
+json.decoder.JSONDecodeError: Expecting property name enclosed in double quotes: line 6713 column 6 (char 172120)
+FAILED graphiti@tuned lme
+Traceback (most recent call last):
+  File "/home/claude/mp/orp/bench/run.py", line 81, in run_one
+    sysm = make(name, **opts)
+  File "/home/claude/mp/orp/bench/run.py", line 64, in make
+    tuned = json.load(open(os.path.join(ROOT, "results", "baseline_tuning.json")))[base]["best"]
+            ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/json/__init__.py", line 298, in load
+    return loads(fp.read(),
+        cls=cls, object_hook=object_hook,
+        parse_float=parse_float, parse_int=parse_int,
+        parse_constant=parse_constant, object_pairs_hook=object_pairs_hook, **kw)
+  File "/usr/lib/python3.13/json/__init__.py", line 352, in loads
+    return _default_decoder.decode(s)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^
+  File "/usr/lib/python3.13/json/decoder.py", line 345, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/json/decoder.py", line 361, in raw_decode
+    obj, end = self.scan_once(s, idx)
+               ~~~~~~~~~~~~~~^^^^^^^^
+json.decoder.JSONDecodeError: Expecting property name enclosed in double quotes: line 8347 column 7 (char 213111)
+FAILED hindsight@tuned lme
+Traceback (most recent call last):
+  File "/home/claude/mp/orp/bench/run.py", line 81, in run_one
+    sysm = make(name, **opts)
+  File "/home/claude/mp/orp/bench/run.py", line 64, in make
+    tuned = json.load(open(os.path.join(ROOT, "results", "baseline_tuning.json")))[base]["best"]
+            ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/json/__init__.py", line 298, in load
+    return loads(fp.read(),
+        cls=cls, object_hook=object_hook,
+        parse_float=parse_float, parse_int=parse_int,
+        parse_constant=parse_constant, object_pairs_hook=object_pairs_hook, **kw)
+  File "/usr/lib/python3.13/json/__init__.py", line 352, in loads
+    return _default_decoder.decode(s)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^
+  File "/usr/lib/python3.13/json/decoder.py", line 345, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/json/decoder.py", line 363, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 4118 column 19 (char 106559)
+FAILED letta@tuned lme
+Traceback (most recent call last):
+  File "/home/claude/mp/orp/bench/run.py", line 81, in run_one
+    sysm = make(name, **opts)
+  File "/home/claude/mp/orp/bench/run.py", line 64, in make
+    tuned = json.load(open(os.path.join(ROOT, "results", "baseline_tuning.json")))[base]["best"]
+            ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/json/__init__.py", line 298, in load
+    return loads(fp.read(),
+        cls=cls, object_hook=object_hook,
+        parse_float=parse_float, parse_int=parse_int,
+        parse_constant=parse_constant, object_pairs_hook=object_pairs_hook, **kw)
+  File "/usr/lib/python3.13/json/__init__.py", line 352, in loads
+    return _default_decoder.decode(s)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^
+  File "/usr/lib/python3.13/json/decoder.py", line 345, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/json/decoder.py", line 361, in raw_decode
+    obj, end = self.scan_once(s, idx)
+               ~~~~~~~~~~~~~~^^^^^^^^
+json.decoder.JSONDecodeError: Expecting property name enclosed in double quotes: line 8347 column 7 (char 213111)
+FAILED supermemory-company-brain@tuned lme
+Traceback (most recent call last):
+  File "/home/claude/mp/orp/bench/run.py", line 81, in run_one
+    sysm = make(name, **opts)
+  File "/home/claude/mp/orp/bench/run.py", line 64, in make
+    tuned = json.load(open(os.path.join(ROOT, "results", "baseline_tuning.json")))[base]["best"]
+            ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/json/__init__.py", line 298, in load
+    return loads(fp.read(),
+        cls=cls, object_hook=object_hook,
+        parse_float=parse_float, parse_int=parse_int,
+        parse_constant=parse_constant, object_pairs_hook=object_pairs_hook, **kw)
+  File "/usr/lib/python3.13/json/__init__.py", line 352, in loads
+    return _default_decoder.decode(s)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^
+  File "/usr/lib/python3.13/json/decoder.py", line 345, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.13/json/decoder.py", line 363, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 2486 column 12 (char 65565)
+FAILED gbrain@tuned lme

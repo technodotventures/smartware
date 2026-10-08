@@ -1,3 +1,10 @@
 --- historical (pre-audit) test invocations, reconstructed from logs:
 2026-10-08T02:48 (bm25,dense, all 15 baselines; LoCoMo + LME-H v1) ; 2026-10-08T04:48 (orp, orp-rrf; LoCoMo + LME-H v1). Superseded by the post-audit runs below.
 2026-10-08T08:23:45.158317 git=8e00159+dirty bench=locomo,lme systems=orp,orp-rrf,orp-allfeat,bm25,dense,graphiti,hindsight,mem0,letta,supermemory-company-brain,gbrain,supermemory,onyx,cognee,basic-memory,sylph,mcp-memory,memos,langmem,memoryos
+2026-10-08T09:49:49.551460 git=a4da050+dirty bench=locomo,lme systems=orp,orp-rrf,orp-allfeat,bm25,dense out=results/summary_v012.json
+2026-10-08T09:52:21.426164 git=c8fef47+dirty bench=hotpot systems=orp,orp-rrf,orp-allfeat,bm25,dense,graphiti,hindsight,mem0,letta,supermemory-company-brain,gbrain,supermemory,onyx,cognee,basic-memory,sylph,mcp-memory,memos,langmem,memoryos out=results/summary_hotpot.json
+2026-10-08T10:57:17.682462 git=a4b890e+dirty bench=locomo,lme systems=mem0@tuned,graphiti@tuned,hindsight@tuned,letta@tuned,supermemory-company-brain@tuned,gbrain@tuned out=results/summary_tuned_a.json
+2026-10-08T10:57:22.639528 git=a4b890e+dirty bench=hotpot systems=graphiti@tuned,hindsight@tuned,mem0@tuned,letta@tuned,supermemory-company-brain@tuned,gbrain@tuned out=results/summary_hotpot_tuned.json
+2026-10-08T11:39:04.773784 git=5b14d50+dirty bench=lme systems=mem0@tuned,graphiti@tuned,hindsight@tuned,letta@tuned,supermemory-company-brain@tuned,gbrain@tuned out=results/summary_tuned_a2.json
+2026-10-08T11:39:04.814522 git=5b14d50+dirty bench=locomo,lme systems=supermemory@tuned,onyx@tuned,cognee@tuned,basic-memory@tuned,sylph@tuned,mcp-memory@tuned,memos@tuned,langmem@tuned,memoryos@tuned out=results/summary_tuned_b.json
+2026-10-08T12:37:16.348268 git=d4e9bb8+dirty bench=hotpot systems=supermemory@tuned,onyx@tuned,cognee@tuned,basic-memory@tuned,sylph@tuned,mcp-memory@tuned,memos@tuned,langmem@tuned,memoryos@tuned out=results/summary_hotpot_tuned_b.json

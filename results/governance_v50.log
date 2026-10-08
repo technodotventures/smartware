@@ -1,0 +1,51 @@
+{
+ "orp": {
+  "permitted_n": 2481,
+  "forbidden_n": 3389,
+  "recall@1000": 0.8966814456536343,
+  "text_leak": 0.0,
+  "answer_leak": 0.0,
+  "rank_side_channel": 0.0
+ },
+ "global_stats": {
+  "permitted_n": 2481,
+  "forbidden_n": 3389,
+  "recall@1000": 0.8966142684401451,
+  "text_leak": 0.0,
+  "answer_leak": 0.0,
+  "rank_side_channel": 1.0
+ },
+ "scope_only": {
+  "permitted_n": 2481,
+  "forbidden_n": 3389,
+  "recall@1000": 0.8424559989251645,
+  "text_leak": 1.0,
+  "answer_leak": 0.8707583357922691,
+  "rank_side_channel": null
+ },
+ "derived_bank": {
+  "permitted_n": 2481,
+  "forbidden_n": 3389,
+  "recall@1000": 0.8910923014913342,
+  "text_leak": 0.30885860306643953,
+  "answer_leak": 0.18914133962820892,
+  "rank_side_channel": null
+ },
+ "post_filter@10": {
+  "permitted_n": 2481,
+  "forbidden_n": 3389,
+  "recall@1000": 0.8018540910923015,
+  "text_leak": 0.0,
+  "answer_leak": 0.0,
+  "rank_side_channel": null
+ },
+ "post_filter@50": {
+  "permitted_n": 2481,
+  "forbidden_n": 3389,
+  "recall@1000": 0.8971382507053608,
+  "text_leak": 0.0,
+  "answer_leak": 0.0,
+  "rank_side_channel": null
+ },
+ "_orp_leak_examples": []
+}

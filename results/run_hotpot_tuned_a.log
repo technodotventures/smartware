@@ -1,0 +1,6 @@
+hotpot  graphiti@tuned               R@500=0.000 R@1000=0.000 R@2000=0.000 sR@1000=0.000 ans@1000=0.812 sessAll@5=1.000 mrr=0.000 p50=32.1ms
+hotpot  hindsight@tuned              R@500=0.000 R@1000=0.000 R@2000=0.000 sR@1000=0.000 ans@1000=0.758 sessAll@5=1.000 mrr=0.000 p50=16.2ms
+hotpot  mem0@tuned                   R@500=0.000 R@1000=0.000 R@2000=0.000 sR@1000=0.000 ans@1000=0.875 sessAll@5=1.000 mrr=0.000 p50=15.9ms
+hotpot  letta@tuned                  R@500=0.000 R@1000=0.000 R@2000=0.000 sR@1000=0.000 ans@1000=0.883 sessAll@5=1.000 mrr=0.000 p50=1.0ms
+hotpot  supermemory-company-brain@tuned R@500=0.000 R@1000=0.000 R@2000=0.000 sR@1000=0.000 ans@1000=0.837 sessAll@5=1.000 mrr=0.000 p50=15.5ms
+hotpot  gbrain@tuned                 R@500=0.000 R@1000=0.000 R@2000=0.000 sR@1000=0.000 ans@1000=0.742 sessAll@5=1.000 mrr=0.000 p50=2.6ms
