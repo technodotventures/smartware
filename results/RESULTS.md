@@ -230,6 +230,45 @@ ORP against the best of the 15: 0 better, 4 no significant difference, 0 worse.
 | _BM25 over turns (reference)_ | 82.7 | 91.0 | 96.0 | 96.0 |
 | _Dense over turns (reference)_ | 64.4 | 81.7 | 83.7 | 92.0 |
 
+## LLM-extraction track (LoCoMo-10 test, n=1152)
+
+Facts extracted once by Claude Haiku sub-agents with a mem0-style brief (`bench/extraction/EXTRACT.md`), frozen in `results/extraction/` and shared by every system, like the encoders. Each system's store (raw turns or extracted facts; for ORP also raw turns as evidence plus facts as derived memories) was chosen on the dev conversations only. ORP's dev choice: `orp+evidence`.
+
+ORP against the best of the 15: **5 better, 1 no significant difference, 0 worse**.
+
+| Metric | ORP | Best of the 15 | Difference [95% CI] | Verdict |
+|---|---|---|---|---|
+| R@500 | 76.2 | 74.5 (mem0, facts) | +1.6 [-0.2, +3.5] | no significant difference |
+| R@1000 | 82.4 | 79.8 (mem0, facts) | +2.6 [+1.0, +4.3] | ORP better |
+| R@2000 | 87.3 | 85.5 (mem0, facts) | +1.8 [+0.3, +3.4] | ORP better |
+| Ans@500 | 75.2 | 70.6 (mem0, facts) | +4.6 [+2.9, +6.3] | ORP better |
+| Ans@1000 | 80.6 | 76.4 (mem0, facts) | +4.2 [+2.8, +5.6] | ORP better |
+| Ans@2000 | 84.6 | 81.3 (mem0, facts) | +3.3 [+2.0, +4.5] | ORP better |
+
+| System (store) | R@500 | R@1000 | R@2000 | Ans@500 | Ans@1000 | Ans@2000 | SessAll@5 | MRR |
+|---|---|---|---|---|---|---|---|---|
+| **ORP (turns as evidence + facts)** | 76.2 | 82.4 | 87.3 | 75.2 | 80.6 | 84.6 | 80.6 | 61.7 |
+| ORP (facts only) | 78.5 | 84.8 | 89.5 | 72.7 | 78.9 | 83.1 | 79.1 | 63.9 |
+| mem0 (facts) | 74.5 | 79.8 | 85.5 | 70.6 | 76.4 | 81.3 | 77.9 | 59.3 |
+| Supermemory Company Brain (facts) | 73.1 | 79.6 | 84.1 | 69.3 | 75.2 | 79.3 | 78.2 | 69.0 |
+| Graphiti (Zep) (facts) | 69.8 | 76.7 | 83.4 | 66.9 | 73.4 | 79.3 | 77.0 | 54.6 |
+| Cognee (facts) | 68.7 | 75.9 | 77.9 | 66.9 | 73.2 | 75.9 | 76.4 | 55.6 |
+| Letta (facts) | 68.4 | 73.7 | 80.2 | 64.9 | 71.0 | 76.6 | 77.9 | 59.3 |
+| Supermemory (facts) | 64.7 | 72.6 | 72.6 | 63.4 | 70.1 | 70.1 | 71.4 | 57.5 |
+| Onyx (facts) | 38.6 | 66.0 | 78.7 | 46.2 | 67.9 | 77.3 | 77.4 | 75.4 |
+| Hindsight (facts) | 44.6 | 62.9 | 77.6 | 51.4 | 65.4 | 75.9 | 43.9 | 27.8 |
+| LangMem (facts) | 50.3 | 61.3 | 73.8 | 56.3 | 66.7 | 76.7 | 54.9 | 39.3 |
+| Basic Memory (facts) | 34.2 | 60.5 | 72.1 | 42.4 | 63.5 | 73.6 | 72.0 | 69.2 |
+| MemOS (facts) | 49.2 | 59.3 | 71.1 | 55.3 | 65.6 | 75.4 | 58.9 | 41.8 |
+| MCP memory server (facts) | 52.3 | 56.5 | 60.5 | 56.1 | 63.0 | 70.1 | 64.1 | 44.3 |
+| GBrain (facts) | 27.4 | 48.1 | 61.7 | 38.0 | 57.2 | 69.3 | 60.0 | 56.1 |
+| Sylph (facts) | 25.5 | 40.8 | 49.0 | 38.8 | 54.6 | 61.8 | 52.1 | 34.6 |
+| MemoryOS (turns) | 32.6 | 40.7 | 47.8 | 45.9 | 56.8 | 62.9 | 48.2 | 28.9 |
+| _BM25 (facts)_ | 74.3 | 79.7 | 85.2 | 69.9 | 75.6 | 81.0 | 77.6 | 59.7 |
+| _Dense (facts)_ | 60.8 | 69.1 | 78.1 | 61.9 | 70.0 | 77.2 | 66.4 | 43.2 |
+
+Extraction lifts almost every system; plain BM25 over the extracted facts lands level with the best baseline, so much of the gain comes from the facts themselves.
+
 ## ORP-Gov v2, 50% channel visibility (same ranker; access control differs)
 
 | Strategy | Recall@1000 (permitted) | Questions with unreadable text in context | Forbidden askers shown gold evidence | Rankings changed by unreadable memories |

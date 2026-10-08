@@ -56,7 +56,7 @@ def table(summ, names, metrics):
             f'<tbody>{"".join(body)}</tbody></table></div>')
 
 
-def verdict_rows(bench, summ, tnames, metrics, exclude=()):
+def verdict_rows(bench, summ, tnames, metrics, exclude=(), orp="orp"):
     out = []
     for k, h in metrics:
         if summ.get("orp", {}).get(k) is None:
@@ -65,7 +65,7 @@ def verdict_rows(bench, summ, tnames, metrics, exclude=()):
         if not c:
             continue
         bv, bn = max(c)
-        r = paired(bench, "orp", bn, k, exclude)
+        r = paired(bench, orp, bn, k, exclude)
         if r is None:
             continue
         state = "win" if r[1] > 0 else "loss" if r[2] < 0 else "tie"
@@ -133,6 +133,27 @@ def main():
   <span class="pill loss">{t['loss']} worse</span></p>
   {verdict_rows("hotpot", hot, tn, hm)}
   <div class="charts">{bars(hot, names, 'ans@1000', 'Answer recall in 1,000 tokens (Ans@1000)')}</div>
+</section>""")
+    F, D = load("summary_facts.json"), load("facts_dev.json")
+    if F and D:
+        S = {**tuned.get("locomo", {}).get("test", {}), **F["locomo"]["test"]}
+        ch = D["choice"]
+        pool = [ch[f"{b}@tuned"] for b in BASE if ch.get(f"{b}@tuned") in S]
+        summ = {**{n: S[n] for n in pool}, "orp": S[ch["orp"]]}
+        hm = [m for m in METRICS if m[0] in HEAD and m[0] != "e_recall@1000"]
+        _, t = verdict("locomo", summ, pool, hm, orp=ch["orp"])
+        tallies["LoCoMo, LLM facts"] = t
+        disp = {n.replace("+facts", ""): v for n, v in summ.items()}
+        sections.append(f"""
+<section id="facts" aria-labelledby="h-facts">
+  <h2 id="h-facts">LoCoMo with LLM-extracted facts</h2>
+  <p class="lede">Claude Haiku extracted facts from every conversation once, the way mem0 does at write time, and
+  every system was allowed to store them. Each system's choice of store was made on dev conversations only. ORP keeps
+  raw turns as evidence and stores the facts as derived memories.</p>
+  <p class="tally"><span class="pill win">{t['win']} better</span><span class="pill tie">{t['tie']} level</span>
+  <span class="pill loss">{t['loss']} worse</span></p>
+  {verdict_rows("locomo", summ, pool, hm, orp=ch["orp"])}
+  <div class="charts">{bars(disp, ["orp"] + [n.replace("+facts", "") for n in pool], 'ans@1000', 'Answer recall in 1,000 tokens, LLM-fact stores')}</div>
 </section>""")
     gov = []
     for vis in ("50", "15"):

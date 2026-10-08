@@ -98,7 +98,7 @@ def table(summ: dict, names: list[str], metrics=METRICS) -> str:
     return "\n".join(out)
 
 
-def verdict(bench, summ, tuned_names, metrics, exclude=()):
+def verdict(bench, summ, tuned_names, metrics, exclude=(), orp="orp"):
     """ORP vs the best of the 15 (dev-tuned) on each metric, with a paired bootstrap CI."""
     out = ["| Metric | ORP | Best of the 15 (tuned) | Difference [95% CI] | Verdict |", "|---|---|---|---|---|"]
     tally = {"win": 0, "tie": 0, "loss": 0}
@@ -109,7 +109,7 @@ def verdict(bench, summ, tuned_names, metrics, exclude=()):
         if not cands:
             continue
         bv, bn = max(cands)
-        r = paired(bench, "orp", bn, k, exclude)
+        r = paired(bench, orp, bn, k, exclude)
         if r is None:
             continue
         v = "ORP better" if r[1] > 0 else "ORP worse" if r[2] < 0 else "no significant difference"
@@ -131,6 +131,55 @@ def cat_table(summ: dict, names: list[str]) -> str:
                   0) for c in allc}
     out.append("| _n_ | " + " | ".join(str(ns[c]) for c in allc) + " |")
     return "\n".join(out)
+
+
+def facts_track() -> list[str]:
+    """LLM-extraction track (LoCoMo): every system may store the shared Haiku-extracted facts; each system's store
+    (raw turns or facts; ORP also evidence plus facts) is chosen on dev (results/facts_dev.json)."""
+    F, D = load("summary_facts.json"), load("facts_dev.json")
+    if not F or not D:
+        return []
+    S = {**load_tuned().get("locomo", {}).get("test", {}), **F["locomo"]["test"]}
+    ch = D["choice"]
+    pool = {ch[f"{b}@tuned"]: S[ch[f"{b}@tuned"]] for b in BASE if ch.get(f"{b}@tuned") in S}
+    orp = ch["orp"]
+    summ = {**pool, "orp": S[orp]}
+    for k in list(summ):
+        pass
+    md = ["## LLM-extraction track (LoCoMo-10 test, n=1152)", "",
+          "Facts extracted once by Claude Haiku sub-agents with a mem0-style brief (`bench/extraction/EXTRACT.md`), "
+          "frozen in `results/extraction/` and shared by every system, like the encoders. Each system's store (raw "
+          "turns or extracted facts; for ORP also raw turns as evidence plus facts as derived memories) was chosen "
+          f"on the dev conversations only. ORP's dev choice: `{orp}`.", ""]
+    out = ["| Metric | ORP | Best of the 15 | Difference [95% CI] | Verdict |", "|---|---|---|---|---|"]
+    tally = {"win": 0, "tie": 0, "loss": 0}
+    for k, h in [m for m in METRICS if m[0] in HEAD and m[0] != "e_recall@1000"]:
+        bv, bn = max((v.get(k) or 0, n) for n, v in pool.items())
+        r = paired("locomo", orp, bn, k)
+        st = "win" if r[1] > 0 else "loss" if r[2] < 0 else "tie"
+        tally[st] += 1
+        out.append(f"| {h} | {f(S[orp][k])} | {f(bv)} ({label(bn.replace('+facts', ''))}"
+                   f"{', facts' if bn.endswith('+facts') else ''}) | {r[0] * 100:+.1f} [{r[1] * 100:+.1f}, "
+                   f"{r[2] * 100:+.1f}] | {dict(win='ORP better', tie='no significant difference', loss='ORP worse')[st]} |")
+    md += [f"ORP against the best of the 15: **{tally['win']} better, {tally['tie']} no significant difference, "
+           f"{tally['loss']} worse**.", ""] + out + [""]
+    names = ["orp+evidence", "orp+facts"] + sorted(pool, key=lambda n: -(S[n].get("recall@1000") or 0)) + \
+        ["bm25+facts", "dense+facts"]
+    rows = ["| System (store) | " + " | ".join(h for _, h in METRICS if _ != "e_recall@1000") + " |",
+            "|---|" + "---|" * (len(METRICS) - 1)]
+    for n in names:
+        if n in S:
+            lab = {"orp+evidence": "**ORP (turns as evidence + facts)**", "orp+facts": "ORP (facts only)",
+                   "bm25+facts": "_BM25 (facts)_", "dense+facts": "_Dense (facts)_"}.get(
+                n, label(n.replace("+facts", "")) + (" (facts)" if n.endswith("+facts") else " (turns)"))
+            rows.append(f"| {lab} | " + " | ".join(f(S[n].get(k)) for k, _ in METRICS if k != "e_recall@1000") + " |")
+    md += rows + ["", "Extraction lifts almost every system; plain BM25 over the extracted facts lands level with "
+                  "the best baseline, so much of the gain comes from the facts themselves.", ""]
+    TRACK.update(tally)
+    return md
+
+
+TRACK: dict = {}
 
 
 def main():
@@ -207,6 +256,7 @@ def main():
     md.insert(6, f"**Overall: on {sum(tally_all.values())} benchmark-metric comparisons against the best of the 15, "
                  f"ORP is better on {tally_all['win']}, not significantly different on {tally_all['tie']} and worse on "
                  f"{tally_all['loss']}.**\n")
+    md += facts_track()
     for vis in ("50", "15"):
         G = load(f"governance_v{vis}.json")
         if not G:
