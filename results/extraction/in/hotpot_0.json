@@ -1,0 +1,992 @@
+[
+{
+"session": "hotpot:d0",
+"date": "2024-01-01 00:00",
+"turns": [
+{
+"id": "hotpot:d0:0",
+"speaker": "document",
+"text": "Lomonosov Moscow State University (MSU; Russian: \u041c\u043e\u0441\u043a\u043e\u0432\u0441\u043a\u0438\u0439 \u0433\u043e\u0441\u0443\u0434\u0430\u0440\u0441\u0442\u0432\u0435\u043d\u043d\u044b\u0439 \u0443\u043d\u0438\u0432\u0435\u0440\u0441\u0438\u0442\u0435\u0442 \u0438\u043c\u0435\u043d\u0438 \u041c.  \u0412.  \u041b\u043e\u043c\u043e\u043d\u043e\u0441\u043e\u0432\u0430 , often abbreviated \u041c\u0413\u0423) is a coeducational and public research university located in Moscow, Russia.  It was founded on January 25, 1755 by Mikhail Lomonosov.  MSU was renamed after Lomonosov in 1940 and was then known as \"Lomonosov University\".  It also houses the tallest educational building in the world.  It is rated among the universities with the best reputation in the world.  Its current rector is Viktor Sadovnichiy."
+}
+]
+},
+{
+"session": "hotpot:d1",
+"date": "2024-01-01 00:01",
+"turns": [
+{
+"id": "hotpot:d1:0",
+"speaker": "document",
+"text": "Sergei Aleksandrovich Roshchin (Russian: \u0421\u0435\u0440\u0433\u0435\u0301\u0439 \u0410\u043b\u0435\u043a\u0441\u0430\u043d\u0434\u0440\u043e\u0432\u0438\u0447 \u0420\u043e\u0449\u0438\u043d ; born January 28, 1989) is a Russian football defender, who last played for FC Znamya Truda Orekhovo-Zuyevo."
+}
+]
+},
+{
+"session": "hotpot:d2",
+"date": "2024-01-01 00:02",
+"turns": [
+{
+"id": "hotpot:d2:0",
+"speaker": "document",
+"text": "Sergei Aleksandrovich Kornilenko (Belarusian: \u0421\u044f\u0440\u0433\u0435\u0439 \u0410\u043b\u044f\u043a\u0441\u0430\u043d\u0434\u0440\u0430\u0432\u0456\u0447 \u041a\u0430\u0440\u043d\u0456\u043b\u0435\u043d\u043a\u0430 ; Russian: \u0421\u0435\u0440\u0433\u0435\u0439 \u0410\u043b\u0435\u043a\u0441\u0430\u043d\u0434\u0440\u043e\u0432\u0438\u0447 \u041a\u043e\u0440\u043d\u0438\u043b\u0435\u043d\u043a\u043e; born 14 June 1983) is a Belarusian professional footballer who plays as a striker for FC Krylia Sovetov Samara of the Russian Premier League.  In Belarus, both Belarusian and Russian languages are official.  Thus his name, usually transliterated as Sergei Kornilenko (Russian: \u0421\u0435\u0440\u0433\u0435\u0301\u0439 \u041a\u043e\u0440\u043d\u0438\u043b\u0435\u043d\u043a\u043e ), can be alternatively spelled as Syarhey Karnilenka (Belarusian: \u0421\u044f\u0440\u0433\u0435\u0439 \u041a\u0430\u0440\u043d\u0456\u043b\u0435\u043d\u043a\u0430 )."
+}
+]
+},
+{
+"session": "hotpot:d3",
+"date": "2024-01-01 00:03",
+"turns": [
+{
+"id": "hotpot:d3:0",
+"speaker": "document",
+"text": "Sergei Aleksandrovich Chikildin (Russian: \u0421\u0435\u0440\u0433\u0435\u0301\u0439 \u0410\u043b\u0435\u043a\u0441\u0430\u043d\u0434\u0440\u043e\u0432\u0438\u0447 \u0427\u0438\u043a\u0438\u043b\u044c\u0434\u0438\u043d ; born January 25, 1991) is a Russian football goalkeeper, who last played for FC Kavkaztransgaz-2005 Ryzdvyany."
+}
+]
+},
+{
+"session": "hotpot:d4",
+"date": "2024-01-01 00:04",
+"turns": [
+{
+"id": "hotpot:d4:0",
+"speaker": "document",
+"text": "Sergei Aleksandrovich Sholokhov (Russian: \u0421\u0435\u0440\u0433\u0435\u0301\u0439 \u0410\u043b\u0435\u043a\u0441\u0430\u043d\u0434\u0440\u043e\u0432\u0438\u0447 \u0428\u043e\u043b\u043e\u0445\u043e\u0432 ; born September 6, 1980) is a Russian professional football player.  As of August 2009, he plays in the Russian Second Division for FC Avangard Kursk.  Before 2004 he was known as Sergei Kocherga (Russian: \u0421\u0435\u0440\u0433\u0435\u0301\u0439 \u041a\u043e\u0447\u0435\u0440\u0433\u0430 )."
+}
+]
+},
+{
+"session": "hotpot:d5",
+"date": "2024-01-01 00:05",
+"turns": [
+{
+"id": "hotpot:d5:0",
+"speaker": "document",
+"text": "Sergei Aleksandrovich Panchin (Russian: \u0421\u0435\u0440\u0433\u0435\u0301\u0439 \u0410\u043b\u0435\u043a\u0441\u0430\u043d\u0434\u0440\u043e\u0432\u0438\u0447 \u041f\u0430\u043d\u0447\u0438\u043d ; born 15 December 1993) is a Russian football goalkeeper."
+}
+]
+},
+{
+"session": "hotpot:d6",
+"date": "2024-01-01 00:06",
+"turns": [
+{
+"id": "hotpot:d6:0",
+"speaker": "document",
+"text": "Sergei Aleksandrovich Kosarev (Russian: \u0421\u0435\u0440\u0433\u0435\u0301\u0439 \u0410\u043b\u0435\u043a\u0441\u0430\u043d\u0434\u0440\u043e\u0432\u0438\u0447 \u041a\u043e\u0441\u0430\u0440\u0435\u0432 ; born January 29, 1993) is a Russian football midfielder, who currently plays for FC MITOS Novocherkassk."
+}
+]
+},
+{
+"session": "hotpot:d7",
+"date": "2024-01-01 00:07",
+"turns": [
+{
+"id": "hotpot:d7:0",
+"speaker": "document",
+"text": "Sergei Aleksandrovich Dmitrochenko (Russian: \u0421\u0435\u0440\u0433\u0435\u0301\u0439 \u0410\u043b\u0435\u043a\u0441\u0430\u043d\u0434\u0440\u043e\u0432\u0438\u0447 \u0414\u043c\u0438\u0442\u0440\u043e\u0447\u0435\u043d\u043a\u043e ; born June 21, 1993) is a Russian football midfielder."
+}
+]
+},
+{
+"session": "hotpot:d8",
+"date": "2024-01-01 00:08",
+"turns": [
+{
+"id": "hotpot:d8:0",
+"speaker": "document",
+"text": "Sergei Aleksandrovich Tokarev (Russian: \u0421\u0435\u0440\u0433\u0435\u0301\u0439 \u0410\u043b\u0435\u043a\u0441\u0430\u0301\u043d\u0434\u0440\u043e\u0432\u0438\u0447 \u0422\u043e\u0301\u043a\u0430\u0440\u0435\u0432 , 29 December 1899 \u2013 19 April 1985) was a Russian scholar, ethnographer, historian, researcher of religious beliefs, doctor of historical sciences, and professor at Moscow State University."
+}
+]
+},
+{
+"session": "hotpot:d9",
+"date": "2024-01-01 00:09",
+"turns": [
+{
+"id": "hotpot:d9:0",
+"speaker": "document",
+"text": "Sergei Aleksandrovich Kudryavtsev (1903 \u2013 April 25, 1938) was a Ukrainian communist Soviet politician.  He was born in Kharkiv.  During the Great Purge, he was arrested on October 13, 1937 and later executed by firing squad.  After the death of Joseph Stalin, he was rehabilitated in 1956."
+}
+]
+},
+{
+"session": "hotpot:d10",
+"date": "2024-01-01 00:10",
+"turns": [
+{
+"id": "hotpot:d10:0",
+"speaker": "document",
+"text": "The Black Book of the Admiralty is a compilation of English admiralty law created over the course of several English monarchs' reigns, including the most important decisions of the High Court of Admiralty.  Its starting point is the Rolls of Ol\u00e9ron, which were promulgated in c.\u00a01160 by Eleanor of Aquitaine, although the \"Black Book\" is undoubtedly later.  The book itself states that the High Court of Admiralty was established during the reign of Edward\u00a0I (1272\u20131307), although more recent scholarship places the establishment at c.\u00a01360 during the reign of Edward III.  Apart from the Rolls of Ol\u00e9ron, the earliest statute referred to is the \"Liber memorandorum\" (1338), of which a separate manuscript copy is available in the archives of the City of London."
+}
+]
+},
+{
+"session": "hotpot:d11",
+"date": "2024-01-01 00:11",
+"turns": [
+{
+"id": "hotpot:d11:0",
+"speaker": "document",
+"text": "The Black Book: The Ruthless Murder of Jews by German-Fascist Invaders Throughout the Temporarily-Occupied Regions of the Soviet Union and in the German Nazi Death Camps established on occupied Polish soil during the War 1941\u20131945 alternatively The Black Book of the Holocaust, or simply The Black Book (Russian: \u0427\u0451\u0440\u043d\u0430\u044f \u041a\u043d\u0438\u0433\u0430 , \"Chornaya Kniga\"; Yiddish: \u05d3\u05d0\u05b8\u05e1 \u05e9\u05d5\u05d5\u05d0\u05b7\u05e8\u05e6\u05e2 \u05d1\u05d5\u05da\u200e , \"Dos shvartse bukh\"), was a result of the collaborative effort by the Jewish Anti-Fascist Committee (JAC) and members of the American Jewish community to document the anti-Jewish crimes of the Holocaust and the participation of Jews in the fighting and the resistance movement against the Nazis during World War II."
+}
+]
+},
+{
+"session": "hotpot:d12",
+"date": "2024-01-01 00:12",
+"turns": [
+{
+"id": "hotpot:d12:0",
+"speaker": "document",
+"text": "The Books of Clanranald are two paper manuscripts that date to about the early 18th century.  The books are written in Classical Gaelic, and are best known for their traditional account of the history of Clan Donald.  The manuscripts are commonly referred to as the \"Red Book\" and the \"Black Book\".  The name \"Red Book\", however, may actually be a misnomer.  Although Gaelic tradition on South Uist notes a \"Red Book of MacMhuirich\", it is uncertain whether this book is identical to the surviving manuscript.  In fact, the manuscript may be partly derived from the red book of tradition.  The name \"Black Book\" may have been coined in order to distinguish it from the so-called \"Red Book\"."
+}
+]
+},
+{
+"session": "hotpot:d13",
+"date": "2024-01-01 00:13",
+"turns": [
+{
+"id": "hotpot:d13:0",
+"speaker": "document",
+"text": "Black Book (Dutch: Zwartboek ) is a Dutch-language 2006 thriller novel by Laurens Abbink Spaink.  It is the novelization of the Dutch film \"Black Book\" (2006).  It tells the story of a young Jewish woman, Rachel Stein, and her struggle for survival during and after the Second World War.  The book has a photo section, and an afterword by Paul Verhoeven and Gerard Soeteman."
+}
+]
+},
+{
+"session": "hotpot:d14",
+"date": "2024-01-01 00:14",
+"turns": [
+{
+"id": "hotpot:d14:0",
+"speaker": "document",
+"text": "Black Book is an unofficial designation of optical disc (OD) formats that defy official standards for CD, DVD, HD DVD and Blu-ray Discs. Most formats considered Black Book are formats used for video games or Digital Rights Management."
+}
+]
+},
+{
+"session": "hotpot:d15",
+"date": "2024-01-01 00:15",
+"turns": [
+{
+"id": "hotpot:d15:0",
+"speaker": "document",
+"text": "Le Livre Noir du Capitalisme (\"The Black Book of Capitalism\") is a 1998 French book published in reaction to \"The Black Book of Communism\".  Unlike the latter work, \"Le Livre Noir du Capitalisme\"'s primary goal is not to try to attribute a number of victims to the political system in question.  Rather, the body of the book is composed of a series of independent works from various writers who each voice their critique on the various aspects of capitalism.  Topics covered range from the African slave trade to the effects of globalization."
+}
+]
+},
+{
+"session": "hotpot:d16",
+"date": "2024-01-01 00:16",
+"turns": [
+{
+"id": "hotpot:d16:0",
+"speaker": "document",
+"text": "Black Book (Dutch: Zwartboek ) is a 2006 Dutch thriller film co-written and directed by Paul Verhoeven and starring Carice van Houten, Sebastian Koch, Thom Hoffman, and Halina Reijn.  The film, credited as based on several true events and characters, is about a young Jewish woman in the Netherlands who becomes a spy for the resistance during World War II after tragedy befalls her in an encounter with the Nazis.  The film had its world premiere on 1 September 2006 at the Venice Film Festival and its public release on 14 September 2006 in the Netherlands.  It is the first film that Verhoeven made in the Netherlands since \"The Fourth Man,\" made in 1983 before he moved to the United States."
+}
+]
+},
+{
+"session": "hotpot:d17",
+"date": "2024-01-01 00:17",
+"turns": [
+{
+"id": "hotpot:d17:0",
+"speaker": "document",
+"text": "The Yazidi Book of Revelation (\"Kit\u00eaba Cilwe\" in Kurdish; also transliterated as \"Kitab Al Jilwah\") is one of two books on the Yazidi religion written in the style of a holy book in the Kurmanji dialect of the Northern Kurdish language, the other being the \"Yazidi Black Book\" (\"Mishefa Re\u015f\" in Kurdish).  It is claimed that the original text of the \"Book of Revelation\" is kept in the Yazidi village of Ba'idn and the original text of the \"Yazidi Black Book\" is kept in the village of Qasr 'tzz at-Din."
+}
+]
+},
+{
+"session": "hotpot:d18",
+"date": "2024-01-01 00:18",
+"turns": [
+{
+"id": "hotpot:d18:0",
+"speaker": "document",
+"text": "Halina Reijn (born 10 November 1975) is a Dutch actress and writer."
+}
+]
+},
+{
+"session": "hotpot:d19",
+"date": "2024-01-01 00:19",
+"turns": [
+{
+"id": "hotpot:d19:0",
+"speaker": "document",
+"text": "Neil Smith is a fiction writer who lives in Montreal, the city where he was born.  His most recent book, a novel called \"Boo\", came out in May 2015 with Random House imprints in America, Britain, and Canada.  The book is narrated by a young science geek named Oliver Dalrymple who finds himself in a heaven reserved exclusively for 13-year-olds.  In addition to English, \"Boo\" has been published in traditional Chinese, Czech, Dutch, French, German, and Portuguese. \" Publishers Weekly\", \"Booklist\", and \"Quill & Quire\" all gave the book starred reviews.  The novel won the Hugh MacLennan Prize for Fiction and was nominated for a Sunburst Award, an Alex Award, and the Canadian Library Association Young Adult Book Award."
+}
+]
+},
+{
+"session": "hotpot:d20",
+"date": "2024-01-01 00:20",
+"turns": [
+{
+"id": "hotpot:d20:0",
+"speaker": "document",
+"text": "American Beauty is a lost 1927 American silent film romantic drama produced and distributed by First National Pictures.  This film was directed by Richard Wallace and starred Billie Dove.  It was based on a short story \"American Beauty\" by Wallace Irwin.  She is supported by Walter McGrail and Margaret Livingston."
+}
+]
+},
+{
+"session": "hotpot:d21",
+"date": "2024-01-01 00:21",
+"turns": [
+{
+"id": "hotpot:d21:0",
+"speaker": "document",
+"text": "This is the first edition of the Miss American Beauty pageant.  The Miss American Beauty pageant was created to select a USA representative to the Miss International.  A live pageant was held from 1963 to 1967.  After that time, there is no actual documentation that a pageant was actually held for the USA representative.  The Miss American Beauty title continued to be used for the USA representative to Miss International until approximately 2003."
+}
+]
+},
+{
+"session": "hotpot:d22",
+"date": "2024-01-01 00:22",
+"turns": [
+{
+"id": "hotpot:d22:0",
+"speaker": "document",
+"text": "Coty, Inc., is a North American beauty products manufacturer based in New York founded in Paris, France, by Fran\u00e7ois Coty in 1904.  Its main products are fragrances, colour cosmetics and skin and body care products.  It is known for its cooperation with designers and celebrities for the creation of fragrances.  Its biggest brands, or \"power brands\" as it calls them, are: Calvin Klein (fragrance and cosmetics), Chloe (fragrance), Davidoff (fragrance), y (fragrance), Marc Jacobs (fragrance), Philosophy (beauty), Adidas (fragrance and beauty), Playboy (fragrance), OPI Products (beauty), Rimmel London (make-up), Max Factor (cosmetics) and Sally Hansen (beauty)."
+}
+]
+},
+{
+"session": "hotpot:d23",
+"date": "2024-01-01 00:23",
+"turns": [
+{
+"id": "hotpot:d23:0",
+"speaker": "document",
+"text": "La Belle Am\u00e9ricaine English: The American Beauty , is a French comedy film from 1961, directed by Robert Dh\u00e9ry, written by Alfred Adam, starring Alfred Adam and Louis de Fun\u00e8s.  The film was known under the titles: \"La bella americana\" (Italy), \"The American Beauty\" (English title), \"Der tolle Amerikaner\" (West Germany)."
+}
+]
+},
+{
+"session": "hotpot:d24",
+"date": "2024-01-01 00:24",
+"turns": [
+{
+"id": "hotpot:d24:0",
+"speaker": "document",
+"text": "\"American Beauty\" is a 1999 American drama film directed by Sam Mendes and written by Alan Ball.  The film stars Kevin Spacey as Lester Burnham, a middle-aged office worker who has a midlife crisis when he becomes infatuated with his teenage daughter's best friend.  Released in North America on September\u00a015, 1999, \"American Beauty\" was positively received by critics and audiences alike; it was the best-reviewed American film of the year and grossed over $350 million worldwide.  Reviewers praised all aspects of the production, with particular emphasis on Mendes, Spacey and Ball; criticism tended to focus on the familiarity of the characters and setting.  At the 1999 Academy Awards, the film won Best Picture, Best Director, Best Actor (for Spacey), Best Original Screenplay and Best Cinematography (for Conrad Hall).  The film was nominated for and won numerous other awards and honors, mainly for the direction, writing, and acting."
+}
+]
+},
+{
+"session": "hotpot:d25",
+"date": "2024-01-01 00:25",
+"turns": [
+{
+"id": "hotpot:d25:0",
+"speaker": "document",
+"text": "The American Beauty/American Psycho Tour was a concert tour by American rock band Fall Out Boy.  Supporting the band's sixth studio album \"American Beauty/American Psycho\" (2015), the tour visited North America and Europe in 2015.  The North American leg was co-headlined with American rapper Wiz Khalifa under the name The Boys of Zummer.  The Boys of Zummer leg with Wiz Khalifa ranked fifty-ninth for Pollstar's Year End Top 200 North American Tours of 2015, grossing $18.2 million."
+}
+]
+},
+{
+"session": "hotpot:d26",
+"date": "2024-01-01 00:26",
+"turns": [
+{
+"id": "hotpot:d26:0",
+"speaker": "document",
+"text": "\"The Kids Aren't Alright\" is a song by American rock band Fall Out Boy.  It was released as the first promotional single (overall the third release) on December 15, 2014 from their sixth studio album, \"American Beauty/American Psycho\", as a digital download with pre-orders of the album.  It coincided with the release of the second official single from the album, \"American Beauty/American Psycho\", along with the album artwork and track listing.  When asked which \"American Beauty/American Psycho\" track the band was most proud of, Pete Wentz responded, \"It's hard to say because it's like having kids.  [Patrick] says The Kids Aren't Alright\"."
+}
+]
+},
+{
+"session": "hotpot:d27",
+"date": "2024-01-01 00:27",
+"turns": [
+{
+"id": "hotpot:d27:0",
+"speaker": "document",
+"text": "Christopher Greenbury, ACE (September 24, 1951 \u2013 January 4, 2007) was a British film editor with more than thirty film credits dating from 1979's \"The Muppet Movie\".  With Tariq Anwar, he won the BAFTA Award for Best Editing for \"American Beauty\" (1999), which he was also nominated for an Academy Award for Best Film Editing.  \"American Beauty\" is a serious drama, but in general Greenbury edited comedy films, including six directed by the Farrelly brothers commencing with 1994's \"Dumb and Dumber\"."
+}
+]
+},
+{
+"session": "hotpot:d28",
+"date": "2024-01-01 00:28",
+"turns": [
+{
+"id": "hotpot:d28:0",
+"speaker": "document",
+"text": "American Beauty is a 1999 American drama film directed by Sam Mendes and written by Alan Ball.  Kevin Spacey stars as Lester Burnham, a 42-year-old advertising executive who has a midlife crisis when he becomes infatuated with his teenage daughter's best friend, Angela (Mena Suvari).  Annette Bening co-stars as Lester's materialistic wife, Carolyn, and Thora Birch plays their insecure daughter, Jane.  Wes Bentley, Chris Cooper, and Allison Janney also feature.  The film is described by academics as a satire of American middle-class notions of beauty and personal satisfaction; analysis has focused on the film's explorations of romantic, and paternal love, sexuality, beauty, materialism, self-liberation, and redemption."
+}
+]
+},
+{
+"session": "hotpot:d29",
+"date": "2024-01-01 00:29",
+"turns": [
+{
+"id": "hotpot:d29:0",
+"speaker": "document",
+"text": "American Beauty: Music from the Original Motion Picture Soundtrack is the soundtrack album to the 1999 film starring Kevin Spacey and Annette Bening."
+}
+]
+},
+{
+"session": "hotpot:d30",
+"date": "2024-01-01 00:30",
+"turns": [
+{
+"id": "hotpot:d30:0",
+"speaker": "document",
+"text": "The Florida Senate is the upper house of the legislature of the U.S. state of Florida.  Along with the House of Representatives, it composes the Florida Legislature.  The Senate has 40 members, each elected from a single-member district with a population of about 470,000.  The Senate meets at the State Capitol in Tallahassee."
+}
+]
+},
+{
+"session": "hotpot:d31",
+"date": "2024-01-01 00:31",
+"turns": [
+{
+"id": "hotpot:d31:0",
+"speaker": "document",
+"text": "The Wisconsin Legislature is the state legislature of the U.S. state of Wisconsin.  The Legislature is a bicameral body composed of the upper house Wisconsin State Senate and the lower Wisconsin State Assembly, both of which have had Republican majorities since January 2011.  With both houses combined, the legislature has 132 members representing an equal number of constituent districts.  The Legislature convenes at the state capitol in Madison."
+}
+]
+},
+{
+"session": "hotpot:d32",
+"date": "2024-01-01 00:32",
+"turns": [
+{
+"id": "hotpot:d32:0",
+"speaker": "document",
+"text": "Ken Pruitt (born January 24, 1957) was a Republican member of the Florida Senate, representing the 28th District from 2000 to 2009.  His district includes portions of Indian River, Martin, Okeechobee, Palm Beach and St. Lucie Counties.  He was previously a member of the Florida House of Representatives from 1990 through 2000."
+}
+]
+},
+{
+"session": "hotpot:d33",
+"date": "2024-01-01 00:33",
+"turns": [
+{
+"id": "hotpot:d33:0",
+"speaker": "document",
+"text": "The Senate is Burkina Faso's uncreated legislative upper chamber under the amended Constitution of Burkina Faso.  The original upper house (Chamber of Representatives) was abolished in 2002, making the legislature unicameral.  The upper house was to have been restored under the name \"Senate\" in the June 2012 constitutional amendments.  This revision was never executed due to an extended and unresolved political confrontation over the Senate's establishment, which left the country effectively with a unicameral legislature as of the October 2014 constitutional crisis."
+}
+]
+},
+{
+"session": "hotpot:d34",
+"date": "2024-01-01 00:34",
+"turns": [
+{
+"id": "hotpot:d34:0",
+"speaker": "document",
+"text": "Murtaza A. Khan is a Member of the Legislative Council in the State of Jammu and Kashmir, India.  Born in village Narol of Poonch District of the Indian Administered State of Jammu and Kashmir, Murtaza A. Khan is a well known lawyer and widely travelled person.  He got bachelor's degree in law from Aligarh Muslim University, Master\u2019s from USA and engaged in legal profession in Canada.  After several years of stay in North America, he returned to Jammu and Kashmir and resumed legal profession.  He joined Jammu and Kashmir Peoples Democratic Party.  headed by former Indian Home Minister Mufti Mohammed Sayeed at its inception in July 1999 as a founder member, authored its Constitution and served it in various capacities.  Was elected as Member of the Jammu and Kashmir Legislative Council (Upper House of the State's bicameral legislature) in February 2007.  He is leader of PDP's legislature party in the Upper House.  He was appointed PDP\u2019s General Secretary in August 2007.  Known for his resolute bearing, he commands massive following and support of the Punjabi and Pothwari/Pahari speaking Muslim communities across Jammu and Kashmir."
+}
+]
+},
+{
+"session": "hotpot:d35",
+"date": "2024-01-01 00:35",
+"turns": [
+{
+"id": "hotpot:d35:0",
+"speaker": "document",
+"text": "The New South Wales Legislative Council, or upper house, is one of the two chambers of the parliament of the Australian state of New South Wales.  The other is the Legislative Assembly.  Both sit at Parliament House in the state capital, Sydney.  The Assembly is referred to as the lower house and the Council as the upper house.  It is normal for legislation to be first deliberated on and enacted in the lower house, and then considered in the upper house, which acts in the main as a house of review.  The Council has 42 members, elected by proportional representation in which the whole state is treated as a single electorate.  Members serve eight-year terms, which are staggered so that half the Council is up for election every four years\u2014roughly coinciding with elections to the Legislative Assembly."
+}
+]
+},
+{
+"session": "hotpot:d36",
+"date": "2024-01-01 00:36",
+"turns": [
+{
+"id": "hotpot:d36:0",
+"speaker": "document",
+"text": "The Nevada Legislature is the state legislature of the U.S. state of Nevada.  The Legislature is a bicameral body, consisting of the lower house Nevada Assembly, with 42 members, and the upper house Nevada Senate, with 21 members.  All 63 members of the Legislature are elected from an equal amount of constituent districts across the state.  The Legislature is the third smallest bicameral state legislature in the United States (the Alaska Legislature is the smallest bicameral, with only 60 members and the Delaware General Assembly has 62 members)."
+}
+]
+},
+{
+"session": "hotpot:d37",
+"date": "2024-01-01 00:37",
+"turns": [
+{
+"id": "hotpot:d37:0",
+"speaker": "document",
+"text": "An upper house, sometimes called a Senate, is one of two chambers of a bicameral legislature (or one of three chambers of a tricameral legislature), the other chamber being the lower house.  The house formally designated as the upper house is usually smaller, and often has more restricted power, than the lower house.  Examples of upper houses in countries include the UK's House of Lords, India's Rajya Sabha, Russia's Federation Council, Ireland's Seanad, Germany's Bundesrat and the United States Senate."
+}
+]
+},
+{
+"session": "hotpot:d38",
+"date": "2024-01-01 00:38",
+"turns": [
+{
+"id": "hotpot:d38:0",
+"speaker": "document",
+"text": "The Alaska Legislature is the state legislature of the U.S. state of Alaska.  It is a bicameral institution, consisting of the lower Alaska House of Representatives, with 40 members, and the upper house Alaska Senate, with 20 members.  There are 40 House Districts (1-40) and 20 Senate Districts (A-T).  With a total of 60 lawmakers, the Alaska Legislature is the smallest bicameral state legislature in the United States and the second-smallest of all state legislatures (only the 49-member unicameral Nebraska Legislature is smaller).  There are no term limits for either chamber."
+}
+]
+},
+{
+"session": "hotpot:d39",
+"date": "2024-01-01 00:39",
+"turns": [
+{
+"id": "hotpot:d39:0",
+"speaker": "document",
+"text": "Elections to the Upper House of the Althing were held in Iceland on 15 June 1930.  Following reforms in 1915, the six seats in the Upper House appointed by the monarch were abolished, and replaced with six elected seats.  The seats were elected by proportional representation at the national level, using the D'Hondt method.  The remaining eight seats were elected along with the Lower House.  This was the last election solely for the Upper House, as from 1934 onwards all Upper House members were elected together with the Lower House."
+}
+]
+},
+{
+"session": "hotpot:d40",
+"date": "2024-01-01 00:40",
+"turns": [
+{
+"id": "hotpot:d40:0",
+"speaker": "document",
+"text": "The following is a list of some notable species of the agaric genus \"Amanita\".  This genus contains over 500 named species and varieties, but the list is far from exhaustive.  The list follows the classification of subgenera and sections of \"Amanita\" outline by Corner and Bas; Bas, as used by Tulloss (2007) and modified by Redhead & al. (2016) for \"Amanita\" subgenus \"Amanitina\" and Singer for \"Amanita\" section \"Roanokenses\".  Bolding of the species name and an asterisk (*) following indicates the species is the type species of that section, with a double asterisk (**) indicating the type species of the entire genus.  Use of common names follows Tulloss (2007), Holden (2003), Arora (1986), and Lincoff (1981)."
+}
+]
+},
+{
+"session": "hotpot:d41",
+"date": "2024-01-01 00:41",
+"turns": [
+{
+"id": "hotpot:d41:0",
+"speaker": "document",
+"text": "The Calyptocephalellidae are a family of toads found in Chile containing two genera, \"Calyptocephalella\" and \"Telmatobufo\".  The \"Calyptocephalella\" genus contains one species, \"C. gayi\", the helmeted water toad, which is a large aquatic toad weighing up to 0.5 kg .  The \"Telmatobufo\" genus contains four species, \"T. australis\", \"T. bullocki\", \"T. ignotus\", and \"T. venustus\".  All species within the family are considered threatened, with \"T. bullocki\" and \"T. venustus\" being classified as critically endangered."
+}
+]
+},
+{
+"session": "hotpot:d42",
+"date": "2024-01-01 00:42",
+"turns": [
+{
+"id": "hotpot:d42:0",
+"speaker": "document",
+"text": "Leptofoenus is a genus of wasp in the family Pteromalidae, the type genus subfamily Leptofoeninae found in South, Central, and southern North America.  The genus contains five living species and one extinct species known from early Miocene Burdigalian stage Dominican amber deposits on the island of Hispaniola.  With body sizes ranging from 11 - \"Leptofoenus\" species are larger than nearly all other species in Pteromalidae.  The genus bears a notable resemblance to the wasp families Pelecinidae, Gasteruptiidae, and Stephanidae."
+}
+]
+},
+{
+"session": "hotpot:d43",
+"date": "2024-01-01 00:43",
+"turns": [
+{
+"id": "hotpot:d43:0",
+"speaker": "document",
+"text": "Banksiamyces is a genus of fungi in the order Helotiales, with a tentative placement in the family Helotiaceae.  The genus contains four species, which grow on the seed follicles of the dead infructescences or \"cones\" of various species of \"Banksia\", a genus in the plant family Proteaceae endemic to Australia.  Fruit bodies of the fungus appear as small (typically less than 10\u00a0mm diameter), shallow dark cups on the follicles of the \"Banksia\" fruit.  The edges of dry fruit bodies fold inwards, appearing like narrow slits.  The first specimens of \"Banksiamyces\", known then as \"Tympanis toomansis\", were described in 1887.  Specimens continued to be collected occasionally for almost 100 years before becoming examined more critically in the early 1980s, leading to the creation of a new genus to contain what was determined to be three distinct species, \"B.\u00a0katerinae\", \"B.\u00a0macrocarpus\", and \"B.\u00a0toomansis\".  A fourth species, \"B.\u00a0maccannii\", was added in 1984."
+}
+]
+},
+{
+"session": "hotpot:d44",
+"date": "2024-01-01 00:44",
+"turns": [
+{
+"id": "hotpot:d44:0",
+"speaker": "document",
+"text": "Megalurus is a genus of passerine bird in the family Locustellidae.  The genus was once placed in the Old World warbler \"wastebin\" family Sylviidae.  The genus contains six species also known as the typical grassbirds.  The genus is distributed from northern China and Japan, to India in the west, and Australia in the south, with most species being located wholly or partly in the tropics.  The genus is also sometimes considered to include the genus \"Bowdleria\", which holds the fernbirds of New Zealand.  The most widespread species, the tawny grassbird, ranges from the Philippines to southern New South Wales, whereas the Fly River grassbird is restricted to swampland in the southern part of New Guinea.  The natural habitat of the typical grassbirds is, as the name suggests, wet grasslands, swamps and other marshlands.  Some species exist away from water in tall grasslands, heathlands, and forest clearings.  Some species have adapted to the margins of rice fields and gardens."
+}
+]
+},
+{
+"session": "hotpot:d45",
+"date": "2024-01-01 00:45",
+"turns": [
+{
+"id": "hotpot:d45:0",
+"speaker": "document",
+"text": "Greyia is a genus of plant in family Melianthaceae.  It contains three species:"
+}
+]
+},
+{
+"session": "hotpot:d46",
+"date": "2024-01-01 00:46",
+"turns": [
+{
+"id": "hotpot:d46:0",
+"speaker": "document",
+"text": "Lophodermium is a genus of fungi within the family Rhytismataceae.  The genus contains 145 species and has a global distribution.  Species of this genus are usually observed producing zone lines, conidiomata and ascomata on dead fallen leaves, but at least some are known to colonize living leaves.  In many cases they then live inside the colonized leaf as a symptomless endobiont, where they are regarded as detritivores utilising dead plant matter.  In a few cases they may kill all or part of the leaf prematurely, and there is a substantial literature dealing with those species as plant pathogens.  The genus infects many different plant families but with a notable concentration in the family Pinaceae; many \"Lophodermium\" species are restricted to a single host genus (or even species), but some, particularly those infecting grasses, may infect several genera.  Some are economically important plant pathogens, such as those that cause needlecast disease in European Black Pine, Scots Pine and Red Pine in forestry and christmas tree plantations.  In these species, notably \"L. pinastri\" and \"L. seditiosum\", the fungal spores disperse and infect the pine needles in late summer, which turn brown by the following spring and then fall off."
+}
+]
+},
+{
+"session": "hotpot:d47",
+"date": "2024-01-01 00:47",
+"turns": [
+{
+"id": "hotpot:d47:0",
+"speaker": "document",
+"text": "Pachyornis is an extinct genus of ratites from New Zealand which belonged to the moa family.  Like all ratites it was a member of the order Struthioniformes.  The Struthioniformes are flightless birds with a sternum without a keel.  They also have a distinctive palate.  This genus contains three species, and are part of the Anomalopteryginae or lesser moa subfamily.  \"Pachyornis\" moa were the stoutest and most heavy-legged genus of the family.  The most notable species being \"Pachyornis elephantopus\" - the Heavy-Footed Moa.  They were generally similar to the Eastern Moa or the Broad-billed moa of the genus \"Euryapteryx\", but differed in having a pointed bill and being more heavyset in general.  At least one species (\"P. australis\") is assumed to have had a crest of long feathers on its head.  The species became rapidly extinct following human colonization of New Zealand, with the possible exception of \"P. australis\", which may have already been extinct by then."
+}
+]
+},
+{
+"session": "hotpot:d48",
+"date": "2024-01-01 00:48",
+"turns": [
+{
+"id": "hotpot:d48:0",
+"speaker": "document",
+"text": "Calibanus is a genus of two species of flowering plants, both evergreen succulents from dry areas of northeastern Mexico.  The APG III classification system places it in the family Asparagaceae, subfamily Nolinoideae (formerly the family Ruscaceae. )  It was formerly included in the Agavaceae (now Agavoideae) but is now separated from them, for it is polycarpic and dioecious.  Its name refers to the monster Caliban, an antagonist in Shakespeare's \"The Tempest\"."
+}
+]
+},
+{
+"session": "hotpot:d49",
+"date": "2024-01-01 00:49",
+"turns": [
+{
+"id": "hotpot:d49:0",
+"speaker": "document",
+"text": "Ceratozamia is a genus of New World cycads in the family Zamiaceae.  The genus contains 27 known currently living species and one or two fossil species.  Most species are endemic to mountainous areas of Mexico, while few species extend into the mountains of Guatemala, Honduras and Belize.  The genus name comes from the Greek \"ceras\", meaning horn, which refers to the paired, spreading horny projections on the male and female sporophylls of all species."
+}
+]
+},
+{
+"session": "hotpot:d50",
+"date": "2024-01-01 00:50",
+"turns": [
+{
+"id": "hotpot:d50:0",
+"speaker": "document",
+"text": "Tom Clancy's Net Force Explorers or Net Force Explorers is a series of young adult novels created by Tom Clancy and Steve Pieczenik as a spin-off of the military fiction series Tom Clancy's Net Force."
+}
+]
+},
+{
+"session": "hotpot:d51",
+"date": "2024-01-01 00:51",
+"turns": [
+{
+"id": "hotpot:d51:0",
+"speaker": "document",
+"text": "Tom Clancy's Ghost Recon 2: Summit Strike is the expansion to \"Tom Clancy's Ghost Recon 2\".  There are several minor differences between \"Tom Clancy's Ghost Recon 2: Summit Strike\", and \"Tom Clancy's Ghost Recon 2\".  The most notable being the difficulty, Summit Strike being regarded as the harder of the two.  Other differences would include new multiplayer modes, such as Heli Hunt."
+}
+]
+},
+{
+"session": "hotpot:d52",
+"date": "2024-01-01 00:52",
+"turns": [
+{
+"id": "hotpot:d52:0",
+"speaker": "document",
+"text": "John Hoyer Updike (March 18, 1932 \u2013 January 27, 2009) was an American novelist, poet, short story writer, art critic, and literary critic.  One of only three writers to win the Pulitzer Prize for Fiction more than once (the others were Booth Tarkington and William Faulkner), Updike published more than twenty novels, more than a dozen short-story collections, as well as poetry, art and literary criticism and children's books during his career."
+}
+]
+},
+{
+"session": "hotpot:d53",
+"date": "2024-01-01 00:53",
+"turns": [
+{
+"id": "hotpot:d53:0",
+"speaker": "document",
+"text": "Thomas Leo \"Tom\" Clancy Jr. (April 12, 1947 \u2013 October 1, 2013) was an American novelist best known for his technically detailed espionage and military-science story lines set during and after the Cold War.  Seventeen of his novels were bestsellers, and more than 100 million copies of his books are in print.  His name was also used on movie scripts written by ghost writers, nonfiction books on military subjects, and video games.  He was a part-owner of the Baltimore Orioles and vice-chairman of their community activities and public affairs committees."
+}
+]
+},
+{
+"session": "hotpot:d54",
+"date": "2024-01-01 00:54",
+"turns": [
+{
+"id": "hotpot:d54:0",
+"speaker": "document",
+"text": "Tom Clancy's Net Force Explorers or Net Force Explorers is a series of young adult novels created by Tom Clancy and Steve Pieczenik as a spin-off of the military fiction series Tom Clancy's Net Force."
+}
+]
+},
+{
+"session": "hotpot:d55",
+"date": "2024-01-01 00:55",
+"turns": [
+{
+"id": "hotpot:d55:0",
+"speaker": "document",
+"text": "Tom Clancy's Net Force Explorers or Net Force Explorers is a series of young adult novels created by Tom Clancy and Steve Pieczenik as a spin-off of the military fiction series Tom Clancy's Net Force."
+}
+]
+},
+{
+"session": "hotpot:d56",
+"date": "2024-01-01 00:56",
+"turns": [
+{
+"id": "hotpot:d56:0",
+"speaker": "document",
+"text": "Tom Clancy's Net Force Explorers or Net Force Explorers is a series of young adult novels created by Tom Clancy and Steve Pieczenik as a spin-off of the military fiction series Tom Clancy's Net Force."
+}
+]
+},
+{
+"session": "hotpot:d57",
+"date": "2024-01-01 00:57",
+"turns": [
+{
+"id": "hotpot:d57:0",
+"speaker": "document",
+"text": "Tom Clancy's Rainbow 6: Patriots is a cancelled first-person shooter video game, part of the \"Tom Clancy's Rainbow Six\" series, announced on the cover of the December 2011 issue of \"Game Informer\".  It was to be published by Ubisoft, and was developed by the company's Montreal studio, with additional development by Ubisoft Toronto and Red Storm Entertainment.  Due to the death of Tom Clancy in October 2013, concern was raised that this game would become the last to bear his name.  Ubisoft has since stated that they will continue putting Tom Clancy's name on future Tom Clancy titles out of respect for the late author."
+}
+]
+},
+{
+"session": "hotpot:d58",
+"date": "2024-01-01 00:58",
+"turns": [
+{
+"id": "hotpot:d58:0",
+"speaker": "document",
+"text": "Tom Clancy's Net Force Explorers or Net Force Explorers is a series of young adult novels created by Tom Clancy and Steve Pieczenik as a spin-off of the military fiction series Tom Clancy's Net Force."
+}
+]
+},
+{
+"session": "hotpot:d59",
+"date": "2024-01-01 00:59",
+"turns": [
+{
+"id": "hotpot:d59:0",
+"speaker": "document",
+"text": "Tom Clancy's Net Force Explorers or Net Force Explorers is a series of young adult novels created by Tom Clancy and Steve Pieczenik as a spin-off of the military fiction series Tom Clancy's Net Force."
+}
+]
+},
+{
+"session": "hotpot:d60",
+"date": "2024-01-01 01:00",
+"turns": [
+{
+"id": "hotpot:d60:0",
+"speaker": "document",
+"text": "Benjamin Lincoln (January 24, 1733 (O.S. January 13, 1732) \u2013 May 9, 1810) was an American army officer.  He served as a major general in the Continental Army during the American Revolutionary War.  Lincoln is notable for being involved in three major surrenders during the war: his participation in the Battles of Saratoga (sustaining a wound shortly afterward) contributed to John Burgoyne's surrender of a British army, he oversaw the largest American surrender of the war at the 1780 Siege of Charleston, and, as George Washington's second in command, he formally accepted the British surrender at Yorktown."
+}
+]
+},
+{
+"session": "hotpot:d61",
+"date": "2024-01-01 01:01",
+"turns": [
+{
+"id": "hotpot:d61:0",
+"speaker": "document",
+"text": "The 1st Virginia State Regiment was a regiment of Virginia Militia that fought during the American Revolutionary War.  The regiment was authorized by the General Assembly of the Commonwealth of Virginia in December 1776 as a force of regular troops for the Commonwealth's defense.  In 1777, Virginia had difficulty meeting its quota for the regular line of the Continental Army.  As a result, in July 1777 under the command of Colonel George Gibson, the regiment began a march North to temporarily join the Continental Army in the Philadelphia Campaign.  In January 1778, the Virginia General Assembly passed an act directing that the 1st Virginia State Regiment \"now in Continental service, be continued in said service instead of the Ninth Virginia Regiment, made prisoners by the enemy in the Battle of Germantown.\"  The regiment camped at Valley Forge in the winter of 1777-78 and at Middlebrook in the winter of 1778-79 and participated in the Battle of Monmouth.  The regiment remained in the service of the Continental Army until late 1779 when redeployed Virginia.  Unlike the standard division of eight found in the regular line regiments of the Continental Army, the 1st Virginia State Regiment consisted of ten companies including one of light infantry."
+}
+]
+},
+{
+"session": "hotpot:d62",
+"date": "2024-01-01 01:02",
+"turns": [
+{
+"id": "hotpot:d62:0",
+"speaker": "document",
+"text": "The Siege of Yorktown, also known as the Battle of Yorktown, the Surrender at Yorktown, German Battle or the Siege of Little York, ending on October 19, 1781, at Yorktown, Virginia, was a decisive victory by a combined force of American Continental Army troops led by General George Washington and French Army troops led by the Comte de Rochambeau over a British Army commanded by British peer and Lieutenant General Charles Cornwallis.  The culmination of the Yorktown campaign, the siege proved to be the last major land battle of the American Revolutionary War in the North American theater, as the surrender by Cornwallis, and the capture of both him and his army, prompted the British government to negotiate an end to the conflict.  The battle boosted faltering American morale and revived French enthusiasm for the war, as well as undermining popular support for the conflict in Great Britain."
+}
+]
+},
+{
+"session": "hotpot:d63",
+"date": "2024-01-01 01:03",
+"turns": [
+{
+"id": "hotpot:d63:0",
+"speaker": "document",
+"text": "Benedict Arnold (January 14, 1741 [O.S. January 3, 1740] June 14, 1801) was a general during the American Revolutionary War, who fought for the American Continental Army, and later defected to the British Army.  While a general on the American side, he obtained command of the fortifications at West Point, New York (which after 1802 would become the site of the U.S. Military Academy), overlooking the cliffs at the Hudson River (upriver from British-occupied New York City), and planned to surrender them to British forces.  This plan was exposed in September 1780.  He was commissioned into the British Army as a brigadier general."
+}
+]
+},
+{
+"session": "hotpot:d64",
+"date": "2024-01-01 01:04",
+"turns": [
+{
+"id": "hotpot:d64:0",
+"speaker": "document",
+"text": "The Battle of Germantown was a major engagement in the Philadelphia campaign of the American Revolutionary War.  It was fought on October 4, 1777, at Germantown, Pennsylvania, between the British Army led by Sir William Howe, and the American Continental Army, with the 2nd Canadian Regiment, under George Washington."
+}
+]
+},
+{
+"session": "hotpot:d65",
+"date": "2024-01-01 01:05",
+"turns": [
+{
+"id": "hotpot:d65:0",
+"speaker": "document",
+"text": "The Board of War, also known as the Board of War and Ordnance, was created by the Second Continental Congress as a special standing committee to oversee the American Continental Army's administration and to make recommendations regarding the army to Congress.  On January 24, 1776, Congressional delegate Edward Rutledge, echoing Gen. George Washington's own concerns, suggested that a war office similar to Britain's be established.  Pressure from Washington and the large volume of military business led Congress to establish the Board of War and Ordnance on June 12, 1776.  Five delegates of Congress, initially John Adams, Roger Sherman, Benjamin Harrison, James Wilson, and Edward Rutledge, assisted by a permanent secretary, Richard Peters, composed the Board of War.  They assumed the prescribed responsibilities for compiling a master roster of all Continental Army officers; monitoring returns of all troops, arms, and equipment; maintaining correspondence files; and securing prisoners of war.  The Board of War began functioning on June 21, 1776."
+}
+]
+},
+{
+"session": "hotpot:d66",
+"date": "2024-01-01 01:06",
+"turns": [
+{
+"id": "hotpot:d66:0",
+"speaker": "document",
+"text": "John Andr\u00e9 (2 May 1750 \u2013 2 October 1780) was a British Army officer hanged as a spy by the Continental Army during the American Revolutionary War for assisting Benedict Arnold's attempted surrender of the fort at West Point, New York to the British."
+}
+]
+},
+{
+"session": "hotpot:d67",
+"date": "2024-01-01 01:07",
+"turns": [
+{
+"id": "hotpot:d67:0",
+"speaker": "document",
+"text": "The United States National Memorial Arch, located in Valley Forge National Historical Park, Chester County, Pennsylvania, is a monument built to celebrate the arrival of General George Washington and the Continental Army at Valley Forge.  Valley Forge was the military camp 18 miles northwest of Philadelphia where the American Continental Army spent the winter of 1777\u201378 during the American Revolutionary War.  Starvation, disease, malnutrition, and exposure killed more than 2,500 American soldiers by the end of February 1778."
+}
+]
+},
+{
+"session": "hotpot:d68",
+"date": "2024-01-01 01:08",
+"turns": [
+{
+"id": "hotpot:d68:0",
+"speaker": "document",
+"text": "The Continental Army was the national army of first the Thirteen Colonies, and then the independent United States, during the American Revolutionary War, established by a resolution of the Congress on June 14, 1775, three days before the Battle of Bunker Hill, where it saw its first action under that title. .  The Continental Congress took a number of steps in the spring of 1775 to create the army in response to the Battles of Lexington and Concord in April and the seizure of Fort Ticonderoga in May.  The units composing the Continental Army changed frequently, especially in the first two years of the war.  From 1777 to the close of the war, the organization of the Continental Army became progressively more systematic and sophisticated.  The Continental Army that served at Yorktown in 1781 bore very little resemblance to the Continental Army that blockaded Boston in 1775."
+}
+]
+},
+{
+"session": "hotpot:d69",
+"date": "2024-01-01 01:09",
+"turns": [
+{
+"id": "hotpot:d69:0",
+"speaker": "document",
+"text": "Pulaski's Legion was raised on March 28, 1778 at Baltimore, Maryland under the command of Kazimierz Pu\u0142aski for service with the Continental Army during the American Revolutionary War.  The Legion consisted of one troop of lancers, two troops of dragoons and 200 light infantry soldiers.  It was one of the few cavalry regiments in the American Continental Army."
+}
+]
+},
+{
+"session": "hotpot:d70",
+"date": "2024-01-01 01:10",
+"turns": [
+{
+"id": "hotpot:d70:0",
+"speaker": "document",
+"text": "B\u00e9atrice Picard, {'1': \", '2': \", '3': \", '4': \"} , {'1': \", '2': \", '3': \", '4': \"} (born July 3, 1929 in Montreal, Quebec) is a Canadian actress.  She is well known in Quebec for the countless roles she has played on the French Canadian theatre and television scene during an ongoing acting career spanning over six decades.  She became a household name in Quebec for her acting role as Angelina Desmarais in one of the first French Canadian \"t\u00e9l\u00e9-roman\" series called \"Le survenant\" in the early days of French-speaking television.  She then went on to a prolific career in televised comedies such as \"Cr\u00e9 Basil\" and \"Symphorien\".  She also played in numerous theatre productions, summer plays, and films.  Most recently, she is well known as the Quebec French voice of Marge Simpson in \"The Simpsons\"."
+}
+]
+},
+{
+"session": "hotpot:d71",
+"date": "2024-01-01 01:11",
+"turns": [
+{
+"id": "hotpot:d71:0",
+"speaker": "document",
+"text": "Emmanuel Curtil (born 7 February 1971) is a French actor known primarily for his voice work, having dubbed the voice of Matthew Perry (Chandler) for the first eight seasons of the American sitcom \"Friends\".  Curtil is also the \"French voice\" of Jim Carrey.  He is also the current voice of Goofy, assuming that duty from G\u00e9rard Rinaldi, who died in 2012."
+}
+]
+},
+{
+"session": "hotpot:d72",
+"date": "2024-01-01 01:12",
+"turns": [
+{
+"id": "hotpot:d72:0",
+"speaker": "document",
+"text": "Ethel Houbiers is a French voice actress.  She is the French voice of Pen\u00e9lope Cruz and Salma Hayek."
+}
+]
+},
+{
+"session": "hotpot:d73",
+"date": "2024-01-01 01:13",
+"turns": [
+{
+"id": "hotpot:d73:0",
+"speaker": "document",
+"text": "Salma Hayek Pinault ( Hayek Jim\u00e9nez) (born September 2, 1966), known professionally as Salma Hayek, is a Mexican and American film actress, producer, and former model.  She began her career in Mexico starring in the telenovela \"Teresa\" and starred in the film \"El Callej\u00f3n de los Milagros\" (\"Miracle Alley\") for which she was nominated for an Ariel Award.  In 1991 Hayek moved to Hollywood and came to prominence with roles in movies such as \"Desperado\" (1995), \"From Dusk Till Dawn\" (1996), \"Dogma\" (1999), and \"Wild Wild West\" (1999)."
+}
+]
+},
+{
+"session": "hotpot:d74",
+"date": "2024-01-01 01:14",
+"turns": [
+{
+"id": "hotpot:d74:0",
+"speaker": "document",
+"text": "Doroth\u00e9e Jemma (born June 16, 1956) is a French voice actress specializing in dubbing.  She is the dub voice of Jennifer Aniston, Melanie Griffith and Sheryl Lee."
+}
+]
+},
+{
+"session": "hotpot:d75",
+"date": "2024-01-01 01:15",
+"turns": [
+{
+"id": "hotpot:d75:0",
+"speaker": "document",
+"text": "Roger Carel (born Roger Bancharel; 14 August 1927) is a French actor and voice talent, known for his recurring film roles as Asterix, the French voice of \"Star Wars'\" C-3PO, and the French voice of \"Winnie the Pooh\".  He is also dubbing David Suchet as Hercule Poirot in Agatha Christie's Poirot.  He voiced Wally Gator, Mickey Mouse and Woody Woodpecker in French.  He was born in Paris, France."
+}
+]
+},
+{
+"session": "hotpot:d76",
+"date": "2024-01-01 01:16",
+"turns": [
+{
+"id": "hotpot:d76:0",
+"speaker": "document",
+"text": "Lisette Dufour (Born 1949) is a Qu\u00e9b\u00e9coise voice actress who is better known as the French voice of Lisa Simpson on \"The Simpsons\"."
+}
+]
+},
+{
+"session": "hotpot:d77",
+"date": "2024-01-01 01:17",
+"turns": [
+{
+"id": "hotpot:d77:0",
+"speaker": "document",
+"text": "Bernard Alane (born Bernard No\u00ebl Vetel 25 December 1948 in Paris) is a French actor and singer, he is the son of actress Annick Alane.  He is best known in France for his roles in two films directed by Edouard Molinaro, \"Hibernatus\" and \"Mon oncle Benjamin\", but has achieved better fame as voice actor, practically in dubbing.  He is the official French voice of Stanley Tucci and Ray Liotta."
+}
+]
+},
+{
+"session": "hotpot:d78",
+"date": "2024-01-01 01:18",
+"turns": [
+{
+"id": "hotpot:d78:0",
+"speaker": "document",
+"text": "Virginie Ledieu (born August 2, 1960) is a French voice actress who specializes in dubbing.  She is the daughter of Marion Game.  She is the official dubbing voice of Alyson Hannigan."
+}
+]
+},
+{
+"session": "hotpot:d79",
+"date": "2024-01-01 01:19",
+"turns": [
+{
+"id": "hotpot:d79:0",
+"speaker": "document",
+"text": "Mary Forbes (30 December 1883 \u2013 22 July 1974) was a British film actress, based in the United States in her latter years, where she died.  She appeared in more than 130 films between 1919 and 1958.  Her legal name was Mrs. Ethel Louise Taylor (later Quartermaine, and later still, Wall), according to her son's 6 November 1904 baptismal record which records his parents' names as Ernest John and Ethel Louise Taylor; however, it is unclear if Forbes was her maiden name.  The dates and lengths of her three marriages are also unknown."
+}
+]
+},
+{
+"session": "hotpot:d80",
+"date": "2024-01-01 01:20",
+"turns": [
+{
+"id": "hotpot:d80:0",
+"speaker": "document",
+"text": "Dubai International Airport (IATA: DXB,\u00a0ICAO: OMDB) (Arabic: \u0645\u0637\u0627\u0631 \u062f\u0628\u064a \u0627\u0644\u062f\u0648\u0644\u064a\u200e \u200e ) is the primary international airport serving Dubai, United Arab Emirates and is the world's busiest airport by international passenger traffic.  It is also the 3rd busiest airport in the world by passenger traffic, the 6th busiest cargo airport in world, the busiest airport for Airbus A380 and Boeing 777 movements, and the busiest airport in the world operating with only two runways.  In 2016, DXB handled 83.6 million passengers, 2.59 million tonnes of cargo and registered 418,220 aircraft movements."
+}
+]
+},
+{
+"session": "hotpot:d81",
+"date": "2024-01-01 01:21",
+"turns": [
+{
+"id": "hotpot:d81:0",
+"speaker": "document",
+"text": "Gatwick Airport (also known as London Gatwick) (IATA: LGW, ICAO: EGKK) is a major international airport in south-east England, 29.5 mi south of Central London and 2.7 NM north of Crawley.  It is the second-busiest airport by total passenger traffic in the United Kingdom, after London Heathrow.  Gatwick is the eighth-busiest airport in Europe.  Until 2016, it was the busiest single-use runway airport in the world before being overtaken by Mumbai's Chhatrapati Shivaji International Airport."
+}
+]
+},
+{
+"session": "hotpot:d82",
+"date": "2024-01-01 01:22",
+"turns": [
+{
+"id": "hotpot:d82:0",
+"speaker": "document",
+"text": "Coimbatore International Airport (IATA: CJB,\u00a0ICAO: VOCB) is the primary airport serving the city of Coimbatore in Tamil Nadu.  It is located at Peelamedu, about 13 km from the center of the city.  Previously known as Peelamedu Civil Aerodrome, it is the 19th busiest airport in India in terms of passengers handled, 16th busiest in terms of total aircraft movement and 14th busiest in terms of cargo handled.  The airport is the second largest airport in terms of passenger traffic and cargo after Chennai International Airport In Tamil Nadu.  About five domestic and three international airlines serve the airport.  The Airport also serves as a growing hub for Cargo transportation."
+}
+]
+},
+{
+"session": "hotpot:d83",
+"date": "2024-01-01 01:23",
+"turns": [
+{
+"id": "hotpot:d83:0",
+"speaker": "document",
+"text": "Vancouver International Airport (IATA: YVR,\u00a0ICAO: CYVR) is located on Sea Island in Richmond, British Columbia, Canada, about 12 km from Downtown Vancouver.  It is the second busiest airport in Canada by aircraft movements (306,799) and passengers (22.3 million), behind Toronto Pearson International Airport.  It has non-stop flights daily to Asia, Europe, Oceania, the United States, Mexico and other airports within Canada.  The airport has won several notable international best airport awards; it won the Skytrax Best North American Airport award in 2007 and 2010 through 2017.  The airport also made the list of top 10 airports in the world for the first time in 2012, rated at 9th (2012), 8th (2013), and 9th (2014) overall.  It is the only North American airport included in the top 10 for 2013 and 2014.  YVR also retains the distinction of Best Canadian Airport in the regional results.  It is a hub for Air Canada and WestJet.  It is also an operating base for Air Transat.  Vancouver International Airport is one of eight Canadian airports that have US Border Preclearance facilities.  It is also one of the few major international airports to have a terminal for scheduled floatplanes."
+}
+]
+},
+{
+"session": "hotpot:d84",
+"date": "2024-01-01 01:24",
+"turns": [
+{
+"id": "hotpot:d84:0",
+"speaker": "document",
+"text": "Grantley Adams International Airport (GAIA) (IATA: BGI,\u00a0ICAO: TBPB) is the international airport of Barbados, located in Seawell, Christ Church.  It is the only designated port of entry for persons arriving and departing by air in Barbados and operates as a major gateway to the Eastern Caribbean.  The airport has direct service to destinations in the United States, Canada, Central America and Europe and serves as the second hub for LIAT.  In 2016, the airport was the 8th busiest airport in the Caribbean region; and the third busiest airport in the Lesser Antilles; after Queen Beatrix International Airport located in Aruba, and Pointe-\u00e0-Pitre International Airport located in the Republic of France within the island of Guadeloupe.  GAIA, also remains an important air-link for cruise ship passengers departing and arriving at the Port of Bridgetown, and a base of operations for the Regional Security System (RSS), and the Regional (Caribbean) Police Training Centre."
+}
+]
+},
+{
+"session": "hotpot:d85",
+"date": "2024-01-01 01:25",
+"turns": [
+{
+"id": "hotpot:d85:0",
+"speaker": "document",
+"text": "Croydon Airport (ICAO: EGCR ) was an airport in South London, England.  It was the main airport for London before it was replaced by Northolt Aerodrome, London Heathrow Airport and Gatwick Airport.  The terminal building and entrance lodge are Grade II listed buildings."
+}
+]
+},
+{
+"session": "hotpot:d86",
+"date": "2024-01-01 01:26",
+"turns": [
+{
+"id": "hotpot:d86:0",
+"speaker": "document",
+"text": "Chennai International Airport (IATA: MAA,\u00a0ICAO: VOMM) is an international airport serving the city of Chennai (Madras), Tamil Nadu, India and its metropolitan area.  It is the fourth busiest airport in India in terms of total passenger traffic after airports at Delhi, Mumbai and Bengaluru.  It is the 49th busiest airport in Asia for CY 2016.  In the fiscal year 2016-17, the airport handled over 18.3 million passengers.  Over 400 aircraft movements are handled by the airport per day.  Third busiest Airport in terms of cargo handling in India.  The planned extension of the terminals are about to start as the union government has told that Chennai might not get its new airport soon."
+}
+]
+},
+{
+"session": "hotpot:d87",
+"date": "2024-01-01 01:27",
+"turns": [
+{
+"id": "hotpot:d87:0",
+"speaker": "document",
+"text": "Dublin Airport, (Irish: Aerfort Bhaile \u00c1tha Cliath ) (IATA: DUB,\u00a0ICAO: EIDW) , is an international airport serving Dublin, the capital city of Ireland.  It is operated by DAA (formerly Dublin Airport Authority).  The airport is located 5.4 nmi north of Dublin in Collinstown, Fingal.  In 2016, 27.9 million passengers passed through the airport, making it the airport's busiest year on record.  It is the 15th busiest airport in Europe, and is also the busiest of the state's airports by total passenger traffic.  It has the greatest traffic levels on the island of Ireland, followed by Belfast International Airport, County Antrim."
+}
+]
+},
+{
+"session": "hotpot:d88",
+"date": "2024-01-01 01:28",
+"turns": [
+{
+"id": "hotpot:d88:0",
+"speaker": "document",
+"text": "Athens International Airport \"Eleftherios Venizelos\" (Greek: \u0394\u03b9\u03b5\u03b8\u03bd\u03ae\u03c2 \u0391\u03b5\u03c1\u03bf\u03bb\u03b9\u03bc\u03ad\u03bd\u03b1\u03c2 \u0391\u03b8\u03b7\u03bd\u03ce\u03bd \u00ab\u0395\u03bb\u03b5\u03c5\u03b8\u03ad\u03c1\u03b9\u03bf\u03c2 \u0392\u03b5\u03bd\u03b9\u03b6\u03ad\u03bb\u03bf\u03c2\u00bb , \"Diethn\u00eds Aerolim\u00e9nas Athin\u00f3n \"Elefth\u00e9rios Veniz\u00e9los\"\") (IATA: ATH,\u00a0ICAO: LGAV) , commonly initialized as \"AIA\", began operation on 28 March 2001 and is the primary international airport that serves the city of Athens and the region of Attica.  It is Greece's busiest airport and it serves as the hub and main base of Aegean Airlines as well as other Greek airlines.  The airport is currently in Group 2 of Airports Council International (10\u201325 million) and as of 2016, Athens International is the 27th busiest airport in Europe."
+}
+]
+},
+{
+"session": "hotpot:d89",
+"date": "2024-01-01 01:29",
+"turns": [
+{
+"id": "hotpot:d89:0",
+"speaker": "document",
+"text": "Heathrow Airport (also known as London Heathrow) (IATA: LHR,\u00a0ICAO: EGLL) is a major international airport in London, United Kingdom.  Heathrow is the second busiest airport in the world by international passenger traffic (surpassed by Dubai International in 2014), as well as the busiest airport in Europe by passenger traffic, and the seventh busiest airport in the world by total passenger traffic.  In 2016, it handled a record 75.7 million passengers, a 1.0% increase from 2015."
+}
+]
+}
+]

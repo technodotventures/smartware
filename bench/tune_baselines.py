@@ -38,6 +38,9 @@ SUBSET = {"locomo": 1, "lme": 20}  # stage-1 screen: 1 LoCoMo dev conversation +
 TOP = 4  # configurations promoted to the full dev evaluation
 
 
+FACTS = False  # --facts: tune each baseline's knobs on the shared LLM-extracted fact stores (bench/facts.py)
+
+
 def job(args):
     global _ENC
     name, cfg, subset = args
@@ -46,7 +49,11 @@ def job(args):
     C = cls_of(name)
     t0 = time.time()
     try:
-        r = evaluate(lambda: C(**cfg), enc=_ENC, subset=subset)
+        if FACTS:
+            from .facts import FactStore
+            r = evaluate(lambda: FactStore(C(**cfg)), enc=_ENC, subset=subset)
+        else:
+            r = evaluate(lambda: C(**cfg), enc=_ENC, subset=subset)
         return name, cfg, objective(r), r, time.time() - t0, subset is not None
     except Exception as e:  # a crashing combination is recorded, not fatal
         return name, cfg, None, {"error": repr(e)}, time.time() - t0, subset is not None
@@ -56,7 +63,11 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("names", nargs="?", default="all")
     ap.add_argument("--workers", type=int, default=2)
+    ap.add_argument("--facts", action="store_true")
     a = ap.parse_args()
+    global FACTS, OUT
+    if a.facts:
+        FACTS, OUT = True, os.path.join(ROOT, "results", "baseline_tuning_facts.json")
     base = ["graphiti", "hindsight", "mem0", "letta", "supermemory-company-brain", "gbrain", "supermemory", "onyx",
             "cognee", "basic-memory", "sylph", "mcp-memory", "memos", "langmem", "memoryos"]
     names = base if a.names == "all" else a.names.split(",")

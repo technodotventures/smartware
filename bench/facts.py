@@ -43,7 +43,10 @@ def load_facts() -> dict[str, list[dict]]:
                 tids = [t for t in r.get("turn_ids", []) if isinstance(t, str)]
                 if not tids or not r.get("text"):
                     continue
-                key = tids[0].rsplit(":", 1)[0] if lme else tids[0].split(":")[0]
+                if os.path.basename(f).startswith("hotpot_"):
+                    key = "hotpot50"
+                else:
+                    key = tids[0].rsplit(":", 1)[0] if lme else tids[0].split(":")[0]
                 if r["text"] in seen[key]:
                     continue
                 seen[key].add(r["text"])

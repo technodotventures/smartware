@@ -46,6 +46,7 @@ REGISTRY = {
     "orp": "bench.orp_variants:ORPLtr",
     "orp-rrf": "bench.orp_variants:ORPRrf",
     "orp-allfeat": "bench.orp_variants:ORPAllFeatures",
+    "orp-ft": "bench.orp_variants:ORPFactsRanker",
 }
 
 _TASKS = {}
@@ -70,6 +71,10 @@ def make(name: str, **kw):
     if name.startswith("orp+evidence"):
         from .facts import orp_with_evidence
         return orp_with_evidence(**kw)
+    if name.endswith("@ftuned"):  # knobs tuned on the fact stores (results/baseline_tuning_facts.json)
+        base = name[: -len("@ftuned")]
+        with open(os.path.join(ROOT, "results", "baseline_tuning_facts.json")) as fh:
+            return make(base, **{**json.load(fh)[base]["best"], **kw})
     if name.endswith("@tuned"):
         base = name[: -len("@tuned")]
         global _TUNED

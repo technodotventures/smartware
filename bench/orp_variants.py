@@ -36,3 +36,11 @@ class ORPAllFeatures(ORPSystem):
 
     def __init__(self, **kw):
         super().__init__(**{**_load("orp_allfeat_params.json"), **kw})
+
+
+class ORPFactsRanker(ORPSystem):
+    """Ranker refitted on dev FACT stores (bench/train_orp_facts.py); used as "orp-ft+facts"."""
+    name = "orp-ft"
+
+    def __init__(self, **kw):
+        super().__init__(**{**_load("orp_facts_params.json"), **kw})
