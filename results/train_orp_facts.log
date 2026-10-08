@@ -1,0 +1,6 @@
+collected 471 dev queries, 112903 candidates, 784 positives
+shipped        CV J=0.8107
+rrf            CV J=0.8108
+linear C=0.01  CV J=0.8123
+linear C=0.1   CV J=0.8161
+selected linear C=0.1
