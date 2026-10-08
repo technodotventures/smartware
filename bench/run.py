@@ -57,11 +57,18 @@ def get_tasks(bench: str):
     return _TASKS[bench]
 
 
+_TUNED = None
+
+
 def make(name: str, **kw):
     """`<system>@tuned` builds the baseline with its dev-tuned configuration (results/baseline_tuning.json)."""
     if name.endswith("@tuned"):
         base = name[: -len("@tuned")]
-        tuned = json.load(open(os.path.join(ROOT, "results", "baseline_tuning.json")))[base]["best"]
+        global _TUNED
+        if _TUNED is None:  # read once per process (the tuning file must not change under a running job)
+            with open(os.path.join(ROOT, "results", "baseline_tuning.json")) as fh:
+                _TUNED = json.load(fh)
+        tuned = _TUNED[base]["best"]
         return make(base, **{**tuned, **kw})
     mod, cls = REGISTRY[name].split(":")
     return getattr(importlib.import_module(mod), cls)(**kw)

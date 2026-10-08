@@ -49,6 +49,17 @@ def load(name):
     return json.load(open(p)) if os.path.exists(p) else {}
 
 
+def load_tuned():
+    """Merge results/summary_tuned*.json (tuned baselines are run in batches)."""
+    import glob
+    out = {}
+    for fn in sorted(glob.glob(os.path.join(RES, "summary_tuned*.json"))):
+        for b, d in json.load(open(fn)).items():
+            for split, systems in d.items():
+                out.setdefault(b, {}).setdefault(split, {}).update(systems)
+    return out
+
+
 def rows(bench, name):
     p = os.path.join(RAW, bench, f"{name}.test.jsonl")
     if not os.path.exists(p):
@@ -123,9 +134,9 @@ def cat_table(summ: dict, names: list[str]) -> str:
 
 
 def main():
-    v011, v012, tuned = load("summary.json"), load("summary_v012.json"), load("summary_tuned.json")
+    v011, v012, tuned = load("summary.json"), load("summary_v012.json"), load_tuned()
     hot = {}
-    for fn in ("summary_hotpot.json", "summary_hotpot_tuned.json"):
+    for fn in ("summary_hotpot.json", "summary_hotpot_tuned.json", "summary_hotpot_tuned_b.json"):
         hot.update(load(fn).get("hotpot", {}).get("test", {}))
     quirks = load("lme_quirks.json").get("excluded", [])
     md = ["# ORP-Bench results, v0.1.2", "",

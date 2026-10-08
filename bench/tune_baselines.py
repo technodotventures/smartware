@@ -73,7 +73,9 @@ def main():
             e["best"], e["best_J"] = best["cfg"], best["J"]
         print(f"{name:26s} {'screen' if screened else 'full  '} J={j if j is None else round(j, 4)} "
               f"{json.dumps(cfg)} {dt:.0f}s", flush=True)
-        json.dump(res, open(OUT, "w"), indent=1, default=str)
+        with open(OUT + ".tmp", "w") as fh:  # atomic replace: readers never see a partial file
+            json.dump(res, fh, indent=1, default=str)
+        os.replace(OUT + ".tmp", OUT)
 
     for n in names:
         if res.get(n, {}).get("best") is not None and len(res[n]["all"]) >= TOP:

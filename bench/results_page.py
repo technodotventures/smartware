@@ -5,7 +5,7 @@ import html
 import json
 import os
 
-from .report import BASE, HEAD, METRICS, ORP, RES, label, load, mean_excl, paired, verdict
+from .report import BASE, HEAD, METRICS, ORP, RES, label, load, load_tuned, mean_excl, paired, verdict
 
 OUT = os.path.join(RES, "site")
 SPEC_URL = "https://claude.ai/code/artifact/85592f49-799b-4a21-b16b-f5f433fcbd8b"
@@ -79,9 +79,9 @@ def verdict_rows(bench, summ, tnames, metrics, exclude=()):
 
 
 def main():
-    v011, v012, tuned = load("summary.json"), load("summary_v012.json"), load("summary_tuned.json")
+    v011, v012, tuned = load("summary.json"), load("summary_v012.json"), load_tuned()
     hot = {}
-    for fn in ("summary_hotpot.json", "summary_hotpot_tuned.json"):
+    for fn in ("summary_hotpot.json", "summary_hotpot_tuned.json", "summary_hotpot_tuned_b.json"):
         hot.update(load(fn).get("hotpot", {}).get("test", {}))
     quirks = set(load("lme_quirks.json").get("excluded", []))
     sections, tallies = [], {}
