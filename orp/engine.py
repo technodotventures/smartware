@@ -922,7 +922,9 @@ class Engine:
                                      tokens=tok, citations=[s.uri for j in members for s in
                                                             self.mem[self.ids[j]].sources] or mids,
                                      valid=label,
-                                     turn_ids=[self.mem[self.ids[j]].meta.get("turn_id", self.ids[j]) for j in claimed]))
+                                     turn_ids=[t for j in claimed for t in (self.mem[self.ids[j]].meta.get("turn_ids") or
+                                                                           [self.mem[self.ids[j]].meta.get("turn_id",
+                                                                                                           self.ids[j])])]))
         return items
 
     def _body(self, k: int, qterms: list[str]) -> tuple[str, float]:

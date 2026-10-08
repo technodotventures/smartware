@@ -61,7 +61,15 @@ _TUNED = None
 
 
 def make(name: str, **kw):
-    """`<system>@tuned` builds the baseline with its dev-tuned configuration (results/baseline_tuning.json)."""
+    """`<system>@tuned` builds the baseline with its dev-tuned configuration (results/baseline_tuning.json).
+    `<system>+facts` stores the shared LLM-extracted facts instead of raw turns; `orp+evidence` keeps both
+    (bench/facts.py)."""
+    if name.endswith("+facts"):
+        from .facts import FactStore
+        return FactStore(make(name[: -len("+facts")], **kw))
+    if name.startswith("orp+evidence"):
+        from .facts import orp_with_evidence
+        return orp_with_evidence(**kw)
     if name.endswith("@tuned"):
         base = name[: -len("@tuned")]
         global _TUNED
