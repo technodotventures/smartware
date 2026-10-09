@@ -44,6 +44,7 @@ python3 -m bench.tune_baselines all                                         # ba
 python3 -m bench.run --bench locomo,lme --systems orp,orp-rrf,orp-allfeat,bm25,dense --out results/summary_v012.json --raw results/raw_v012
 python3 -m bench.run --bench locomo,lme --systems graphiti@tuned,...,memoryos@tuned --out results/summary_tuned.json --raw results/raw_v012
 python3 -m bench.run --bench hotpot --systems all --out results/summary_hotpot.json --raw results/raw_v012
+python3 -m bench.run --bench lmem --systems orp,orp-rrf,graphiti@tuned,...,bm25,dense --out results/summary_lmem.json --raw results/raw_lmem --resume
 python3 -m bench.governance results/governance_v50.json 0.5 && python3 -m bench.governance results/governance_v15.json 0.15
 python3 -m bench.latency orp,orp-rrf,graphiti,...                           # on an idle machine
 python3 -m bench.report                                                     # writes results/RESULTS.md
@@ -51,4 +52,4 @@ python3 -m bench.report                                                     # wr
 
 Data: the vendored LoCoMo-10 file, the LongMemEval oracle file with recombined haystacks (LME-R, see `bench/data.py`), and Cognee's HotpotQA-50 set (held-out, added after the v0.1.1 freeze). Every test-split invocation is logged in `results/TEST_RUNS.log`. Methodology and limitations: `results/METHODOLOGY.md`.
 
-Datasets are read from upstream repositories cloned next to this one (`../vendor/`): `snap-research/locomo` (LoCoMo-10), `getzep/graphiti` (`tests/evals/data/longmemeval_data/longmemeval_oracle.json`) and `topoteretes/cognee` (`evals/old/hotpot_50_*.json`). They are not redistributed here. The code studies of the 15 projects are in `../reports/`.
+Datasets are read from upstream repositories cloned next to this one (`../vendor/`): `snap-research/locomo` (LoCoMo-10), `getzep/graphiti` (`tests/evals/data/longmemeval_data/longmemeval_oracle.json`) and `topoteretes/cognee` (`evals/old/hotpot_50_*.json`). The official LongMemEval-M file (`longmemeval_m_cleaned.json`, xiaowu0162/longmemeval) is read from `../data/lme_m/` as deduplicated `questions.jsonl.gz` and `sessions_*.jsonl.gz` (compaction script in `results/METHODOLOGY.md` terms: one record per unique session id, questions keep their session id lists). They are not redistributed here. The code studies of the 15 projects are in `../reports/`.

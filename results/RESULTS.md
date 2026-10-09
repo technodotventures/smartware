@@ -230,6 +230,88 @@ ORP against the best of the 15: 0 better, 4 no significant difference, 0 worse.
 | _BM25 over turns (reference)_ | 82.7 | 91.0 | 96.0 | 96.0 |
 | _Dense over turns (reference)_ | 64.4 | 81.7 | 83.7 | 92.0 |
 
+## Official LongMemEval-M (frozen configurations, scored once), n=382
+
+The official `longmemeval_m_cleaned.json` haystacks (about 475 sessions, 4,900 turns and 1.2M tokens per question; LME-R used 40 sessions), the same 382 test questions. Nothing was tuned on it: ORP's shipped ranker and every baseline's raw-turn dev-tuned configuration. Raw turns only (no fact track at this scale).
+
+ORP against the best of the 15: **2 better, 5 no significant difference, 2 worse**.
+
+| Metric | ORP | Best of the 15 (tuned) | Difference [95% CI] | Verdict |
+|---|---|---|---|---|
+| R@500 | 67.3 | 60.4 (mem0) | +6.9 [+3.2, +10.7] | ORP better |
+| R@1000 | 73.6 | 68.8 (mem0) | +4.8 [+1.3, +8.3] | ORP better |
+| R@2000 | 79.6 | 76.7 (mem0) | +2.9 [-0.6, +6.2] | no significant difference |
+| E@1000 | 65.0 | 65.4 (Hindsight) | -0.4 [-3.9, +3.1] | no significant difference |
+| Ans@500 | 57.0 | 60.9 (Supermemory Company Brain) | -3.9 [-7.7, -0.1] | ORP worse |
+| Ans@1000 | 64.4 | 67.7 (Supermemory Company Brain) | -3.3 [-7.1, +0.5] | no significant difference |
+| Ans@2000 | 73.6 | 75.7 (Graphiti (Zep)) | -2.1 [-5.6, +1.4] | no significant difference |
+| Ans@4000 | 79.0 | 80.4 (Supermemory Company Brain) | -1.4 [-4.4, +1.4] | no significant difference |
+| SessAll@5 | 68.6 | 72.0 (Onyx) | -3.4 [-6.8, -0.3] | ORP worse |
+
+| System | R@500 | R@1000 | R@2000 | E@1000 | Ans@500 | Ans@1000 | Ans@2000 | Ans@4000 | SessAll@5 |
+|---|---|---|---|---|---|---|---|---|---|
+| **ORP reference engine** | 67.3 | 73.6 | 79.6 | 65.0 | 57.0 | 64.4 | 73.6 | 79.0 | 68.6 |
+| ORP, hand-tuned RRF (no learned model) | 64.0 | 72.2 | 77.1 | 64.2 | 53.8 | 64.1 | 72.0 | 79.8 | 68.6 |
+| mem0 | 60.4 | 68.8 | 76.7 | 55.4 | 58.2 | 66.3 | 74.5 | 78.5 | 67.5 |
+| Graphiti (Zep) | 56.8 | 67.3 | 73.9 | 41.5 | 55.8 | 65.3 | 75.7 | 76.8 | 66.2 |
+| Hindsight | 56.0 | 65.4 | 74.3 | 65.4 | 47.2 | 57.1 | 70.4 | 73.0 | 65.7 |
+| Letta | 55.6 | 62.6 | 69.7 | 62.6 | 55.7 | 65.4 | 73.7 | 79.6 | 70.7 |
+| Supermemory Company Brain | 55.1 | 62.0 | 68.8 | 59.0 | 60.9 | 67.7 | 74.6 | 80.4 | 70.9 |
+| LangMem | 55.0 | 61.6 | 67.9 | 61.6 | 53.9 | 65.4 | 71.6 | 78.7 | 62.6 |
+| MCP memory server | 42.9 | 47.1 | 50.1 | 47.1 | 43.5 | 50.4 | 58.2 | 65.5 | 44.0 |
+| Basic Memory | 12.7 | 41.5 | 56.9 | 41.3 | 33.6 | 53.8 | 66.9 | 76.6 | 64.1 |
+| Cognee | 28.7 | 38.9 | 51.1 | 33.3 | 41.3 | 57.6 | 69.2 | 76.9 | 65.4 |
+| Onyx | 22.8 | 37.4 | 58.0 | 37.4 | 37.2 | 52.3 | 66.2 | 76.0 | 72.0 |
+| MemoryOS | 27.1 | 35.1 | 41.1 | 30.1 | 40.7 | 51.8 | 62.5 | 72.5 | 49.0 |
+| Supermemory | 29.8 | 31.0 | 31.3 | 19.8 | 28.7 | 32.0 | 32.3 | 32.3 | 30.4 |
+| MemOS | 11.7 | 23.0 | 31.2 | 23.0 | 29.8 | 47.7 | 59.4 | 70.5 | 47.9 |
+| GBrain | 2.3 | 22.7 | 29.7 | 21.9 | 20.2 | 47.8 | 60.1 | 69.6 | 50.0 |
+| Sylph | 3.2 | 6.2 | 17.1 | 6.2 | 15.2 | 22.2 | 41.1 | 60.6 | 7.9 |
+| _BM25 over turns (reference)_ | 59.1 | 66.5 | 72.7 | 66.5 | 55.3 | 66.9 | 74.7 | 80.2 | 72.0 |
+| _Dense over turns (reference)_ | 52.8 | 60.1 | 66.2 | 60.1 | 53.1 | 64.0 | 72.2 | 79.0 | 62.8 |
+
+Without the 29 test questions with gold evidence dated after the question (inadmissible to an engine that honours `as_of`) in the official data (`results/lmem_quirks.json`): **4 better, 5 no significant difference, 0 worse**.
+
+| Metric | ORP | Best of the 15 (tuned) | Difference [95% CI] | Verdict |
+|---|---|---|---|---|
+| R@500 | 71.5 | 59.9 (mem0) | +11.5 [+8.1, +15.0] | ORP better |
+| R@1000 | 77.8 | 68.2 (mem0) | +9.6 [+6.5, +12.7] | ORP better |
+| R@2000 | 84.1 | 76.3 (mem0) | +7.8 [+4.7, +10.8] | ORP better |
+| E@1000 | 68.5 | 64.6 (Hindsight) | +4.0 [+0.6, +7.2] | ORP better |
+| Ans@500 | 57.7 | 60.7 (Supermemory Company Brain) | -3.0 [-7.1, +1.0] | no significant difference |
+| Ans@1000 | 64.8 | 67.6 (Supermemory Company Brain) | -2.8 [-6.8, +1.2] | no significant difference |
+| Ans@2000 | 74.0 | 75.0 (Graphiti (Zep)) | -1.0 [-4.5, +2.7] | no significant difference |
+| Ans@4000 | 79.0 | 80.1 (Supermemory Company Brain) | -1.1 [-4.2, +1.8] | no significant difference |
+| SessAll@5 | 74.2 | 73.1 (Onyx) | +1.1 [-1.7, +4.0] | no significant difference |
+
+Without the 85 test questions with any haystack session dated after the question in the official data (`results/lmem_quirks.json`): **3 better, 4 no significant difference, 2 worse**.
+
+| Metric | ORP | Best of the 15 (tuned) | Difference [95% CI] | Verdict |
+|---|---|---|---|---|
+| R@500 | 68.0 | 57.3 (mem0) | +10.7 [+7.0, +14.5] | ORP better |
+| R@1000 | 74.5 | 65.9 (mem0) | +8.6 [+5.2, +12.0] | ORP better |
+| R@2000 | 81.5 | 73.3 (mem0) | +8.2 [+4.8, +11.8] | ORP better |
+| E@1000 | 63.4 | 61.9 (Hindsight) | +1.6 [-2.2, +5.2] | no significant difference |
+| Ans@500 | 53.5 | 58.8 (Supermemory Company Brain) | -5.3 [-9.6, -1.0] | ORP worse |
+| Ans@1000 | 61.0 | 65.6 (Supermemory Company Brain) | -4.5 [-8.9, -0.5] | ORP worse |
+| Ans@2000 | 71.5 | 72.8 (Graphiti (Zep)) | -1.3 [-5.6, +2.7] | no significant difference |
+| Ans@4000 | 77.0 | 79.1 (Supermemory Company Brain) | -2.1 [-5.8, +1.3] | no significant difference |
+| SessAll@5 | 70.7 | 69.0 (Onyx) | +1.7 [-1.3, +4.7] | no significant difference |
+
+Recall@1000 by question category:
+
+| System | knowledge-update | multi-session | single-session-assistant | single-session-preference | single-session-user | temporal-reasoning |
+|---|---|---|---|---|---|---|
+| **ORP reference engine** | 94.9 | 67.6 | 93.5 | 32.1 | 93.5 | 56.2 |
+| mem0 | 81.2 | 47.8 | 91.3 | 35.9 | 90.7 | 68.7 |
+| Graphiti (Zep) | 86.8 | 45.9 | 91.3 | 25.6 | 92.6 | 62.8 |
+| Hindsight | 75.5 | 67.8 | 28.3 | 30.1 | 85.2 | 72.8 |
+| Letta | 78.0 | 48.9 | 82.6 | 17.3 | 86.1 | 56.3 |
+| Supermemory Company Brain | 72.8 | 44.6 | 95.7 | 16.0 | 88.9 | 54.2 |
+| LangMem | 79.0 | 45.8 | 76.1 | 26.3 | 81.5 | 58.2 |
+| _BM25 over turns (reference)_ | 79.6 | 52.5 | 84.8 | 26.3 | 82.4 | 66.0 |
+| _n_ | 62 | 101 | 46 | 26 | 54 | 93 |
+
 ## LLM-extraction track
 
 Facts extracted once by Claude Haiku sub-agents with a mem0-style brief (`bench/extraction/EXTRACT.md`), frozen in `results/extraction/` and shared by every system, like the encoders. Each system's store (raw turns or extracted facts; for ORP also raw turns as evidence plus facts as derived memories) was chosen on that benchmark's dev split only.
