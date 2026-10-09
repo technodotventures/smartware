@@ -183,6 +183,69 @@ def load_lme(n_sessions: int = 40, seed: int = 7, limit: int | None = None) -> l
     return tasks
 
 
+LME_M = os.path.join(os.path.dirname(__file__), "..", "..", "data", "lme_m")
+_LME_M_SESS: dict | None = None
+
+
+def _lme_m_sessions() -> dict:
+    global _LME_M_SESS
+    if _LME_M_SESS is None:
+        import gzip
+        _LME_M_SESS = {}
+        for fn in sorted(os.listdir(LME_M)):
+            if fn.startswith("sessions_"):
+                for line in gzip.open(os.path.join(LME_M, fn), "rt", encoding="utf-8"):
+                    s = json.loads(line)
+                    _LME_M_SESS[s["sid"]] = [(t["role"], t["content"], bool(t.get("has_answer"))) for t in s["turns"]]
+    return _LME_M_SESS
+
+
+def lme_m_questions() -> list[dict]:
+    import gzip
+    return [json.loads(l) for l in gzip.open(os.path.join(LME_M, "questions.jsonl.gz"), "rt", encoding="utf-8")]
+
+
+def load_lme_m(limit: int | None = None, split: str | None = None):
+    """Official LongMemEval-M (xiaowu0162/longmemeval, `longmemeval_m_cleaned.json`): the same 500 questions as
+    LongMemEval-S and the oracle file, each with its own official haystack of about 475 sessions (about 4,900 turns,
+    1.2M tokens). Compacted on the user's machine by deduplicating sessions shared between questions (no session id
+    had two different contents). Same question ids as LME-R, so the same hash-based dev/test split. Abstention
+    questions are excluded, as for LME-R. Turn timestamps follow LME-R: the session date plus 60 s per turn.
+
+    Yields tasks lazily (each haystack is large): call again for a fresh pass."""
+    sess = _lme_m_sessions()
+    n = 0
+    for q in lme_m_questions():
+        if q["question_id"].endswith("_abs"):
+            continue
+        sp = "dev" if _is_dev(q["question_id"]) else "test"
+        if split and split != "all" and sp != split:
+            continue
+        if limit and n >= limit:
+            return
+        n += 1
+        qid = q["question_id"]
+        qtime = _parse_lme_dt(q["question_date"])
+        order = sorted(zip(q["haystack_session_ids"], q["haystack_dates"]), key=lambda x: (_parse_lme_dt(x[1]), x[0]))
+        turns, sts, gold = [], {}, set()
+        ans = set(q["answer_session_ids"])
+        for sid, dt in order:
+            ts0 = _parse_lme_dt(dt)
+            usid = f"{qid}:{sid}"
+            sts[usid] = ts0
+            for i, (role, content, has) in enumerate(sess[sid]):
+                tid = f"{usid}:{i}"
+                turns.append(Turn(id=tid, session_id=usid, idx=i, speaker=role, role=role, text=content,
+                                  ts=ts0 + timedelta(seconds=60 * i)))
+                if has and sid in ans:
+                    gold.add(tid)
+        corpus = Corpus(id=qid, turns=turns, session_order=[f"{qid}:{s}" for s, _ in order], session_ts=sts,
+                        speakers=["user", "assistant"])
+        yield Task(corpus, [Query(qid=qid, text=q["question"], time=qtime, gold_turns=gold,
+                                  gold_sessions={f"{qid}:{s}" for s in ans}, category=q["question_type"],
+                                  answer=str(q["answer"]), split=sp)])
+
+
 def all_texts() -> list[str]:
     """Union of benchmark text used to train the shared dense encoder."""
     out = []

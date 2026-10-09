@@ -17,7 +17,7 @@ import traceback
 from collections import defaultdict
 from multiprocessing import Pool
 
-from .data import load_lme, load_locomo, load_hotpot
+from .data import load_lme, load_lme_m, load_locomo, load_hotpot
 from .encoders import DenseEncoder, Encoders
 from .metrics import score_query
 
@@ -52,7 +52,9 @@ REGISTRY = {
 _TASKS = {}
 
 
-def get_tasks(bench: str):
+def get_tasks(bench: str, split: str = "all"):
+    if bench == "lmem":  # official LongMemEval-M: too large to hold, streamed afresh on every call
+        return load_lme_m(split=split)
     if bench not in _TASKS:
         _TASKS[bench] = {"locomo": load_locomo, "lme": load_lme, "hotpot": load_hotpot}[bench]()
     return _TASKS[bench]
@@ -91,8 +93,11 @@ def run_one(args):
     name, bench, split, opts = args
     raw_dir = opts.pop("_raw", RAW)
     enc = Encoders(DenseEncoder.load())
-    tasks = get_tasks(bench)
+    tasks = get_tasks(bench, split)
     rows, build_ms, q_ms = [], [], []
+    tag = opts.get("_tag", "")
+    os.makedirs(os.path.join(raw_dir, bench), exist_ok=True)
+    part = open(os.path.join(raw_dir, bench, f"{name}{tag}.{split}.partial"), "w")  # progress, for long runs
     try:
         for task in tasks:
             qs = [q for q in task.queries if split == "all" or q.split == split]
@@ -111,11 +116,13 @@ def run_one(args):
                 m = score_query(items, q.gold_turns, q.gold_sessions, t2s, q.answer, ttext)
                 m.update(qid=q.qid, category=q.category, split=q.split, n_items=len(items))
                 rows.append(m)
+                part.write(json.dumps(m) + "\n")
+                part.flush()
     except Exception:
         traceback.print_exc()
         return name, bench, None
-    tag = opts.get("_tag", "")
-    os.makedirs(os.path.join(raw_dir, bench), exist_ok=True)
+    part.close()
+    os.remove(part.name)
     with open(os.path.join(raw_dir, bench, f"{name}{tag}.{split}.jsonl"), "w") as f:
         for r in rows:
             f.write(json.dumps(r) + "\n")

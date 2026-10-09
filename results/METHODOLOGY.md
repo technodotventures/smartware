@@ -75,3 +75,15 @@ The first fact track kept every system's knobs from raw-turn tuning. In the re-t
 - for LoCoMo and LME-R, every system's configuration (raw turns tuned, facts with raw-tuned knobs, facts re-tuned; for ORP also turns as evidence plus facts) is chosen on that benchmark's dev split;
 - HotpotQA-50 has no dev split: each system uses the configuration with the highest mean dev objective over LoCoMo and LME-R, and HotpotQA facts were extracted the same way (6 Haiku runs, 1,398 memories);
 - each chosen configuration is scored once per benchmark. LoCoMo and LME-R test results have been seen several times by now, so HotpotQA-50 is the only clean held-out check.
+
+## Official LongMemEval-M check (pre-registered 9 Oct 2026, before any LongMemEval-M test run)
+
+The user supplied the official `longmemeval_m_cleaned.json` (xiaowu0162/longmemeval). It holds the same 500 questions as LongMemEval-S and the oracle file, each with its own official haystack: 460-490 sessions, about 4,900 turns and 1.2M tokens per question, against 40 sessions in LME-R. It was compacted on the user's machine into deduplicated sessions (51,661 unique, no session id with two different contents; `bench/data.py:load_lme_m`). Same question ids as LME-R, so the same dev/test split (88 / 382 non-abstention questions).
+
+Protocol, fixed before any test number is seen:
+- **Raw-turn track only.** LLM extraction of 540k unique turns (about 130M input tokens) is out of budget, so there is no fact track here.
+- **Frozen configurations, no tuning on LongMemEval-M:** `orp` (shipped ranker), `orp-rrf` (no learned model), every baseline at its raw-turn dev-tuned configuration (`<name>@tuned`, `results/baseline_tuning.json`), plus the `bm25` and `dense` references. Two dev questions were used only to time the systems; their numbers play no part in any choice.
+- Each configuration is scored once on the 382 test questions (`python -m bench.run --bench lmem`), raw results in `results/raw_lmem/`.
+- Verdicts as elsewhere: paired bootstrap of ORP against the best of the 15 per metric (R@B and Ans@B co-primary, B = 500 to 4,000), reported on all 382 and without the questions affected by the dataset's own date quirks. The official data has the same quirks found in LME-R: 37 of the 470 questions have a gold evidence session dated after the question (mostly hours later on the same day), inadmissible to an engine that honours `as_of`; 107 have some haystack session dated after the question, which ORP filters and time-agnostic baselines do not.
+- The shared encoder was trained without labels on LoCoMo and LongMemEval oracle text; most LongMemEval-M distractor text (ShareGPT and UltraChat sessions) was not in its training data. This applies to every system equally.
+- This is the cleanest test in the suite: new haystacks no system or configuration was developed on. The questions and their evidence sessions are the same as LME-R's, whose test results had been seen.
