@@ -97,10 +97,16 @@ def run_one(args):
     rows, build_ms, q_ms = [], [], []
     tag = opts.get("_tag", "")
     os.makedirs(os.path.join(raw_dir, bench), exist_ok=True)
-    part = open(os.path.join(raw_dir, bench, f"{name}{tag}.{split}.partial"), "w")  # progress, for long runs
+    pp = os.path.join(raw_dir, bench, f"{name}{tag}.{split}.partial")  # progress, for long runs; resumed if present
+    if opts.pop("_resume", False) and os.path.exists(pp):
+        rows = [json.loads(l) for l in open(pp) if l.strip().endswith("}")]
+    done = {r["qid"] for r in rows}
+    part = open(pp, "w")
+    for r in rows:
+        part.write(json.dumps(r) + "\n")
     try:
         for task in tasks:
-            qs = [q for q in task.queries if split == "all" or q.split == split]
+            qs = [q for q in task.queries if (split == "all" or q.split == split) and q.qid not in done]
             if not qs:
                 continue
             sysm = make(name, **opts)
@@ -118,6 +124,8 @@ def run_one(args):
                 rows.append(m)
                 part.write(json.dumps(m) + "\n")
                 part.flush()
+            if bench == "lmem":  # 1.2M-token haystacks: drop the embedding cache between them (outputs unchanged)
+                enc.dense._cache.clear()
     except Exception:
         traceback.print_exc()
         return name, bench, None
@@ -162,9 +170,10 @@ def main(argv=None):
     ap.add_argument("--workers", type=int, default=2)
     ap.add_argument("--out", default=os.path.join(ROOT, "results", "summary.json"))
     ap.add_argument("--raw", default=RAW, help="directory for per-query results")
+    ap.add_argument("--resume", action="store_true", help="continue from .partial files (after an interrupted run)")
     a = ap.parse_args(argv)
     names = list(REGISTRY) if a.systems == "all" else a.systems.split(",")
-    jobs = [(n, b, a.split, {"_raw": a.raw}) for b in a.bench.split(",") for n in names]
+    jobs = [(n, b, a.split, {"_raw": a.raw, "_resume": a.resume}) for b in a.bench.split(",") for n in names]
     if a.split == "test":  # append-only record of every test-split invocation
         try:
             head = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=ROOT, capture_output=True,
