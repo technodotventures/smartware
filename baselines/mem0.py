@@ -433,7 +433,8 @@ class Mem0(System):
         self.ent_text: list[str] = []
         self.ent_key: dict[str, int] = {}
         self.ent_links: list[set[int]] = []
-        ent_vecs: list[np.ndarray] = []
+        ent_buf = np.zeros((256, self.E.shape[1] if self.n else 1), np.float32)  # entity vectors, grown in place
+        n_ent = 0
         by_session: dict[str, list[int]] = defaultdict(list)
         for i, u in enumerate(U):
             by_session[u[0]].append(i)
@@ -452,14 +453,16 @@ class Mem0(System):
                 continue
             keys = list(batch)
             vecs = self.enc.embed_many([batch[k][0] for k in keys])
-            existing = np.stack(ent_vecs) if ent_vecs else np.zeros((0, dim), np.float32)
-            for k, v in zip(keys, vecs):
+            n0 = n_ent  # the batch is compared with entities stored before it (as before: one matrix product)
+            if n0:
+                S = vecs @ ent_buf[:n0].T
+                best = S.argmax(axis=1)
+            for r, (k, v) in enumerate(zip(keys, vecs)):
                 et, mids = batch[k]
                 idx = self.ent_key.get(k)
-                if idx is None and len(existing):
-                    sims = existing @ v
-                    j = int(np.argmax(sims))
-                    if sims[j] >= ENTITY_DEDUP_SIM:
+                if idx is None and n0:
+                    j = int(best[r])
+                    if S[r, j] >= ENTITY_DEDUP_SIM:
                         idx = j
                 if idx is not None:
                     self.ent_links[idx] |= mids
@@ -467,8 +470,11 @@ class Mem0(System):
                     self.ent_key[k] = len(self.ent_text)
                     self.ent_text.append(et)
                     self.ent_links.append(set(mids))
-                    ent_vecs.append(v)
-        self.EV = np.stack(ent_vecs) if ent_vecs else np.zeros((0, dim), np.float32)
+                    if n_ent == len(ent_buf):
+                        ent_buf = np.concatenate([ent_buf, np.zeros_like(ent_buf)])
+                    ent_buf[n_ent] = v
+                    n_ent += 1
+        self.EV = ent_buf[:n_ent].copy() if n_ent else np.zeros((0, dim), np.float32)
         self.ent_norm = [_norm(t) for t in self.ent_text]
 
     @staticmethod
