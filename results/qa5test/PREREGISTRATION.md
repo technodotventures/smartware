@@ -14,3 +14,13 @@ orp-clean minus each system with paired bootstrap 95% CIs and Holm-adjusted p ov
 "Better" means a Holm-adjusted p below 0.05 with a positive difference; "level" otherwise unless the difference is
 negative and significant. Both readers are reported whatever they show. If `orp-clean` holds up, it becomes the
 engine default (v0.1.3); nothing else in the engine changes.
+
+## Outcome (11 Oct 2026)
+
+All 4,408 items answered and judged by both reader-and-judge pairs (DeepSeek inputs verified unchanged by SHA-256).
+- Claude Sonnet: ORP v0.1.3 82.3% (oracle 94.8%). Better than 15 of the 16 comparators after Holm (14 baselines and
+  BM25); level with Hindsight (80.2%, +2.2 [-2.6, +6.9]); worse than none. Level with v0.1.2 rendering (+0.9).
+- DeepSeek V3: ORP v0.1.3 58.6% (oracle 61.6%). Better than 10 of 16; level with Hindsight (58.6%), mem0 (58.2%),
+  BM25, Supermemory Company Brain, Graphiti and Letta; worse than none. Better than v0.1.2 rendering (+6.9 [+2.6,
+  +11.2], Holm p 0.014).
+Per the protocol, `orp-clean` became the engine default (v0.1.3); the ranking is unchanged.

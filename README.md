@@ -1,4 +1,4 @@
-# ORP: Open Recall Protocol (working name), v0.1.2
+# ORP: Open Recall Protocol (working name), v0.1.3
 
 An open protocol for how AI agents and SaaS platforms store, govern and recall memory, with a reference engine, MCP and HTTP servers, a conformance suite, and a reproducible benchmark against LLM-free re-implementations of the recall paths of 15 open-source memory systems.
 

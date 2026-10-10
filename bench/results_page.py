@@ -85,6 +85,43 @@ def main():
         hot.update(load(fn).get("hotpot", {}).get("test", {}))
     quirks = set(load("lme_quirks.json").get("excluded", []))
     sections, tallies = [], {}
+    C5 = {src: load(f"qa5test/score_{src}_orp-clean.json") for src in ("claude", "external")}
+    if all(C5.values()):
+        rows5, tl5 = "", {}
+        for src in ("claude", "external"):
+            cm = C5[src]["ref_minus"]
+            base = [x for x in cm if x not in ("orp",)]
+            tl5[src] = (sum(1 for x in base if cm[x]["diff"] > 0 and cm[x]["p_holm"] < .05),
+                        sum(1 for x in base if not cm[x]["p_holm"] < .05),
+                        sum(1 for x in base if cm[x]["diff"] < 0 and cm[x]["p_holm"] < .05))
+        ac, ax = C5["claude"]["accuracy"], C5["external"]["accuracy"]
+        for n in sorted(ac, key=lambda x: -(ac[x] + ax[x])):
+            nm = {"oracle": "Oracle (gold evidence only)", "orp-clean": "ORP v0.1.3", "orp": "ORP v0.1.2 rendering"}.get(
+                n, plain(n))
+            rows5 += (f'<tr class="{"orp" if n == "orp-clean" else "ref" if n in ("oracle", "bm25") else ""}">'
+                      f'<th scope="row">{esc(nm)}</th><td>{pct(ac[n])}</td><td>{pct(ax[n])}</td></tr>')
+        qc = {("orp" if n == "orp-clean" else n): {"acc": v} for n, v in ac.items() if n != "orp"}
+        qxx = {("orp" if n == "orp-clean" else n): {"acc": v} for n, v in ax.items() if n != "orp"}
+        for k, (w, t_, l_) in (("Final QA, Claude reader", tl5["claude"]), ("Final QA, DeepSeek reader", tl5["external"])):
+            tallies[k] = {"win": w, "tie": t_, "loss": l_}
+        sections.append(f"""
+<section id="final" aria-labelledby="h-final">
+  <h2 id="h-final">Final test: blind question answering, two independent readers <span class="tag">pre-registered</span></h2>
+  <p class="lede">{C5['claude']['n_questions']} official LongMemEval-S test questions never used in an earlier answer
+  test. Every one of the 15 systems, BM25 and the gold-evidence ceiling, 1,000 tokens of context each. One reader and
+  judge was Claude Sonnet, the other DeepSeek V3; neither knew which system produced a context. ORP v0.1.3 writes a date
+  on every line, a change chosen on separate dev questions with both readers.</p>
+  <p class="tally"><span class="pill win">Claude: better than {tl5['claude'][0]} of 16, level with {tl5['claude'][1]},
+  worse than {tl5['claude'][2]}</span><span class="pill win">DeepSeek: better than {tl5['external'][0]} of 16, level with
+  {tl5['external'][1]}, worse than {tl5['external'][2]}</span></p>
+  <div class="charts">{bars(qc, list(qc), 'acc', 'Claude Sonnet reader: correct (%)')}
+  {bars(qxx, list(qxx), 'acc', 'DeepSeek V3 reader: correct (%)')}</div>
+  <p class="note">With DeepSeek the gold evidence alone scores only {pct(ax['oracle'])}%, so all the leading systems are
+  squeezed into the few points below that ceiling; ORP v0.1.3 ties for the top there. The v0.1.3 change itself lifted
+  DeepSeek accuracy from {pct(ax['orp'])}% to {pct(ax['orp-clean'])}% without costing anything with Claude.</p>
+  <details><summary>Every system, both readers</summary><div class="tw"><table><thead><tr><th>System</th>
+  <th>Claude: correct</th><th>DeepSeek: correct</th></tr></thead><tbody>{rows5}</tbody></table></div></details>
+</section>""")
     Q3 = load("qa3_blind.json")
     if Q3:
         acc, cmp_ = Q3["accuracy"], Q3["orp_minus"]

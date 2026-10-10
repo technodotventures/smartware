@@ -19,7 +19,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BUDGET, BATCH, SEED = 1000, 15, 3
 CLEAN = {"render": "clean"}
 VARIANTS = {  # name -> (registry system, kwargs, chronological display)
-    "orp": ("orp", {}, False),
+    "orp": ("orp", {"render": "v012"}, False),  # v0.1.2 rendering (the engine default became "clean" in v0.1.3)
     "orp-clean": ("orp", CLEAN, False),
     "orp-clean-chrono": ("orp", CLEAN, True),
     "orp-clean-nodates": ("orp", {**CLEAN, "resolve_dates": False}, True),

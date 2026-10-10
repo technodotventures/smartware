@@ -1,4 +1,4 @@
-"""ORP reference engine (v0.1.2).
+"""ORP reference engine (v0.1.3).
 
 A single-process implementation of the Open Recall Protocol (spec/ORP-0.1.md):
 bi-temporal memory records, explicit supersession, provenance-closed access control,
@@ -87,7 +87,7 @@ class Params:
     expand_next: bool = True
     expand_prev_q: bool = True
     headers: bool = True
-    render: str = "v012"  # v012: "## date · thread" headers | clean: every line carries its own date, no thread labels
+    render: str = "clean"  # since v0.1.3 (blind QA, results/qa5test). v012: "## date · thread" headers | clean: every line carries its own date, no thread labels
     resolve_dates: bool = True
     count_div: bool = True
     # learned rankers

@@ -378,6 +378,27 @@ def main():
                 md.append(f"| {lab[k]} | {f(v['recall@1000'])} | {f(v['text_leak'])} | {f(v['answer_leak'])} | "
                           f"{f(v['rank_side_channel'])} |")
         md.append("")
+    C5 = {src: load(f"qa5test/score_{src}_orp-clean.json") for src in ("claude", "external")}
+    if all(C5.values()):
+        acc_c, acc_x = C5["claude"]["accuracy"], C5["external"]["accuracy"]
+        md += ["## Final blind QA: ORP v0.1.3 on held-out LongMemEval-S questions (pre-registered)", "",
+               f"{C5['claude']['n_questions']} official test questions never used in an earlier QA test; every one of "
+               "the 15 baselines, BM25, the gold-evidence oracle, ORP v0.1.2 rendering and ORP v0.1.3 (`orp-clean`: "
+               "every line carries its own date, chosen on dev by both readers, `results/qa4dev/`). 1,000-token "
+               "contexts, day-precision times. Two independent reader-and-judge pairs: Claude Sonnet and DeepSeek V3. "
+               "Protocol: `results/qa5test/PREREGISTRATION.md`.", "",
+               "| System | Claude: correct | v0.1.3 minus system [95% CI], Holm p | DeepSeek: correct | "
+               "v0.1.3 minus system [95% CI], Holm p |", "|---|---|---|---|---|"]
+        for sname in sorted(acc_c, key=lambda x: -(acc_c[x] + acc_x[x])):
+            cells = []
+            for src, a in (("claude", acc_c), ("external", acc_x)):
+                c = C5[src]["ref_minus"].get(sname)
+                cells += [f(a[sname]), (f"{c['diff'] * 100:+.1f} [{c['ci95'][0] * 100:+.1f}, {c['ci95'][1] * 100:+.1f}], "
+                                        f"{c['p_holm']:.3f}") if c else "–"]
+            lab = {"oracle": "Oracle (gold evidence only)", "orp-clean": "**ORP v0.1.3**",
+                   "orp": "ORP v0.1.2 rendering"}.get(sname, label(sname.split("@")[0]))
+            md.append(f"| {lab} | " + " | ".join(cells) + " |")
+        md.append("")
     Q3 = load("qa3_blind.json")
     if Q3:
         acc, cmp_ = Q3["accuracy"], Q3["orp_minus"]

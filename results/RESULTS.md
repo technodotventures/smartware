@@ -708,6 +708,32 @@ ORP configuration chosen on dev: `orp-ft+facts`. Against the best of the 15: **0
 | Workspace scope only (no per-item ACL) | 84.4 | 100.0 | 87.3 | – |
 | Per-item ACL on raw units, summaries workspace-scoped | 96.4 | 79.7 | 28.1 | – |
 
+## Final blind QA: ORP v0.1.3 on held-out LongMemEval-S questions (pre-registered)
+
+232 official test questions never used in an earlier QA test; every one of the 15 baselines, BM25, the gold-evidence oracle, ORP v0.1.2 rendering and ORP v0.1.3 (`orp-clean`: every line carries its own date, chosen on dev by both readers, `results/qa4dev/`). 1,000-token contexts, day-precision times. Two independent reader-and-judge pairs: Claude Sonnet and DeepSeek V3. Protocol: `results/qa5test/PREREGISTRATION.md`.
+
+| System | Claude: correct | v0.1.3 minus system [95% CI], Holm p | DeepSeek: correct | v0.1.3 minus system [95% CI], Holm p |
+|---|---|---|---|---|
+| Oracle (gold evidence only) | 94.8 | – | 61.6 | – |
+| **ORP v0.1.3** | 82.3 | – | 58.6 | – |
+| Hindsight | 80.2 | +2.2 [-2.6, +6.9], 0.804 | 58.6 | +0.0 [-5.6, +5.2], 1.000 |
+| mem0 | 75.9 | +6.5 [+1.3, +11.6], 0.039 | 58.2 | +0.4 [-5.6, +6.5], 1.000 |
+| ORP v0.1.2 rendering | 81.5 | +0.9 [-2.6, +4.3], 0.804 | 51.7 | +6.9 [+2.6, +11.2], 0.014 |
+| _BM25 over turns (reference)_ | 73.3 | +9.1 [+3.4, +14.7], 0.005 | 55.2 | +3.4 [-1.7, +8.6], 0.785 |
+| Graphiti (Zep) | 72.0 | +10.3 [+4.7, +15.9], 0.001 | 54.3 | +4.3 [-1.3, +9.9], 0.785 |
+| Letta | 70.7 | +11.6 [+5.6, +17.2], 0.000 | 53.9 | +4.7 [-1.3, +10.8], 0.785 |
+| Supermemory Company Brain | 67.2 | +15.1 [+9.1, +21.1], 0.000 | 54.7 | +3.9 [-1.7, +9.5], 0.785 |
+| LangMem | 63.4 | +19.0 [+12.5, +25.4], 0.000 | 39.2 | +19.4 [+12.9, +25.9], 0.000 |
+| MCP memory server | 50.0 | +32.3 [+25.4, +39.2], 0.000 | 36.2 | +22.4 [+15.5, +29.3], 0.000 |
+| Cognee | 40.5 | +41.8 [+34.5, +49.1], 0.000 | 34.9 | +23.7 [+16.4, +31.0], 0.000 |
+| Basic Memory | 35.8 | +46.6 [+39.2, +53.9], 0.000 | 31.0 | +27.6 [+20.3, +34.5], 0.000 |
+| MemoryOS | 37.5 | +44.8 [+37.5, +52.2], 0.000 | 28.9 | +29.7 [+22.8, +36.6], 0.000 |
+| Supermemory | 30.2 | +52.2 [+44.8, +59.1], 0.000 | 29.3 | +29.3 [+22.0, +36.6], 0.000 |
+| MemOS | 29.3 | +53.0 [+45.7, +60.3], 0.000 | 24.6 | +34.1 [+26.7, +41.4], 0.000 |
+| GBrain | 28.0 | +54.3 [+47.0, +61.6], 0.000 | 23.7 | +34.9 [+27.6, +42.3], 0.000 |
+| Onyx | 31.5 | +50.9 [+43.5, +57.8], 0.000 | 20.3 | +38.4 [+31.0, +45.7], 0.000 |
+| Sylph | 11.2 | +71.1 [+65.1, +77.2], 0.000 | 8.2 | +50.4 [+44.0, +56.9], 0.000 |
+
 ## Blind QA v3 on official LongMemEval-S (pre-registered; all 15 baselines)
 
 150 stratified test questions, 1,000-token contexts, day-precision question times for every system. Claude Sonnet readers answered from each context without knowing the system; separate Sonnet judges graded with LongMemEval's official per-type rules, also blind. A second judge pass on 540 items agreed on 99.8% (Cohen's kappa 0.996). Protocol: `results/qa3/PREREGISTRATION.md`.
