@@ -398,6 +398,24 @@ def main():
                       " | ".join(f(Q3["by_category"][ct].get(sname)) for ct in cats) + " |")
         md.append("| _questions_ | | | | " + " | ".join(str(Q3["n_by_category"][ct]) for ct in cats) + " |")
         md.append("")
+    QX = load("qa3_blind_external.json")
+    if QX and Q3:
+        accx, cmpx = QX["accuracy"], QX["orp_minus"]
+        md += [f"### The same blind items, read and judged by a non-Claude model ({QX['run']['model']}, "
+               f"{QX['run']['provider']} API)", "",
+               "Pre-registered as an addendum before any output existed; run on the user's machine (this workspace "
+               "cannot reach other model APIs). Same contexts, briefs and statistics. **It does not confirm ORP's lead.** "
+               f"The gold-evidence ceiling falls from {f(acc['oracle'])}% to {f(accx['oracle'])}%: this reader often "
+               "answers \"I don't know\" when an answer needs combining several facts (multi-session, preference and "
+               "temporal questions), and it did so most often on ORP's contexts.", "",
+               "| System | Accuracy (non-Claude) | ORP minus system [95% CI] | Holm p | Accuracy (Claude) |",
+               "|---|---|---|---|---|"]
+        for sname in sorted(accx, key=lambda x: -accx[x]):
+            c = cmpx.get(sname)
+            lab = "Oracle (gold evidence only)" if sname == "oracle" else label(sname.split("@")[0])
+            md.append(f"| {lab} | {f(accx[sname])} | " + (f"{c['diff'] * 100:+.1f} [{c['ci95'][0] * 100:+.1f}, "
+                      f"{c['ci95'][1] * 100:+.1f}] | {c['p_holm']:.3f}" if c else "– | –") + f" | {f(acc[sname])} |")
+        md.append("")
     Q = load("qa_blind.json")
     if Q:
         md += ["## Blind QA (Claude Sonnet readers and judges, 1,000-token contexts)", "",

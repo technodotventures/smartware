@@ -143,9 +143,16 @@ def _verdicts(d):
     return {u: 1.0 if str(x).upper().startswith("CORRECT") else 0.0 for u, x in v.items()}
 
 
-def score():
+def score(source: str = "claude"):
     key = json.load(open(os.path.join(QA, "_key.json")))
-    v, v2 = _verdicts("judge"), _verdicts("judge2")
+    if source == "external":  # non-Claude reader and judge (results/qa3/external, run on the user's machine)
+        v = {}
+        for line in open(os.path.join(QA, "external", "verdicts.jsonl")):
+            d = json.loads(line)
+            v[d["uid"]] = 1.0 if d["verdict"] == "CORRECT" else 0.0
+        v2 = {}
+    else:
+        v, v2 = _verdicts("judge"), _verdicts("judge2")
     if set(key) - set(v):
         sys.exit("missing verdicts")
     systems = sorted({k["system"] for k in key.values()})
@@ -186,7 +193,10 @@ def score():
                              for c in sorted({c for c, _ in cat})},
            "judge_agreement": {"n": len(both), "agreement": po, "kappa": kappa},
            "tokens": {s: float(np.mean([k["tokens"] for k in key.values() if k["system"] == s])) for s in systems}}
-    json.dump(out, open(os.path.join(ROOT, "results", "qa3_blind.json"), "w"), indent=1)
+    if source == "external":
+        out["run"] = json.load(open(os.path.join(QA, "external", "run_info.json")))
+    json.dump(out, open(os.path.join(ROOT, "results", "qa3_blind.json" if source == "claude" else "qa3_blind_external.json"),
+                        "w"), indent=1)
     for s in sorted(acc, key=lambda s: -acc[s]):
         c = comp.get(s)
         print(f"{s:34s} {acc[s] * 100:5.1f}" + (f"  ORP-minus {c['diff'] * 100:+.1f} [{c['ci95'][0] * 100:+.1f}, "

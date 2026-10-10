@@ -98,6 +98,19 @@ def main():
                f'{cmp_[n]["ci95"][1] * 100:+.1f}]</span></td><td>{cmp_[n]["p_holm"]:.3f}' if n in cmp_ else "–</td><td>–")
             + "</td></tr>" for n in sorted(acc, key=lambda x: -acc[x]))
         ja = Q3["judge_agreement"]
+        QX = load("qa3_blind_external.json")
+        qx = {n: {"acc": v} for n, v in QX.get("accuracy", {}).items()}
+        xnote = ""
+        if qx:
+            bx = max((n for n in qx if n not in ("orp", "oracle")), key=lambda n: qx[n]["acc"])
+            cx = QX["orp_minus"][bx]
+            xnote = (f'<p class="note"><b>A non-Claude reader does not confirm the lead.</b> The same blind items read '
+                     f'and judged by DeepSeek V3: ORP {pct(qx["orp"]["acc"])}%, best of the 15 '
+                     f'{pct(qx[bx]["acc"])}% ({esc(plain(bx))}; ORP minus {cx["diff"] * 100:+.1f}, 95% CI '
+                     f'[{cx["ci95"][0] * 100:+.1f}, {cx["ci95"][1] * 100:+.1f}], Holm p {cx["p_holm"]:.2f}). Gold evidence '
+                     f'alone scores only {pct(qx["oracle"]["acc"])}% with this reader: it answers "I don\'t know" on many '
+                     f'questions that need several facts combined, and did so most often on ORP\'s contexts. ORP\'s '
+                     f'end-to-end advantage depends on a reader that reasons across its contexts.</p>')
         sections.append(f"""
 <section id="qa3" aria-labelledby="h-qa3">
   <h2 id="h-qa3">Blind question answering on official LongMemEval-S <span class="tag">pre-registered</span></h2>
@@ -108,7 +121,9 @@ def main():
   <p class="tally"><span class="pill win">ORP {pct(acc['orp'])}%</span> against {pct(acc[best])}% for the best of the
   15 ({esc(plain(best))}); significantly ahead of {wins} of {len(cmp_)} systems after Holm correction. Gold evidence
   alone scores {pct(acc['oracle'])}%.</p>
-  <div class="charts">{bars(qs, list(acc), 'acc', 'Questions answered correctly (%)')}</div>
+  <div class="charts">{bars(qs, list(acc), 'acc', 'Claude Sonnet reader and judge: correct (%)')}
+  {bars(qx, list(qx), 'acc', 'DeepSeek V3 reader and judge: correct (%)') if qx else ''}</div>
+  {xnote}
   <details><summary>Every system, with ORP's lead and 95% interval</summary><div class="tw"><table><thead><tr>
   <th>System</th><th>Accuracy</th><th>ORP minus system [95% CI]</th><th>Holm p</th></tr></thead><tbody>{rows}
   </tbody></table></div></details>

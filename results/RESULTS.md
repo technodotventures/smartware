@@ -734,6 +734,31 @@ ORP configuration chosen on dev: `orp-ft+facts`. Against the best of the 15: **0
 | Sylph | 10.0 | +70.7 [+62.7, +78.0] | 0.000 | 12.5 | 2.5 | 16.7 | 40.0 | 19.0 | 0.0 |
 | _questions_ | | | | 24 | 40 | 18 | 10 | 21 | 37 |
 
+### The same blind items, read and judged by a non-Claude model (deepseek-chat, deepseek API)
+
+Pre-registered as an addendum before any output existed; run on the user's machine (this workspace cannot reach other model APIs). Same contexts, briefs and statistics. **It does not confirm ORP's lead.** The gold-evidence ceiling falls from 95.3% to 61.3%: this reader often answers "I don't know" when an answer needs combining several facts (multi-session, preference and temporal questions), and it did so most often on ORP's contexts.
+
+| System | Accuracy (non-Claude) | ORP minus system [95% CI] | Holm p | Accuracy (Claude) |
+|---|---|---|---|---|
+| Oracle (gold evidence only) | 61.3 | – | – | 95.3 |
+| mem0 | 56.0 | -10.0 [-18.0, -2.0] | 0.133 | 72.7 |
+| _BM25 over turns (reference)_ | 55.3 | -9.3 [-17.3, -1.3] | 0.146 | 71.3 |
+| Hindsight | 54.7 | -8.7 [-17.3, +0.0] | 0.300 | 72.0 |
+| Graphiti (Zep) | 52.7 | -6.7 [-14.0, +0.7] | 0.378 | 72.7 |
+| Letta | 51.3 | -5.3 [-12.7, +2.0] | 0.383 | 68.0 |
+| Supermemory Company Brain | 51.3 | -5.3 [-13.3, +2.7] | 0.383 | 62.7 |
+| **ORP reference engine** | 46.0 | – | – | 80.7 |
+| LangMem | 39.3 | +6.7 [-1.3, +14.7] | 0.383 | 62.0 |
+| MCP memory server | 34.0 | +12.0 [+3.3, +20.7] | 0.096 | 48.0 |
+| Basic Memory | 32.7 | +13.3 [+6.0, +20.7] | 0.016 | 42.0 |
+| Cognee | 29.3 | +16.7 [+8.7, +24.7] | 0.000 | 38.7 |
+| MemoryOS | 26.0 | +20.0 [+11.3, +28.7] | 0.000 | 39.3 |
+| MemOS | 24.7 | +21.3 [+12.7, +30.0] | 0.000 | 28.0 |
+| Supermemory | 24.7 | +21.3 [+13.3, +29.3] | 0.000 | 27.3 |
+| Onyx | 24.0 | +22.0 [+13.3, +30.7] | 0.000 | 35.3 |
+| GBrain | 20.7 | +25.3 [+16.7, +33.3] | 0.000 | 25.3 |
+| Sylph | 7.3 | +38.7 [+30.7, +46.7] | 0.000 | 10.0 |
+
 ## Blind QA (Claude Sonnet readers and judges, 1,000-token contexts)
 
 | System | LoCoMo acc. | LME-R acc. |

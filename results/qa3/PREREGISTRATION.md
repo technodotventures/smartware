@@ -45,3 +45,12 @@ one item per call. Scored with the same statistics against the hidden key. Repor
 whatever the outcome; calls that still fail after six retries are reported as missing, not dropped.
 Amendment (before any external output): the run may call DeepSeek's own API directly (`--provider deepseek`, model
 `deepseek-chat`, the same DeepSeek V3 model as the OpenRouter default). Nothing else changes.
+
+## Outcome of the external run (10 Oct 2026)
+
+DeepSeek V3 (`deepseek-chat`, DeepSeek API, temperature 0) read and judged all 2,700 items (inputs verified unchanged by
+SHA-256). ORP 46.0%; mem0 56.0%, BM25 55.3%, Hindsight 54.7%; oracle 61.3%. ORP minus mem0 -10.0 [-18.0, -2.0], Holm
+p 0.133; no comparison against the top six is significant after Holm. The reader answered "I don't know" on 38 of 150
+oracle contexts and 71 of 150 ORP contexts (mem0 and BM25: 58). It does not confirm the Claude-read result: ORP's
+advantage there comes from questions that need facts combined (multi-session, temporal), which this reader mostly
+declines to answer even from gold evidence.

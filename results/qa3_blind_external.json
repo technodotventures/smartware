@@ -1,0 +1,328 @@
+{
+ "n_questions": 150,
+ "accuracy": {
+  "basic-memory@tuned": 0.32666666666666666,
+  "bm25": 0.5533333333333333,
+  "cognee@tuned": 0.29333333333333333,
+  "gbrain@tuned": 0.20666666666666667,
+  "graphiti@tuned": 0.5266666666666666,
+  "hindsight@tuned": 0.5466666666666666,
+  "langmem@tuned": 0.3933333333333333,
+  "letta@tuned": 0.5133333333333333,
+  "mcp-memory@tuned": 0.34,
+  "mem0@tuned": 0.56,
+  "memoryos@tuned": 0.26,
+  "memos@tuned": 0.24666666666666667,
+  "onyx@tuned": 0.24,
+  "oracle": 0.6133333333333333,
+  "orp": 0.46,
+  "supermemory-company-brain@tuned": 0.5133333333333333,
+  "supermemory@tuned": 0.24666666666666667,
+  "sylph@tuned": 0.07333333333333333
+ },
+ "orp_minus": {
+  "basic-memory@tuned": {
+   "diff": 0.13333333333333333,
+   "ci95": [
+    0.06,
+    0.2068333333333309
+   ],
+   "p": 0.0018,
+   "p_holm": 0.0162
+  },
+  "bm25": {
+   "diff": -0.09333333333333334,
+   "ci95": [
+    -0.17333333333333334,
+    -0.013333333333333334
+   ],
+   "p": 0.0244,
+   "p_holm": 0.1464
+  },
+  "cognee@tuned": {
+   "diff": 0.16666666666666666,
+   "ci95": [
+    0.08666666666666667,
+    0.24666666666666667
+   ],
+   "p": 0.0,
+   "p_holm": 0.0
+  },
+  "gbrain@tuned": {
+   "diff": 0.25333333333333335,
+   "ci95": [
+    0.16666666666666666,
+    0.3333333333333333
+   ],
+   "p": 0.0,
+   "p_holm": 0.0
+  },
+  "graphiti@tuned": {
+   "diff": -0.06666666666666667,
+   "ci95": [
+    -0.14,
+    0.006666666666666667
+   ],
+   "p": 0.0944,
+   "p_holm": 0.3776
+  },
+  "hindsight@tuned": {
+   "diff": -0.08666666666666667,
+   "ci95": [
+    -0.17333333333333334,
+    0.0
+   ],
+   "p": 0.06,
+   "p_holm": 0.3
+  },
+  "langmem@tuned": {
+   "diff": 0.06666666666666667,
+   "ci95": [
+    -0.013333333333333334,
+    0.14666666666666667
+   ],
+   "p": 0.1276,
+   "p_holm": 0.3828
+  },
+  "letta@tuned": {
+   "diff": -0.05333333333333334,
+   "ci95": [
+    -0.12666666666666668,
+    0.02
+   ],
+   "p": 0.168,
+   "p_holm": 0.3828
+  },
+  "mcp-memory@tuned": {
+   "diff": 0.12,
+   "ci95": [
+    0.03333333333333333,
+    0.20666666666666667
+   ],
+   "p": 0.012,
+   "p_holm": 0.096
+  },
+  "mem0@tuned": {
+   "diff": -0.1,
+   "ci95": [
+    -0.18,
+    -0.02
+   ],
+   "p": 0.019,
+   "p_holm": 0.133
+  },
+  "memoryos@tuned": {
+   "diff": 0.2,
+   "ci95": [
+    0.11333333333333333,
+    0.2866666666666667
+   ],
+   "p": 0.0,
+   "p_holm": 0.0
+  },
+  "memos@tuned": {
+   "diff": 0.21333333333333335,
+   "ci95": [
+    0.12666666666666668,
+    0.3
+   ],
+   "p": 0.0,
+   "p_holm": 0.0
+  },
+  "onyx@tuned": {
+   "diff": 0.22,
+   "ci95": [
+    0.13333333333333333,
+    0.30666666666666664
+   ],
+   "p": 0.0,
+   "p_holm": 0.0
+  },
+  "supermemory-company-brain@tuned": {
+   "diff": -0.05333333333333334,
+   "ci95": [
+    -0.13333333333333333,
+    0.02666666666666667
+   ],
+   "p": 0.2196,
+   "p_holm": 0.3828
+  },
+  "supermemory@tuned": {
+   "diff": 0.21333333333333335,
+   "ci95": [
+    0.13333333333333333,
+    0.29333333333333333
+   ],
+   "p": 0.0,
+   "p_holm": 0.0
+  },
+  "sylph@tuned": {
+   "diff": 0.38666666666666666,
+   "ci95": [
+    0.30666666666666664,
+    0.46683333333333094
+   ],
+   "p": 0.0,
+   "p_holm": 0.0
+  }
+ },
+ "by_category": {
+  "knowledge-update": {
+   "langmem@tuned": 0.4166666666666667,
+   "basic-memory@tuned": 0.3333333333333333,
+   "mcp-memory@tuned": 0.4583333333333333,
+   "orp": 0.5416666666666666,
+   "letta@tuned": 0.6666666666666666,
+   "memos@tuned": 0.25,
+   "bm25": 0.7083333333333334,
+   "oracle": 0.625,
+   "supermemory@tuned": 0.375,
+   "hindsight@tuned": 0.5416666666666666,
+   "onyx@tuned": 0.2916666666666667,
+   "mem0@tuned": 0.7083333333333334,
+   "memoryos@tuned": 0.25,
+   "gbrain@tuned": 0.25,
+   "supermemory-company-brain@tuned": 0.625,
+   "cognee@tuned": 0.3333333333333333,
+   "graphiti@tuned": 0.625,
+   "sylph@tuned": 0.08333333333333333
+  },
+  "multi-session": {
+   "memos@tuned": 0.025,
+   "bm25": 0.25,
+   "oracle": 0.4,
+   "sylph@tuned": 0.025,
+   "gbrain@tuned": 0.0,
+   "orp": 0.125,
+   "mem0@tuned": 0.3,
+   "letta@tuned": 0.25,
+   "graphiti@tuned": 0.2,
+   "basic-memory@tuned": 0.05,
+   "langmem@tuned": 0.225,
+   "mcp-memory@tuned": 0.15,
+   "memoryos@tuned": 0.1,
+   "cognee@tuned": 0.05,
+   "hindsight@tuned": 0.4,
+   "supermemory@tuned": 0.0,
+   "onyx@tuned": 0.05,
+   "supermemory-company-brain@tuned": 0.2
+  },
+  "single-session-assistant": {
+   "memos@tuned": 0.7777777777777778,
+   "letta@tuned": 0.7777777777777778,
+   "oracle": 0.9444444444444444,
+   "sylph@tuned": 0.16666666666666666,
+   "orp": 0.7777777777777778,
+   "mcp-memory@tuned": 0.6111111111111112,
+   "mem0@tuned": 0.7777777777777778,
+   "supermemory-company-brain@tuned": 0.9444444444444444,
+   "graphiti@tuned": 0.8333333333333334,
+   "langmem@tuned": 0.8333333333333334,
+   "gbrain@tuned": 0.7222222222222222,
+   "hindsight@tuned": 0.6666666666666666,
+   "cognee@tuned": 0.8888888888888888,
+   "onyx@tuned": 0.3888888888888889,
+   "basic-memory@tuned": 0.7777777777777778,
+   "memoryos@tuned": 0.7777777777777778,
+   "bm25": 0.8888888888888888,
+   "supermemory@tuned": 0.5555555555555556
+  },
+  "single-session-preference": {
+   "supermemory-company-brain@tuned": 0.2,
+   "mcp-memory@tuned": 0.0,
+   "graphiti@tuned": 0.5,
+   "basic-memory@tuned": 0.2,
+   "mem0@tuned": 0.4,
+   "onyx@tuned": 0.1,
+   "langmem@tuned": 0.2,
+   "oracle": 0.2,
+   "supermemory@tuned": 0.0,
+   "hindsight@tuned": 0.1,
+   "gbrain@tuned": 0.1,
+   "bm25": 0.3,
+   "memos@tuned": 0.2,
+   "memoryos@tuned": 0.2,
+   "letta@tuned": 0.2,
+   "cognee@tuned": 0.3,
+   "sylph@tuned": 0.1,
+   "orp": 0.0
+  },
+  "single-session-user": {
+   "letta@tuned": 0.9523809523809523,
+   "supermemory-company-brain@tuned": 0.9047619047619048,
+   "graphiti@tuned": 1.0,
+   "basic-memory@tuned": 0.8571428571428571,
+   "mcp-memory@tuned": 0.6190476190476191,
+   "hindsight@tuned": 0.7619047619047619,
+   "orp": 0.9523809523809523,
+   "cognee@tuned": 0.5714285714285714,
+   "memoryos@tuned": 0.42857142857142855,
+   "bm25": 0.9523809523809523,
+   "supermemory@tuned": 0.47619047619047616,
+   "sylph@tuned": 0.19047619047619047,
+   "gbrain@tuned": 0.47619047619047616,
+   "onyx@tuned": 0.5714285714285714,
+   "langmem@tuned": 0.9047619047619048,
+   "mem0@tuned": 0.9523809523809523,
+   "oracle": 0.9047619047619048,
+   "memos@tuned": 0.5714285714285714
+  },
+  "temporal-reasoning": {
+   "memoryos@tuned": 0.10810810810810811,
+   "gbrain@tuned": 0.02702702702702703,
+   "hindsight@tuned": 0.6486486486486487,
+   "orp": 0.4594594594594595,
+   "sylph@tuned": 0.0,
+   "bm25": 0.4594594594594595,
+   "letta@tuned": 0.40540540540540543,
+   "supermemory@tuned": 0.21621621621621623,
+   "onyx@tuned": 0.1891891891891892,
+   "supermemory-company-brain@tuned": 0.43243243243243246,
+   "graphiti@tuned": 0.40540540540540543,
+   "oracle": 0.6216216216216216,
+   "memos@tuned": 0.05405405405405406,
+   "mem0@tuned": 0.4594594594594595,
+   "cognee@tuned": 0.08108108108108109,
+   "mcp-memory@tuned": 0.2702702702702703,
+   "basic-memory@tuned": 0.13513513513513514,
+   "langmem@tuned": 0.10810810810810811
+  }
+ },
+ "n_by_category": {
+  "knowledge-update": 24,
+  "multi-session": 40,
+  "single-session-assistant": 18,
+  "single-session-preference": 10,
+  "single-session-user": 21,
+  "temporal-reasoning": 37
+ },
+ "judge_agreement": {
+  "n": 0,
+  "agreement": null,
+  "kappa": null
+ },
+ "tokens": {
+  "basic-memory@tuned": 820.2133333333334,
+  "bm25": 985.9866666666667,
+  "cognee@tuned": 994.7466666666667,
+  "gbrain@tuned": 875.8533333333334,
+  "graphiti@tuned": 988.8066666666666,
+  "hindsight@tuned": 968.4,
+  "langmem@tuned": 990.4933333333333,
+  "letta@tuned": 984.9133333333333,
+  "mcp-memory@tuned": 974.2933333333333,
+  "mem0@tuned": 990.0733333333334,
+  "memoryos@tuned": 987.9466666666667,
+  "memos@tuned": 954.1133333333333,
+  "onyx@tuned": 899.0733333333334,
+  "oracle": 187.84666666666666,
+  "orp": 989.3533333333334,
+  "supermemory-company-brain@tuned": 987.1533333333333,
+  "supermemory@tuned": 113.69333333333333,
+  "sylph@tuned": 527.8333333333334
+ },
+ "run": {
+  "provider": "deepseek",
+  "model": "deepseek-chat"
+ }
+}
