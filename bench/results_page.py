@@ -134,26 +134,27 @@ def main():
   {verdict_rows("hotpot", hot, tn, hm)}
   <div class="charts">{bars(hot, names, 'ans@1000', 'Answer recall in 1,000 tokens (Ans@1000)')}</div>
 </section>""")
-    LM = load("summary_lmem.json").get("lmem", {}).get("test", {})
-    if "orp" in LM:
+    for lb, ltitle, lsize in (("lmes", "LongMemEval-S", "38 to 62 sessions, about 490 turns and 115,000 tokens"),
+                              ("lmem", "LongMemEval-M", "about 475 sessions, 4,900 turns and 1.2 million tokens")):
+        LM = load(f"summary_{lb}.json").get(lb, {}).get("test", {})
+        if "orp" not in LM:
+            continue
         tn = [f"{n}@tuned" for n in BASE if f"{n}@tuned" in LM]
         lm = [(k, h) for k, h in METRICS if k in HEAD] + [("ans@4000", "Ans@4000"), ("sess_all@5", "SessAll@5")]
-        _, t = verdict("lmem", LM, tn, lm)
-        tallies["LongMemEval-M (official)"] = t
-        lq = load("lmem_quirks.json")
-        g = set(lq.get("gold_session_after_question", []))
-        sub = {k: {m: mean_excl("lmem", k, m, g) for m, _ in lm} for k in ["orp"] + tn}
-        _, tg = verdict("lmem", sub, tn, lm, g)
+        _, t = verdict(lb, LM, tn, lm)
+        tallies[f"{ltitle} (official)"] = t
+        g = set(load(f"{lb}_quirks.json").get("gold_session_after_question", []))
+        sub = {k: {m: mean_excl(lb, k, m, g) for m, _ in lm} for k in ["orp"] + tn}
+        _, tg = verdict(lb, sub, tn, lm, g)
         names = ["orp", "orp-rrf"] + sorted(tn, key=lambda x: -(LM[x].get("recall@1000") or 0)) + ["bm25", "dense"]
         sections.append(f"""
-<section id="lmem" aria-labelledby="h-lmem">
-  <h2 id="h-lmem">LongMemEval-M, official haystacks <span class="tag">new data</span></h2>
-  <p class="lede">The official LongMemEval-M histories: about 475 sessions, 4,900 turns and 1.2 million tokens behind
-  every question, against 40 sessions in LME-R. Same {LM['orp']['n']} test questions. Every system ran once with
-  frozen settings; nothing was tuned on this data.</p>
+<section id="{lb}" aria-labelledby="h-{lb}">
+  <h2 id="h-{lb}">{ltitle}, official haystacks <span class="tag">new data</span></h2>
+  <p class="lede">The official {ltitle} histories: {lsize} behind every question. Same {LM['orp']['n']} test
+  questions as LME-R. Every system ran once with frozen settings; nothing was tuned on this data.</p>
   <p class="tally"><span class="pill win">{t['win']} better</span><span class="pill tie">{t['tie']} level</span>
   <span class="pill loss">{t['loss']} worse</span> against the best of the 15 on each metric</p>
-  {verdict_rows("lmem", LM, tn, lm)}
+  {verdict_rows(lb, LM, tn, lm)}
   <p class="note">In {len(g)} of these questions the official data dates a gold evidence session after the question.
   ORP honours the as-of time and cannot return it. Without them: ORP better on {tg['win']}, level on {tg['tie']},
   worse on {tg['loss']}.</p>
@@ -392,7 +393,7 @@ footer {{ font-size: 13px; color: var(--muted); border-top: 1px solid var(--rule
     text. A strong neural embedder could change the order.</li>
     <li>ORP had a larger tuning budget than any single baseline. The hand-tuned, model-free ORP variant is shown
     alongside for a like-for-like comparison of architecture.</li>
-    <li>LME-R is a reconstruction of LongMemEval; the LongMemEval-M section uses the official haystacks. Recall
+    <li>LME-R is a reconstruction of LongMemEval; the LongMemEval-S and -M sections use the official haystacks. Recall
     numbers here are not comparable to published LoCoMo or LongMemEval answer accuracies.</li>
     <li>Test results from the pre-audit version had been seen before the current engine was built, so LoCoMo and LME-R
     are not pristine held-out sets for it. HotpotQA-50 is.</li>
