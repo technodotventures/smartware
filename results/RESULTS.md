@@ -708,6 +708,32 @@ ORP configuration chosen on dev: `orp-ft+facts`. Against the best of the 15: **0
 | Workspace scope only (no per-item ACL) | 84.4 | 100.0 | 87.3 | – |
 | Per-item ACL on raw units, summaries workspace-scoped | 96.4 | 79.7 | 28.1 | – |
 
+## Blind QA v3 on official LongMemEval-S (pre-registered; all 15 baselines)
+
+150 stratified test questions, 1,000-token contexts, day-precision question times for every system. Claude Sonnet readers answered from each context without knowing the system; separate Sonnet judges graded with LongMemEval's official per-type rules, also blind. A second judge pass on 540 items agreed on 99.8% (Cohen's kappa 0.996). Protocol: `results/qa3/PREREGISTRATION.md`.
+
+| System | Accuracy | ORP minus system [95% CI] | Holm p | knowledge-update | multi-session | single-session-assistant | single-session-preference | single-session-user | temporal-reasoning |
+|---|---|---|---|---|---|---|---|---|---|
+| Oracle (gold evidence only) | 95.3 | – | – | 95.8 | 95.0 | 94.4 | 100.0 | 100.0 | 91.9 |
+| **ORP reference engine** | 80.7 | – | – | 91.7 | 65.0 | 77.8 | 80.0 | 100.0 | 81.1 |
+| Graphiti (Zep) | 72.7 | +8.0 [+2.0, +14.7] | 0.031 | 87.5 | 47.5 | 83.3 | 90.0 | 100.0 | 64.9 |
+| mem0 | 72.7 | +8.0 [+2.0, +14.0] | 0.031 | 91.7 | 45.0 | 72.2 | 90.0 | 95.2 | 73.0 |
+| Hindsight | 72.0 | +8.7 [+2.7, +15.3] | 0.026 | 75.0 | 62.5 | 55.6 | 80.0 | 81.0 | 81.1 |
+| _BM25 over turns (reference)_ | 71.3 | +9.3 [+2.7, +16.0] | 0.022 | 79.2 | 45.0 | 94.4 | 70.0 | 95.2 | 70.3 |
+| Letta | 68.0 | +12.7 [+6.0, +19.3] | 0.002 | 83.3 | 37.5 | 88.9 | 70.0 | 95.2 | 64.9 |
+| Supermemory Company Brain | 62.7 | +18.0 [+11.3, +25.3] | 0.000 | 70.8 | 35.0 | 94.4 | 60.0 | 90.5 | 56.8 |
+| LangMem | 62.0 | +18.7 [+10.7, +26.7] | 0.000 | 75.0 | 47.5 | 77.8 | 90.0 | 95.2 | 35.1 |
+| MCP memory server | 48.0 | +32.7 [+24.7, +41.3] | 0.000 | 66.7 | 30.0 | 61.1 | 30.0 | 61.9 | 45.9 |
+| Basic Memory | 42.0 | +38.7 [+30.0, +47.3] | 0.000 | 37.5 | 7.5 | 94.4 | 50.0 | 85.7 | 29.7 |
+| MemoryOS | 39.3 | +41.3 [+32.0, +50.0] | 0.000 | 33.3 | 17.5 | 83.3 | 70.0 | 52.4 | 29.7 |
+| Cognee | 38.7 | +42.0 [+32.7, +50.7] | 0.000 | 50.0 | 5.0 | 94.4 | 60.0 | 61.9 | 21.6 |
+| Onyx | 35.3 | +45.3 [+36.7, +54.0] | 0.000 | 33.3 | 15.0 | 33.3 | 60.0 | 57.1 | 40.5 |
+| MemOS | 28.0 | +52.7 [+44.0, +61.3] | 0.000 | 29.2 | 5.0 | 77.8 | 50.0 | 57.1 | 5.4 |
+| Supermemory | 27.3 | +53.3 [+44.7, +61.3] | 0.000 | 41.7 | 2.5 | 66.7 | 30.0 | 47.6 | 13.5 |
+| GBrain | 25.3 | +55.3 [+46.7, +63.3] | 0.000 | 29.2 | 0.0 | 77.8 | 40.0 | 47.6 | 8.1 |
+| Sylph | 10.0 | +70.7 [+62.7, +78.0] | 0.000 | 12.5 | 2.5 | 16.7 | 40.0 | 19.0 | 0.0 |
+| _questions_ | | | | 24 | 40 | 18 | 10 | 21 | 37 |
+
 ## Blind QA (Claude Sonnet readers and judges, 1,000-token contexts)
 
 | System | LoCoMo acc. | LME-R acc. |

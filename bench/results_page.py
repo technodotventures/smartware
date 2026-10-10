@@ -85,6 +85,34 @@ def main():
         hot.update(load(fn).get("hotpot", {}).get("test", {}))
     quirks = set(load("lme_quirks.json").get("excluded", []))
     sections, tallies = [], {}
+    Q3 = load("qa3_blind.json")
+    if Q3:
+        acc, cmp_ = Q3["accuracy"], Q3["orp_minus"]
+        qs = {n: {"acc": v} for n, v in acc.items()}
+        best = max((n for n in acc if n not in ("orp", "oracle")), key=lambda n: acc[n])
+        wins = sum(1 for c in cmp_.values() if c["ci95"][0] > 0 and c["p_holm"] < 0.05)
+        rows = "".join(
+            f'<tr class="{"orp" if n == "orp" else "ref" if n in ("oracle", "bm25") else ""}"><th scope="row">'
+            f'{"Oracle (gold evidence only)" if n == "oracle" else esc(plain(n))}</th><td>{pct(acc[n])}</td><td>'
+            + (f'{cmp_[n]["diff"] * 100:+.1f} <span class="muted">[{cmp_[n]["ci95"][0] * 100:+.1f}, '
+               f'{cmp_[n]["ci95"][1] * 100:+.1f}]</span></td><td>{cmp_[n]["p_holm"]:.3f}' if n in cmp_ else "–</td><td>–")
+            + "</td></tr>" for n in sorted(acc, key=lambda x: -acc[x]))
+        ja = Q3["judge_agreement"]
+        sections.append(f"""
+<section id="qa3" aria-labelledby="h-qa3">
+  <h2 id="h-qa3">Blind question answering on official LongMemEval-S <span class="tag">pre-registered</span></h2>
+  <p class="lede">The end-to-end test: {Q3['n_questions']} test questions, every one of the 15 systems plus BM25 and
+  ORP, 1,000 tokens of context each. Claude Sonnet readers answered without knowing which system produced the context;
+  separate judges graded with LongMemEval's official rules, also blind. A second judge pass agreed on
+  {ja['agreement'] * 100:.1f}% of {ja['n']} items.</p>
+  <p class="tally"><span class="pill win">ORP {pct(acc['orp'])}%</span> against {pct(acc[best])}% for the best of the
+  15 ({esc(plain(best))}); significantly ahead of {wins} of {len(cmp_)} systems after Holm correction. Gold evidence
+  alone scores {pct(acc['oracle'])}%.</p>
+  <div class="charts">{bars(qs, list(acc), 'acc', 'Questions answered correctly (%)')}</div>
+  <details><summary>Every system, with ORP's lead and 95% interval</summary><div class="tw"><table><thead><tr>
+  <th>System</th><th>Accuracy</th><th>ORP minus system [95% CI]</th><th>Holm p</th></tr></thead><tbody>{rows}
+  </tbody></table></div></details>
+</section>""")
     for b, title, blurb in (
             ("locomo", "LoCoMo-10", "Long multi-session conversations between two people. 1,152 test questions over "
                                     "7 held-out conversations; evidence is the turn that answers the question."),

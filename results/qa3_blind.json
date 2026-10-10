@@ -1,0 +1,324 @@
+{
+ "n_questions": 150,
+ "accuracy": {
+  "basic-memory@tuned": 0.42,
+  "bm25": 0.7133333333333334,
+  "cognee@tuned": 0.38666666666666666,
+  "gbrain@tuned": 0.25333333333333335,
+  "graphiti@tuned": 0.7266666666666667,
+  "hindsight@tuned": 0.72,
+  "langmem@tuned": 0.62,
+  "letta@tuned": 0.68,
+  "mcp-memory@tuned": 0.48,
+  "mem0@tuned": 0.7266666666666667,
+  "memoryos@tuned": 0.3933333333333333,
+  "memos@tuned": 0.28,
+  "onyx@tuned": 0.35333333333333333,
+  "oracle": 0.9533333333333334,
+  "orp": 0.8066666666666666,
+  "supermemory-company-brain@tuned": 0.6266666666666667,
+  "supermemory@tuned": 0.2733333333333333,
+  "sylph@tuned": 0.1
+ },
+ "orp_minus": {
+  "basic-memory@tuned": {
+   "diff": 0.38666666666666666,
+   "ci95": [
+    0.3,
+    0.47333333333333333
+   ],
+   "p": 0.0,
+   "p_holm": 0.0
+  },
+  "bm25": {
+   "diff": 0.09333333333333334,
+   "ci95": [
+    0.02666666666666667,
+    0.16
+   ],
+   "p": 0.0054,
+   "p_holm": 0.0216
+  },
+  "cognee@tuned": {
+   "diff": 0.42,
+   "ci95": [
+    0.32666666666666666,
+    0.5066666666666667
+   ],
+   "p": 0.0,
+   "p_holm": 0.0
+  },
+  "gbrain@tuned": {
+   "diff": 0.5533333333333333,
+   "ci95": [
+    0.4666666666666667,
+    0.6333333333333333
+   ],
+   "p": 0.0,
+   "p_holm": 0.0
+  },
+  "graphiti@tuned": {
+   "diff": 0.08,
+   "ci95": [
+    0.02,
+    0.14666666666666667
+   ],
+   "p": 0.0154,
+   "p_holm": 0.0308
+  },
+  "hindsight@tuned": {
+   "diff": 0.08666666666666667,
+   "ci95": [
+    0.02666666666666667,
+    0.15333333333333332
+   ],
+   "p": 0.0086,
+   "p_holm": 0.0258
+  },
+  "langmem@tuned": {
+   "diff": 0.18666666666666668,
+   "ci95": [
+    0.10666666666666667,
+    0.26666666666666666
+   ],
+   "p": 0.0,
+   "p_holm": 0.0
+  },
+  "letta@tuned": {
+   "diff": 0.12666666666666668,
+   "ci95": [
+    0.06,
+    0.19333333333333333
+   ],
+   "p": 0.0004,
+   "p_holm": 0.002
+  },
+  "mcp-memory@tuned": {
+   "diff": 0.32666666666666666,
+   "ci95": [
+    0.24666666666666667,
+    0.41333333333333333
+   ],
+   "p": 0.0,
+   "p_holm": 0.0
+  },
+  "mem0@tuned": {
+   "diff": 0.08,
+   "ci95": [
+    0.02,
+    0.14
+   ],
+   "p": 0.016,
+   "p_holm": 0.0308
+  },
+  "memoryos@tuned": {
+   "diff": 0.41333333333333333,
+   "ci95": [
+    0.32,
+    0.5
+   ],
+   "p": 0.0,
+   "p_holm": 0.0
+  },
+  "memos@tuned": {
+   "diff": 0.5266666666666666,
+   "ci95": [
+    0.44,
+    0.6133333333333333
+   ],
+   "p": 0.0,
+   "p_holm": 0.0
+  },
+  "onyx@tuned": {
+   "diff": 0.4533333333333333,
+   "ci95": [
+    0.36666666666666664,
+    0.54
+   ],
+   "p": 0.0,
+   "p_holm": 0.0
+  },
+  "supermemory-company-brain@tuned": {
+   "diff": 0.18,
+   "ci95": [
+    0.11333333333333333,
+    0.25333333333333335
+   ],
+   "p": 0.0,
+   "p_holm": 0.0
+  },
+  "supermemory@tuned": {
+   "diff": 0.5333333333333333,
+   "ci95": [
+    0.44666666666666666,
+    0.6133333333333333
+   ],
+   "p": 0.0,
+   "p_holm": 0.0
+  },
+  "sylph@tuned": {
+   "diff": 0.7066666666666667,
+   "ci95": [
+    0.6266666666666667,
+    0.78
+   ],
+   "p": 0.0,
+   "p_holm": 0.0
+  }
+ },
+ "by_category": {
+  "knowledge-update": {
+   "langmem@tuned": 0.75,
+   "basic-memory@tuned": 0.375,
+   "mcp-memory@tuned": 0.6666666666666666,
+   "orp": 0.9166666666666666,
+   "letta@tuned": 0.8333333333333334,
+   "memos@tuned": 0.2916666666666667,
+   "bm25": 0.7916666666666666,
+   "oracle": 0.9583333333333334,
+   "supermemory@tuned": 0.4166666666666667,
+   "hindsight@tuned": 0.75,
+   "onyx@tuned": 0.3333333333333333,
+   "mem0@tuned": 0.9166666666666666,
+   "memoryos@tuned": 0.3333333333333333,
+   "gbrain@tuned": 0.2916666666666667,
+   "supermemory-company-brain@tuned": 0.7083333333333334,
+   "cognee@tuned": 0.5,
+   "graphiti@tuned": 0.875,
+   "sylph@tuned": 0.125
+  },
+  "multi-session": {
+   "memos@tuned": 0.05,
+   "bm25": 0.45,
+   "oracle": 0.95,
+   "sylph@tuned": 0.025,
+   "gbrain@tuned": 0.0,
+   "orp": 0.65,
+   "mem0@tuned": 0.45,
+   "letta@tuned": 0.375,
+   "graphiti@tuned": 0.475,
+   "basic-memory@tuned": 0.075,
+   "langmem@tuned": 0.475,
+   "mcp-memory@tuned": 0.3,
+   "memoryos@tuned": 0.175,
+   "cognee@tuned": 0.05,
+   "hindsight@tuned": 0.625,
+   "supermemory@tuned": 0.025,
+   "onyx@tuned": 0.15,
+   "supermemory-company-brain@tuned": 0.35
+  },
+  "single-session-assistant": {
+   "memos@tuned": 0.7777777777777778,
+   "letta@tuned": 0.8888888888888888,
+   "oracle": 0.9444444444444444,
+   "sylph@tuned": 0.16666666666666666,
+   "orp": 0.7777777777777778,
+   "mcp-memory@tuned": 0.6111111111111112,
+   "mem0@tuned": 0.7222222222222222,
+   "supermemory-company-brain@tuned": 0.9444444444444444,
+   "graphiti@tuned": 0.8333333333333334,
+   "langmem@tuned": 0.7777777777777778,
+   "gbrain@tuned": 0.7777777777777778,
+   "hindsight@tuned": 0.5555555555555556,
+   "cognee@tuned": 0.9444444444444444,
+   "onyx@tuned": 0.3333333333333333,
+   "basic-memory@tuned": 0.9444444444444444,
+   "memoryos@tuned": 0.8333333333333334,
+   "bm25": 0.9444444444444444,
+   "supermemory@tuned": 0.6666666666666666
+  },
+  "single-session-preference": {
+   "supermemory-company-brain@tuned": 0.6,
+   "mcp-memory@tuned": 0.3,
+   "graphiti@tuned": 0.9,
+   "basic-memory@tuned": 0.5,
+   "mem0@tuned": 0.9,
+   "onyx@tuned": 0.6,
+   "langmem@tuned": 0.9,
+   "oracle": 1.0,
+   "supermemory@tuned": 0.3,
+   "hindsight@tuned": 0.8,
+   "gbrain@tuned": 0.4,
+   "bm25": 0.7,
+   "memos@tuned": 0.5,
+   "memoryos@tuned": 0.7,
+   "letta@tuned": 0.7,
+   "cognee@tuned": 0.6,
+   "sylph@tuned": 0.4,
+   "orp": 0.8
+  },
+  "single-session-user": {
+   "letta@tuned": 0.9523809523809523,
+   "supermemory-company-brain@tuned": 0.9047619047619048,
+   "graphiti@tuned": 1.0,
+   "basic-memory@tuned": 0.8571428571428571,
+   "mcp-memory@tuned": 0.6190476190476191,
+   "hindsight@tuned": 0.8095238095238095,
+   "orp": 1.0,
+   "cognee@tuned": 0.6190476190476191,
+   "memoryos@tuned": 0.5238095238095238,
+   "bm25": 0.9523809523809523,
+   "supermemory@tuned": 0.47619047619047616,
+   "sylph@tuned": 0.19047619047619047,
+   "gbrain@tuned": 0.47619047619047616,
+   "onyx@tuned": 0.5714285714285714,
+   "langmem@tuned": 0.9523809523809523,
+   "mem0@tuned": 0.9523809523809523,
+   "oracle": 1.0,
+   "memos@tuned": 0.5714285714285714
+  },
+  "temporal-reasoning": {
+   "memoryos@tuned": 0.2972972972972973,
+   "gbrain@tuned": 0.08108108108108109,
+   "hindsight@tuned": 0.8108108108108109,
+   "orp": 0.8108108108108109,
+   "sylph@tuned": 0.0,
+   "bm25": 0.7027027027027027,
+   "letta@tuned": 0.6486486486486487,
+   "supermemory@tuned": 0.13513513513513514,
+   "onyx@tuned": 0.40540540540540543,
+   "supermemory-company-brain@tuned": 0.5675675675675675,
+   "graphiti@tuned": 0.6486486486486487,
+   "oracle": 0.918918918918919,
+   "memos@tuned": 0.05405405405405406,
+   "mem0@tuned": 0.7297297297297297,
+   "cognee@tuned": 0.21621621621621623,
+   "mcp-memory@tuned": 0.4594594594594595,
+   "basic-memory@tuned": 0.2972972972972973,
+   "langmem@tuned": 0.35135135135135137
+  }
+ },
+ "n_by_category": {
+  "knowledge-update": 24,
+  "multi-session": 40,
+  "single-session-assistant": 18,
+  "single-session-preference": 10,
+  "single-session-user": 21,
+  "temporal-reasoning": 37
+ },
+ "judge_agreement": {
+  "n": 540,
+  "agreement": 0.9981481481481481,
+  "kappa": 0.9962941612451618
+ },
+ "tokens": {
+  "basic-memory@tuned": 820.2133333333334,
+  "bm25": 985.9866666666667,
+  "cognee@tuned": 994.7466666666667,
+  "gbrain@tuned": 875.8533333333334,
+  "graphiti@tuned": 988.8066666666666,
+  "hindsight@tuned": 968.4,
+  "langmem@tuned": 990.4933333333333,
+  "letta@tuned": 984.9133333333333,
+  "mcp-memory@tuned": 974.2933333333333,
+  "mem0@tuned": 990.0733333333334,
+  "memoryos@tuned": 987.9466666666667,
+  "memos@tuned": 954.1133333333333,
+  "onyx@tuned": 899.0733333333334,
+  "oracle": 187.84666666666666,
+  "orp": 989.3533333333334,
+  "supermemory-company-brain@tuned": 987.1533333333333,
+  "supermemory@tuned": 113.69333333333333,
+  "sylph@tuned": 527.8333333333334
+ }
+}

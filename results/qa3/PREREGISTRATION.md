@@ -26,3 +26,11 @@ Accuracy per system (overall and per question type), ORP minus each system with 
 ceiling, judge agreement. All raw answers, verdicts and the uid-to-system key are kept in `results/qa3/`.
 No question, system, prompt or rule is changed after export. Failed reader batches are rerun with the same brief and
 logged; nothing is dropped silently.
+
+## Outcome (10 Oct 2026)
+
+All 2,700 reader answers and verdicts collected (one item omitted by its reader was rerun alone with the same brief;
+`RERUNS.log`). ORP 80.7% correct; best of the 15: Graphiti and mem0 72.7%, Hindsight 72.0%; BM25 71.3%; oracle
+95.3%. ORP minus each system is positive with a 95% interval above zero for all 16 comparisons, Holm-adjusted p at
+most 0.031. Second judge agreement 99.8% on 540 items (kappa 0.996). Weakest type for ORP: single-session-assistant
+(77.8% against BM25's 94.4%), where long assistant replies are cut to snippets.

@@ -378,6 +378,26 @@ def main():
                 md.append(f"| {lab[k]} | {f(v['recall@1000'])} | {f(v['text_leak'])} | {f(v['answer_leak'])} | "
                           f"{f(v['rank_side_channel'])} |")
         md.append("")
+    Q3 = load("qa3_blind.json")
+    if Q3:
+        acc, cmp_ = Q3["accuracy"], Q3["orp_minus"]
+        cats = list(Q3["by_category"])
+        md += ["## Blind QA v3 on official LongMemEval-S (pre-registered; all 15 baselines)", "",
+               f"{Q3['n_questions']} stratified test questions, 1,000-token contexts, day-precision question times for "
+               "every system. Claude Sonnet readers answered from each context without knowing the system; separate "
+               "Sonnet judges graded with LongMemEval's official per-type rules, also blind. A second judge pass on "
+               f"{Q3['judge_agreement']['n']} items agreed on {Q3['judge_agreement']['agreement'] * 100:.1f}% "
+               f"(Cohen's kappa {Q3['judge_agreement']['kappa']:.3f}). Protocol: `results/qa3/PREREGISTRATION.md`.", "",
+               "| System | Accuracy | ORP minus system [95% CI] | Holm p | " + " | ".join(cats) + " |",
+               "|---|---|---|---|" + "---|" * len(cats)]
+        for sname in sorted(acc, key=lambda x: -acc[x]):
+            c = cmp_.get(sname)
+            lab = "Oracle (gold evidence only)" if sname == "oracle" else label(sname.split("@")[0])
+            md.append(f"| {lab} | {f(acc[sname])} | " + (f"{c['diff'] * 100:+.1f} [{c['ci95'][0] * 100:+.1f}, "
+                      f"{c['ci95'][1] * 100:+.1f}] | {c['p_holm']:.3f}" if c else "– | –") + " | " +
+                      " | ".join(f(Q3["by_category"][ct].get(sname)) for ct in cats) + " |")
+        md.append("| _questions_ | | | | " + " | ".join(str(Q3["n_by_category"][ct]) for ct in cats) + " |")
+        md.append("")
     Q = load("qa_blind.json")
     if Q:
         md += ["## Blind QA (Claude Sonnet readers and judges, 1,000-token contexts)", "",
