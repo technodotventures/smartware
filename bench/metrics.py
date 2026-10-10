@@ -81,6 +81,7 @@ def score_query(items: list[Item], gold_turns: set[str], gold_sessions: set[str]
                 answer: str = "", turn_text: dict[str, str] | None = None) -> dict:
     out = {}
     ans = set(terms(answer)) if answer else set()
+    answ = {w for w in ans if not w.isdigit()}
     for prefix, counter, skip in (("", chars4, True), ("s_", count_tokens, False)):
         for b in BUDGETS:
             cov, used, kept = pack(items, b, counter, skip)
@@ -89,6 +90,8 @@ def score_query(items: list[Item], gold_turns: set[str], gold_sessions: set[str]
                 for it in kept:
                     ctx.update(terms(it.text))
                 out[f"{prefix}ans@{b}"] = len(ans & ctx) / len(ans)
+                if not prefix and answ:  # answer words without bare numbers (stray list numbers, scores, ids)
+                    out[f"answ@{b}"] = len(answ & ctx) / len(answ)
             if gold_turns:
                 hit = len(cov & gold_turns)
                 out[f"{prefix}recall@{b}"] = hit / len(gold_turns)

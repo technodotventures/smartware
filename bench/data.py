@@ -205,20 +205,26 @@ def lme_m_questions(d: str = LME_M) -> list[dict]:
     return [json.loads(l) for l in gzip.open(os.path.join(d, "questions.jsonl.gz"), "rt", encoding="utf-8")]
 
 
-def load_lme_s(limit: int | None = None, split: str | None = None):
+def _day_end(t: datetime) -> datetime:
+    return t.replace(hour=23, minute=59, second=59, microsecond=0)
+
+
+def load_lme_s(limit: int | None = None, split: str | None = None, day: bool = False):
     """Official LongMemEval-S (`longmemeval_s_cleaned.json`): the same 500 questions, each with its own official
     haystack of 38-62 sessions (about 115k tokens). Compacted with tools/compact_lme_m.py; loaded like LongMemEval-M."""
-    return load_lme_m(limit, split, d=LME_S)
+    return load_lme_m(limit, split, d=LME_S, day=day)
 
 
-def load_lme_m(limit: int | None = None, split: str | None = None, d: str = LME_M):
+def load_lme_m(limit: int | None = None, split: str | None = None, d: str = LME_M, day: bool = False):
     """Official LongMemEval-M (xiaowu0162/longmemeval, `longmemeval_m_cleaned.json`): the same 500 questions as
     LongMemEval-S and the oracle file, each with its own official haystack of about 475 sessions (about 4,900 turns,
     1.2M tokens). Compacted on the user's machine by deduplicating sessions shared between questions (no session id
     had two different contents). Same question ids as LME-R, so the same hash-based dev/test split. Abstention
     questions are excluded, as for LME-R. Turn timestamps follow LME-R: the session date plus 60 s per turn.
 
-    Yields tasks lazily (each haystack is large): call again for a fresh pass."""
+    Yields tasks lazily (each haystack is large): call again for a fresh pass. `day=True` sets every question time to
+    the end of its calendar day: in the official data every gold session dated after its question falls on the same
+    day (0.6-19 hours later), so question times are only day-precise. Applied to every system alike."""
     sess = _lme_m_sessions(d)
     n = 0
     for q in lme_m_questions(d):
@@ -232,6 +238,8 @@ def load_lme_m(limit: int | None = None, split: str | None = None, d: str = LME_
         n += 1
         qid = q["question_id"]
         qtime = _parse_lme_dt(q["question_date"])
+        if day:  # day-precision question times: every session dated on the question's day counts as before it
+            qtime = _day_end(qtime)
         order = sorted(zip(q["haystack_session_ids"], q["haystack_dates"]), key=lambda x: (_parse_lme_dt(x[1]), x[0]))
         turns, sts, gold = [], {}, set()
         ans = set(q["answer_session_ids"])

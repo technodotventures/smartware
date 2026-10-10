@@ -57,6 +57,8 @@ def get_tasks(bench: str, split: str = "all"):
         return load_lme_m(split=split)
     if bench == "lmes":  # official LongMemEval-S, streamed the same way
         return load_lme_s(split=split)
+    if bench in ("lmesd", "lmemd"):  # the same with day-precision question times, for every system
+        return (load_lme_s if bench == "lmesd" else load_lme_m)(split=split, day=True)
     if bench not in _TASKS:
         _TASKS[bench] = {"locomo": load_locomo, "lme": load_lme, "hotpot": load_hotpot}[bench]()
     return _TASKS[bench]
@@ -126,7 +128,7 @@ def run_one(args):
                 rows.append(m)
                 part.write(json.dumps(m) + "\n")
                 part.flush()
-            if bench in ("lmem", "lmes"):  # large haystacks: drop the embedding cache between them (outputs unchanged)
+            if bench in ("lmem", "lmes", "lmemd", "lmesd"):  # large haystacks: drop the embedding cache between them (outputs unchanged)
                 enc.dense._cache.clear()
     except Exception:
         traceback.print_exc()
