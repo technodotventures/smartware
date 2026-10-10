@@ -1,0 +1,1052 @@
+[
+{
+"uid": "qa00725",
+"question": "How many days passed between the day I replaced my spark plugs and the day I participated in the Turbocharged Tuesdays auto racking event?",
+"question_type": "temporal-reasoning",
+"gold": "29 days. 30 days (including the last day) is also acceptable.",
+"answer": "29 days (February 14 to March 15, 2023)"
+},
+{
+"uid": "qa04262",
+"question": "How many months have passed since I participated in two charity events in a row, on consecutive days?",
+"question_type": "temporal-reasoning",
+"gold": "2",
+"answer": "I don't know"
+},
+{
+"uid": "qa03355",
+"question": "How many copies of my favorite artist's debut album were released worldwide?",
+"question_type": "single-session-user",
+"gold": "500",
+"answer": "500 copies."
+},
+{
+"uid": "qa03513",
+"question": "What brand of BBQ sauce am I currently obsessed with?",
+"question_type": "knowledge-update",
+"gold": "Kansas City Masterpiece",
+"answer": "Kansas City Masterpiece"
+},
+{
+"uid": "qa02603",
+"question": "How many musical instruments do I currently own?",
+"question_type": "multi-session",
+"gold": "I currently own 4 musical instruments. I've had the Fender Stratocaster electric guitar for 5 years, the Yamaha FG800 acoustic guitar for 8 years, the 5-piece Pearl Export drum set for an unspecified amount of time, and the Korg B1 piano for 3 years.",
+"answer": "2 (a Fender Stratocaster guitar and a Korg B1 piano)"
+},
+{
+"uid": "qa03870",
+"question": "I wanted to follow up on our previous conversation about the fusion breakthrough at Lawrence Livermore National Laboratory. Can you remind me who is the President's Chief Advisor for Science and Technology mentioned in the article?",
+"question_type": "single-session-assistant",
+"gold": "Dr. Arati Prabhakar",
+"answer": "Dr. Arati Prabhakar"
+},
+{
+"uid": "qa03506",
+"question": "Which three events happened in the order from first to last: the day I helped my friend prepare the nursery, the day I helped my cousin pick out stuff for her baby shower, and the day I ordered a customized phone case for my friend's birthday?",
+"question_type": "temporal-reasoning",
+"gold": "First, I helped my friend prepare the nursery, then I helped my cousin pick out stuff for her baby shower, and lastly, I ordered a customized phone case for my friend's birthday.",
+"answer": "I don't know"
+},
+{
+"uid": "qa02221",
+"question": "How many days passed between the day I replaced my spark plugs and the day I participated in the Turbocharged Tuesdays auto racking event?",
+"question_type": "temporal-reasoning",
+"gold": "29 days. 30 days (including the last day) is also acceptable.",
+"answer": "I don't know"
+},
+{
+"uid": "qa01240",
+"question": "What was the significant buisiness milestone I mentioned four weeks ago?",
+"question_type": "temporal-reasoning",
+"gold": "I signed a contract with my first client.",
+"answer": "I don't know"
+},
+{
+"uid": "qa00136",
+"question": "How long had I been a member of 'Book Lovers Unite' when I attended the meetup?",
+"question_type": "temporal-reasoning",
+"gold": "Two weeks",
+"answer": "I don't know"
+},
+{
+"uid": "qa02347",
+"question": "How many bikes do I own?",
+"question_type": "single-session-user",
+"gold": "three",
+"answer": "Three (a road bike, a mountain bike and a commuter bike)."
+},
+{
+"uid": "qa00324",
+"question": "How many skeins of worsted weight yarn did I find in my stash?",
+"question_type": "single-session-user",
+"gold": "17",
+"answer": "17 skeins"
+},
+{
+"uid": "qa02307",
+"question": "Where did I buy my new bookshelf from?",
+"question_type": "single-session-user",
+"gold": "IKEA",
+"answer": "IKEA"
+},
+{
+"uid": "qa02448",
+"question": "How much older am I than the average age of employees in my department?",
+"question_type": "multi-session",
+"gold": "2.5 years",
+"answer": "I don't know"
+},
+{
+"uid": "qa00605",
+"question": "I wanted to follow up on our previous conversation about mindfulness techniques. You mentioned some great resources for guided imagery exercises, can you remind me of the website that had free exercises like 'The Mountain Meditation' and 'The Body Scan Meditation'?",
+"question_type": "single-session-assistant",
+"gold": "Mindful.org.",
+"answer": "Mindful.org"
+},
+{
+"uid": "qa04277",
+"question": "How many weddings have I attended in this year?",
+"question_type": "multi-session",
+"gold": "I attended three weddings. The couples were Rachel and Mike, Emily and Sarah, and Jen and Tom.",
+"answer": "I don't know"
+},
+{
+"uid": "qa03026",
+"question": "Where did I buy my new bookshelf from?",
+"question_type": "single-session-user",
+"gold": "IKEA",
+"answer": "IKEA"
+},
+{
+"uid": "qa00552",
+"question": "What is my preferred gin-to-vermouth ratio for a classic gin martini?",
+"question_type": "single-session-user",
+"gold": "3:1",
+"answer": "3:1 gin to vermouth, with a dash of citrus bitters"
+},
+{
+"uid": "qa03932",
+"question": "How long have I had my cat, Luna?",
+"question_type": "knowledge-update",
+"gold": "9 months",
+"answer": "About 9 months."
+},
+{
+"uid": "qa04071",
+"question": "Where do I currently keep my old sneakers?",
+"question_type": "knowledge-update",
+"gold": "in a shoe rack in my closet",
+"answer": "In a shoe rack in your closet (previously under your bed)."
+},
+{
+"uid": "qa04159",
+"question": "How many hours have I spent playing games in total?",
+"question_type": "multi-session",
+"gold": "140 hours",
+"answer": "110 hours (30 + 70 + 10)"
+},
+{
+"uid": "qa01955",
+"question": "Who did I meet first, the woman selling jam at the farmer's market or the tourist from Australia?",
+"question_type": "temporal-reasoning",
+"gold": "the woman selling jam at the farmer's market",
+"answer": "I don't know"
+},
+{
+"uid": "qa03985",
+"question": "How long had I been using the new area rug when I rearranged my living room furniture?",
+"question_type": "temporal-reasoning",
+"gold": "One week. Answers ranging from 7 days to 10 days are also acceptable.",
+"answer": "I don't know"
+},
+{
+"uid": "qa03673",
+"question": "How many days passed between the day I attended the gardening workshop and the day I planted the tomato saplings?",
+"question_type": "temporal-reasoning",
+"gold": "6 days. 7 days (including the last day) is also acceptable.",
+"answer": "I don't know"
+},
+{
+"uid": "qa00722",
+"question": "What game did I finally beat last weekend?",
+"question_type": "single-session-user",
+"gold": "Dark Souls 3 DLC",
+"answer": "The last boss in the Dark Souls 3 DLC"
+},
+{
+"uid": "qa03041",
+"question": "Can you suggest some activities that I can do in the evening?",
+"question_type": "single-session-preference",
+"gold": "The user would prefer suggestions that involve relaxing activities that can be done in the evening, preferably before 9:30 pm. They would not prefer suggestions that involve using their phone or watching TV, as these activities have been affecting their sleep quality.",
+"answer": "Wind-down activities such as guided meditation, gentle low-impact yoga or light gardening, avoiding stimulating activities late in the evening."
+},
+{
+"uid": "qa03367",
+"question": "I've been having trouble with the battery life on my phone lately. Any tips?",
+"question_type": "single-session-preference",
+"gold": "The user would prefer responses that build upon their previous mention of purchasing a portable power bank, such as suggestions on how to optimize its use, like ensuring it's fully charged before use. They might also appreciate tips on utilizing battery-saving features on their phone. The user may not prefer responses that suggest alternative solutions or unrelated advice.",
+"answer": "Carry a portable power bank (such as the compact Anker PowerCore options discussed), especially since you are travelling and flying a lot."
+},
+{
+"uid": "qa01677",
+"question": "How many properties did I view before making an offer on the townhouse in the Brookside neighborhood?",
+"question_type": "multi-session",
+"gold": "I viewed four properties before making an offer on the townhouse in the Brookside neighborhood. The reasons I didn't make an offer on them were: the kitchen of the bungalow needed serious renovation, the property in Cedar Creek was out of my budget, the noise from the highway was a deal-breaker for the 1-bedroom condo, and my offer on the 2-bedroom condo was rejected due to a higher bid.",
+"answer": "3 (the Oakwood bungalow, the 2-bedroom condo, and the Brookside townhouse itself)"
+},
+{
+"uid": "qa04333",
+"question": "Which streaming service did I start using most recently?",
+"question_type": "temporal-reasoning",
+"gold": "Disney+",
+"answer": "I don't know"
+},
+{
+"uid": "qa01555",
+"question": "Which health issue did I deal with first, the persistent cough or the skin tag removal?",
+"question_type": "temporal-reasoning",
+"gold": "Persistent cough",
+"answer": "The persistent cough (about three weeks before February 28); the skin tag removal was on February 22"
+},
+{
+"uid": "qa01049",
+"question": "How many fitness classes do I attend in a typical week?",
+"question_type": "multi-session",
+"gold": "5",
+"answer": "3 classes: BodyPump on Mondays, Hip Hop Abs on Saturdays and yoga on Sundays."
+},
+{
+"uid": "qa02595",
+"question": "How many days did I spend on my solo camping trip to Yosemite National Park?",
+"question_type": "temporal-reasoning",
+"gold": "2 days. 3 days (including the last day) is also acceptable.",
+"answer": "I don't know"
+},
+{
+"uid": "qa01549",
+"question": "How many days ago did I attend the Maundy Thursday service at the Episcopal Church?",
+"question_type": "temporal-reasoning",
+"gold": "4 days.",
+"answer": "4 days ago (April 6, 2023)"
+},
+{
+"uid": "qa00683",
+"question": "What should I serve for dinner this weekend with my homegrown ingredients?",
+"question_type": "single-session-preference",
+"gold": "The user would prefer dinner suggestions that incorporate their homegrown cherry tomatoes and herbs like basil and mint, highlighting recipes that showcase their garden produce. They might not prefer suggestions that do not utilize these specific ingredients or do not emphasize the use of homegrown elements.",
+"answer": "I don't know"
+},
+{
+"uid": "qa03648",
+"question": "How long did I wait for the decision on my asylum application?",
+"question_type": "single-session-user",
+"gold": "over a year",
+"answer": "Over a year"
+},
+{
+"uid": "qa02130",
+"question": "How many years older is my grandma than me?",
+"question_type": "multi-session",
+"gold": "43",
+"answer": "I don't know"
+},
+{
+"uid": "qa03931",
+"question": "What is my current highest score in Ticket to Ride?",
+"question_type": "knowledge-update",
+"gold": "132 points",
+"answer": "132 points."
+},
+{
+"uid": "qa00960",
+"question": "I was thinking about our previous conversation about the Fifth Album, and I was wondering if you could remind me what song you said best exemplified the band's growth and development as artists?",
+"question_type": "single-session-assistant",
+"gold": "Evolution",
+"answer": "\"Evolution\""
+},
+{
+"uid": "qa00978",
+"question": "How much older am I than the average age of employees in my department?",
+"question_type": "multi-session",
+"gold": "2.5 years",
+"answer": "I don't know"
+},
+{
+"uid": "qa01255",
+"question": "What was the discount I got on my first purchase from the new clothing brand?",
+"question_type": "single-session-user",
+"gold": "10%",
+"answer": "10%"
+},
+{
+"uid": "qa02185",
+"question": "Can you suggest some activities I can do during my commute to work?",
+"question_type": "single-session-preference",
+"gold": "The user would prefer suggestions related to listening to new podcasts or audiobooks, especially the genre beyond true crime or self-improvement, such as history. They may not be interested in activities that require visual attention, such as reading or watching videos, as they are commuting. The user would not prefer general podcast topics such as true crime or self-improvement, as the user wants to explore other topics.",
+"answer": "Listen to podcasts, such as the history podcasts you're interested in, organised into a listening schedule for your roughly 40-minute commute each way, instead of checking email and social media."
+},
+{
+"uid": "qa01122",
+"question": "I'm looking back at our previous conversation about building a cocktail bar. You recommended five bottles to make the widest variety of gin-based cocktails. Can you remind me what the fifth bottle was?",
+"question_type": "single-session-assistant",
+"gold": "Absinthe",
+"answer": "Absinthe"
+},
+{
+"uid": "qa02373",
+"question": "How many weeks ago did I start using the cashback app 'Ibotta'?",
+"question_type": "temporal-reasoning",
+"gold": "3 weeks ago",
+"answer": "About 3 weeks (you had just downloaded it around April 16, 2023)."
+},
+{
+"uid": "qa03585",
+"question": "What book am I currently reading?",
+"question_type": "single-session-user",
+"gold": "The Seven Husbands of Evelyn Hugo",
+"answer": "The Seven Husbands of Evelyn Hugo"
+},
+{
+"uid": "qa02310",
+"question": "What time did I reach the clinic on Monday?",
+"question_type": "multi-session",
+"gold": "9:00 AM",
+"answer": "9 AM (you left home at 7 AM and the trip took two hours)"
+},
+{
+"uid": "qa02409",
+"question": "Where is the painting 'Ethereal Dreams' by Emma Taylor currently hanging?",
+"question_type": "knowledge-update",
+"gold": "in my bedroom",
+"answer": "Above your bed in your bedroom."
+},
+{
+"uid": "qa02335",
+"question": "How many months ago did I attend the photography workshop?",
+"question_type": "temporal-reasoning",
+"gold": "3",
+"answer": "About 3 months ago (the workshop was on November 1, 2023)."
+},
+{
+"uid": "qa02954",
+"question": "I'm planning my trip to Speyer again and I wanted to confirm, what's the phone number of the Speyer tourism board that you provided me earlier?",
+"question_type": "single-session-assistant",
+"gold": "+49 (0) 62 32 / 14 23 - 0",
+"answer": "+49 (0) 62 32 / 14 23 - 0"
+},
+{
+"uid": "qa01331",
+"question": "What is my current record in the recreational volleyball league?",
+"question_type": "knowledge-update",
+"gold": "5-2",
+"answer": "I don't know"
+},
+{
+"uid": "qa01931",
+"question": "How many days had passed since I started taking ukulele lessons when I decided to take my acoustic guitar to the guitar tech for servicing?",
+"question_type": "temporal-reasoning",
+"gold": "24 days. 25 days (including the last day) is also acceptable.",
+"answer": "I don't know"
+},
+{
+"uid": "qa01167",
+"question": "How many days ago did I attend the Maundy Thursday service at the Episcopal Church?",
+"question_type": "temporal-reasoning",
+"gold": "4 days.",
+"answer": "4 days ago (April 6, 2023)"
+},
+{
+"uid": "qa03904",
+"question": "Which health issue did I deal with first, the persistent cough or the skin tag removal?",
+"question_type": "temporal-reasoning",
+"gold": "Persistent cough",
+"answer": "I don't know"
+},
+{
+"uid": "qa03955",
+"question": "How long have my parents been staying with me in the US?",
+"question_type": "knowledge-update",
+"gold": "nine months",
+"answer": "Nine months."
+},
+{
+"uid": "qa03491",
+"question": "I'm going back to our previous conversation about the children's book on dinosaurs. Can you remind me what color was the scaly body of the Plesiosaur in the image?",
+"question_type": "single-session-assistant",
+"gold": "The Plesiosaur had a blue scaly body.",
+"answer": "Blue"
+},
+{
+"uid": "qa03671",
+"question": "What percentage of leadership positions do women hold in the my company?",
+"question_type": "multi-session",
+"gold": "20%",
+"answer": "20%"
+},
+{
+"uid": "qa01118",
+"question": "How many days ago did I meet Emma?",
+"question_type": "temporal-reasoning",
+"gold": "9 days ago. 10 days (including the last day) is also acceptable.",
+"answer": "I don't know"
+},
+{
+"uid": "qa03809",
+"question": "How many bikes do I currently own?",
+"question_type": "knowledge-update",
+"gold": "4",
+"answer": "Three bikes"
+},
+{
+"uid": "qa03155",
+"question": "What is the order of the concerts and musical events I attended in the past two months, starting from the earliest?",
+"question_type": "temporal-reasoning",
+"gold": "The order of the concerts I attended is: 1. Billie Eilish concert at the Wells Fargo Center in Philly, 2. Free outdoor concert series in the park, 3. Music festival in Brooklyn, 4. Jazz night at a local bar, 5. Queen + Adam Lambert concert at the Prudential Center in Newark, NJ.",
+"answer": "The context only dates two: the free outdoor concert series in the park (25 Mar 2023), then the jazz night at a local bar (8 Apr 2023); the Brooklyn music festival and Billie Eilish show in Philly were earlier or undated, so the full order is unclear."
+},
+{
+"uid": "qa03018",
+"question": "How many different art-related events did I attend in the past month?",
+"question_type": "multi-session",
+"gold": "4",
+"answer": "I don't know"
+},
+{
+"uid": "qa01984",
+"question": "How many days did it take for me to find a house I loved after starting to work with Rachel?",
+"question_type": "temporal-reasoning",
+"gold": "14 days. 15 days (including the last day) is also acceptable.",
+"answer": "I don't know"
+},
+{
+"uid": "qa00561",
+"question": "How many years older am I than when I graduated from college?",
+"question_type": "multi-session",
+"gold": "7",
+"answer": "I don't know"
+},
+{
+"uid": "qa00590",
+"question": "I've been thinking about making a cocktail for an upcoming get-together, but I'm not sure which one to choose. Any suggestions?",
+"question_type": "single-session-preference",
+"gold": "Considering their mixology class background, the user would prefer cocktail suggestions that build upon their existing skills and interests, such as creative variations of classic cocktails or innovative twists on familiar flavors. They might appreciate recommendations that incorporate their experience with refreshing summer drinks like Pimm's Cup. The user would not prefer overly simplistic or basic cocktail recipes, and may not be interested in suggestions that don't take into account their mixology class background.",
+"answer": "Since you like experimenting with Hendrick's gin and summer drinks, try a Hendrick's Collins served in a Collins glass."
+},
+{
+"uid": "qa01182",
+"question": "What is the total distance I covered in my four road trips?",
+"question_type": "multi-session",
+"gold": "3,000 miles",
+"answer": "3,000 miles (1,800 + 1,200)"
+},
+{
+"uid": "qa02636",
+"question": "I wanted to follow up on our previous conversation about natural remedies for dark circles under the eyes. You mentioned applying tomato juice mixed with lemon juice, how long did you say I should leave it on for?",
+"question_type": "single-session-assistant",
+"gold": "10 minutes",
+"answer": "About 10 minutes, then wash off with cold water"
+},
+{
+"uid": "qa03129",
+"question": "Can you suggest some activities I can do during my commute to work?",
+"question_type": "single-session-preference",
+"gold": "The user would prefer suggestions related to listening to new podcasts or audiobooks, especially the genre beyond true crime or self-improvement, such as history. They may not be interested in activities that require visual attention, such as reading or watching videos, as they are commuting. The user would not prefer general podcast topics such as true crime or self-improvement, as the user wants to explore other topics.",
+"answer": "Listen to podcasts, for example history ones, to branch out beyond true crime and self-improvement; your commute is about 40 minutes each way."
+},
+{
+"uid": "qa02646",
+"question": "Who did I meet first, the woman selling jam at the farmer's market or the tourist from Australia?",
+"question_type": "temporal-reasoning",
+"gold": "the woman selling jam at the farmer's market",
+"answer": "I don't know"
+},
+{
+"uid": "qa04180",
+"question": "What is the total distance of the hikes I did on two consecutive weekends?",
+"question_type": "multi-session",
+"gold": "8 miles",
+"answer": "8 miles (5 + 3)"
+},
+{
+"uid": "qa04274",
+"question": "How many bikes do I currently own?",
+"question_type": "knowledge-update",
+"gold": "4",
+"answer": "I don't know"
+},
+{
+"uid": "qa03531",
+"question": "How many days before the team meeting I was preparing for did I attend the workshop on 'Effective Communication in the Workplace'?",
+"question_type": "temporal-reasoning",
+"gold": "7 days. 8 days (including the last day) is also acceptable.",
+"answer": "I don't know"
+},
+{
+"uid": "qa00303",
+"question": "How many issues of National Geographic have I finished reading?",
+"question_type": "knowledge-update",
+"gold": "Five",
+"answer": "5 issues"
+},
+{
+"uid": "qa01093",
+"question": "How many sessions of the bereavement support group did I attend?",
+"question_type": "knowledge-update",
+"gold": "five",
+"answer": "I don't know"
+},
+{
+"uid": "qa03349",
+"question": "How long have my parents been staying with me in the US?",
+"question_type": "knowledge-update",
+"gold": "nine months",
+"answer": "Nine months."
+},
+{
+"uid": "qa00955",
+"question": "Where did I buy my new tennis racket from?",
+"question_type": "single-session-user",
+"gold": "the sports store downtown",
+"answer": "A sports store downtown"
+},
+{
+"uid": "qa02833",
+"question": "How long have my parents been staying with me in the US?",
+"question_type": "knowledge-update",
+"gold": "nine months",
+"answer": "Nine months"
+},
+{
+"uid": "qa00549",
+"question": "How long did I wait for the decision on my asylum application?",
+"question_type": "single-session-user",
+"gold": "over a year",
+"answer": "Over a year"
+},
+{
+"uid": "qa04310",
+"question": "What is my current record in the recreational volleyball league?",
+"question_type": "knowledge-update",
+"gold": "5-2",
+"answer": "I don't know"
+},
+{
+"uid": "qa01217",
+"question": "What time do I usually get home from work on weeknights?",
+"question_type": "single-session-user",
+"gold": "6:30 pm",
+"answer": "Around 6:30 pm"
+},
+{
+"uid": "qa00123",
+"question": "Which event happened first, the narrator losing their phone charger or the narrator receiving their new phone case?",
+"question_type": "temporal-reasoning",
+"gold": "Receiving the new phone case",
+"answer": "The phone case (received about a month before May 26), before losing the charger (about two weeks before)"
+},
+{
+"uid": "qa03194",
+"question": "What is the total distance I covered in my four road trips?",
+"question_type": "multi-session",
+"gold": "3,000 miles",
+"answer": "I don't know"
+},
+{
+"uid": "qa00341",
+"question": "How much money did I raise for charity in total?",
+"question_type": "multi-session",
+"gold": "$3,750",
+"answer": "About $3,500 ($2,000 animal shelter + $500 American Cancer Society + over $1,000 children's hospital)"
+},
+{
+"uid": "qa02891",
+"question": "What brand of shampoo do I currently use?",
+"question_type": "single-session-user",
+"gold": "Trader Joe's",
+"answer": "A lavender-scented shampoo from Trader Joe's (no brand name given)"
+},
+{
+"uid": "qa02819",
+"question": "How many months have passed since I participated in two charity events in a row, on consecutive days?",
+"question_type": "temporal-reasoning",
+"gold": "2",
+"answer": "I don't know"
+},
+{
+"uid": "qa03511",
+"question": "What was the date on which I attended the first BBQ event in June?",
+"question_type": "temporal-reasoning",
+"gold": "June 3rd",
+"answer": "3 June 2023"
+},
+{
+"uid": "qa02411",
+"question": "How many fish are there in total in both of my aquariums?",
+"question_type": "multi-session",
+"gold": "17",
+"answer": "I don't know"
+},
+{
+"uid": "qa02887",
+"question": "Which trip did I take first, the one to Europe with family or the solo trip to Thailand?",
+"question_type": "temporal-reasoning",
+"gold": "The solo trip to Thailand",
+"answer": "I don't know"
+},
+{
+"uid": "qa02447",
+"question": "How much money did I raise for charity in total?",
+"question_type": "multi-session",
+"gold": "$3,750",
+"answer": "$1,250 ($1,000 from the bake sale plus $250 from the Run for Hunger)."
+},
+{
+"uid": "qa04388",
+"question": "How much did I spend on car wash and parking ticket?",
+"question_type": "multi-session",
+"gold": "$65",
+"answer": "I don't know"
+},
+{
+"uid": "qa02950",
+"question": "What is the total cost of the car cover and detailing spray I purchased?",
+"question_type": "multi-session",
+"gold": "$140",
+"answer": "$140 ($120 car cover plus $20 detailing spray)"
+},
+{
+"uid": "qa02300",
+"question": "I mentioned cooking something for my friend a couple of days ago. What was it?",
+"question_type": "temporal-reasoning",
+"gold": "a chocolate cake",
+"answer": "I don't know"
+},
+{
+"uid": "qa03550",
+"question": "How long have I been sticking to my daily tidying routine?",
+"question_type": "knowledge-update",
+"gold": "4 weeks",
+"answer": "About 4 weeks (as of 30 Sep 2023)"
+},
+{
+"uid": "qa02619",
+"question": "Can you suggest some activities I can do during my commute to work?",
+"question_type": "single-session-preference",
+"gold": "The user would prefer suggestions related to listening to new podcasts or audiobooks, especially the genre beyond true crime or self-improvement, such as history. They may not be interested in activities that require visual attention, such as reading or watching videos, as they are commuting. The user would not prefer general podcast topics such as true crime or self-improvement, as the user wants to explore other topics.",
+"answer": "Listen to history podcasts (e.g. Hardcore History, Lore, The Dollop) during your roughly 40-minute commute each way."
+},
+{
+"uid": "qa00513",
+"question": "How long have I been working before I started my current job at NovaTech?",
+"question_type": "temporal-reasoning",
+"gold": "4 years and 9 months",
+"answer": "I don't know"
+},
+{
+"uid": "qa02169",
+"question": "Who became a parent first, Rachel or Alex?",
+"question_type": "temporal-reasoning",
+"gold": "Alex",
+"answer": "I don't know"
+},
+{
+"uid": "qa01272",
+"question": "How many days did it take me to finish 'The Nightingale' by Kristin Hannah?",
+"question_type": "temporal-reasoning",
+"gold": "21 days. 22 days (including the last day) is also acceptable.",
+"answer": "I don't know"
+},
+{
+"uid": "qa02679",
+"question": "How many new postcards have I added to my collection since I started collecting again?",
+"question_type": "knowledge-update",
+"gold": "25",
+"answer": "25 new postcards"
+},
+{
+"uid": "qa03062",
+"question": "What percentage of packed shoes did I wear on my last trip?",
+"question_type": "multi-session",
+"gold": "40%",
+"answer": "I don't know"
+},
+{
+"uid": "qa03690",
+"question": "What charity event did I participate in a month ago?",
+"question_type": "temporal-reasoning",
+"gold": "the 'Walk for Hunger' charity event",
+"answer": "The \"Walk for Hunger\" charity walk (5 km with work colleagues, raising money for the local food bank) on 19 March 2023."
+},
+{
+"uid": "qa04231",
+"question": "How long had I been a member of 'Book Lovers Unite' when I attended the meetup?",
+"question_type": "temporal-reasoning",
+"gold": "Two weeks",
+"answer": "About two weeks (joined the week of 7 May, attended the meetup the week of 21 May)"
+},
+{
+"uid": "qa04020",
+"question": "How many Marvel movies did I re-watch?",
+"question_type": "multi-session",
+"gold": "2",
+"answer": "Two (Avengers: Endgame and Spider-Man: No Way Home)."
+},
+{
+"uid": "qa03977",
+"question": "How many weddings have I attended in this year?",
+"question_type": "multi-session",
+"gold": "I attended three weddings. The couples were Rachel and Mike, Emily and Sarah, and Jen and Tom.",
+"answer": "I don't know"
+},
+{
+"uid": "qa03177",
+"question": "For the coffee-to-water ratio in my French press, did I switch to more water per tablespoon of coffee, or less?",
+"question_type": "knowledge-update",
+"gold": "You switched to less water (5 ounces) per tablespoon of coffee.",
+"answer": "I don't know"
+},
+{
+"uid": "qa01271",
+"question": "How many days did I spend on camping trips in the United States this year?",
+"question_type": "multi-session",
+"gold": "8 days.",
+"answer": "I don't know"
+},
+{
+"uid": "qa04202",
+"question": "Which bike did I fixed or serviced the past weekend?",
+"question_type": "temporal-reasoning",
+"gold": "road bike",
+"answer": "Your road bike (you installed Shimano Ultegra clipless pedals on it on 19 March)"
+},
+{
+"uid": "qa00070",
+"question": "How many short stories have I written since I started writing regularly?",
+"question_type": "knowledge-update",
+"gold": "seven",
+"answer": "7 short stories"
+},
+{
+"uid": "qa03509",
+"question": "Which event did I attend first, the 'Effective Time Management' workshop or the 'Data Analysis using Python' webinar?",
+"question_type": "temporal-reasoning",
+"gold": "'Data Analysis using Python' webinar",
+"answer": "The 'Data Analysis using Python' webinar (March 2023), before the workshop on 20 May 2023"
+},
+{
+"uid": "qa02944",
+"question": "I am planning another theme park weekend; do you have any suggestions?",
+"question_type": "single-session-preference",
+"gold": "The user would prefer theme park suggestions that cater to their interest in both thrill rides and special events, utilizing their previous experiences at Disneyland, Knott's Berry Farm, Six Flags Magic Mountain, and Universal Studios Hollywood as a reference point. They would also appreciate recommendations that highlight unique food experiences and nighttime shows. The user might not prefer suggestions that focus solely on one aspect of theme parks, such as only thrill rides or only family-friendly attractions, and may not be interested in parks that lack special events or unique dining options.",
+"answer": "Since you've already done Disneyland, Knott's Berry Farm, Six Flags Magic Mountain and Universal Studios Hollywood, try the upcoming Halloween-themed events at LA-area theme parks (spooky shows, themed food, horror-fan tours)."
+},
+{
+"uid": "qa03244",
+"question": "How many projects have I led or am currently leading?",
+"question_type": "multi-session",
+"gold": "2",
+"answer": "I don't know"
+},
+{
+"uid": "qa00929",
+"question": "How many free night's stays can I redeem at any Hilton property with my accumulated points?",
+"question_type": "knowledge-update",
+"gold": "Two",
+"answer": "Two free nights (the most recent mention, on 2023-05-30)"
+},
+{
+"uid": "qa02486",
+"question": "How long did Alex marinate the BBQ ribs in special sauce?",
+"question_type": "single-session-user",
+"gold": "24 hours",
+"answer": "24 hours."
+},
+{
+"uid": "qa03225",
+"question": "How many days passed between the day I finished reading 'The Nightingale' and the day I started reading 'The Hitchhiker's Guide to the Galaxy'?",
+"question_type": "temporal-reasoning",
+"gold": "1 day. 2 days (including the last day) is also acceptable.",
+"answer": "1 day (finished The Nightingale on 2022-01-15, started The Hitchhiker's Guide on 2022-01-16)."
+},
+{
+"uid": "qa03131",
+"question": "How many days ago did I meet Emma?",
+"question_type": "temporal-reasoning",
+"gold": "9 days ago. 10 days (including the last day) is also acceptable.",
+"answer": "I don't know"
+},
+{
+"uid": "qa00285",
+"question": "I've been thinking about making a cocktail for an upcoming get-together, but I'm not sure which one to choose. Any suggestions?",
+"question_type": "single-session-preference",
+"gold": "Considering their mixology class background, the user would prefer cocktail suggestions that build upon their existing skills and interests, such as creative variations of classic cocktails or innovative twists on familiar flavors. They might appreciate recommendations that incorporate their experience with refreshing summer drinks like Pimm's Cup. The user would not prefer overly simplistic or basic cocktail recipes, and may not be interested in suggestions that don't take into account their mixology class background.",
+"answer": "Try a summer Pimm's Cup with a twist, such as the grapefruit simple syrup version you liked, or a Hendrick's gin cocktail since you've been enjoying that gin."
+},
+{
+"uid": "qa03806",
+"question": "What is the difference in price between my luxury boots and the similar pair found at the budget store?",
+"question_type": "multi-session",
+"gold": "$750",
+"answer": "I don't know"
+},
+{
+"uid": "qa02291",
+"question": "How long had I been a member of 'Book Lovers Unite' when I attended the meetup?",
+"question_type": "temporal-reasoning",
+"gold": "Two weeks",
+"answer": "About 2 weeks (joined three weeks before 28 May, attended the meetup the week before)"
+},
+{
+"uid": "qa01370",
+"question": "What brand of BBQ sauce am I currently obsessed with?",
+"question_type": "knowledge-update",
+"gold": "Kansas City Masterpiece",
+"answer": "Kansas City Masterpiece."
+},
+{
+"uid": "qa04065",
+"question": "How much older am I than the average age of employees in my department?",
+"question_type": "multi-session",
+"gold": "2.5 years",
+"answer": "2.5 years older (you are 32, the department average is 29.5)."
+},
+{
+"uid": "qa02043",
+"question": "How long had I been using the new area rug when I rearranged my living room furniture?",
+"question_type": "temporal-reasoning",
+"gold": "One week. Answers ranging from 7 days to 10 days are also acceptable.",
+"answer": "About one week"
+},
+{
+"uid": "qa00886",
+"question": "I'm going back to our previous conversation about the children's book on dinosaurs. Can you remind me what color was the scaly body of the Plesiosaur in the image?",
+"question_type": "single-session-assistant",
+"gold": "The Plesiosaur had a blue scaly body.",
+"answer": "Blue"
+},
+{
+"uid": "qa00664",
+"question": "Which device did I set up first, the smart thermostat or the mesh network system?",
+"question_type": "temporal-reasoning",
+"gold": "Smart thermostat",
+"answer": "The smart thermostat (set up about a month ago, in April; the mesh system was described as a more recent upgrade)"
+},
+{
+"uid": "qa03780",
+"question": "Which event happened first, the purchase of the coffee maker or the malfunction of the stand mixer?",
+"question_type": "temporal-reasoning",
+"gold": "The malfunction of the stand mixer",
+"answer": "The stand mixer malfunction (repaired last month); the coffee maker was bought about three weeks ago."
+},
+{
+"uid": "qa00383",
+"question": "What game did I finally beat last weekend?",
+"question_type": "single-session-user",
+"gold": "Dark Souls 3 DLC",
+"answer": "The last boss in the Dark Souls 3 DLC"
+},
+{
+"uid": "qa03739",
+"question": "How many weeks ago did I start using the cashback app 'Ibotta'?",
+"question_type": "temporal-reasoning",
+"gold": "3 weeks ago",
+"answer": "About 3 weeks (you had just downloaded it on 16 April 2023, 20 days before 6 May)."
+},
+{
+"uid": "qa01942",
+"question": "How many days passed between the day I cancelled my FarmFresh subscription and the day I did my online grocery shopping from Instacart?",
+"question_type": "temporal-reasoning",
+"gold": "54 days. 55 days (including the last day) is also acceptable.",
+"answer": "I don't know"
+},
+{
+"uid": "qa01850",
+"question": "I've been sneezing quite a bit lately. Do you think it might be my living room?",
+"question_type": "single-session-preference",
+"gold": "The user would prefer responses that consider the potential impact of their cat, Luna, and her shedding on their sneezing, as well as the recent deep clean of the living room and its possible effect on stirring up dust. They might not prefer responses that fail to take into account these specific details previously mentioned, such as generic suggestions or unrelated factors.",
+"answer": "Possibly: your living room has a lot of cat hair and dust (and possibly dust mites), which could be triggering the sneezing."
+},
+{
+"uid": "qa00023",
+"question": "How many dozen eggs do we currently have stocked up in our refrigerator?",
+"question_type": "knowledge-update",
+"gold": "20",
+"answer": "20 dozen"
+},
+{
+"uid": "qa03313",
+"question": "Who did I meet first, the woman selling jam at the farmer's market or the tourist from Australia?",
+"question_type": "temporal-reasoning",
+"gold": "the woman selling jam at the farmer's market",
+"answer": "I don't know"
+},
+{
+"uid": "qa03304",
+"question": "Which bike did I fixed or serviced the past weekend?",
+"question_type": "temporal-reasoning",
+"gold": "road bike",
+"answer": "Your road bike (you upgraded its pedals to Shimano Ultegra clipless pedals)."
+},
+{
+"uid": "qa00864",
+"question": "Can you recommend a show or movie for me to watch tonight?",
+"question_type": "single-session-preference",
+"gold": "The user would prefer recommendations for stand-up comedy specials on Netflix, especially those that are known for their storytelling. They may not prefer recommendations for other genres or platforms.",
+"answer": "Since you're an aspiring stand-up comedian, try a Netflix stand-up special with strong storytelling, similar to John Mulaney's 'Kid Gorgeous'."
+},
+{
+"uid": "qa00510",
+"question": "How many years older is my grandma than me?",
+"question_type": "multi-session",
+"gold": "43",
+"answer": "I don't know"
+},
+{
+"uid": "qa03881",
+"question": "What company is Rachel, an old colleague from my previous company, currently working at?",
+"question_type": "knowledge-update",
+"gold": "TechCorp",
+"answer": "TechCorp"
+},
+{
+"uid": "qa03100",
+"question": "I wanted to follow up on our previous conversation about natural remedies for dark circles under the eyes. You mentioned applying tomato juice mixed with lemon juice, how long did you say I should leave it on for?",
+"question_type": "single-session-assistant",
+"gold": "10 minutes",
+"answer": "Wash it off after 10 minutes with cold water"
+},
+{
+"uid": "qa00300",
+"question": "How many days had passed since I started taking ukulele lessons when I decided to take my acoustic guitar to the guitar tech for servicing?",
+"question_type": "temporal-reasoning",
+"gold": "24 days. 25 days (including the last day) is also acceptable.",
+"answer": "I don't know"
+},
+{
+"uid": "qa02503",
+"question": "How many pieces of furniture did I buy, assemble, sell, or fix in the past few months?",
+"question_type": "multi-session",
+"gold": "4",
+"answer": "I don't know"
+},
+{
+"uid": "qa03031",
+"question": "What is the total distance I covered in my four road trips?",
+"question_type": "multi-session",
+"gold": "3,000 miles",
+"answer": "3,000 miles (1,800 on the three earlier trips plus 1,200 on the Yellowstone trip)"
+},
+{
+"uid": "qa00109",
+"question": "How many short stories have I written since I started writing regularly?",
+"question_type": "knowledge-update",
+"gold": "seven",
+"answer": "Four"
+},
+{
+"uid": "qa04143",
+"question": "What is the total cost of the car cover and detailing spray I purchased?",
+"question_type": "multi-session",
+"gold": "$140",
+"answer": "$140 ($120 car cover + $20 detailing spray)"
+},
+{
+"uid": "qa02557",
+"question": "How much money did I raise for charity in total?",
+"question_type": "multi-session",
+"gold": "$3,750",
+"answer": "At least $3,500 ($500 for the American Cancer Society, $2,000 for the animal shelter, and over $1,000 at the children's hospital bake sale)"
+},
+{
+"uid": "qa02299",
+"question": "How much did I save on the designer handbag at TK Maxx?",
+"question_type": "multi-session",
+"gold": "$300",
+"answer": "$300 (paid $200 for a bag originally $500)"
+},
+{
+"uid": "qa01155",
+"question": "How many days passed between the day I started playing along to my favorite songs on my old keyboard and the day I discovered a bluegrass band?",
+"question_type": "temporal-reasoning",
+"gold": "6 days. 7 days (including the last day) is also acceptable.",
+"answer": "I don't know"
+},
+{
+"uid": "qa02769",
+"question": "How many days passed between the day I received feedback about my car's suspension and the day I tested my new suspension setup?",
+"question_type": "temporal-reasoning",
+"gold": "38 days. 39 days (including the last day) is also acceptable.",
+"answer": "I don't know"
+},
+{
+"uid": "qa01465",
+"question": "Which event happened first, the meeting with Rachel or the pride parade?",
+"question_type": "temporal-reasoning",
+"gold": "The meeting with Rachel",
+"answer": "I don't know"
+},
+{
+"uid": "qa01769",
+"question": "How much more did I have to pay for the trip after the initial quote?",
+"question_type": "multi-session",
+"gold": "$300",
+"answer": "I don't know"
+},
+{
+"uid": "qa00492",
+"question": "I mentioned cooking something for my friend a couple of days ago. What was it?",
+"question_type": "temporal-reasoning",
+"gold": "a chocolate cake",
+"answer": "Something with leftover beef and pasta"
+},
+{
+"uid": "qa02103",
+"question": "Which bike did I fixed or serviced the past weekend?",
+"question_type": "temporal-reasoning",
+"gold": "road bike",
+"answer": "Your mountain bike (you fixed its flat tire)"
+},
+{
+"uid": "qa02044",
+"question": "How many days ago did I meet Emma?",
+"question_type": "temporal-reasoning",
+"gold": "9 days ago. 10 days (including the last day) is also acceptable.",
+"answer": "I don't know"
+},
+{
+"uid": "qa03072",
+"question": "How many minutes did I exceed my target time by in the marathon?",
+"question_type": "multi-session",
+"gold": "12",
+"answer": "I don't know"
+},
+{
+"uid": "qa01591",
+"question": "How many different species of birds have I seen in my local park?",
+"question_type": "knowledge-update",
+"gold": "32",
+"answer": "27 species"
+},
+{
+"uid": "qa00106",
+"question": "How many minutes did I exceed my target time by in the marathon?",
+"question_type": "multi-session",
+"gold": "12",
+"answer": "I don't know"
+},
+{
+"uid": "qa00810",
+"question": "I'm planning to visit the Vatican again and I was wondering if you could remind me of the name of that famous deli near the Vatican that serves the best cured meats and cheeses?",
+"question_type": "single-session-assistant",
+"gold": "Roscioli",
+"answer": "Roscioli"
+},
+{
+"uid": "qa03049",
+"question": "How many years older is my grandma than me?",
+"question_type": "multi-session",
+"gold": "43",
+"answer": "43 years (grandma just turned 75; you are 32)."
+}
+]
