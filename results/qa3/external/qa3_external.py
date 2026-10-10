@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
-"""Blind QA v3, external (non-Claude) reader and judge, run on your own machine through OpenRouter.
+"""Blind QA v3, external (non-Claude) reader and judge, run on your own machine.
 
 Usage (in Terminal, from this folder):
-    read -s OPENROUTER_API_KEY && export OPENROUTER_API_KEY
-    python3 qa3_external.py                  # default model: deepseek/deepseek-chat
-    python3 qa3_external.py --model openai/gpt-4.1
+    read -s DEEPSEEK_API_KEY && export DEEPSEEK_API_KEY && python3 qa3_external.py --provider deepseek
+    read -s OPENROUTER_API_KEY && export OPENROUTER_API_KEY && python3 qa3_external.py   # deepseek/deepseek-chat
 
 Reads items.json (uid, question, asked_on, context; systems hidden) and judge_meta.json (uid -> question, type,
 gold; systems hidden). Writes answers.jsonl and verdicts.jsonl next to this script, resuming if interrupted.
@@ -14,7 +13,9 @@ import argparse, json, os, sys, threading, time, urllib.request, urllib.error
 from concurrent.futures import ThreadPoolExecutor
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-URL = "https://openrouter.ai/api/v1/chat/completions"
+PROVIDERS = {"openrouter": ("https://openrouter.ai/api/v1/chat/completions", "OPENROUTER_API_KEY", "deepseek/deepseek-chat"),
+             "deepseek": ("https://api.deepseek.com/chat/completions", "DEEPSEEK_API_KEY", "deepseek-chat")}
+URL = None
 READER = open(os.path.join(HERE, "READER_V3.md")).read()
 JUDGE = open(os.path.join(HERE, "JUDGE_V3.md")).read()
 lock = threading.Lock()
@@ -31,7 +32,7 @@ def call(model, system, user, key, max_tokens):
         except (urllib.error.HTTPError, urllib.error.URLError, KeyError, TimeoutError) as e:
             code = getattr(e, "code", None)
             if code in (401, 402, 403):
-                sys.exit(f"OpenRouter refused the request ({code}): check the key and credit.")
+                sys.exit(f"The API refused the request ({code}): check the key and credit.")
             time.sleep(2 ** attempt)
     return None
 
@@ -71,12 +72,16 @@ def run(stage, items, path, fn, workers):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--model", default="deepseek/deepseek-chat")
+    ap.add_argument("--provider", default="openrouter", choices=sorted(PROVIDERS))
+    ap.add_argument("--model", default=None)
     ap.add_argument("--workers", type=int, default=8)
     a = ap.parse_args()
-    key = os.environ.get("OPENROUTER_API_KEY")
+    global URL
+    URL, env, default_model = PROVIDERS[a.provider]
+    a.model = a.model or default_model
+    key = os.environ.get(env)
     if not key:
-        sys.exit("Set OPENROUTER_API_KEY first (read -s OPENROUTER_API_KEY && export OPENROUTER_API_KEY).")
+        sys.exit(f"Set {env} first (read -s {env} && export {env}).")
     items = json.load(open(os.path.join(HERE, "items.json")))
     meta = json.load(open(os.path.join(HERE, "judge_meta.json")))
 
@@ -95,7 +100,7 @@ def main():
         return None if r is None else ("CORRECT" if r.upper().startswith("CORRECT") else "WRONG")
 
     run("verdict", [it for it in items if it["uid"] in ans], os.path.join(HERE, "verdicts.jsonl"), judge, a.workers)
-    json.dump({"model": a.model}, open(os.path.join(HERE, "run_info.json"), "w"))
+    json.dump({"provider": a.provider, "model": a.model}, open(os.path.join(HERE, "run_info.json"), "w"))
     print("finished. Tell Claude the files are ready.")
 
 

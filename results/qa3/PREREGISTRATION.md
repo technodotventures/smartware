@@ -43,3 +43,5 @@ OpenRouter (default `deepseek/deepseek-chat`, temperature 0), run on the user's 
 (`external/items.json`: uid, question, date, context; `external/judge_meta.json`: question, type, gold). Same briefs,
 one item per call. Scored with the same statistics against the hidden key. Reported next to the Claude-read results,
 whatever the outcome; calls that still fail after six retries are reported as missing, not dropped.
+Amendment (before any external output): the run may call DeepSeek's own API directly (`--provider deepseek`, model
+`deepseek-chat`, the same DeepSeek V3 model as the OpenRouter default). Nothing else changes.
