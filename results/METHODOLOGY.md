@@ -101,3 +101,5 @@ Protocol: identical to the LongMemEval-M check above, written before any S numbe
 ## Day-precision question times (dev diagnosis 10 Oct 2026; protocol in `results/dev_diag/PLAN.md`)
 
 A dev-only diagnosis found that every LongMemEval gold session dated after its question falls on the question's own day, so question times are day-precise. The `lmesd` and `lmemd` benches pass every system the end of the question's day as its time. No system's configuration changes. This was found after the S and M test results had been seen; the strict-time results remain the primary pre-registered ones. A post-hoc secondary metric, `answ@B`, scores answer words without bare numbers, because computed numeric answers get chance credit from list numbering, scores and ids.
+
+**Outcome (post hoc, 10 Oct 2026).** With day-precision question times, ORP against the best of the 15: LongMemEval-S 5 better, 7 level, 0 worse (including AnsW@500 and AnsW@1000); LongMemEval-M 4 better, 5 level, 0 worse. Raw Ans@B is level on both. These runs follow a fix found after the test results had been seen, so they are reported as post hoc next to the strict-time results, not instead of them.

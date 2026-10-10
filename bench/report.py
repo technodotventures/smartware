@@ -61,7 +61,7 @@ def load_tuned():
 
 
 def rows(bench, name):
-    p = os.path.join(RES, f"raw_{bench}" if bench in ("lmem", "lmes") else "raw_v012", bench, f"{name}.test.jsonl")
+    p = os.path.join(RES, f"raw_{bench}" if bench in ("lmem", "lmes", "lmemd", "lmesd") else "raw_v012", bench, f"{name}.test.jsonl")
     if not os.path.exists(p):
         return None
     return {json.loads(l)["qid"]: json.loads(l) for l in open(p)}
@@ -231,13 +231,24 @@ def lmem_track(bench: str = "lmem") -> list[str]:
         return []
     tn = [f"{n}@tuned" for n in BASE if f"{n}@tuned" in S]
     mets = [(k, h) for k, h in METRICS if k in HEAD] + [("ans@4000", "Ans@4000"), ("sess_all@5", "SessAll@5")]
+    if all("answ@1000" in v for v in S.values()):
+        mets += [("answ@500", "AnsW@500"), ("answ@1000", "AnsW@1000"), ("answ@2000", "AnsW@2000")]
     q = load(f"{bench}_quirks.json")
-    size = ("about 475 sessions, 4,900 turns and 1.2M tokens" if bench == "lmem" else
+    v = bench[3]
+    day = bench.endswith("d")
+    size = ("about 475 sessions, 4,900 turns and 1.2M tokens" if v == "m" else
             "38-62 sessions, about 490 turns and 115k tokens")
-    md = [f"## Official LongMemEval-{bench[-1].upper()} (frozen configurations, scored once), n={S['orp']['n']}", "",
-          f"The official `longmemeval_{bench[-1]}_cleaned.json` haystacks ({size} per question; LME-R used 40 rebuilt "
+    md = [f"## Official LongMemEval-{v.upper()}{', day-precision question times' if day else ''} "
+          f"(frozen configurations{', post hoc' if day else ', scored once'}), n={S['orp']['n']}", "",
+          f"The official `longmemeval_{v}_cleaned.json` haystacks ({size} per question; LME-R used 40 rebuilt "
           "sessions), the same 382 test questions. Nothing was tuned on it: ORP's shipped ranker and every baseline's "
           "raw-turn dev-tuned configuration. Raw turns only.", ""]
+    if day:
+        md += ["Every system is given the end of the question's day as the question time: in the official data every "
+               "gold session dated after its question falls on that same day. Found by a dev-only diagnosis after "
+               "the strict-time results above had been seen (`results/dev_diag/PLAN.md`). **AnsW@B** (post hoc) "
+               "counts answer words that are not bare numbers, which numbered lists, scores and ids otherwise match "
+               "by chance.", ""]
     vt, t = verdict(bench, S, tn, mets)
     for k in t:
         LMEM[k] = LMEM.get(k, 0) + t[k]
@@ -345,6 +356,8 @@ def main():
                  f"{tally_all['loss']}.**\n")
     md += lmem_track("lmes")
     md += lmem_track("lmem")
+    md += lmem_track("lmesd")
+    md += lmem_track("lmemd")
     md += facts_track()
     md += retuned_track()
     for vis in ("50", "15"):

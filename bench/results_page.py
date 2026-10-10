@@ -134,30 +134,35 @@ def main():
   {verdict_rows("hotpot", hot, tn, hm)}
   <div class="charts">{bars(hot, names, 'ans@1000', 'Answer recall in 1,000 tokens (Ans@1000)')}</div>
 </section>""")
-    for lb, ltitle, lsize in (("lmes", "LongMemEval-S", "38 to 62 sessions, about 490 turns and 115,000 tokens"),
-                              ("lmem", "LongMemEval-M", "about 475 sessions, 4,900 turns and 1.2 million tokens")):
+    SZ = {"s": "38 to 62 sessions, about 490 turns and 115,000 tokens",
+          "m": "about 475 sessions, 4,900 turns and 1.2 million tokens"}
+    for lb in ("lmesd", "lmemd", "lmes", "lmem"):
+        ltitle, lsize, day = f"LongMemEval-{lb[3].upper()}", SZ[lb[3]], lb.endswith("d")
         LM = load(f"summary_{lb}.json").get(lb, {}).get("test", {})
         if "orp" not in LM:
             continue
         tn = [f"{n}@tuned" for n in BASE if f"{n}@tuned" in LM]
         lm = [(k, h) for k, h in METRICS if k in HEAD] + [("ans@4000", "Ans@4000"), ("sess_all@5", "SessAll@5")]
+        if all("answ@1000" in v for v in LM.values()):
+            lm += [("answ@500", "AnsW@500"), ("answ@1000", "AnsW@1000"), ("answ@2000", "AnsW@2000")]
         _, t = verdict(lb, LM, tn, lm)
-        tallies[f"{ltitle} (official)"] = t
+        tallies[f"{ltitle}{', day times' if day else ', strict times'}"] = t
         g = set(load(f"{lb}_quirks.json").get("gold_session_after_question", []))
         sub = {k: {m: mean_excl(lb, k, m, g) for m, _ in lm} for k in ["orp"] + tn}
         _, tg = verdict(lb, sub, tn, lm, g)
         names = ["orp", "orp-rrf"] + sorted(tn, key=lambda x: -(LM[x].get("recall@1000") or 0)) + ["bm25", "dense"]
         sections.append(f"""
 <section id="{lb}" aria-labelledby="h-{lb}">
-  <h2 id="h-{lb}">{ltitle}, official haystacks <span class="tag">new data</span></h2>
+  <h2 id="h-{lb}">{ltitle}, official haystacks, {'day-precision question times' if day else 'strict question times'}
+  <span class="tag">{'post hoc' if day else 'new data'}</span></h2>
   <p class="lede">The official {ltitle} histories: {lsize} behind every question. Same {LM['orp']['n']} test
-  questions as LME-R. Every system ran once with frozen settings; nothing was tuned on this data.</p>
+  questions as LME-R. Frozen settings; nothing was tuned on this data.{' Every system gets the end of the question day as its time, because in this data every evidence session dated after its question falls on that same day. Found on dev after the strict-time results were seen. AnsW counts answer words that are not bare numbers (list numbers, scores and ids match bare numbers by chance).' if day else ''}</p>
   <p class="tally"><span class="pill win">{t['win']} better</span><span class="pill tie">{t['tie']} level</span>
   <span class="pill loss">{t['loss']} worse</span> against the best of the 15 on each metric</p>
   {verdict_rows(lb, LM, tn, lm)}
-  <p class="note">In {len(g)} of these questions the official data dates a gold evidence session after the question.
-  ORP honours the as-of time and cannot return it. Without them: ORP better on {tg['win']}, level on {tg['tie']},
-  worse on {tg['loss']}.</p>
+  {'' if not g else f"""<p class="note">In {len(g)} of these questions the official data dates a gold evidence session
+  after the question (always the same day). ORP honours the as-of time and cannot return it. Without them: ORP better
+  on {tg['win']}, level on {tg['tie']}, worse on {tg['loss']}.</p>"""}
   <div class="charts">{bars(LM, names, 'recall@1000', 'Evidence recall in 1,000 tokens (R@1000)')}
   {bars(LM, names, 'ans@1000', 'Answer recall in 1,000 tokens (Ans@1000)')}</div>
   <details><summary>Every system, every metric</summary>{table(LM, names, lm)}</details>

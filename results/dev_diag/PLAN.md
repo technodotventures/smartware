@@ -42,3 +42,11 @@ v0.1.2, with the caveat that S and M test results had been seen before the diagn
 - Added secondary metric `answ@B` (answer words without bare numbers), reported for S. It was introduced after the
   S and M test results were seen and is labelled post hoc.
 - Verdicts as before against the best of the 15. The original strict-time results stay in the report unchanged.
+
+## Test outcome (10 Oct 2026)
+
+- LongMemEval-S, day-precision times, all 19 systems rerun: ORP 5 better, 7 level, 0 worse against the best of the 15
+  (R@500/1000/2000 +4.6 to +6.2; AnsW@500 +3.8 and AnsW@1000 +3.1 against mem0; raw Ans@B level). The 14 systems that
+  never read the question time gave identical rows to the strict-time run (gbrain and onyx included).
+- LongMemEval-M, day-precision times, 7 time-reading systems rerun, 12 reused: ORP 4 better (R@500/1000/2000 +7.6 to
+  +10.8, E@1000 +3.5), 5 level, 0 worse.
