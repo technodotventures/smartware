@@ -34,3 +34,12 @@ All 2,700 reader answers and verdicts collected (one item omitted by its reader 
 95.3%. ORP minus each system is positive with a 95% interval above zero for all 16 comparisons, Holm-adjusted p at
 most 0.031. Second judge agreement 99.8% on 540 items (kappa 0.996). Weakest type for ORP: single-session-assistant
 (77.8% against BM25's 94.4%), where long assistant replies are cut to snippets.
+
+## Addendum: external reader and judge (fixed 10 Oct 2026, before any external output exists)
+
+To remove the shared-vendor concern, the same 2,700 blind items are re-read and re-judged by a non-Claude model via
+OpenRouter (default `deepseek/deepseek-chat`, temperature 0), run on the user's machine with
+`tools/qa3_external.py` because this workspace cannot reach other model APIs. Inputs carry no system labels
+(`external/items.json`: uid, question, date, context; `external/judge_meta.json`: question, type, gold). Same briefs,
+one item per call. Scored with the same statistics against the hidden key. Reported next to the Claude-read results,
+whatever the outcome; calls that still fail after six retries are reported as missing, not dropped.
