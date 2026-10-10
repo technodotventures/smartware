@@ -1,0 +1,1052 @@
+[
+{
+"uid": "qa00408",
+"question": "Which event happened first, my cousin's wedding or Michael's engagement party?",
+"question_type": "temporal-reasoning",
+"gold": "Michael's engagement party",
+"answer": "Michael's engagement party (6 May 2023), before your cousin's wedding (15 June 2023)"
+},
+{
+"uid": "qa00554",
+"question": "Which book did I finish a week ago?",
+"question_type": "temporal-reasoning",
+"gold": "'The Nightingale' by Kristin Hannah",
+"answer": "The Nightingale by Kristin Hannah"
+},
+{
+"uid": "qa00447",
+"question": "Who did I go with to the music event last Saturday?",
+"question_type": "temporal-reasoning",
+"gold": "my parents",
+"answer": "A group of friends"
+},
+{
+"uid": "qa00399",
+"question": "How many trips have I taken my Canon EOS 80D camera on?",
+"question_type": "knowledge-update",
+"gold": "five",
+"answer": "5 trips"
+},
+{
+"uid": "qa00445",
+"question": "How many days before the 'Rack Fest' did I participate in the 'Turbocharged Tuesdays' event?",
+"question_type": "temporal-reasoning",
+"gold": "4 days.",
+"answer": "4 days (Turbocharged Tuesdays on June 14, Rack Fest on June 18)"
+},
+{
+"uid": "qa00233",
+"question": "How much earlier do I wake up on Fridays compared to other weekdays?",
+"question_type": "multi-session",
+"gold": "30 minutes",
+"answer": "30 minutes earlier (6:00 AM on Fridays vs 6:30 AM on other weekdays)."
+},
+{
+"uid": "qa00027",
+"question": "I've been thinking about ways to stay connected with my colleagues. Any suggestions?",
+"question_type": "single-session-preference",
+"gold": "The user would prefer responses that acknowledge their desire for social interaction and collaboration while working remotely, utilizing their previous experiences with company initiatives and team collaborations. They might prefer suggestions of virtual team-building activities, regular check-ins, or joining interest-based groups within the company. The user may not prefer generic suggestions that do not take into account their specific work situation or previous attempts at staying connected with colleagues.",
+"answer": "Since you work from home and miss watercooler chats, suggest regular virtual coffee breaks to your team in a meeting, framed as a collaborative idea with light ground rules like no work talk."
+},
+{
+"uid": "qa00378",
+"question": "How much did I spend on gifts for my sister?",
+"question_type": "multi-session",
+"gold": "$300",
+"answer": "$200 (the Tiffany's silver necklace)"
+},
+{
+"uid": "qa00346",
+"question": "How many days passed between the day I started watering my herb garden and the day I harvested my first batch of fresh herbs?",
+"question_type": "temporal-reasoning",
+"gold": "24 days. 25 days (including the last day) is also acceptable.",
+"answer": "24 days (22 March to 15 April 2023)"
+},
+{
+"uid": "qa00335",
+"question": "I was going through our previous conversation about high-end fashion brands, and I was wondering if you could remind me of the brand that uses wild rubber sourced from the Amazon rainforest?",
+"question_type": "single-session-assistant",
+"gold": "Veja",
+"answer": "Veja"
+},
+{
+"uid": "qa00316",
+"question": "Which task did I complete first, fixing the fence or trimming the goats' hooves?",
+"question_type": "temporal-reasoning",
+"gold": "Fixing the fence",
+"answer": "Fixing the fence (about three weeks before 25 May, versus the hoof trimming about two weeks before)"
+},
+{
+"uid": "qa00263",
+"question": "When did I volunteer at the local animal shelter's fundraising dinner?",
+"question_type": "single-session-user",
+"gold": "February 14th",
+"answer": "In February 2023 (the \"Love is in the Air\" fundraising dinner)."
+},
+{
+"uid": "qa00439",
+"question": "How many days passed between the day I started watering my herb garden and the day I harvested my first batch of fresh herbs?",
+"question_type": "temporal-reasoning",
+"gold": "24 days. 25 days (including the last day) is also acceptable.",
+"answer": "24 days (22 March to 15 April 2023)"
+},
+{
+"uid": "qa00353",
+"question": "How much discount will I get on my next purchase at FreshMart?",
+"question_type": "multi-session",
+"gold": "$5",
+"answer": "$5 (500 points gets a $5 discount, 100 points per $1)"
+},
+{
+"uid": "qa00585",
+"question": "Can you remind me what was the average improvement in framerate when using the Hardware-Aware Modular Training (HAMT) agent in the 'To Adapt or Not to Adapt? Real-Time Adaptation for Semantic Segmentation' submission?",
+"question_type": "single-session-assistant",
+"gold": "The average improvement in framerate was approximately 20% when using the Hardware-Aware Modular Training (HAMT) agent.",
+"answer": "I don't know"
+},
+{
+"uid": "qa00163",
+"question": "How many weeks had passed since I recovered from the flu when I went on my 10th jog outdoors?",
+"question_type": "temporal-reasoning",
+"gold": "15",
+"answer": "About 11 weeks (81 days, from 19 Jan 2023 to 10 Apr 2023)."
+},
+{
+"uid": "qa00289",
+"question": "What was the airline that I flied with on Valentine's day?",
+"question_type": "temporal-reasoning",
+"gold": "American Airlines",
+"answer": "American Airlines"
+},
+{
+"uid": "qa00312",
+"question": "Which task did I complete first, fixing the fence or trimming the goats' hooves?",
+"question_type": "temporal-reasoning",
+"gold": "Fixing the fence",
+"answer": "Fixing the fence (about three weeks before 25 May, versus the hoof trimming about two weeks before)"
+},
+{
+"uid": "qa00189",
+"question": "How long is my daily commute to work?",
+"question_type": "single-session-user",
+"gold": "45 minutes each way",
+"answer": "45 minutes each way."
+},
+{
+"uid": "qa00273",
+"question": "How many years in total did I spend in formal education from high school to the completion of my Bachelor's degree?",
+"question_type": "multi-session",
+"gold": "10 years",
+"answer": "10 years (4 years of high school, 2 years for the associate's degree, 4 years for the bachelor's)."
+},
+{
+"uid": "qa00214",
+"question": "How many months ago did I book the Airbnb in San Francisco?",
+"question_type": "temporal-reasoning",
+"gold": "Five months ago",
+"answer": "About 5 months ago (booked three months before the wedding trip, which was two months before 21 May 2023)."
+},
+{
+"uid": "qa00549",
+"question": "How old was I when I moved to the United States?",
+"question_type": "temporal-reasoning",
+"gold": "27",
+"answer": "27"
+},
+{
+"uid": "qa00002",
+"question": "How many days passed between the day I fixed my mountain bike and the day I decided to upgrade my road bike's pedals?",
+"question_type": "temporal-reasoning",
+"gold": "4 days. 5 days (including the last day) is also acceptable.",
+"answer": "4 days (fixed the mountain bike on 15 March 2023; decided on the pedal upgrade on 19 March 2023)."
+},
+{
+"uid": "qa00144",
+"question": "I've been thinking about ways to stay connected with my colleagues. Any suggestions?",
+"question_type": "single-session-preference",
+"gold": "The user would prefer responses that acknowledge their desire for social interaction and collaboration while working remotely, utilizing their previous experiences with company initiatives and team collaborations. They might prefer suggestions of virtual team-building activities, regular check-ins, or joining interest-based groups within the company. The user may not prefer generic suggestions that do not take into account their specific work situation or previous attempts at staying connected with colleagues.",
+"answer": "Set up regular virtual coffee breaks with your team (agreed collaboratively at a team meeting, with light ground rules like no work talk)."
+},
+{
+"uid": "qa00134",
+"question": "Which seeds were started first, the tomatoes or the marigolds?",
+"question_type": "temporal-reasoning",
+"gold": "Tomatoes",
+"answer": "The tomatoes (started Feb 20); the marigold seeds arrived March 3."
+},
+{
+"uid": "qa00093",
+"question": "I noticed my bike seems to be performing even better during my Sunday group rides. Could there be a reason for this?",
+"question_type": "single-session-preference",
+"gold": "The user would prefer responses that reference specific details from their previous interactions, such as the replacement of the bike's chain and cassette, and the use of a new Garmin bike computer. They might prefer explanations that connect these details to the observed improvement in bike performance. The user may not prefer responses that fail to acknowledge these specific details or provide vague, general explanations for the improvement.",
+"answer": "You replaced the old bike's chain and cassette on February 1st."
+},
+{
+"uid": "qa00301",
+"question": "Which grocery store did I spend the most money at in the past month?",
+"question_type": "multi-session",
+"gold": "Thrive Market",
+"answer": "Thrive Market (about $150)"
+},
+{
+"uid": "qa00425",
+"question": "How many trips have I taken my Canon EOS 80D camera on?",
+"question_type": "knowledge-update",
+"gold": "five",
+"answer": "5 trips"
+},
+{
+"uid": "qa00248",
+"question": "What is the order of the three events: 'I signed up for the rewards program at ShopRite', 'I used a Buy One Get One Free coupon on Luvs diapers at Walmart', and 'I redeemed $12 cashback for a $10 Amazon gift card from Ibotta'?",
+"question_type": "temporal-reasoning",
+"gold": "First, I used a Buy One Get One Free coupon on Luvs diapers at Walmart. Then, I redeemed $12 cashback for a $10 Amazon gift card from Ibotta. Finally, I signed up for the rewards program at ShopRite.",
+"answer": "First the Buy One Get One Free coupon on Luvs diapers at Walmart (April 1), then the Ibotta redemption for the Amazon gift card (April 10), then signing up for the ShopRite rewards program (April 15)."
+},
+{
+"uid": "qa00006",
+"question": "How many weeks ago did I attend the 'Summer Nights' festival at Universal Studios Hollywood?",
+"question_type": "temporal-reasoning",
+"gold": "3 weeks ago",
+"answer": "About 6 weeks ago (around the week of 24 June 2023)."
+},
+{
+"uid": "qa00518",
+"question": "What percentage discount did I get on the book from my favorite author?",
+"question_type": "multi-session",
+"gold": "20%",
+"answer": "20% (the $30 book cost $24)"
+},
+{
+"uid": "qa00337",
+"question": "How many days ago did I go on a whitewater rafting trip in the Oregon mountains?",
+"question_type": "temporal-reasoning",
+"gold": "3 days ago. 4 days (including the last day) is also acceptable.",
+"answer": "3 days ago (17 June 2023)"
+},
+{
+"uid": "qa00487",
+"question": "Which task did I complete first, fixing the fence or trimming the goats' hooves?",
+"question_type": "temporal-reasoning",
+"gold": "Fixing the fence",
+"answer": "Fixing the fence (three weeks ago, vs. trimming the goats' hooves two weeks ago)"
+},
+{
+"uid": "qa00486",
+"question": "How many hours did I spend watching documentaries on Netflix last month?",
+"question_type": "single-session-user",
+"gold": "10",
+"answer": "About 10 hours"
+},
+{
+"uid": "qa00090",
+"question": "I'm planning to visit Bandung again and I was wondering if you could remind me of the name of that restaurant in Cihampelas Walk that serves a great Nasi Goreng?",
+"question_type": "single-session-assistant",
+"gold": "Miss Bee Providore",
+"answer": "Miss Bee Providore"
+},
+{
+"uid": "qa00042",
+"question": "What color did I repaint my bedroom walls?",
+"question_type": "single-session-user",
+"gold": "a lighter shade of gray",
+"answer": "A lighter shade of gray."
+},
+{
+"uid": "qa00077",
+"question": "How many hours did I spend watching documentaries on Netflix last month?",
+"question_type": "single-session-user",
+"gold": "10",
+"answer": "10 hours"
+},
+{
+"uid": "qa00118",
+"question": "How many antique items did I inherit or acquire from my family members?",
+"question_type": "multi-session",
+"gold": "5",
+"answer": "5 (antique tea set, vintage typewriter, vintage diamond necklace, antique music box, depression-era glassware)"
+},
+{
+"uid": "qa00194",
+"question": "For my daily commute, how much more expensive was the taxi ride compared to the train fare?",
+"question_type": "multi-session",
+"gold": "$6",
+"answer": "$6 more (taxi $12 vs train fare $6)."
+},
+{
+"uid": "qa00542",
+"question": "I'm getting excited about my visit to the music store this weekend. Any tips on what to look for in a new guitar?",
+"question_type": "single-session-preference",
+"gold": "The user would prefer responses that highlight the differences between Fender Stratocaster and Gibson Les Paul electric guitars, such as the feel of the neck, weight, and sound profile. They might not prefer general tips on buying an electric guitar or suggestions that do not take into account their current guitar and desired upgrade.",
+"answer": "Since you're moving from a Fender Stratocaster to a Gibson Les Paul, play the Les Paul yourself and check how it handles the music you play, including fingerpicking patterns like the Blackbird intro and open D tuning, rather than just comparing specs."
+},
+{
+"uid": "qa00349",
+"question": "What did I bake for my niece's birthday party?",
+"question_type": "single-session-user",
+"gold": "a lemon blueberry cake",
+"answer": "A lemon blueberry cake"
+},
+{
+"uid": "qa00183",
+"question": "How much faster did I finish the 5K run compared to my previous year's time?",
+"question_type": "multi-session",
+"gold": "10 minutes",
+"answer": "10 minutes faster (35 minutes vs 45 minutes the previous year)."
+},
+{
+"uid": "qa00212",
+"question": "I wanted to check back on our previous conversation about Netflix. I mentioned that I wanted to be able to access all seasons of old shows? Do you remember what show I used as an example, the one that only had the last season available?",
+"question_type": "single-session-assistant",
+"gold": "Doc Martin",
+"answer": "Doc Martin."
+},
+{
+"uid": "qa00361",
+"question": "How many days ago did I go on a whitewater rafting trip in the Oregon mountains?",
+"question_type": "temporal-reasoning",
+"gold": "3 days ago. 4 days (including the last day) is also acceptable.",
+"answer": "3 days ago (17 June 2023)"
+},
+{
+"uid": "qa00501",
+"question": "I was going through our previous chat and I was wondering, what was Andy wearing in the script you wrote for the comedy movie scene?",
+"question_type": "single-session-assistant",
+"gold": "Andy was wearing an untidy, stained white shirt.",
+"answer": "An untidy, stained white shirt"
+},
+{
+"uid": "qa00502",
+"question": "How many fun runs did I miss in March due to work commitments?",
+"question_type": "multi-session",
+"gold": "2",
+"answer": "2 (March 5 and March 26)"
+},
+{
+"uid": "qa00442",
+"question": "What did I do with Rachel on the Wednesday two months ago?",
+"question_type": "temporal-reasoning",
+"gold": "I started taking ukulele lessons with Rachel.",
+"answer": "You started ukulele lessons with her"
+},
+{
+"uid": "qa00220",
+"question": "What was the airline that I flied with on Valentine's day?",
+"question_type": "temporal-reasoning",
+"gold": "American Airlines",
+"answer": "American Airlines."
+},
+{
+"uid": "qa00419",
+"question": "For my daily commute, how much more expensive was the taxi ride compared to the train fare?",
+"question_type": "multi-session",
+"gold": "$6",
+"answer": "$6 more ($12 taxi vs $6 train fare)"
+},
+{
+"uid": "qa00533",
+"question": "Which group did I join first, 'Page Turners' or 'Marketing Professionals'?",
+"question_type": "temporal-reasoning",
+"gold": "Page Turners",
+"answer": "Page Turners"
+},
+{
+"uid": "qa00452",
+"question": "How many hours did I spend watching documentaries on Netflix last month?",
+"question_type": "single-session-user",
+"gold": "10",
+"answer": "About 10 hours"
+},
+{
+"uid": "qa00142",
+"question": "How many music albums or EPs have I purchased or downloaded?",
+"question_type": "multi-session",
+"gold": "3",
+"answer": "2 (Billie Eilish's \"Happier Than Ever\" and The Whiskey Wanderers' EP \"Midnight Sky\")"
+},
+{
+"uid": "qa00281",
+"question": "What play did I attend at the local community theater?",
+"question_type": "single-session-user",
+"gold": "The Glass Menagerie",
+"answer": "The Glass Menagerie"
+},
+{
+"uid": "qa00205",
+"question": "How many music albums or EPs have I purchased or downloaded?",
+"question_type": "multi-session",
+"gold": "3",
+"answer": "2 (Billie Eilish's \"Happier Than Ever\" downloaded, and The Whiskey Wanderers' EP \"Midnight Sky\" bought)."
+},
+{
+"uid": "qa00229",
+"question": "How many amateur comedians did I watch perform at the open mic night?",
+"question_type": "single-session-user",
+"gold": "10",
+"answer": "10"
+},
+{
+"uid": "qa00085",
+"question": "I mentioned participating in a sports event two weeks ago. What was the event?",
+"question_type": "temporal-reasoning",
+"gold": "The company's annual charity soccer tournament.",
+"answer": "I don't know"
+},
+{
+"uid": "qa00041",
+"question": "How many tops have I bought from H&M so far?",
+"question_type": "knowledge-update",
+"gold": "five",
+"answer": "Five tops."
+},
+{
+"uid": "qa00559",
+"question": "Which event happened first, the road trip to the coast or the arrival of the new prime lens?",
+"question_type": "temporal-reasoning",
+"gold": "The arrival of the new prime lens",
+"answer": "The new prime lens arrived first, since you took it on the coastal road trip"
+},
+{
+"uid": "qa00446",
+"question": "How many hours in total did I spend driving to my three road trip destinations combined?",
+"question_type": "multi-session",
+"gold": "15 hours for getting to the three destinations (or 30 hours for the round trip)",
+"answer": "15 hours (4 to Outer Banks, 5 to Tennessee, 6 to Washington D.C.)"
+},
+{
+"uid": "qa00469",
+"question": "In our previous chat, you suggested 'sexual compulsions' and a few other options for alternative terms for certain behaviors. Can you remind me what the other four options were?",
+"question_type": "single-session-assistant",
+"gold": "I suggested 'sexual fixations', 'problematic sexual behaviors', 'sexual impulsivity', and 'compulsive sexuality'.",
+"answer": "Sexual fixations, compulsive sexuality, sexual impulsivity, and problematic sexual behaviors"
+},
+{
+"uid": "qa00200",
+"question": "How old was I when I moved to the United States?",
+"question_type": "temporal-reasoning",
+"gold": "27",
+"answer": "27 (you are 32 and have lived in the US for five years)."
+},
+{
+"uid": "qa00407",
+"question": "What time do I usually go to the gym?",
+"question_type": "knowledge-update",
+"gold": "6:00 pm",
+"answer": "6:00 pm (most recently stated; earlier it was 7:00 pm)"
+},
+{
+"uid": "qa00253",
+"question": "I'm planning another trip to New York City and I was wondering if you could remind me of that vegan eatery you recommended last time, the one with multiple locations throughout the city?",
+"question_type": "single-session-assistant",
+"gold": "By Chloe",
+"answer": "By Chloe"
+},
+{
+"uid": "qa00132",
+"question": "How many amateur comedians did I watch perform at the open mic night?",
+"question_type": "single-session-user",
+"gold": "10",
+"answer": "10"
+},
+{
+"uid": "qa00550",
+"question": "How long had I been bird watching when I attended the bird watching workshop?",
+"question_type": "temporal-reasoning",
+"gold": "Two months",
+"answer": "About 2 months (about three months of bird watching by 21 May, with the workshop a month earlier in April)"
+},
+{
+"uid": "qa00223",
+"question": "I've been feeling like my chocolate chip cookies need something extra. Any advice?",
+"question_type": "single-session-preference",
+"gold": "The user would prefer responses that build upon their previous experimentation with turbinado sugar, suggesting ingredients or techniques that complement its richer flavor. They might not prefer generic cookie-making advice or suggestions that don't take into account their existing use of turbinado sugar.",
+"answer": "Since you've found turbinado sugar gives a richer flavour, use it in the cookies and pair it with warm spices, vanilla, espresso, nuts or a pinch of flaky sea salt."
+},
+{
+"uid": "qa00594",
+"question": "How many years in total did I spend in formal education from high school to the completion of my Bachelor's degree?",
+"question_type": "multi-session",
+"gold": "10 years",
+"answer": "8 years (4 years of high school, 2010 to 2014, plus 4 years for the Bachelor's)"
+},
+{
+"uid": "qa00505",
+"question": "How many online courses have I completed in total?",
+"question_type": "multi-session",
+"gold": "5",
+"answer": "5 (three on Coursera and two on edX)"
+},
+{
+"uid": "qa00119",
+"question": "How many weeks ago did I attend the friends and family sale at Nordstrom?",
+"question_type": "temporal-reasoning",
+"gold": "2",
+"answer": "2 weeks ago (November 17, 2022)"
+},
+{
+"uid": "qa00172",
+"question": "What is the order of the sports events I watched in January?",
+"question_type": "temporal-reasoning",
+"gold": "First, I attended a NBA game at the Staples Center, then I watched the College Football National Championship game, and finally, I watched the NFL playoffs.",
+"answer": "First the Lakers vs Bulls NBA game (5 Jan), then the College Football National Championship, Georgia vs Alabama (14 Jan), then the Chiefs vs Bills NFL Divisional Round game (weekend before 22 Jan)."
+},
+{
+"uid": "qa00363",
+"question": "Can you remind me of the name of the romantic Italian restaurant in Rome you recommended for dinner?",
+"question_type": "single-session-assistant",
+"gold": "Roscioli",
+"answer": "Roscioli"
+},
+{
+"uid": "qa00472",
+"question": "I'm going back to our previous conversation about the grant aim page on molecular subtypes and endometrial cancer. Can you remind me what were the three objectives we outlined for the project?",
+"question_type": "single-session-assistant",
+"gold": "The three objectives were: 1) to identify molecular subtypes of endometrial cancer, 2) to investigate their clinical and biological significance, and 3) to develop biomarkers for early detection and prognosis.",
+"answer": "I don't know"
+},
+{
+"uid": "qa00023",
+"question": "How many days had passed between the Sunday mass at St. Mary's Church and the Ash Wednesday service at the cathedral?",
+"question_type": "temporal-reasoning",
+"gold": "30 days. 31 days (including the last day) is also acceptable.",
+"answer": "30 days (Sunday mass on January 2, Ash Wednesday service on February 1)."
+},
+{
+"uid": "qa00355",
+"question": "Before I purchased the gravel bike, do I have other bikes in addition to my mountain bike and my commuter bike?",
+"question_type": "knowledge-update",
+"gold": "Yes. (You have a road bike too.)",
+"answer": "Yes, a road bike"
+},
+{
+"uid": "qa00395",
+"question": "How many fun runs did I miss in March due to work commitments?",
+"question_type": "multi-session",
+"gold": "2",
+"answer": "2 (March 5th and March 26th)"
+},
+{
+"uid": "qa00291",
+"question": "Can you remind me what was the average improvement in framerate when using the Hardware-Aware Modular Training (HAMT) agent in the 'To Adapt or Not to Adapt? Real-Time Adaptation for Semantic Segmentation' submission?",
+"question_type": "single-session-assistant",
+"gold": "The average improvement in framerate was approximately 20% when using the Hardware-Aware Modular Training (HAMT) agent.",
+"answer": "Approximately 20%."
+},
+{
+"uid": "qa00456",
+"question": "What was my previous goal for my Apex Legends level before I updated my goal?",
+"question_type": "knowledge-update",
+"gold": "level 100",
+"answer": "Level 100"
+},
+{
+"uid": "qa00317",
+"question": "How many weeks ago did I attend the 'Summer Nights' festival at Universal Studios Hollywood?",
+"question_type": "temporal-reasoning",
+"gold": "3 weeks ago",
+"answer": "About 6 weeks ago (the festival was around the week of 24 June 2023)"
+},
+{
+"uid": "qa00062",
+"question": "How many days did I spend participating in faith-related activities in December?",
+"question_type": "multi-session",
+"gold": "3 days.",
+"answer": "3 days (December 10 food drive, December 17 Bible study, December 24 midnight mass)."
+},
+{
+"uid": "qa00066",
+"question": "What time do I usually go to the gym?",
+"question_type": "knowledge-update",
+"gold": "6:00 pm",
+"answer": "6:00 pm (on Mondays, Wednesdays and Fridays)."
+},
+{
+"uid": "qa00485",
+"question": "Can you remind me of the name of the romantic Italian restaurant in Rome you recommended for dinner?",
+"question_type": "single-session-assistant",
+"gold": "Roscioli",
+"answer": "Roscioli"
+},
+{
+"uid": "qa00276",
+"question": "How many women are on the team led by my former manager Rachel?",
+"question_type": "knowledge-update",
+"gold": "6",
+"answer": "6 women out of 10 (your most recent mention; earlier you said 5)."
+},
+{
+"uid": "qa00095",
+"question": "Which event happened first, my attendance at a cultural festival or the start of my Spanish classes?",
+"question_type": "temporal-reasoning",
+"gold": "Spanish classes",
+"answer": "The start of the Spanish classes (about three months before May 27) came first; the cultural festival was on May 26."
+},
+{
+"uid": "qa00070",
+"question": "In our previous chat, you suggested 'sexual compulsions' and a few other options for alternative terms for certain behaviors. Can you remind me what the other four options were?",
+"question_type": "single-session-assistant",
+"gold": "I suggested 'sexual fixations', 'problematic sexual behaviors', 'sexual impulsivity', and 'compulsive sexuality'.",
+"answer": "Sexual fixations, problematic sexual behaviors, sexual impulsivity, and compulsive sexuality."
+},
+{
+"uid": "qa00467",
+"question": "Which vehicle did I take care of first in February, the bike or the car?",
+"question_type": "temporal-reasoning",
+"gold": "bike",
+"answer": "The bike (repaired in mid-February; the car was washed on 27 February)"
+},
+{
+"uid": "qa00567",
+"question": "Did I finish reading 'The Nightingale' by Kristin Hannah?",
+"question_type": "knowledge-update",
+"gold": "Yes",
+"answer": "Yes"
+},
+{
+"uid": "qa00358",
+"question": "I was going through our previous chat and I was wondering, what was Andy wearing in the script you wrote for the comedy movie scene?",
+"question_type": "single-session-assistant",
+"gold": "Andy was wearing an untidy, stained white shirt.",
+"answer": "An untidy, stained white shirt"
+},
+{
+"uid": "qa00348",
+"question": "What is the order of airlines I flew with from earliest to latest before today?",
+"question_type": "temporal-reasoning",
+"gold": "JetBlue, Delta, United, American Airlines",
+"answer": "Delta (15 Jan), then United (28 Jan), then American Airlines (10 Feb)"
+},
+{
+"uid": "qa00607",
+"question": "I've been feeling like my chocolate chip cookies need something extra. Any advice?",
+"question_type": "single-session-preference",
+"gold": "The user would prefer responses that build upon their previous experimentation with turbinado sugar, suggesting ingredients or techniques that complement its richer flavor. They might not prefer generic cookie-making advice or suggestions that don't take into account their existing use of turbinado sugar.",
+"answer": "Try turbinado sugar for a deeper caramel flavour, and finish the cookies with a pinch of flaky sea salt; you could also add nuts, espresso or dark chocolate."
+},
+{
+"uid": "qa00079",
+"question": "How long is my daily commute to work?",
+"question_type": "single-session-user",
+"gold": "45 minutes each way",
+"answer": "45 minutes each way"
+},
+{
+"uid": "qa00040",
+"question": "How many days passed between the day I started watering my herb garden and the day I harvested my first batch of fresh herbs?",
+"question_type": "temporal-reasoning",
+"gold": "24 days. 25 days (including the last day) is also acceptable.",
+"answer": "24 days (started watering on 22 March 2023; first harvest on 15 April 2023)."
+},
+{
+"uid": "qa00431",
+"question": "How much faster did I finish the 5K run compared to my previous year's time?",
+"question_type": "multi-session",
+"gold": "10 minutes",
+"answer": "10 minutes faster (35 minutes vs 45 minutes)"
+},
+{
+"uid": "qa00500",
+"question": "Can you remind me what was the average improvement in framerate when using the Hardware-Aware Modular Training (HAMT) agent in the 'To Adapt or Not to Adapt? Real-Time Adaptation for Semantic Segmentation' submission?",
+"question_type": "single-session-assistant",
+"gold": "The average improvement in framerate was approximately 20% when using the Hardware-Aware Modular Training (HAMT) agent.",
+"answer": "About 20%"
+},
+{
+"uid": "qa00155",
+"question": "I noticed my bike seems to be performing even better during my Sunday group rides. Could there be a reason for this?",
+"question_type": "single-session-preference",
+"gold": "The user would prefer responses that reference specific details from their previous interactions, such as the replacement of the bike's chain and cassette, and the use of a new Garmin bike computer. They might prefer explanations that connect these details to the observed improvement in bike performance. The user may not prefer responses that fail to acknowledge these specific details or provide vague, general explanations for the improvement.",
+"answer": "Yes, you replaced the old bike's chain and cassette on February 1st, which has contributed to the improved performance."
+},
+{
+"uid": "qa00350",
+"question": "What time do I usually go to the gym?",
+"question_type": "knowledge-update",
+"gold": "6:00 pm",
+"answer": "6:00 pm"
+},
+{
+"uid": "qa00168",
+"question": "How many days passed between the day I fixed my mountain bike and the day I decided to upgrade my road bike's pedals?",
+"question_type": "temporal-reasoning",
+"gold": "4 days. 5 days (including the last day) is also acceptable.",
+"answer": "4 days (fixed the mountain bike on 15 March 2023, decided on the pedal upgrade on 19 March 2023)."
+},
+{
+"uid": "qa00600",
+"question": "How much faster did I finish the 5K run compared to my previous year's time?",
+"question_type": "multi-session",
+"gold": "10 minutes",
+"answer": "10 minutes faster (35 minutes versus 45 minutes)"
+},
+{
+"uid": "qa00524",
+"question": "How many weeks ago did I attend the 'Summer Nights' festival at Universal Studios Hollywood?",
+"question_type": "temporal-reasoning",
+"gold": "3 weeks ago",
+"answer": "About 3 weeks ago"
+},
+{
+"uid": "qa00593",
+"question": "How many trips have I taken my Canon EOS 80D camera on?",
+"question_type": "knowledge-update",
+"gold": "five",
+"answer": "5 trips"
+},
+{
+"uid": "qa00611",
+"question": "How many months before my anniversary did Rachel get engaged?",
+"question_type": "temporal-reasoning",
+"gold": "2",
+"answer": "About 2 months (Rachel got engaged on May 15; the anniversary is July 22)"
+},
+{
+"uid": "qa00294",
+"question": "How much is the painting of a sunset worth in terms of the amount I paid for it?",
+"question_type": "single-session-user",
+"gold": "The painting is worth triple what I paid for it.",
+"answer": "Triple what you paid for it."
+},
+{
+"uid": "qa00459",
+"question": "How many months ago did I book the Airbnb in San Francisco?",
+"question_type": "temporal-reasoning",
+"gold": "Five months ago",
+"answer": "About 5 months ago (wedding trip was in March, booked three months in advance)"
+},
+{
+"uid": "qa00351",
+"question": "How many amateur comedians did I watch perform at the open mic night?",
+"question_type": "single-session-user",
+"gold": "10",
+"answer": "10"
+},
+{
+"uid": "qa00506",
+"question": "How many days passed between the day I fixed my mountain bike and the day I decided to upgrade my road bike's pedals?",
+"question_type": "temporal-reasoning",
+"gold": "4 days. 5 days (including the last day) is also acceptable.",
+"answer": "4 days (March 15 to March 19)"
+},
+{
+"uid": "qa00537",
+"question": "How many women are on the team led by my former manager Rachel?",
+"question_type": "knowledge-update",
+"gold": "6",
+"answer": "6"
+},
+{
+"uid": "qa00307",
+"question": "How many days did I spend participating in faith-related activities in December?",
+"question_type": "multi-session",
+"gold": "3 days.",
+"answer": "3 days (Dec 10, Dec 17 and Dec 24)"
+},
+{
+"uid": "qa00083",
+"question": "How many graduation ceremonies have I attended in the past three months?",
+"question_type": "multi-session",
+"gold": "3",
+"answer": "3"
+},
+{
+"uid": "qa00249",
+"question": "What color did I repaint my bedroom walls?",
+"question_type": "single-session-user",
+"gold": "a lighter shade of gray",
+"answer": "A lighter shade of gray."
+},
+{
+"uid": "qa00184",
+"question": "Which book did I finish a week ago?",
+"question_type": "temporal-reasoning",
+"gold": "'The Nightingale' by Kristin Hannah",
+"answer": "\"The Nightingale\" by Kristin Hannah."
+},
+{
+"uid": "qa00254",
+"question": "I was going through our previous conversation about high-end fashion brands, and I was wondering if you could remind me of the brand that uses wild rubber sourced from the Amazon rainforest?",
+"question_type": "single-session-assistant",
+"gold": "Veja",
+"answer": "Veja"
+},
+{
+"uid": "qa00306",
+"question": "How many weeks ago did I attend the 'Summer Nights' festival at Universal Studios Hollywood?",
+"question_type": "temporal-reasoning",
+"gold": "3 weeks ago",
+"answer": "About 6 weeks ago"
+},
+{
+"uid": "qa00370",
+"question": "How long is my daily commute to work?",
+"question_type": "single-session-user",
+"gold": "45 minutes each way",
+"answer": "45 minutes each way"
+},
+{
+"uid": "qa00464",
+"question": "How much discount will I get on my next purchase at FreshMart?",
+"question_type": "multi-session",
+"gold": "$5",
+"answer": "$5 (500 points)"
+},
+{
+"uid": "qa00476",
+"question": "I wanted to check back on our previous conversation about Netflix. I mentioned that I wanted to be able to access all seasons of old shows? Do you remember what show I used as an example, the one that only had the last season available?",
+"question_type": "single-session-assistant",
+"gold": "Doc Martin",
+"answer": "Doc Martin"
+},
+{
+"uid": "qa00321",
+"question": "I mentioned that I participated in an art-related event two weeks ago. Where was that event held at?",
+"question_type": "temporal-reasoning",
+"gold": "The Metropolitan Museum of Art.",
+"answer": "The City Art Museum"
+},
+{
+"uid": "qa00437",
+"question": "I mentioned that I participated in an art-related event two weeks ago. Where was that event held at?",
+"question_type": "temporal-reasoning",
+"gold": "The Metropolitan Museum of Art.",
+"answer": "The City Art Museum (the \"Impressionist Masterpieces\" exhibition)"
+},
+{
+"uid": "qa00544",
+"question": "Which seeds were started first, the tomatoes or the marigolds?",
+"question_type": "temporal-reasoning",
+"gold": "Tomatoes",
+"answer": "The tomatoes (started February 20, versus the marigolds from seeds that arrived March 3)"
+},
+{
+"uid": "qa00508",
+"question": "Which task did I complete first, fixing the fence or trimming the goats' hooves?",
+"question_type": "temporal-reasoning",
+"gold": "Fixing the fence",
+"answer": "Fixing the fence (three weeks ago, vs. trimming the goats' hooves two weeks ago)"
+},
+{
+"uid": "qa00210",
+"question": "How many days passed between the day I started watering my herb garden and the day I harvested my first batch of fresh herbs?",
+"question_type": "temporal-reasoning",
+"gold": "24 days. 25 days (including the last day) is also acceptable.",
+"answer": "24 days (started watering on 22 March 2023, first harvest on 15 April 2023)."
+},
+{
+"uid": "qa00061",
+"question": "How many days passed between the day I fixed my mountain bike and the day I decided to upgrade my road bike's pedals?",
+"question_type": "temporal-reasoning",
+"gold": "4 days. 5 days (including the last day) is also acceptable.",
+"answer": "4 days (fixed the mountain bike on 15 March 2023; decided on the pedal upgrade on 19 March 2023)."
+},
+{
+"uid": "qa00064",
+"question": "How many weeks ago did I attend the friends and family sale at Nordstrom?",
+"question_type": "temporal-reasoning",
+"gold": "2",
+"answer": "2 weeks ago (the sale was on 17 November 2022)."
+},
+{
+"uid": "qa00560",
+"question": "When did I volunteer at the local animal shelter's fundraising dinner?",
+"question_type": "single-session-user",
+"gold": "February 14th",
+"answer": "On Valentine's Day (14 February 2023)"
+},
+{
+"uid": "qa00099",
+"question": "How many trips have I taken my Canon EOS 80D camera on?",
+"question_type": "knowledge-update",
+"gold": "five",
+"answer": "5 trips"
+},
+{
+"uid": "qa00381",
+"question": "How much will I save by taking the train from the airport to my hotel instead of a taxi?",
+"question_type": "multi-session",
+"gold": "$50",
+"answer": "$50 ($10 by train vs about $60 by taxi)"
+},
+{
+"uid": "qa00192",
+"question": "What is the total cost of the new food bowl, measuring cup, dental chews, and flea and tick collar I got for Max?",
+"question_type": "multi-session",
+"gold": "$50",
+"answer": "$50 ($15 food bowl + $5 measuring cup + $10 dental chews + $20 flea and tick collar)."
+},
+{
+"uid": "qa00105",
+"question": "Which task did I complete first, fixing the fence or trimming the goats' hooves?",
+"question_type": "temporal-reasoning",
+"gold": "Fixing the fence",
+"answer": "Fixing the fence (about three weeks before May 25, versus trimming hooves about two weeks before)"
+},
+{
+"uid": "qa00185",
+"question": "How much faster did I finish the 5K run compared to my previous year's time?",
+"question_type": "multi-session",
+"gold": "10 minutes",
+"answer": "10 minutes faster (35 minutes vs 45 minutes the previous year)."
+},
+{
+"uid": "qa00573",
+"question": "How many women are on the team led by my former manager Rachel?",
+"question_type": "knowledge-update",
+"gold": "6",
+"answer": "6"
+},
+{
+"uid": "qa00315",
+"question": "For my daily commute, how much more expensive was the taxi ride compared to the train fare?",
+"question_type": "multi-session",
+"gold": "$6",
+"answer": "$6 more (the taxi ride was $12 versus a $6 train fare)"
+},
+{
+"uid": "qa00120",
+"question": "How many antique items did I inherit or acquire from my family members?",
+"question_type": "multi-session",
+"gold": "5",
+"answer": "5 (antique tea set, vintage typewriter, vintage diamond necklace, antique music box, depression-era glassware)"
+},
+{
+"uid": "qa00553",
+"question": "Where do I take yoga classes?",
+"question_type": "single-session-user",
+"gold": "Serenity Yoga",
+"answer": "Serenity Yoga"
+},
+{
+"uid": "qa00147",
+"question": "I'm planning another trip to New York City and I was wondering if you could remind me of that vegan eatery you recommended last time, the one with multiple locations throughout the city?",
+"question_type": "single-session-assistant",
+"gold": "By Chloe",
+"answer": "By Chloe"
+},
+{
+"uid": "qa00429",
+"question": "How many days ago did I launch my website when I signed a contract with my first client?",
+"question_type": "temporal-reasoning",
+"gold": "19 days ago. 20 days (including the last day) is also acceptable.",
+"answer": "24 days"
+},
+{
+"uid": "qa00296",
+"question": "Which mode of transport did I use most recently, a bus or a train?",
+"question_type": "temporal-reasoning",
+"gold": "train",
+"answer": "A train (March 3rd)."
+},
+{
+"uid": "qa00136",
+"question": "How many days before the 'Rack Fest' did I participate in the 'Turbocharged Tuesdays' event?",
+"question_type": "temporal-reasoning",
+"gold": "4 days.",
+"answer": "4 days (Turbocharged Tuesdays on June 14, Rack Fest on June 18)"
+},
+{
+"uid": "qa00570",
+"question": "How many days ago did I launch my website when I signed a contract with my first client?",
+"question_type": "temporal-reasoning",
+"gold": "19 days ago. 20 days (including the last day) is also acceptable.",
+"answer": "I don't know"
+},
+{
+"uid": "qa00047",
+"question": "What is the order of the sports events I watched in January?",
+"question_type": "temporal-reasoning",
+"gold": "First, I attended a NBA game at the Staples Center, then I watched the College Football National Championship game, and finally, I watched the NFL playoffs.",
+"answer": "Lakers vs Bulls NBA game (5 Jan), then the College Football National Championship, Georgia vs Alabama (14 Jan), then Chiefs vs Bills NFL Divisional Round (weekend of 15 Jan)."
+},
+{
+"uid": "qa00226",
+"question": "Can you remind me what was the average improvement in framerate when using the Hardware-Aware Modular Training (HAMT) agent in the 'To Adapt or Not to Adapt? Real-Time Adaptation for Semantic Segmentation' submission?",
+"question_type": "single-session-assistant",
+"gold": "The average improvement in framerate was approximately 20% when using the Hardware-Aware Modular Training (HAMT) agent.",
+"answer": "Approximately 20%."
+},
+{
+"uid": "qa00050",
+"question": "How many MCU films did I watch in the last 3 months?",
+"question_type": "knowledge-update",
+"gold": "5",
+"answer": "5 MCU films (your most recent statement; an earlier message said 4)."
+},
+{
+"uid": "qa00406",
+"question": "I've been feeling like my chocolate chip cookies need something extra. Any advice?",
+"question_type": "single-session-preference",
+"gold": "The user would prefer responses that build upon their previous experimentation with turbinado sugar, suggesting ingredients or techniques that complement its richer flavor. They might not prefer generic cookie-making advice or suggestions that don't take into account their existing use of turbinado sugar.",
+"answer": "Try swapping in turbinado sugar, which you've found adds a richer flavour (it was also suggested for cookies, e.g. turbinado and cinnamon sugar cookies)."
+},
+{
+"uid": "qa00063",
+"question": "I was going through our previous chat and I was wondering, what was Andy wearing in the script you wrote for the comedy movie scene?",
+"question_type": "single-session-assistant",
+"gold": "Andy was wearing an untidy, stained white shirt.",
+"answer": "An untidy, stained white shirt."
+},
+{
+"uid": "qa00228",
+"question": "How old was I when I moved to the United States?",
+"question_type": "temporal-reasoning",
+"gold": "27",
+"answer": "27 (you are 32 and had lived in the US for five years)."
+},
+{
+"uid": "qa00126",
+"question": "How many weeks had passed since I recovered from the flu when I went on my 10th jog outdoors?",
+"question_type": "temporal-reasoning",
+"gold": "15",
+"answer": "81 days, about 11.5 weeks (roughly 12 weeks)"
+},
+{
+"uid": "qa00579",
+"question": "How many music albums or EPs have I purchased or downloaded?",
+"question_type": "multi-session",
+"gold": "3",
+"answer": "I don't know"
+},
+{
+"uid": "qa00060",
+"question": "Which vehicle did I take care of first in February, the bike or the car?",
+"question_type": "temporal-reasoning",
+"gold": "bike",
+"answer": "The bike (repaired in mid-February, before the car was washed on 27 February)."
+},
+{
+"uid": "qa00434",
+"question": "Who did I go with to the music event last Saturday?",
+"question_type": "temporal-reasoning",
+"gold": "my parents",
+"answer": "A group of friends (at the Brooklyn music festival)"
+},
+{
+"uid": "qa00564",
+"question": "How many months passed between the completion of my undergraduate degree and the submission of my master's thesis?",
+"question_type": "temporal-reasoning",
+"gold": "6 months",
+"answer": "About 6 months (undergrad completed around 17 Nov 2022, thesis submitted 15 May 2023)"
+},
+{
+"uid": "qa00092",
+"question": "I was going through our previous conversation about high-end fashion brands, and I was wondering if you could remind me of the brand that uses wild rubber sourced from the Amazon rainforest?",
+"question_type": "single-session-assistant",
+"gold": "Veja",
+"answer": "Veja"
+},
+{
+"uid": "qa00246",
+"question": "What color did I repaint my bedroom walls?",
+"question_type": "single-session-user",
+"gold": "a lighter shade of gray",
+"answer": "A lighter shade of gray."
+},
+{
+"uid": "qa00071",
+"question": "Which group did I join first, 'Page Turners' or 'Marketing Professionals'?",
+"question_type": "temporal-reasoning",
+"gold": "Page Turners",
+"answer": "'Page Turners' (joined the week of 18 May 2023; 'Marketing Professionals' on 24 May 2023)."
+}
+]

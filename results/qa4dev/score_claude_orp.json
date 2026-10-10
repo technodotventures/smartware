@@ -1,0 +1,134 @@
+{
+ "source": "claude",
+ "ref": "orp",
+ "n_questions": 88,
+ "accuracy": {
+  "bm25": 0.7954545454545454,
+  "mem0@tuned": 0.8181818181818182,
+  "orp": 0.8636363636363636,
+  "orp-clean": 0.8977272727272727,
+  "orp-clean-chrono": 0.8863636363636364,
+  "orp-clean-full": 0.8522727272727273,
+  "orp-clean-nodates": 0.8863636363636364
+ },
+ "ref_minus": {
+  "bm25": {
+   "diff": 0.06818181818181818,
+   "ci95": [
+    -0.022727272727272728,
+    0.1590909090909091
+   ],
+   "p": 0.1688,
+   "p_holm": 0.8440000000000001
+  },
+  "mem0@tuned": {
+   "diff": 0.045454545454545456,
+   "ci95": [
+    -0.03409090909090909,
+    0.125
+   ],
+   "p": 0.3186,
+   "p_holm": 1.0
+  },
+  "orp-clean": {
+   "diff": -0.03409090909090909,
+   "ci95": [
+    -0.07954545454545454,
+    0.0
+   ],
+   "p": 0.0962,
+   "p_holm": 0.5771999999999999
+  },
+  "orp-clean-chrono": {
+   "diff": -0.022727272727272728,
+   "ci95": [
+    -0.06818181818181818,
+    0.022727272727272728
+   ],
+   "p": 0.4424,
+   "p_holm": 1.0
+  },
+  "orp-clean-full": {
+   "diff": 0.011363636363636364,
+   "ci95": [
+    -0.045454545454545456,
+    0.06818181818181818
+   ],
+   "p": 0.839,
+   "p_holm": 1.0
+  },
+  "orp-clean-nodates": {
+   "diff": -0.022727272727272728,
+   "ci95": [
+    -0.06818181818181818,
+    0.022727272727272728
+   ],
+   "p": 0.4424,
+   "p_holm": 1.0
+  }
+ },
+ "by_category": {
+  "knowledge-update": {
+   "bm25": 1.0,
+   "mem0@tuned": 1.0,
+   "orp": 0.9,
+   "orp-clean": 1.0,
+   "orp-clean-chrono": 1.0,
+   "orp-clean-full": 1.0,
+   "orp-clean-nodates": 1.0
+  },
+  "multi-session": {
+   "bm25": 0.6,
+   "mem0@tuned": 0.65,
+   "orp": 0.9,
+   "orp-clean": 0.9,
+   "orp-clean-chrono": 0.9,
+   "orp-clean-full": 0.8,
+   "orp-clean-nodates": 0.9
+  },
+  "single-session-assistant": {
+   "bm25": 1.0,
+   "mem0@tuned": 1.0,
+   "orp": 0.9,
+   "orp-clean": 0.9,
+   "orp-clean-chrono": 0.9,
+   "orp-clean-full": 0.9,
+   "orp-clean-nodates": 0.9
+  },
+  "single-session-preference": {
+   "bm25": 0.75,
+   "mem0@tuned": 0.75,
+   "orp": 1.0,
+   "orp-clean": 1.0,
+   "orp-clean-chrono": 1.0,
+   "orp-clean-full": 1.0,
+   "orp-clean-nodates": 1.0
+  },
+  "single-session-user": {
+   "bm25": 0.9,
+   "mem0@tuned": 1.0,
+   "orp": 1.0,
+   "orp-clean": 1.0,
+   "orp-clean-chrono": 1.0,
+   "orp-clean-full": 1.0,
+   "orp-clean-nodates": 1.0
+  },
+  "temporal-reasoning": {
+   "bm25": 0.7647058823529411,
+   "mem0@tuned": 0.7647058823529411,
+   "orp": 0.7647058823529411,
+   "orp-clean": 0.8235294117647058,
+   "orp-clean-chrono": 0.7941176470588235,
+   "orp-clean-full": 0.7647058823529411,
+   "orp-clean-nodates": 0.7941176470588235
+  }
+ },
+ "n_by_category": {
+  "knowledge-update": 10,
+  "multi-session": 20,
+  "single-session-assistant": 10,
+  "single-session-preference": 4,
+  "single-session-user": 10,
+  "temporal-reasoning": 34
+ }
+}

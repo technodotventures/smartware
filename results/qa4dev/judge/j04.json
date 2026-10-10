@@ -1,0 +1,114 @@
+[
+{
+"uid": "qa00428",
+"question": "I'm planning to visit Bandung again and I was wondering if you could remind me of the name of that restaurant in Cihampelas Walk that serves a great Nasi Goreng?",
+"question_type": "single-session-assistant",
+"gold": "Miss Bee Providore",
+"answer": "Miss Bee Providore"
+},
+{
+"uid": "qa00444",
+"question": "How many months passed between the completion of my undergraduate degree and the submission of my master's thesis?",
+"question_type": "temporal-reasoning",
+"gold": "6 months",
+"answer": "About 6 months (undergraduate completed around 17 November 2022; thesis submitted 15 May 2023)"
+},
+{
+"uid": "qa00088",
+"question": "How many hours did I spend watching documentaries on Netflix last month?",
+"question_type": "single-session-user",
+"gold": "10",
+"answer": "10 hours"
+},
+{
+"uid": "qa00038",
+"question": "What did I do with Rachel on the Wednesday two months ago?",
+"question_type": "temporal-reasoning",
+"gold": "I started taking ukulele lessons with Rachel.",
+"answer": "You started ukulele lessons with Rachel (on Wednesday, 1 February 2023)."
+},
+{
+"uid": "qa00219",
+"question": "How many tops have I bought from H&M so far?",
+"question_type": "knowledge-update",
+"gold": "five",
+"answer": "Five tops (per your most recent mention on 30 Sep 2023)."
+},
+{
+"uid": "qa00519",
+"question": "How many days passed between the day I fixed my mountain bike and the day I decided to upgrade my road bike's pedals?",
+"question_type": "temporal-reasoning",
+"gold": "4 days. 5 days (including the last day) is also acceptable.",
+"answer": "4 days (March 15 to March 19)"
+},
+{
+"uid": "qa00059",
+"question": "What was the airline that I flied with on Valentine's day?",
+"question_type": "temporal-reasoning",
+"gold": "American Airlines",
+"answer": "American Airlines."
+},
+{
+"uid": "qa00596",
+"question": "Which grocery store did I spend the most money at in the past month?",
+"question_type": "multi-session",
+"gold": "Thrive Market",
+"answer": "Walmart (about $120)"
+},
+{
+"uid": "qa00374",
+"question": "How many antique items did I inherit or acquire from my family members?",
+"question_type": "multi-session",
+"gold": "5",
+"answer": "3 (the diamond necklace from your grandmother, the antique music box from your great-aunt, and the depression-era glassware from your mom)"
+},
+{
+"uid": "qa00096",
+"question": "For my daily commute, how much more expensive was the taxi ride compared to the train fare?",
+"question_type": "multi-session",
+"gold": "$6",
+"answer": "$6 more ($12 taxi vs $6 train fare)"
+},
+{
+"uid": "qa00548",
+"question": "How long is my daily commute to work?",
+"question_type": "single-session-user",
+"gold": "45 minutes each way",
+"answer": "45 minutes each way"
+},
+{
+"uid": "qa00074",
+"question": "How many tops have I bought from H&M so far?",
+"question_type": "knowledge-update",
+"gold": "five",
+"answer": "Five tops."
+},
+{
+"uid": "qa00049",
+"question": "How many days ago did I harvest my first batch of fresh herbs from the herb garden kit?",
+"question_type": "temporal-reasoning",
+"gold": "3 days ago. 4 days (including the last day) is also acceptable.",
+"answer": "3 days ago (harvested on 15 April 2023)."
+},
+{
+"uid": "qa00404",
+"question": "How many months passed between the completion of my undergraduate degree and the submission of my master's thesis?",
+"question_type": "temporal-reasoning",
+"gold": "6 months",
+"answer": "About 6 months (undergraduate completed around 17 November 2022; thesis submitted 15 May 2023)"
+},
+{
+"uid": "qa00154",
+"question": "What is the total cost of Lola's vet visit and flea medication?",
+"question_type": "multi-session",
+"gold": "$75",
+"answer": "$75 ($50 vet consultation + $25 flea and tick medication)."
+},
+{
+"uid": "qa00331",
+"question": "How many music albums or EPs have I purchased or downloaded?",
+"question_type": "multi-session",
+"gold": "3",
+"answer": "One (Billie Eilish's \"Happier Than Ever\", downloaded on Spotify)"
+}
+]
