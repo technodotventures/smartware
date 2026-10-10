@@ -39,3 +39,10 @@ baselines, BM25 and the oracle, with both readers (protocol to be written before
 By the rule above the winner is `orp-clean` (Claude accuracy above `orp`'s, so the 3-point guard is met). With the
 DeepSeek reader it is 13.6 points above `orp` (95% CI +5.7 to +21.6). Showing items oldest first hurt the DeepSeek
 reader; rank order stays. One reader omission was rerun alone (`RERUNS.log`).
+
+## Outcome (10 Oct 2026)
+
+Dev accuracy, Claude / DeepSeek / mean: orp 86.4 / 43.2 / 64.8; orp-clean 89.8 / 56.8 / 73.3; orp-clean-chrono
+88.6 / 46.6 / 67.6; orp-clean-nodates 88.6 / 40.9 / 64.8; orp-clean-full 85.2 / 47.7 / 66.5; mem0 81.8 / 59.1 / 70.5;
+BM25 79.5 / 51.1 / 65.3. By the rule above the winner is **orp-clean** (`results/qa4dev/selection.json`). Its DeepSeek
+gain over orp is +13.6 points (95% CI +5.7 to +21.6). One Claude reader omission was rerun alone (`RERUNS.log`).
