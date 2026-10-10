@@ -184,28 +184,34 @@ def load_lme(n_sessions: int = 40, seed: int = 7, limit: int | None = None) -> l
 
 
 LME_M = os.path.join(os.path.dirname(__file__), "..", "..", "data", "lme_m")
-_LME_M_SESS: dict | None = None
+LME_S = os.path.join(os.path.dirname(__file__), "..", "..", "data", "lme_s")
+_SESS: dict = {}
 
 
-def _lme_m_sessions() -> dict:
-    global _LME_M_SESS
-    if _LME_M_SESS is None:
+def _lme_m_sessions(d: str = LME_M) -> dict:
+    if d not in _SESS:
         import gzip
-        _LME_M_SESS = {}
-        for fn in sorted(os.listdir(LME_M)):
+        out = _SESS[d] = {}
+        for fn in sorted(os.listdir(d)):
             if fn.startswith("sessions_"):
-                for line in gzip.open(os.path.join(LME_M, fn), "rt", encoding="utf-8"):
+                for line in gzip.open(os.path.join(d, fn), "rt", encoding="utf-8"):
                     s = json.loads(line)
-                    _LME_M_SESS[s["sid"]] = [(t["role"], t["content"], bool(t.get("has_answer"))) for t in s["turns"]]
-    return _LME_M_SESS
+                    out[s["sid"]] = [(t["role"], t["content"], bool(t.get("has_answer"))) for t in s["turns"]]
+    return _SESS[d]
 
 
-def lme_m_questions() -> list[dict]:
+def lme_m_questions(d: str = LME_M) -> list[dict]:
     import gzip
-    return [json.loads(l) for l in gzip.open(os.path.join(LME_M, "questions.jsonl.gz"), "rt", encoding="utf-8")]
+    return [json.loads(l) for l in gzip.open(os.path.join(d, "questions.jsonl.gz"), "rt", encoding="utf-8")]
 
 
-def load_lme_m(limit: int | None = None, split: str | None = None):
+def load_lme_s(limit: int | None = None, split: str | None = None):
+    """Official LongMemEval-S (`longmemeval_s_cleaned.json`): the same 500 questions, each with its own official
+    haystack of 38-62 sessions (about 115k tokens). Compacted with tools/compact_lme_m.py; loaded like LongMemEval-M."""
+    return load_lme_m(limit, split, d=LME_S)
+
+
+def load_lme_m(limit: int | None = None, split: str | None = None, d: str = LME_M):
     """Official LongMemEval-M (xiaowu0162/longmemeval, `longmemeval_m_cleaned.json`): the same 500 questions as
     LongMemEval-S and the oracle file, each with its own official haystack of about 475 sessions (about 4,900 turns,
     1.2M tokens). Compacted on the user's machine by deduplicating sessions shared between questions (no session id
@@ -213,9 +219,9 @@ def load_lme_m(limit: int | None = None, split: str | None = None):
     questions are excluded, as for LME-R. Turn timestamps follow LME-R: the session date plus 60 s per turn.
 
     Yields tasks lazily (each haystack is large): call again for a fresh pass."""
-    sess = _lme_m_sessions()
+    sess = _lme_m_sessions(d)
     n = 0
-    for q in lme_m_questions():
+    for q in lme_m_questions(d):
         if q["question_id"].endswith("_abs"):
             continue
         sp = "dev" if _is_dev(q["question_id"]) else "test"

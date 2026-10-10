@@ -17,7 +17,7 @@ import traceback
 from collections import defaultdict
 from multiprocessing import Pool
 
-from .data import load_lme, load_lme_m, load_locomo, load_hotpot
+from .data import load_lme, load_lme_m, load_lme_s, load_locomo, load_hotpot
 from .encoders import DenseEncoder, Encoders
 from .metrics import score_query
 
@@ -55,6 +55,8 @@ _TASKS = {}
 def get_tasks(bench: str, split: str = "all"):
     if bench == "lmem":  # official LongMemEval-M: too large to hold, streamed afresh on every call
         return load_lme_m(split=split)
+    if bench == "lmes":  # official LongMemEval-S, streamed the same way
+        return load_lme_s(split=split)
     if bench not in _TASKS:
         _TASKS[bench] = {"locomo": load_locomo, "lme": load_lme, "hotpot": load_hotpot}[bench]()
     return _TASKS[bench]
@@ -124,7 +126,7 @@ def run_one(args):
                 rows.append(m)
                 part.write(json.dumps(m) + "\n")
                 part.flush()
-            if bench == "lmem":  # 1.2M-token haystacks: drop the embedding cache between them (outputs unchanged)
+            if bench in ("lmem", "lmes"):  # large haystacks: drop the embedding cache between them (outputs unchanged)
                 enc.dense._cache.clear()
     except Exception:
         traceback.print_exc()

@@ -61,7 +61,7 @@ def load_tuned():
 
 
 def rows(bench, name):
-    p = os.path.join(RES, "raw_lmem" if bench == "lmem" else "raw_v012", bench, f"{name}.test.jsonl")
+    p = os.path.join(RES, f"raw_{bench}" if bench in ("lmem", "lmes") else "raw_v012", bench, f"{name}.test.jsonl")
     if not os.path.exists(p):
         return None
     return {json.loads(l)["qid"]: json.loads(l) for l in open(p)}
@@ -224,20 +224,21 @@ def retuned_track() -> list[str]:
     return md
 
 
-def lmem_track() -> list[str]:
-    """Official LongMemEval-M, frozen raw-turn configurations, scored once (pre-registered in METHODOLOGY)."""
-    S = load("summary_lmem.json").get("lmem", {}).get("test", {})
+def lmem_track(bench: str = "lmem") -> list[str]:
+    """Official LongMemEval-S / -M, frozen raw-turn configurations, scored once (pre-registered in METHODOLOGY)."""
+    S = load(f"summary_{bench}.json").get(bench, {}).get("test", {})
     if "orp" not in S:
         return []
     tn = [f"{n}@tuned" for n in BASE if f"{n}@tuned" in S]
     mets = [(k, h) for k, h in METRICS if k in HEAD] + [("ans@4000", "Ans@4000"), ("sess_all@5", "SessAll@5")]
-    q = load("lmem_quirks.json")
-    md = [f"## Official LongMemEval-M (frozen configurations, scored once), n={S['orp']['n']}", "",
-          "The official `longmemeval_m_cleaned.json` haystacks (about 475 sessions, 4,900 turns and 1.2M tokens per "
-          "question; LME-R used 40 sessions), the same 382 test questions. Nothing was tuned on it: ORP's shipped "
-          "ranker and every baseline's raw-turn dev-tuned configuration. Raw turns only (no fact track at this scale).",
-          ""]
-    vt, t = verdict("lmem", S, tn, mets)
+    q = load(f"{bench}_quirks.json")
+    size = ("about 475 sessions, 4,900 turns and 1.2M tokens" if bench == "lmem" else
+            "38-62 sessions, about 490 turns and 115k tokens")
+    md = [f"## Official LongMemEval-{bench[-1].upper()} (frozen configurations, scored once), n={S['orp']['n']}", "",
+          f"The official `longmemeval_{bench[-1]}_cleaned.json` haystacks ({size} per question; LME-R used 40 rebuilt "
+          "sessions), the same 382 test questions. Nothing was tuned on it: ORP's shipped ranker and every baseline's "
+          "raw-turn dev-tuned configuration. Raw turns only.", ""]
+    vt, t = verdict(bench, S, tn, mets)
     for k in t:
         LMEM[k] = LMEM.get(k, 0) + t[k]
     md += [f"ORP against the best of the 15: **{t['win']} better, {t['tie']} no significant difference, "
@@ -250,9 +251,9 @@ def lmem_track() -> list[str]:
         ex = set(q.get(key, []))
         if not ex:
             continue
-        sub = {k: {m: mean_excl("lmem", k, m, ex) for m, _ in mets} for k in ["orp"] + tn}
-        vq, tq = verdict("lmem", sub, tn, mets, ex)
-        md += [f"Without the {len(ex)} test questions with {what} in the official data (`results/lmem_quirks.json`): "
+        sub = {k: {m: mean_excl(bench, k, m, ex) for m, _ in mets} for k in ["orp"] + tn}
+        vq, tq = verdict(bench, sub, tn, mets, ex)
+        md += [f"Without the {len(ex)} test questions with {what} in the official data (`results/{bench}_quirks.json`): "
                f"**{tq['win']} better, {tq['tie']} no significant difference, {tq['loss']} worse**.", "", vq, ""]
     md += ["Recall@1000 by question category:", "",
            cat_table(S, ["orp"] + sorted(tn, key=lambda x: -(S[x].get("recall@1000") or 0))[:6] + ["bm25"]), ""]
@@ -342,7 +343,8 @@ def main():
     md.insert(6, f"**Overall: on {sum(tally_all.values())} benchmark-metric comparisons against the best of the 15, "
                  f"ORP is better on {tally_all['win']}, not significantly different on {tally_all['tie']} and worse on "
                  f"{tally_all['loss']}.**\n")
-    md += lmem_track()
+    md += lmem_track("lmes")
+    md += lmem_track("lmem")
     md += facts_track()
     md += retuned_track()
     for vis in ("50", "15"):
