@@ -87,6 +87,7 @@ class Params:
     expand_next: bool = True
     expand_prev_q: bool = True
     headers: bool = True
+    render: str = "v012"  # v012: "## date · thread" headers | clean: every line carries its own date, no thread labels
     resolve_dates: bool = True
     count_div: bool = True
     # learned rankers
@@ -880,12 +881,16 @@ class Engine:
                 body, frac = (mj.content, 1.0) if gran == "thread" else self._body(j, qterms)
                 if p.resolve_dates and mj.meta.get("time_refs"):
                     body += " (" + "; ".join(f"{a} = {b}" for a, b in mj.meta["time_refs"][:2]) + ")"
-                lines.append(f"{mj.actor}: {body}" if mj.actor else body)
+                line = f"{mj.actor}: {body}" if mj.actor else body
+                if p.render == "clean":
+                    dj = mj.event_time or mj.observed_at
+                    line = (f"[{dj.day} {dj.strftime('%b %Y')}] " if dj else "") + line
+                lines.append(line)
                 if frac >= p.claim_fraction:
                     claimed.append(j)
             head = ""
             tkey = (m.tenant, m.thread)
-            if p.headers and tkey not in seen_threads:
+            if p.headers and p.render != "clean" and tkey not in seen_threads:
                 d = m.event_time or m.observed_at
                 ds = d.strftime("%Y-%m-%d (%a)") if d else ""
                 lab = m.meta.get("thread_label") or (m.thread.split(":")[-1] if m.thread else "")
