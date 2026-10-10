@@ -1,0 +1,1052 @@
+[
+{
+"uid": "v00975",
+"question": "Where does my sister Emily live?",
+"question_type": "single-session-user",
+"gold": "Denver",
+"answer": "I don't know"
+},
+{
+"uid": "v01691",
+"question": "At which university did I present a poster on my thesis research?",
+"question_type": "multi-session",
+"gold": "Harvard University",
+"answer": "Harvard University"
+},
+{
+"uid": "v00657",
+"question": "How many times did I ride rollercoasters across all the events I attended from July to October?",
+"question_type": "multi-session",
+"gold": "10 times",
+"answer": "4 times (Xcelerator once and Revenge of the Mummy three times)"
+},
+{
+"uid": "v00753",
+"question": "How many days ago did I read the March 15th issue of The New Yorker?",
+"question_type": "temporal-reasoning",
+"gold": "12 days ago. 13 days (including the last day) is also acceptable.",
+"answer": "12 days ago (read on 2023-03-20)"
+},
+{
+"uid": "v01670",
+"question": "Which book did I finish reading first, 'The Hate U Give' or 'The Nightingale'?",
+"question_type": "temporal-reasoning",
+"gold": "'The Hate U Give'",
+"answer": "The Hate U Give"
+},
+{
+"uid": "v00578",
+"question": "How many days had passed since I bought my Adidas running shoes when I realized one of the shoelaces on my old Converse sneakers had broken?",
+"question_type": "temporal-reasoning",
+"gold": "14 days. 15 days (including the last day) is also acceptable.",
+"answer": "14 days (shoes bought January 10th, shoelace broke January 24th)."
+},
+{
+"uid": "v00525",
+"question": "What is the total number of episodes I've listened to from 'How I Built This' and 'My Favorite Murder'?",
+"question_type": "multi-session",
+"gold": "27",
+"answer": "I don't know"
+},
+{
+"uid": "v01288",
+"question": "How many days before I bought the iPhone 13 Pro did I attend the Holiday Market?",
+"question_type": "temporal-reasoning",
+"gold": "7 days. 8 days (including the last day) is also acceptable.",
+"answer": "7 days"
+},
+{
+"uid": "v00042",
+"question": "I remember you told me about the refining processes at CITGO's three refineries earlier. Can you remind me what kind of processes are used at the Lake Charles Refinery?",
+"question_type": "single-session-assistant",
+"gold": "Atmospheric distillation, fluid catalytic cracking (FCC), alkylation, and hydrotreating.",
+"answer": "Atmospheric distillation and fluid catalytic cracking (FCC)"
+},
+{
+"uid": "v02089",
+"question": "I wanted to follow up on our previous conversation about binaural beats for anxiety and depression. Can you remind me how many subjects were in the study published in the journal Music and Medicine that found significant reductions in symptoms of depression, anxiety, and stress?",
+"question_type": "single-session-assistant",
+"gold": "38 subjects",
+"answer": "38 subjects"
+},
+{
+"uid": "v01420",
+"question": "I wanted to follow up on our previous conversation about binaural beats for anxiety and depression. Can you remind me how many subjects were in the study published in the journal Music and Medicine that found significant reductions in symptoms of depression, anxiety, and stress?",
+"question_type": "single-session-assistant",
+"gold": "38 subjects",
+"answer": "38 subjects"
+},
+{
+"uid": "v00689",
+"question": "How much time do I dedicate to coding exercises each day?",
+"question_type": "knowledge-update",
+"gold": "about two hours",
+"answer": "About two hours each day."
+},
+{
+"uid": "v01378",
+"question": "How many total pieces of writing have I completed since I started writing again three weeks ago, including short stories, poems, and pieces for the writing challenge?",
+"question_type": "multi-session",
+"gold": "23",
+"answer": "I don't know"
+},
+{
+"uid": "v02095",
+"question": "I wanted to follow up on our previous conversation about private sector businesses in Chaudhary. Can you remind me of the company that employs over 40,000 people in the rug-manufacturing industry?",
+"question_type": "single-session-assistant",
+"gold": "Jaipur Rugs",
+"answer": "I don't know"
+},
+{
+"uid": "v02514",
+"question": "My kitchen's becoming a bit of a mess again. Any tips for keeping it clean?",
+"question_type": "single-session-preference",
+"gold": "The user would prefer responses that acknowledge and build upon their existing efforts to organize their kitchen, such as utilizing their new utensil holder to keep countertops clutter-free. They would also appreciate tips that address their concern for maintaining their granite surface, particularly around the sink area. Preferred responses would provide practical and actionable steps to maintain cleanliness, leveraging the user's current tools and setup. They might not prefer generic or vague suggestions that do not take into account their specific kitchen setup or concerns.",
+"answer": "Use your new utensil holder to keep countertops clutter-free, give each group of utensils a set home, and put things back after use so the clutter doesn't build up again."
+},
+{
+"uid": "v00200",
+"question": "What is the artist that I started to listen to last Friday?",
+"question_type": "temporal-reasoning",
+"gold": "a bluegrass band that features a banjo player",
+"answer": "A bluegrass band featuring a banjo player (no name given)"
+},
+{
+"uid": "v01600",
+"question": "What is the total number of lunch meals I got from the chicken fajitas and lentil soup?",
+"question_type": "multi-session",
+"gold": "8 meals",
+"answer": "8 lunches (5 from the lentil soup plus 3 from the chicken fajitas)"
+},
+{
+"uid": "v00204",
+"question": "I was looking back at our previous chat and I wanted to confirm, how many times did the Chiefs play the Jaguars at Arrowhead Stadium?",
+"question_type": "single-session-assistant",
+"gold": "The Chiefs played the Jaguars 12 times at Arrowhead Stadium.",
+"answer": "12 times"
+},
+{
+"uid": "v00977",
+"question": "Which event did I participate in first, the volleyball league or the charity 5K run to raise money for a local children's hospital?",
+"question_type": "temporal-reasoning",
+"gold": "volleyball league",
+"answer": "The volleyball league (joined about 2 months ago, versus the 5K about a month ago)"
+},
+{
+"uid": "v00588",
+"question": "My kitchen's becoming a bit of a mess again. Any tips for keeping it clean?",
+"question_type": "single-session-preference",
+"gold": "The user would prefer responses that acknowledge and build upon their existing efforts to organize their kitchen, such as utilizing their new utensil holder to keep countertops clutter-free. They would also appreciate tips that address their concern for maintaining their granite surface, particularly around the sink area. Preferred responses would provide practical and actionable steps to maintain cleanliness, leveraging the user's current tools and setup. They might not prefer generic or vague suggestions that do not take into account their specific kitchen setup or concerns.",
+"answer": "Keep countertops clear by storing utensils in your new utensil holder, wipe down surfaces daily with a granite-safe cleaner (especially around the sink), and fix the leaking faucet so water doesn't pool and make a mess."
+},
+{
+"uid": "v01661",
+"question": "How many autographed baseballs have I added to my collection in the first three months of collection?",
+"question_type": "knowledge-update",
+"gold": "15",
+"answer": "I don't know"
+},
+{
+"uid": "v00070",
+"question": "How many Instagram followers do I currently have?",
+"question_type": "knowledge-update",
+"gold": "600",
+"answer": "I don't know"
+},
+{
+"uid": "v01226",
+"question": "How many days did I take social media breaks in total?",
+"question_type": "multi-session",
+"gold": "17 days",
+"answer": "17 days (a 10-day break plus a week-long break)"
+},
+{
+"uid": "v01094",
+"question": "How many days did I spend in total traveling in Hawaii and in New York City?",
+"question_type": "multi-session",
+"gold": "15 days",
+"answer": "I don't know"
+},
+{
+"uid": "v01461",
+"question": "Who did I meet with during the lunch last Tuesday?",
+"question_type": "temporal-reasoning",
+"gold": "Emma",
+"answer": "I don't know"
+},
+{
+"uid": "v00421",
+"question": "What is the order of the six museums I visited from earliest to latest?",
+"question_type": "temporal-reasoning",
+"gold": "Science Museum, Museum of Contemporary Art, Metropolitan Museum of Art, Museum of History, Modern Art Museum, Natural History Museum",
+"answer": "Science Museum (Jan 15), Museum of Contemporary Art (Jan 22), Metropolitan Museum of Art (Feb 10), Museum of History (Feb 15), Modern Art Museum (Feb 20), Natural History Museum (Mar 4)"
+},
+{
+"uid": "v00504",
+"question": "How many health-related devices do I use in a day?",
+"question_type": "multi-session",
+"gold": "4",
+"answer": "Two (the Fitbit Versa 3 and the Accu-Chek Aviva Nano blood sugar system)"
+},
+{
+"uid": "v01812",
+"question": "I was going through our previous conversation about the impact of the political climate in Catalonia on its literature and music. Can you remind me of the example you gave of a Spanish-Catalan singer-songwriter who supports unity between Catalonia and Spain?",
+"question_type": "single-session-assistant",
+"gold": "Manolo Garc\u00eda",
+"answer": "Manolo Garc\u00eda"
+},
+{
+"uid": "v00786",
+"question": "How many days ago did I participate in the 5K charity run?",
+"question_type": "temporal-reasoning",
+"gold": "7 days ago. 8 days (including the last day) is also acceptable.",
+"answer": "I don't know"
+},
+{
+"uid": "v02624",
+"question": "How many days did I spend in total traveling in Hawaii and in New York City?",
+"question_type": "multi-session",
+"gold": "15 days",
+"answer": "15 days (10 days in Hawaii plus 5 days in New York City)"
+},
+{
+"uid": "v01158",
+"question": "How many pages of 'A Short History of Nearly Everything' have I read so far?",
+"question_type": "knowledge-update",
+"gold": "220",
+"answer": "220 pages"
+},
+{
+"uid": "v00744",
+"question": "What are the two hobbies that led me to join online communities?",
+"question_type": "multi-session",
+"gold": "photography and cooking",
+"answer": "I don't know"
+},
+{
+"uid": "v01875",
+"question": "What is the total number of lunch meals I got from the chicken fajitas and lentil soup?",
+"question_type": "multi-session",
+"gold": "8 meals",
+"answer": "8 lunch meals (3 from the chicken fajitas + 5 from the lentil soup)"
+},
+{
+"uid": "v00095",
+"question": "I was going through our previous conversation about making a classic French omelette, and I wanted to confirm - how many eggs did you say we need for the recipe?",
+"question_type": "single-session-assistant",
+"gold": "2-3 eggs",
+"answer": "2-3 eggs"
+},
+{
+"uid": "v01739",
+"question": "How many shirts did I pack for my 5-day trip to Costa Rica?",
+"question_type": "single-session-user",
+"gold": "7",
+"answer": "7 shirts"
+},
+{
+"uid": "v02405",
+"question": "Which event did I participate in first, the charity gala or the charity bake sale?",
+"question_type": "temporal-reasoning",
+"gold": "I participated in the charity bake sale first.",
+"answer": "The charity bake sale (planned around 15 March), before the charity gala on 28 March"
+},
+{
+"uid": "v01961",
+"question": "How many hours of jogging and yoga did I do last week?",
+"question_type": "multi-session",
+"gold": "0.5 hours",
+"answer": "I don't know"
+},
+{
+"uid": "v01759",
+"question": "What was the approximate increase in Instagram followers I experienced in two weeks?",
+"question_type": "multi-session",
+"gold": "100",
+"answer": "About 100 followers (from 250 at the start of the year to around 350)"
+},
+{
+"uid": "v00063",
+"question": "How much total money have I spent on bike-related expenses since the start of the year?",
+"question_type": "multi-session",
+"gold": "$185",
+"answer": "$185 ($120 helmet + $25 chain + $40 lights)"
+},
+{
+"uid": "v02267",
+"question": "How many movie festivals that I attended?",
+"question_type": "multi-session",
+"gold": "I attended four movie festivals.",
+"answer": "I don't know"
+},
+{
+"uid": "v01708",
+"question": "What is the total number of days I spent in Japan and Chicago?",
+"question_type": "multi-session",
+"gold": "11 days (or 12 days, if April 15th to 22nd is considered as 8 days)",
+"answer": "I don't know"
+},
+{
+"uid": "v00706",
+"question": "What is the artist that I started to listen to last Friday?",
+"question_type": "temporal-reasoning",
+"gold": "a bluegrass band that features a banjo player",
+"answer": "I don't know"
+},
+{
+"uid": "v02213",
+"question": "Where did I attend the religious activity last week?",
+"question_type": "temporal-reasoning",
+"gold": "the Episcopal Church",
+"answer": "I don't know"
+},
+{
+"uid": "v00218",
+"question": "My kitchen's becoming a bit of a mess again. Any tips for keeping it clean?",
+"question_type": "single-session-preference",
+"gold": "The user would prefer responses that acknowledge and build upon their existing efforts to organize their kitchen, such as utilizing their new utensil holder to keep countertops clutter-free. They would also appreciate tips that address their concern for maintaining their granite surface, particularly around the sink area. Preferred responses would provide practical and actionable steps to maintain cleanliness, leveraging the user's current tools and setup. They might not prefer generic or vague suggestions that do not take into account their specific kitchen setup or concerns.",
+"answer": "Give every item a designated home, purge duplicates, use dividers or containers, and clean the utensil holder regularly; your new utensil holder already helps keep the countertops clutter-free."
+},
+{
+"uid": "v01801",
+"question": "How many different museums or galleries did I visit in the month of February?",
+"question_type": "multi-session",
+"gold": "2",
+"answer": "I don't know"
+},
+{
+"uid": "v00055",
+"question": "How many health-related devices do I use in a day?",
+"question_type": "multi-session",
+"gold": "4",
+"answer": "I don't know"
+},
+{
+"uid": "v00067",
+"question": "How many engineers do I lead when I just started my new role as Senior Software Engineer? How many engineers do I lead now?",
+"question_type": "knowledge-update",
+"gold": "When you just started your new role as Senior Software Engineer, you led 4 engineers. Now, you lead 5 engineers",
+"answer": "4 engineers when you started, 5 engineers now"
+},
+{
+"uid": "v01251",
+"question": "I was going through our previous chat. Can you remind me of the name of the last venue you recommended in the list of popular venues in Portland for indie music shows?",
+"question_type": "single-session-assistant",
+"gold": "Revolution Hall",
+"answer": "Revolution Hall"
+},
+{
+"uid": "v01394",
+"question": "Which airline did I fly with the most in March and April?",
+"question_type": "temporal-reasoning",
+"gold": "United Airlines",
+"answer": "I don't know"
+},
+{
+"uid": "v01462",
+"question": "How many shirts did I pack for my 5-day trip to Costa Rica?",
+"question_type": "single-session-user",
+"gold": "7",
+"answer": "7 shirts"
+},
+{
+"uid": "v01844",
+"question": "How much have I made from selling eggs this month?",
+"question_type": "multi-session",
+"gold": "$120",
+"answer": "I don't know"
+},
+{
+"uid": "v02359",
+"question": "How many plants did I acquire in the last month?",
+"question_type": "multi-session",
+"gold": "3",
+"answer": "2 (a peace lily and a succulent)"
+},
+{
+"uid": "v00630",
+"question": "What is the name of my cat?",
+"question_type": "single-session-user",
+"gold": "Luna",
+"answer": "Luna"
+},
+{
+"uid": "v02209",
+"question": "How much did I spend on each coffee mug for my coworkers?",
+"question_type": "multi-session",
+"gold": "$12",
+"answer": "$12 each ($60 for 5 mugs)."
+},
+{
+"uid": "v02289",
+"question": "Which event did I participate in first, the charity gala or the charity bake sale?",
+"question_type": "temporal-reasoning",
+"gold": "I participated in the charity bake sale first.",
+"answer": "The charity bake sale (mid-March) came before the charity gala (28 March)."
+},
+{
+"uid": "v00054",
+"question": "How long have I been using my Fitbit Charge 3?",
+"question_type": "knowledge-update",
+"gold": "9 months",
+"answer": "I don't know"
+},
+{
+"uid": "v01146",
+"question": "I'm trying to decide whether to buy a NAS device now or wait. What do you think?",
+"question_type": "single-session-preference",
+"gold": "The user would prefer responses that take into account their current home network storage capacity issues and recent reliance on external hard drives, highlighting the potential benefits of a NAS device in addressing these specific needs. They might not prefer responses that ignore their current storage challenges or fail to consider their recent tech upgrades and priorities. Preferred responses would utilize the user's previous mentions of storage capacity issues and tech investments to inform their decision.",
+"answer": "You already back up to an external drive and want central backup with strong security, so buying a NAS now seems reasonable; the context says nothing about pricing or upcoming models that would justify waiting."
+},
+{
+"uid": "v01297",
+"question": "Do I go to the gym more frequently than I did previously?",
+"question_type": "knowledge-update",
+"gold": "Yes",
+"answer": "I don't know"
+},
+{
+"uid": "v00966",
+"question": "Do I have a spare screwdriver for opening up my laptop?",
+"question_type": "knowledge-update",
+"gold": "Yes",
+"answer": "Apparently not; you were reminded to pick up a small screwdriver."
+},
+{
+"uid": "v02107",
+"question": "I was thinking about rearranging the furniture in my bedroom this weekend. Any tips?",
+"question_type": "single-session-preference",
+"gold": "The user would prefer responses that take into account their existing plans to replace the bedroom dresser and their interest in mid-century modern style, suggesting furniture layouts that accommodate the new dresser and incorporate elements of this design aesthetic. They might not prefer general furniture arrangement tips or suggestions that do not consider their specific design preferences.",
+"answer": "Place the new mid-century modern dresser first and arrange the rest around it; also keep your laptop and smart speaker in a spot that suits the weak bedroom Wi-Fi."
+},
+{
+"uid": "v01098",
+"question": "How many days ago did I attend a networking event?",
+"question_type": "temporal-reasoning",
+"gold": "26 days. 27 days (including the last day) is also acceptable.",
+"answer": "I don't know"
+},
+{
+"uid": "v00777",
+"question": "How old was I when Alex was born?",
+"question_type": "multi-session",
+"gold": "11",
+"answer": "I don't know"
+},
+{
+"uid": "v01904",
+"question": "Which airline did I fly with the most in March and April?",
+"question_type": "temporal-reasoning",
+"gold": "United Airlines",
+"answer": "United Airlines"
+},
+{
+"uid": "v00672",
+"question": "I was going through our previous conversation about political propaganda and humor, and I was wondering if you could remind me of that Soviet cartoon you mentioned that mocked Western culture?",
+"question_type": "single-session-assistant",
+"gold": "Nu, pogodi!",
+"answer": "I don't know"
+},
+{
+"uid": "v00796",
+"question": "I was going through our previous chat. Can you remind me of the name of the last venue you recommended in the list of popular venues in Portland for indie music shows?",
+"question_type": "single-session-assistant",
+"gold": "Revolution Hall",
+"answer": "Revolution Hall"
+},
+{
+"uid": "v00393",
+"question": "Where did I go on my most recent family trip?",
+"question_type": "knowledge-update",
+"gold": "Paris",
+"answer": "Hawaii"
+},
+{
+"uid": "v00669",
+"question": "What was my previous personal best time for the charity 5K run?",
+"question_type": "knowledge-update",
+"gold": "27 minutes and 45 seconds",
+"answer": "27 minutes 45 seconds"
+},
+{
+"uid": "v01814",
+"question": "How many days before I bought the iPhone 13 Pro did I attend the Holiday Market?",
+"question_type": "temporal-reasoning",
+"gold": "7 days. 8 days (including the last day) is also acceptable.",
+"answer": "I don't know"
+},
+{
+"uid": "v02509",
+"question": "How many pieces of jewelry did I acquire in the last two months?",
+"question_type": "multi-session",
+"gold": "3",
+"answer": "3 (emerald earrings, a silver necklace with a pendant, and an engagement ring)."
+},
+{
+"uid": "v01590",
+"question": "How many health-related devices do I use in a day?",
+"question_type": "multi-session",
+"gold": "4",
+"answer": "I don't know"
+},
+{
+"uid": "v01536",
+"question": "How many pages of 'A Short History of Nearly Everything' have I read so far?",
+"question_type": "knowledge-update",
+"gold": "220",
+"answer": "Page 220"
+},
+{
+"uid": "v02419",
+"question": "How long did it take to move to the new apartment?",
+"question_type": "single-session-user",
+"gold": "5 hours",
+"answer": "About 5 hours"
+},
+{
+"uid": "v00031",
+"question": "Which event did I participate in first, the volleyball league or the charity 5K run to raise money for a local children's hospital?",
+"question_type": "temporal-reasoning",
+"gold": "volleyball league",
+"answer": "I don't know"
+},
+{
+"uid": "v01520",
+"question": "Which event did I participate in first, the volleyball league or the charity 5K run to raise money for a local children's hospital?",
+"question_type": "temporal-reasoning",
+"gold": "volleyball league",
+"answer": "I don't know"
+},
+{
+"uid": "v01822",
+"question": "What gardening-related activity did I do two weeks ago?",
+"question_type": "temporal-reasoning",
+"gold": "planting 12 new tomato saplings",
+"answer": "I don't know"
+},
+{
+"uid": "v00444",
+"question": "I was going through our previous conversation about the impact of the political climate in Catalonia on its literature and music. Can you remind me of the example you gave of a Spanish-Catalan singer-songwriter who supports unity between Catalonia and Spain?",
+"question_type": "single-session-assistant",
+"gold": "Manolo Garc\u00eda",
+"answer": "Manolo Garc\u00eda"
+},
+{
+"uid": "v00605",
+"question": "How many days did I spend in total traveling in Hawaii and in New York City?",
+"question_type": "multi-session",
+"gold": "15 days",
+"answer": "I don't know"
+},
+{
+"uid": "v02058",
+"question": "Which event did I participate in first, the charity gala or the charity bake sale?",
+"question_type": "temporal-reasoning",
+"gold": "I participated in the charity bake sale first.",
+"answer": "I don't know"
+},
+{
+"uid": "v02012",
+"question": "How many Instagram followers do I currently have?",
+"question_type": "knowledge-update",
+"gold": "600",
+"answer": "500 (reached last week, per your latest mention)"
+},
+{
+"uid": "v02393",
+"question": "How many days had passed between the day I bought a gift for my brother's graduation ceremony and the day I bought a birthday gift for my best friend?",
+"question_type": "temporal-reasoning",
+"gold": "7 days. 8 days (including the last day) is also acceptable.",
+"answer": "7 days (brother's gift on 8 March, best friend's gift on 15 March)"
+},
+{
+"uid": "v01992",
+"question": "What was my previous occupation?",
+"question_type": "single-session-user",
+"gold": "Marketing specialist at a small startup",
+"answer": "I don't know"
+},
+{
+"uid": "v00107",
+"question": "What time do I wake up on Tuesdays and Thursdays?",
+"question_type": "temporal-reasoning",
+"gold": "6:45 AM",
+"answer": "6:45 AM (you usually wake at 7:00 AM and get up 15 minutes earlier on Tuesdays and Thursdays)"
+},
+{
+"uid": "v00539",
+"question": "Where did I complete my Bachelor's degree in Computer Science?",
+"question_type": "single-session-user",
+"gold": "University of California, Los Angeles (UCLA)",
+"answer": "I don't know"
+},
+{
+"uid": "v00687",
+"question": "What was my previous occupation?",
+"question_type": "single-session-user",
+"gold": "Marketing specialist at a small startup",
+"answer": "You worked at a startup, managing a team of interns (a specific job title isn't given)."
+},
+{
+"uid": "v01546",
+"question": "What is the total number of goals and assists I have in the recreational indoor soccer league?",
+"question_type": "multi-session",
+"gold": "5",
+"answer": "I don't know"
+},
+{
+"uid": "v02293",
+"question": "How many Instagram followers do I currently have?",
+"question_type": "knowledge-update",
+"gold": "600",
+"answer": "600 followers (as of 28 May 2023)."
+},
+{
+"uid": "v00475",
+"question": "What was my previous stance on spirituality?",
+"question_type": "single-session-user",
+"gold": "A staunch atheist",
+"answer": "You used to be a staunch atheist."
+},
+{
+"uid": "v02380",
+"question": "I was thinking about rearranging the furniture in my bedroom this weekend. Any tips?",
+"question_type": "single-session-preference",
+"gold": "The user would prefer responses that take into account their existing plans to replace the bedroom dresser and their interest in mid-century modern style, suggesting furniture layouts that accommodate the new dresser and incorporate elements of this design aesthetic. They might not prefer general furniture arrangement tips or suggestions that do not consider their specific design preferences.",
+"answer": "Lean into the mid-century modern look you've been exploring for your dresser, and keep large furniture out of the path between your router and the bedroom, since the Wi-Fi signal there is already weak."
+},
+{
+"uid": "v01567",
+"question": "How many shirts did I pack for my 5-day trip to Costa Rica?",
+"question_type": "single-session-user",
+"gold": "7",
+"answer": "7 shirts"
+},
+{
+"uid": "v02281",
+"question": "What new kitchen gadget did I invest in before getting the Air Fryer?",
+"question_type": "knowledge-update",
+"gold": "Instant Pot",
+"answer": "I don't know"
+},
+{
+"uid": "v00359",
+"question": "I remember you told me about the refining processes at CITGO's three refineries earlier. Can you remind me what kind of processes are used at the Lake Charles Refinery?",
+"question_type": "single-session-assistant",
+"gold": "Atmospheric distillation, fluid catalytic cracking (FCC), alkylation, and hydrotreating.",
+"answer": "Atmospheric distillation, fluid catalytic cracking (FCC), alkylation and hydrotreating."
+},
+{
+"uid": "v00926",
+"question": "What is the order of the six museums I visited from earliest to latest?",
+"question_type": "temporal-reasoning",
+"gold": "Science Museum, Museum of Contemporary Art, Metropolitan Museum of Art, Museum of History, Modern Art Museum, Natural History Museum",
+"answer": "I don't know"
+},
+{
+"uid": "v00164",
+"question": "What is the total number of goals and assists I have in the recreational indoor soccer league?",
+"question_type": "multi-session",
+"gold": "5",
+"answer": "I don't know"
+},
+{
+"uid": "v01345",
+"question": "What time do I wake up on Tuesdays and Thursdays?",
+"question_type": "temporal-reasoning",
+"gold": "6:45 AM",
+"answer": "6:45 AM (15 minutes earlier than your usual 7:00 AM)"
+},
+{
+"uid": "v00894",
+"question": "How many days before I bought the iPhone 13 Pro did I attend the Holiday Market?",
+"question_type": "temporal-reasoning",
+"gold": "7 days. 8 days (including the last day) is also acceptable.",
+"answer": "7 days (the Holiday Market was a week before Black Friday, when you bought the iPhone 13 Pro)"
+},
+{
+"uid": "v00768",
+"question": "Do I go to the gym more frequently than I did previously?",
+"question_type": "knowledge-update",
+"gold": "Yes",
+"answer": "Yes. Earlier you went 3 days a week (Tuesday, Thursday, Saturday), and later you said four times a week."
+},
+{
+"uid": "v01745",
+"question": "What breed is my dog?",
+"question_type": "single-session-user",
+"gold": "Golden Retriever",
+"answer": "I don't know"
+},
+{
+"uid": "v01615",
+"question": "How many titles are currently on my to-watch list?",
+"question_type": "knowledge-update",
+"gold": "25",
+"answer": "25 titles"
+},
+{
+"uid": "v00978",
+"question": "Where did I go on a week-long trip with my family?",
+"question_type": "single-session-user",
+"gold": "Hawaii",
+"answer": "Hawaii"
+},
+{
+"uid": "v01808",
+"question": "How many charity events did I participate in before the 'Run for the Cure' event?",
+"question_type": "temporal-reasoning",
+"gold": "4",
+"answer": "I don't know"
+},
+{
+"uid": "v00614",
+"question": "How long did I use my new binoculars before I saw the American goldfinches returning to the area?",
+"question_type": "temporal-reasoning",
+"gold": "Two weeks",
+"answer": "I don't know"
+},
+{
+"uid": "v01188",
+"question": "How many days ago did I attend a networking event?",
+"question_type": "temporal-reasoning",
+"gold": "26 days. 27 days (including the last day) is also acceptable.",
+"answer": "26 days ago (the networking event was on 9 March 2022)"
+},
+{
+"uid": "v00633",
+"question": "How much more did I spend on accommodations per night in Hawaii compared to Tokyo?",
+"question_type": "multi-session",
+"gold": "$270",
+"answer": "I don't know"
+},
+{
+"uid": "v01041",
+"question": "I'm looking back at our previous chat about the DHL Wellness Retreats campaign. Can you remind me how much was allocated for influencer marketing in the campaign plan?",
+"question_type": "single-session-assistant",
+"gold": "$2,000",
+"answer": "I don't know"
+},
+{
+"uid": "v01909",
+"question": "Which event happened first, my participation in the #PlankChallenge or my post about vegan chili recipe?",
+"question_type": "temporal-reasoning",
+"gold": "You posted a recipe for vegan chili on Instagram using the hashtag #FoodieAdventures first.",
+"answer": "I don't know"
+},
+{
+"uid": "v01707",
+"question": "What is the average age of me, my parents, and my grandparents?",
+"question_type": "multi-session",
+"gold": "59.6",
+"answer": "I don't know"
+},
+{
+"uid": "v01038",
+"question": "How many different types of citrus fruits have I used in my cocktail recipes?",
+"question_type": "multi-session",
+"gold": "3",
+"answer": "I don't know"
+},
+{
+"uid": "v02449",
+"question": "What was the the life event of one of my relatives that I participated in a week ago?",
+"question_type": "temporal-reasoning",
+"gold": "my cousin's wedding",
+"answer": "I don't know"
+},
+{
+"uid": "v00408",
+"question": "Where do I initially keep my old sneakers?",
+"question_type": "knowledge-update",
+"gold": "under my bed",
+"answer": "I don't know"
+},
+{
+"uid": "v02669",
+"question": "I was going through our previous conversation about making a classic French omelette, and I wanted to confirm - how many eggs did you say we need for the recipe?",
+"question_type": "single-session-assistant",
+"gold": "2-3 eggs",
+"answer": "2-3 eggs"
+},
+{
+"uid": "v01408",
+"question": "How much did I spend on each coffee mug for my coworkers?",
+"question_type": "multi-session",
+"gold": "$12",
+"answer": "I don't know"
+},
+{
+"uid": "v01427",
+"question": "How long did I use my new binoculars before I saw the American goldfinches returning to the area?",
+"question_type": "temporal-reasoning",
+"gold": "Two weeks",
+"answer": "About two weeks (you got the binoculars three weeks before 2023-05-20 and noticed the goldfinches returning about a week before)."
+},
+{
+"uid": "v01128",
+"question": "How long did I use my new binoculars before I saw the American goldfinches returning to the area?",
+"question_type": "temporal-reasoning",
+"gold": "Two weeks",
+"answer": "I don't know"
+},
+{
+"uid": "v00025",
+"question": "I was going through our previous conversation about making a classic French omelette, and I wanted to confirm - how many eggs did you say we need for the recipe?",
+"question_type": "single-session-assistant",
+"gold": "2-3 eggs",
+"answer": "2-3 eggs"
+},
+{
+"uid": "v01287",
+"question": "How long did it take to move to the new apartment?",
+"question_type": "single-session-user",
+"gold": "5 hours",
+"answer": "About 5 hours"
+},
+{
+"uid": "v00119",
+"question": "What is the order of the six museums I visited from earliest to latest?",
+"question_type": "temporal-reasoning",
+"gold": "Science Museum, Museum of Contemporary Art, Metropolitan Museum of Art, Museum of History, Modern Art Museum, Natural History Museum",
+"answer": "I can only place some: Science Museum (15 Jan 2023), then Modern Art Museum (20 Feb), then Natural History Museum (4 Mar); the dates for the other three museums are not given."
+},
+{
+"uid": "v00326",
+"question": "How much did I spend on each coffee mug for my coworkers?",
+"question_type": "multi-session",
+"gold": "$12",
+"answer": "$12 each ($60 for 5 mugs)."
+},
+{
+"uid": "v01374",
+"question": "When did I submit my research paper on sentiment analysis?",
+"question_type": "multi-session",
+"gold": "February 1st",
+"answer": "I don't know"
+},
+{
+"uid": "v01532",
+"question": "I'm looking back at our previous chat about the DHL Wellness Retreats campaign. Can you remind me how much was allocated for influencer marketing in the campaign plan?",
+"question_type": "single-session-assistant",
+"gold": "$2,000",
+"answer": "$2,000"
+},
+{
+"uid": "v01594",
+"question": "I\u2019m a bit anxious about getting around Tokyo. Do you have any helpful tips?",
+"question_type": "single-session-preference",
+"gold": "The user would prefer responses that utilize their existing resources, such as their Suica card and TripIt app, to provide personalized tips for navigating Tokyo's public transportation. They might not prefer general tips or recommendations that do not take into account their prior preparations.",
+"answer": "Use your Suica card to pay for trains and get from Narita Airport to Shinjuku (options like the Narita Express or Keisei Skyliner plus the JR Yamanote Line), and keep your plans organised in the TripIt app you already downloaded."
+},
+{
+"uid": "v02090",
+"question": "Who did I have a conversation with about destiny?",
+"question_type": "single-session-user",
+"gold": "Sarah",
+"answer": "Sarah"
+},
+{
+"uid": "v01088",
+"question": "Is my mom using the same grocery list method as me?",
+"question_type": "knowledge-update",
+"gold": "Yes.",
+"answer": "I don't know"
+},
+{
+"uid": "v02153",
+"question": "How many model kits have I worked on or bought?",
+"question_type": "multi-session",
+"gold": "I have worked on or bought five model kits. The scales of the models are: Revell F-15 Eagle (scale not mentioned), Tamiya 1/48 scale Spitfire Mk.V, 1/16 scale German Tiger I tank, 1/72 scale B-29 bomber, and 1/24 scale '69 Camaro.",
+"answer": "I don't know"
+},
+{
+"uid": "v01616",
+"question": "What new kitchen gadget did I invest in before getting the Air Fryer?",
+"question_type": "knowledge-update",
+"gold": "Instant Pot",
+"answer": "I don't know"
+},
+{
+"uid": "v02021",
+"question": "How many times did I bake something in the past two weeks?",
+"question_type": "multi-session",
+"gold": "4",
+"answer": "1 (the apple pie baked in the cast iron skillet)"
+},
+{
+"uid": "v01291",
+"question": "How many days had passed between the day I bought a gift for my brother's graduation ceremony and the day I bought a birthday gift for my best friend?",
+"question_type": "temporal-reasoning",
+"gold": "7 days. 8 days (including the last day) is also acceptable.",
+"answer": "7 days (brother's gift on March 8, best friend's gift on March 15)."
+},
+{
+"uid": "v02621",
+"question": "I was thinking about rearranging the furniture in my bedroom this weekend. Any tips?",
+"question_type": "single-session-preference",
+"gold": "The user would prefer responses that take into account their existing plans to replace the bedroom dresser and their interest in mid-century modern style, suggesting furniture layouts that accommodate the new dresser and incorporate elements of this design aesthetic. They might not prefer general furniture arrangement tips or suggestions that do not consider their specific design preferences.",
+"answer": "Plan the layout around your new mid-century modern dresser, and keep your laptop and smart speaker in spots with the clearest line toward the living-room router, since your bedroom Wi-Fi is weak."
+},
+{
+"uid": "v01755",
+"question": "I was thinking about our previous conversation about data privacy and security. You mentioned that companies use two-factor authentication to enhance security. Can you remind me what kind of two-factor authentication methods you were referring to?",
+"question_type": "single-session-assistant",
+"gold": "I mentioned biometric authentication or one-time passwords (OTP) as examples of two-factor authentication methods.",
+"answer": "Biometric authentication (such as fingerprint or facial recognition) and one-time passwords (OTP), e.g. a code sent to a mobile device."
+},
+{
+"uid": "v01364",
+"question": "How many days did I take social media breaks in total?",
+"question_type": "multi-session",
+"gold": "17 days",
+"answer": "17 days (a 10-day break plus a week-long break)"
+},
+{
+"uid": "v00908",
+"question": "How long did it take to move to the new apartment?",
+"question_type": "single-session-user",
+"gold": "5 hours",
+"answer": "Around 5 hours"
+},
+{
+"uid": "v00717",
+"question": "I've been feeling nostalgic lately. Do you think it would be a good idea to attend my high school reunion?",
+"question_type": "single-session-preference",
+"gold": "The user would prefer responses that draw upon their personal experiences and memories, specifically their positive high school experiences such as being part of the debate team and taking advanced placement courses. They would prefer suggestions that highlight the potential benefits of attending the reunion, such as reconnecting with old friends and revisiting favorite subjects like history and economics. The user might not prefer generic or vague responses that do not take into account their individual experiences and interests.",
+"answer": "I don't know"
+},
+{
+"uid": "v02495",
+"question": "How many days ago did I participate in the 5K charity run?",
+"question_type": "temporal-reasoning",
+"gold": "7 days ago. 8 days (including the last day) is also acceptable.",
+"answer": "7 days ago (the 5K charity run was on 2023-03-19)."
+},
+{
+"uid": "v02348",
+"question": "I'm looking back at our previous chat about the DHL Wellness Retreats campaign. Can you remind me how much was allocated for influencer marketing in the campaign plan?",
+"question_type": "single-session-assistant",
+"gold": "$2,000",
+"answer": "$2,000"
+},
+{
+"uid": "v01470",
+"question": "I wanted to follow up on our previous conversation about fracking in the Marcellus Shale region. You mentioned that some states require fracking companies to monitor groundwater quality at nearby wells before drilling and for a certain period after drilling is complete. Can you remind me which state you mentioned as an example that has this requirement?",
+"question_type": "single-session-assistant",
+"gold": "Pennsylvania",
+"answer": "Pennsylvania"
+},
+{
+"uid": "v02433",
+"question": "What was my previous personal best time for the charity 5K run?",
+"question_type": "knowledge-update",
+"gold": "27 minutes and 45 seconds",
+"answer": "27 minutes 45 seconds"
+},
+{
+"uid": "v02161",
+"question": "What new kitchen gadget did I invest in before getting the Air Fryer?",
+"question_type": "knowledge-update",
+"gold": "Instant Pot",
+"answer": "I don't know"
+},
+{
+"uid": "v00552",
+"question": "I was going through our previous conversation about the impact of the political climate in Catalonia on its literature and music. Can you remind me of the example you gave of a Spanish-Catalan singer-songwriter who supports unity between Catalonia and Spain?",
+"question_type": "single-session-assistant",
+"gold": "Manolo Garc\u00eda",
+"answer": "Manolo Garcia."
+},
+{
+"uid": "v02258",
+"question": "What day of the week did I meet with my previous language exchange tutor Juan?",
+"question_type": "knowledge-update",
+"gold": "Wednesday",
+"answer": "Wednesday (Wednesday evenings)."
+},
+{
+"uid": "v00130",
+"question": "How long was I in Japan for?",
+"question_type": "single-session-user",
+"gold": "two weeks",
+"answer": "I don't know"
+},
+{
+"uid": "v00196",
+"question": "How many movie festivals that I attended?",
+"question_type": "multi-session",
+"gold": "I attended four movie festivals.",
+"answer": "3 (AFI Fest, Portland Film Festival, Austin Film Festival)"
+},
+{
+"uid": "v01964",
+"question": "What was the approximate increase in Instagram followers I experienced in two weeks?",
+"question_type": "multi-session",
+"gold": "100",
+"answer": "About 350 followers"
+},
+{
+"uid": "v01224",
+"question": "Where did I attend the religious activity last week?",
+"question_type": "temporal-reasoning",
+"gold": "the Episcopal Church",
+"answer": "I don't know"
+},
+{
+"uid": "v02249",
+"question": "How many different museums or galleries did I visit in the month of February?",
+"question_type": "multi-session",
+"gold": "2",
+"answer": "I don't know"
+},
+{
+"uid": "v00028",
+"question": "How many days before I bought the iPhone 13 Pro did I attend the Holiday Market?",
+"question_type": "temporal-reasoning",
+"gold": "7 days. 8 days (including the last day) is also acceptable.",
+"answer": "I don't know"
+},
+{
+"uid": "v02522",
+"question": "How many weeks passed between the day I bought my new tennis racket and the day I received it?",
+"question_type": "temporal-reasoning",
+"gold": "1 week",
+"answer": "I don't know"
+},
+{
+"uid": "v00324",
+"question": "I was looking back at our previous conversation about buying unique engagement rings directly from designers. Can you remind me of the Instagram handle of the UK-based designer who works with unusual gemstones?",
+"question_type": "single-session-assistant",
+"gold": "@jessica_poole_jewellery",
+"answer": "@jessica_poole_jewellery (Jessica Poole)."
+},
+{
+"uid": "v01650",
+"question": "How many sports have I played competitively in the past?",
+"question_type": "multi-session",
+"gold": "two",
+"answer": "I don't know"
+},
+{
+"uid": "v02260",
+"question": "How long was I in Japan for?",
+"question_type": "single-session-user",
+"gold": "two weeks",
+"answer": "Two weeks."
+},
+{
+"uid": "v02441",
+"question": "I was looking back at our previous conversation about Caribbean dishes and I was wondering, what was the name of that Jamaican dish you recommended I try with snapper that has fruit in it?",
+"question_type": "single-session-assistant",
+"gold": "Grilled Snapper with Mango Salsa",
+"answer": "Grilled Snapper with Mango Salsa"
+},
+{
+"uid": "v00273",
+"question": "How many engineers do I lead when I just started my new role as Senior Software Engineer? How many engineers do I lead now?",
+"question_type": "knowledge-update",
+"gold": "When you just started your new role as Senior Software Engineer, you led 4 engineers. Now, you lead 5 engineers",
+"answer": "4 engineers when you started the role, and 5 now."
+}
+]
