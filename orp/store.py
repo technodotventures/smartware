@@ -62,7 +62,10 @@ def _j(x) -> str:
 
 def connect(path: str) -> sqlite3.Connection:
     os.makedirs(os.path.dirname(os.path.abspath(path)) or ".", exist_ok=True)
+    new = path != ":memory:" and not os.path.exists(path)
     con = sqlite3.connect(path)
+    if new:
+        os.chmod(path, 0o600)  # every tenant's memories and the snapshot secret: owner-only
     con.execute("PRAGMA journal_mode=WAL")
     con.execute("PRAGMA synchronous=NORMAL")
     con.executescript(DDL)

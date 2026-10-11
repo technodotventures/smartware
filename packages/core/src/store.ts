@@ -5,7 +5,7 @@
 // Writes are incremental: each verb collects a journal of what it changed and flush() writes exactly that, in one
 // transaction. Tenants load lazily, so a hosted instance holds only the tenants it is serving.
 import { createRequire } from "node:module";
-import { mkdirSync } from "node:fs";
+import { chmodSync, existsSync, mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 
 export const SCHEMA = "orp-store-1";
@@ -153,8 +153,12 @@ export class SqliteStore implements Store {
 
   constructor(readonly path: string) {
     const { DatabaseSync } = sqlite();
-    if (path !== ":memory:") mkdirSync(dirname(resolve(path)), { recursive: true });
+    const isNew = path !== ":memory:" && !existsSync(path);
+    if (path !== ":memory:") mkdirSync(dirname(resolve(path)), { recursive: true, mode: 0o700 });
     this.db = new DatabaseSync(path);
+    // the file holds every tenant's memories and the snapshot secret: owner-only from the start (SQLite gives its
+    // -wal and -shm files the same permissions)
+    if (isNew) chmodSync(path, 0o600);
     this.db.exec("PRAGMA journal_mode=WAL; PRAGMA synchronous=NORMAL; PRAGMA busy_timeout=5000;");
     this.db.exec(DDL);
     const row = this.q("SELECT value FROM orp_meta WHERE key='schema'").get() as Row | undefined;
@@ -200,6 +204,7 @@ export class SqliteStore implements Store {
   async backupTo(path: string): Promise<void> {
     const { backup } = sqlite();
     await backup(this.db, path);
+    chmodSync(path, 0o600);
   }
 
   loadTenantSync(t: string): TenantRows {
