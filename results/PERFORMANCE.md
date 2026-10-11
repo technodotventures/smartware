@@ -34,3 +34,17 @@ LongMemEval-S parity still 100% identical packs, encoder vectors bit-identical):
 - four-accumulator and sparse (non-zero query coordinates only) float32 dot products with identical rounding;
 - segment windows identical to their unit share the unit's vector;
 - per-word weighted vectors in the SIF encoder; bounded encoder cache; 1.5x buffer growth.
+
+## SQLite and Postgres stores (11 October 2026)
+
+Same machine, hashing encoder, Postgres 16 on localhost (no network latency), one process. The engine and index are
+identical; only where a verb's changes are written differs (one transaction per call either way; Postgres sends the
+whole transaction as one pipelined round trip).
+
+| Store | remember, 1 record | remember, 100 records | recall (1,200 units, warm) | first recall after restart (load and index 1,200 units) |
+|---|---|---|---|---|
+| SQLite | 0.8 ms | 12 ms | 8 ms | 76 ms |
+| Postgres | 2.1 ms | 26 ms | 5 ms | 87 ms |
+
+Over a network, add one round trip per write and per tenant load. Recall never touches the store once a tenant is
+loaded.
