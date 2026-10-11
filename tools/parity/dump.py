@@ -41,7 +41,7 @@ for ti, task in enumerate(tasks):
     label = {s: f"S{i + 1}" for i, s in enumerate(corpus.session_order)}
     mems = [Memory(content=t.text, kind="event", actor=t.speaker, role=t.role, thread=t.session_id, seq=t.idx,
                    observed_at=t.ts, id=f"t:{t.id}",
-                   meta={"turn_id": t.id, "idempotency_key": t.id, "thread_label": label.get(t.session_id, "")})
+                   meta={"turn_id": t.id, "_idempotency_key": t.id, "thread_label": label.get(t.session_id, "")})
             for t in corpus.turns]
     rec = [m.to_json() for m in mems]
     eng = Engine(enc, params)

@@ -161,7 +161,7 @@ class Engine:
                 m.labels = sorted(set(m.labels) | labels)
             # de-duplication is scoped to tenant, writer and audience (M17): never resolves to another
             # principal's record, never crosses tenants
-            ik = m.meta.get("idempotency_key")
+            ik = m.meta.get("_idempotency_key")  # engine-reserved; client meta cannot set "_" keys
             h = ("key", m.tenant, writer, ik) if ik else (m.dedup_key(writer) if dedup_content else None)
             if h is not None and h in self._hash and self._hash[h] in self.mem:
                 ids.append(self._hash[h])
@@ -310,6 +310,8 @@ class Engine:
         purge: record removed. cascade: derived memories are retracted/redacted too (no laundering)."""
         hit = self.cascade_set([mem_id], cascade)
         tenant = self.mem[mem_id].tenant if mem_id in self.mem else None
+        chain_keys = {(self.mem[i].tenant, self.mem[i].claim.key()) for i in hit
+                      if i in self.mem and self.mem[i].claim is not None}  # before a purge removes them
         for i in hit:
             m = self.mem.get(i)
             if not m:
@@ -336,26 +338,28 @@ class Engine:
                         s.span = s.hash = ""
             self.audit.append({"op": f"forget:{mode}", "id": i, "by": principal.id, "reason": reason,
                                "at": _clock.now().isoformat()})
-        for key in {(self.mem[i].tenant, self.mem[i].claim.key()) for i in hit
-                    if i in self.mem and self.mem[i].claim is not None}:
+        for key in chain_keys:
             self.resolve_chain(key)  # a retracted superseder restores the version it replaced
         self.touch(tenant)
         return hit
 
     def cascade_set(self, ids: list[str], cascade: bool = True) -> list[str]:
-        """Memories affected by forgetting `ids`. With cascade, everything derived (transitively) from them. Without,
-        derived memories are still included when none of their sources remains (M28: a derived memory never keeps
-        facts its sources no longer support)."""
+        """Memories affected by forgetting `ids`: with cascade, everything derived (transitively) from them; without,
+        derived memories left with no remaining source (M28: a derived memory never keeps facts its sources no longer
+        support). Only records with a source in the affected set are considered, and never across tenants (M03)."""
         hit = list(dict.fromkeys(ids))
+        tenants = {self.mem[i].tenant for i in hit if i in self.mem}
         changed = True
         while changed:
             changed = False
             hs = set(hit)
             for m in self.mem.values():
-                if not m.derived_from or m.id in hs:
+                if not m.derived_from or m.id in hs or m.tenant not in tenants:
                     continue
-                gone = [s in hs or s not in self.mem or self.mem[s].status == "retracted" for s in m.derived_from]
-                if (cascade and any(s in hs for s in m.derived_from)) or all(gone):
+                if not any(s in hs for s in m.derived_from):
+                    continue
+                if cascade or all(s in hs or s not in self.mem or self.mem[s].status == "retracted"
+                                  for s in m.derived_from):
                     hit.append(m.id)
                     changed = True
         return hit
@@ -371,7 +375,19 @@ class Engine:
 
     def history(self, subject: str, predicate: str, tenant: str = "default") -> list[Memory]:
         key = (tenant, f"{subject.lower().strip()}|{predicate.lower().strip()}")
-        return [self.mem[i] for i in self._claims.get(key, []) if i in self.mem]
+        return [self.mem[i] for i in self._claims.get(key, []) if i in self.mem and self.mem[i].claim is not None
+                and self.mem[i].claim.key() == key[1]]
+
+    def unchain(self, mem_id: str):
+        """Remove a record from every claim chain (an upsert that changed or dropped its claim) and re-resolve them."""
+        keys = [k for k, ids in self._claims.items() if mem_id in ids]
+        for k in keys:
+            self._claims[k] = [i for i in self._claims[k] if i != mem_id]
+            for i in self._claims[k]:
+                o = self.mem.get(i)
+                if o is not None and mem_id in o.meta.get("_supersedable_by", []):
+                    o.meta["_supersedable_by"] = [x for x in o.meta["_supersedable_by"] if x != mem_id]
+        return keys
 
     # ------------------------------------------------------------ index
     def _build(self):
@@ -553,7 +569,7 @@ class Engine:
         if self._dirty:
             self._build()
         n = len(self.ids)
-        if n == 0:
+        if self.tcount.get(req.principal.tenant, 0) <= 0:
             return ContextPack([], 0, req.budget_tokens, 0.0, self._snapshot(req.principal.tenant))
         p = self.p
         now = req.as_of or _clock.now()
@@ -1066,7 +1082,7 @@ class ORPSystem:
         self.eng = Engine(enc.dense, self.params)
         label = {s: f"S{i + 1}" for i, s in enumerate(corpus.session_order)}  # neutral, dataset-free labels
         mems = [Memory(content=t.text, kind="event", actor=t.speaker, role=t.role, thread=t.session_id, seq=t.idx,
-                       observed_at=t.ts, meta={"turn_id": t.id, "idempotency_key": t.id,
+                       observed_at=t.ts, meta={"turn_id": t.id, "_idempotency_key": t.id,
                                                 "thread_label": label.get(t.session_id, "")})
                 for t in corpus.turns]
         self.eng.remember(mems)

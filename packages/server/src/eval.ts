@@ -115,7 +115,7 @@ function orpSystem(enc: Encoder, ranker: string): System {
     build(h) {
       eng = new Engine(enc, params);
       eng.remember(h.memories.map((d) => {
-        const m = memoryFromJson({ kind: "event", ...d, meta: { ...(d.meta ?? {}), idempotency_key: d.id } });
+        const m = memoryFromJson({ kind: "event", ...d, meta: { ...(d.meta ?? {}), _idempotency_key: d.id } });
         return m;
       }));
     },

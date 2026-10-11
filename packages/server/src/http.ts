@@ -17,6 +17,7 @@ export interface HttpOptions {
   authorizationServers?: string[];
   maxBody?: number; // bytes, default 1 MiB (import: 64 MiB)
   rate?: { rps: number; burst: number }; // per principal
+  authFailRate?: { rps: number; burst: number }; // per client address, for failed authentication (default 1/s, burst 20)
   allowedOrigins?: string[]; // for browser callers and MCP DNS-rebinding protection
   mcp: Omit<SessionOptions, "notify" | "elicit">;
   metricsToken?: string;
@@ -24,12 +25,40 @@ export interface HttpOptions {
 }
 
 const ERR_STATUS: Record<string, number> = { unauthorized: 401, forbidden: 403, not_found: 404, version_conflict: 409,
-  rate_limited: 429, payload_too_large: 413 };
+  rate_limited: 429, payload_too_large: 413, unavailable: 503 };
+
+/** A bounded label for metrics and logs: ids and other caller-chosen path segments become placeholders, so a caller
+ * cannot grow the metrics table or put arbitrary text in log labels. */
+export function routeTemplate(method: string, parts: string[]): string {
+  const p0 = parts[0];
+  if (p0 === "v1") {
+    if (parts.length === 2 && parts[1] === "whoami") return `${method} /v1/whoami`;
+    const verb = parts[2];
+    if (verb === undefined) return `${method} /v1`;
+    const known = ["capabilities", "whoami", "recall", "remember", "forget", "feedback", "reflect", "profile", "link", "import",
+      "memories", "history", "threads", "changes", "audit", "jobs", "export", "edges"];
+    if (!known.includes(verb)) return `${method} /v1/:tenant/other`;
+    const rest = parts.slice(3).map((x, i) => (i === 0 ? ":id" : ["neighbours", "edges", "history", "approve"].includes(x) ? x : ":x"));
+    return `${method} /v1/:tenant/${[verb, ...rest].join("/")}`;
+  }
+  if (p0 === "mcp" && parts.length === 1) return `${method} /mcp`;
+  if (p0 === "mem0") return `${method} /mem0`;
+  if (p0 === ".well-known") return `${method} /.well-known`;
+  if (["healthz", "readyz", "metrics"].includes(p0 ?? "") && parts.length === 1) return `${method} /${p0}`;
+  return `${method} other`;
+}
 
 class Bucket {
   tokens: number;
   at = Date.now();
   constructor(readonly rps: number, readonly burst: number) { this.tokens = burst; }
+  /** Refill without spending; true when at least one token is available. */
+  peek(): boolean {
+    const now = Date.now();
+    this.tokens = Math.min(this.burst, this.tokens + ((now - this.at) / 1000) * this.rps);
+    this.at = now;
+    return this.tokens >= 1;
+  }
   take(): boolean {
     const now = Date.now();
     this.tokens = Math.min(this.burst, this.tokens + ((now - this.at) / 1000) * this.rps);
@@ -67,6 +96,7 @@ interface HttpSession { session: McpSession; principalKey: string; streams: Set<
 export class Gateway {
   readonly server: Server;
   private buckets = new Map<string, Bucket>();
+  private failBuckets = new Map<string, Bucket>();
   private sessions = new Map<string, HttpSession>();
   readonly metrics = new Metrics();
   private inflight = 0;
@@ -157,12 +187,32 @@ export class Gateway {
     return b.take();
   }
 
+  /** Failed authentication is limited per client address, so a caller without a key cannot hammer token checks. */
+  private authFailBucket(req: IncomingMessage): Bucket {
+    const r = this.opt.authFailRate ?? { rps: 1, burst: 20 };
+    const ip = req.socket.remoteAddress ?? "?";
+    let b = this.failBuckets.get(ip);
+    if (!b) {
+      if (this.failBuckets.size > 50_000) this.failBuckets.clear(); // bounded; a reset only forgives
+      this.failBuckets.set(ip, (b = new Bucket(r.rps, r.burst)));
+    }
+    return b;
+  }
+
   private async handle(req: IncomingMessage, res: ServerResponse) {
     const t0 = performance.now();
     const rid = "req_" + randomBytes(8).toString("hex");
-    const url = new URL(req.url ?? "/", "http://x");
-    const parts = url.pathname.split("/").filter(Boolean).map(decodeURIComponent);
-    let route = parts[0] === "v1" ? `v1/${parts.slice(2).map((p, i) => (i === 1 && parts[2] === "memories" ? ":id" : p)).join("/")}` : url.pathname;
+    let url: URL;
+    let parts: string[];
+    try {
+      url = new URL(req.url ?? "/", "http://x");
+      parts = url.pathname.split("/").filter(Boolean).map(decodeURIComponent);
+    } catch {
+      this.send(res, 400, { error: { code: "invalid_parameter", message: "malformed request path", details: {} } });
+      this.metrics.observe(`${req.method} other`, 400, performance.now() - t0);
+      return;
+    }
+    const route = routeTemplate(String(req.method), parts);
     let status = 500;
     let pr: Principal | null = null;
     this.inflight++;
@@ -186,17 +236,21 @@ export class Gateway {
       const write = req.method === "POST" || req.method === "DELETE" || req.method === "PUT";
       let authz = req.headers.authorization;
       if (parts[0] === "mem0" && authz && /^Token\s+/i.test(authz)) authz = authz.replace(/^Token\s+/i, "Bearer "); // mem0 clients send "Token <key>"
+      const fb = this.authFailBucket(req);
+      if (!fb.peek()) {
+        status = 429;
+        return this.send(res, 429, { error: { code: "rate_limited", message: "too many failed authentications", details: {} } }, { "retry-after": "5" });
+      }
       try {
         pr = await this.auth.resolve(authz, write);
       } catch (e) {
-        if (e instanceof AuthError) { status = e.status; return this.authFail(res, e); }
+        if (e instanceof AuthError) { fb.take(); status = e.status; return this.authFail(res, e); }
         throw e;
       }
       if (!this.rateOk(pr)) { status = 429; return this.send(res, 429, { error: { code: "rate_limited", message: "slow down", details: {} } }, { "retry-after": "1" }); }
-      if (parts[0] === "mcp" && parts.length === 1) { route = "mcp"; status = await this.mcp(req, res, pr); return; }
+      if (parts[0] === "mcp" && parts.length === 1) { status = await this.mcp(req, res, pr); return; }
       if (parts[0] === "v1") { const r = await this.v1(req, res, url, parts, pr); status = r; return; }
       if (parts[0] === "mem0" && (parts[1] === "v1" || parts[1] === "v2")) {
-        route = "mem0";
         status = await mem0Route(this.svc, pr, req, res, parts, url, () => this.body(req, this.opt.maxBody ?? 1 << 20), (st, b) => this.send(res, st, b));
         return;
       }
@@ -274,11 +328,14 @@ export class Gateway {
       }
       if (m === "POST" && parts[4] === "approve") return ok(await s.approve(id, pr));
       if (m === "DELETE" && parts.length === 4) { // REST-style forget: retract, with If-Match guarding the version
-        const r = await s.get([id], pr, ["secret"]);
-        if (req.headers["if-match"] !== undefined && r.memories.length && `"${r.memories[0].version}"` !== String(req.headers["if-match"]).replace(/^W\//, "")) {
-          throw new ORPError("version_conflict", "version mismatch", { current: r.memories[0].version });
+        let ifVersion: number | undefined;
+        if (req.headers["if-match"] !== undefined) {
+          const v = String(req.headers["if-match"]).replace(/^W\//, "").replace(/"/g, "");
+          if (!/^\d+$/.test(v)) throw new ORPError("invalid_parameter", "If-Match must carry a version number");
+          ifVersion = parseInt(v, 10);
         }
-        return ok(await s.forget({ ids: [id], mode: q.mode ?? "retract" }, pr));
+        // the version check and the forget run under one lock, so nothing can change the record in between
+        return ok(await s.forget({ ids: [id], mode: q.mode ?? "retract" }, pr, ifVersion === undefined ? {} : { ifVersion }));
       }
     }
     if (m === "GET" && verb === "history" && parts.length === 3) {

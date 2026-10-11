@@ -376,6 +376,9 @@ export class OrpClient implements MemoryApi {
   }
 }
 
+/** meta keys the engine derives from content on write. */
+export const ENGINE_DERIVED_META: ReadonlySet<string> = new Set(["entities", "time_refs"]);
+
 const INPUT_KEYS = ["id", "kind", "content", "claim", "scope", "writers", "actor", "origin", "thread", "seq", "event_time",
   "valid_from", "valid_to", "expires_at", "sources", "derived_from", "labels", "load", "confidence", "support", "meta"] as const;
 
@@ -387,6 +390,11 @@ function recordToInput(rec: Memory, readers: string[]): MemoryInput {
     if (v !== undefined) out[k] = v;
   }
   if (rec.role) out.role = rec.role;
+  if (out.meta) { // entities and time_refs are derived by the engine; the server rejects them on input
+    const meta: Json = {};
+    for (const [k, v] of Object.entries(out.meta as Json)) if (!ENGINE_DERIVED_META.has(k) && !k.startsWith("_")) meta[k] = v;
+    out.meta = meta;
+  }
   out.readers = readers;
   return out as MemoryInput;
 }

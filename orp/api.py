@@ -60,9 +60,16 @@ def _enum(v, allowed, name):
     return v
 
 
+_TS_RX = re.compile(r"^\d{4}-\d{2}-\d{2}([T ]\d{2}(:\d{2}(:\d{2}([.,]\d{1,9})?)?)?)?\s*(Z|[+-]\d{2}(:?\d{2})?)?$")
+
+
 def _ts(v):
+    """ISO 8601 / RFC 3339 timestamps only (YYYY-MM-DD[THH[:MM[:SS[.f]]]][Z|±HH[:MM]]); numbers are rejected rather
+    than guessed at (M18)."""
     if v is None or isinstance(v, datetime):
         return v
+    if not isinstance(v, str) or not _TS_RX.match(v.strip()):
+        raise ORPError("invalid_parameter", f"bad timestamp {v!r}: use ISO 8601, e.g. 2026-05-12T09:30:00Z")
     try:
         return _clock.parse(v)  # offsets are converted to UTC, never just dropped
     except ValueError:
@@ -112,6 +119,22 @@ _MEM_KEYS = {"id", "kind", "content", "claim", "scope", "readers", "writers", "a
 _RECALL_KEYS = {"query", "queries", "as_of", "known_at", "scope", "kinds", "budget", "granularity", "include", "time",
                 "mode", "min_coverage", "cursor"}
 _FORGET_KEYS = {"ids", "mode", "cascade", "dry_run", "reason", "allow_reingest"}
+
+
+_DERIVED_META = {"entities", "time_refs"}  # computed by the engine from content; never taken from a client
+META_MAX_DEPTH = 32  # client meta may nest this deep (it is stored, exported and serialised recursively)
+
+
+def _json_depth(v, d):
+    """Depth of a JSON value, stopping as soon as it passes the limit (so a hostile value costs little)."""
+    if d > META_MAX_DEPTH or not isinstance(v, (dict, list)):
+        return d
+    m = d + 1
+    for x in (v.values() if isinstance(v, dict) else v):
+        m = max(m, _json_depth(x, d + 1))
+        if m > META_MAX_DEPTH:
+            break
+    return m
 
 
 def is_admin(pr: Principal) -> bool:
@@ -262,8 +285,11 @@ class Service:
                 raise ORPError("invalid_parameter", f"{f} must be a string")
         if "meta" in raw and not isinstance(raw["meta"], dict):
             raise ORPError("invalid_parameter", "meta must be an object")
-        if any(str(k).startswith("_") for k in raw.get("meta", {})):
-            raise ORPError("invalid_parameter", "meta keys starting with '_' are reserved for the engine")
+        if "meta" in raw and _json_depth(raw["meta"], 0) > META_MAX_DEPTH:
+            raise ORPError("invalid_parameter", f"meta nests deeper than {META_MAX_DEPTH} levels")
+        if any(str(k).startswith("_") or k in _DERIVED_META for k in raw.get("meta", {})):
+            raise ORPError("invalid_parameter", "meta keys starting with '_', and the engine-derived keys "
+                           f"{sorted(_DERIVED_META)}, are reserved for the engine")
         readers = _strs(raw.get("readers"), "readers", nullable=True)
         writers = _strs(raw.get("writers"), "writers", nullable=True)
         labels = _strs(raw.get("labels", []), "labels")
@@ -335,9 +361,16 @@ class Service:
         kk = (t, principal.id, key)
         if key and kk in self._keys:
             return {"ids": self._outl(t, self._keys[kk]), "replayed": True, "stage": "indexed"}
-        mems = [self._build_memory(raw, principal, mode) for raw in body.get("memories", [])]  # validate all first
-        out = []
-        for raw, m in zip(body.get("memories", []), mems):
+        raws = body.get("memories", [])
+        mems = [self._build_memory(raw, principal, mode) for raw in raws]  # validate all first
+        # every check runs before any change, so a batch is all-or-nothing
+        seen = set()
+        for m in mems:
+            if m.id in seen:
+                raise ORPError("invalid_parameter", f"{self._out(t, m.id)} appears twice in one batch")
+            seen.add(m.id)
+        olds = []
+        for raw, m in zip(raws, mems):
             if not (body.get("allow_reingest") or m.meta.get("allow_reingest")):
                 # blocked only if the writer could read the retracted record: never reveals others' content
                 for bid in self._blocked.get((t, m.content_hash()), []):
@@ -357,17 +390,7 @@ class Service:
                     raise ORPError("forbidden", "record was retracted; upsert would restore it (set allow_reingest)")
                 if _int(body["if_version"], "if_version") != existing.version:
                     raise ORPError("version_conflict", "version mismatch", current=existing.version)
-                m.version = existing.version + 1
-                m.observed_at = existing.observed_at
-                m.meta["_creator"] = existing.meta.get("_creator", principal.id)
-                for k in ("_supersedable_by", "_wseq"):
-                    if k in existing.meta:
-                        m.meta[k] = existing.meta[k]
-                for hk in [hk for hk, v in self.engine._hash.items() if v == m.id]:
-                    del self.engine._hash[hk]
-                del self.engine.mem[m.id]
-                self.engine.order.remove(m.id)
-                self.engine.tcount[existing.tenant] -= 1
+            sup = []
             if mode == "supersede":
                 if m.kind in ("event", "document"):
                     raise ORPError("invalid_parameter", "evidence (event/document) is never superseded")
@@ -379,14 +402,38 @@ class Service:
                         raise ORPError("forbidden", f"cannot supersede {old}")
                     if om.kind in ("event", "document"):
                         raise ORPError("invalid_parameter", "evidence (event/document) is never superseded")
-                    om.status, om.superseded_by = "superseded", m.id
-                    om.valid_to = m.valid_from or m.event_time or _clock.now()
-                    om.meta["_explicit_superseded"] = True
-                    om.version += 1
-                    m.supersedes.append(oi)
-                    self._log("supersede", oi, principal)
-            ids = self.engine.remember(m, principal, dedup_content=raw.get("id") is None)
+                    sup.append(oi)
+            olds.append((existing, sup))
+        out = []
+        for raw, (existing, sup), m in zip(raws, olds, mems):
+            stale = []
             if existing is not None:
+                m.version = existing.version + 1
+                m.observed_at = existing.observed_at
+                m.meta["_creator"] = existing.meta.get("_creator", principal.id)
+                for k in ("_supersedable_by", "_wseq"):
+                    if k in existing.meta:
+                        m.meta[k] = existing.meta[k]
+                for hk in [hk for hk, v in self.engine._hash.items() if v == m.id]:
+                    del self.engine._hash[hk]
+                stale = self.engine.unchain(m.id)  # the new version may state another claim, or none
+                del self.engine.mem[m.id]
+                self.engine.order.remove(m.id)
+                self.engine.tcount[existing.tenant] -= 1
+            for oi in sup:
+                om = self.engine.mem[oi]
+                om.status, om.superseded_by = "superseded", m.id
+                om.valid_to = m.valid_from or m.event_time or _clock.now()
+                om.meta["_explicit_superseded"] = True
+                om.version += 1
+                m.supersedes.append(oi)
+                self._log("supersede", oi, principal)
+            ids = self.engine.remember(m, principal, dedup_content=raw.get("id") is None)
+            if ids != [m.id] and existing is not None:
+                raise RuntimeError("upsert must store the record under its own id")
+            if existing is not None:
+                for k in stale:
+                    self.engine.resolve_chain(k)
                 self.engine.reclose(m.id)
             out += ids
             self._log("remember", ids[0], principal)
@@ -399,7 +446,7 @@ class Service:
     def recall(self, body: dict, principal: Principal) -> dict:
         _check_keys(body, _RECALL_KEYS, "recall")
         if not isinstance(body.get("query"), str) or not body["query"].strip():
-            raise ORPError("invalid_parameter", "query is required (an empty query never means 'everything')")
+            raise ORPError("invalid_parameter", "query must be a non-empty string (an empty query never means 'everything')")
         rejected = [k for k in ("queries", "cursor", "time") if k in body]
         if rejected:  # honoured-or-rejected (P5)
             raise ORPError("unsupported_parameter", f"not supported by this engine: {rejected}", parameters=rejected)
@@ -583,10 +630,10 @@ class Service:
         self._edges[eid] = dict(e, id=eid, tenant=principal.tenant)
         return {"id": eid}
 
-    def _edge_visible(self, e: dict, principal: Principal) -> bool:
+    def _edge_visible(self, e: dict, principal: Principal, labels: tuple = ()) -> bool:
         a, b = self.engine.mem.get(e["from"]), self.engine.mem.get(e["to"])
-        return bool(e.get("tenant") == principal.tenant and a and b and self._can_read(a, principal)
-                    and self._can_read(b, principal))
+        return bool(e.get("tenant") == principal.tenant and a and b and self._can_read(a, principal, labels)
+                    and self._can_read(b, principal, labels))
 
     def edges(self, mem_id: str, principal: Principal) -> list[dict]:
         iid = self._in(principal.tenant, mem_id)
@@ -674,6 +721,13 @@ class Service:
     @_enveloped
     def reflect(self, body: dict, principal: Principal) -> dict:
         _check_keys(body, {"scope", "threads", "kinds"}, "reflect")
+        kinds = _strs(body.get("kinds", ["summary"]), "kinds")
+        if set(kinds) != {"summary"}:
+            raise ORPError("unsupported_parameter", "this engine's reflect produces summaries only", parameters=["kinds"])
+        sc = body.get("scope", "")
+        if not isinstance(sc, str):
+            raise ORPError("invalid_parameter", "scope must be a string")
+        sc = sc.rstrip("/")
         job = "job_" + uuid.uuid4().hex[:12]
         made = []
         threads = defaultdict(list)
@@ -681,6 +735,8 @@ class Service:
         for m in self.engine.mem.values():
             if m.kind in ("event", "document") and m.status == "active" and self._can_read(m, principal):
                 if want is not None and m.thread not in want:
+                    continue
+                if sc and not (m.scope == sc or m.scope.startswith(sc + "/")):
                     continue
                 threads[m.thread].append(m)
         sysp = Principal("system", frozenset({"*"}), tenant=principal.tenant)
@@ -747,11 +803,11 @@ class Service:
                  for m in sorted(mems, key=lambda m: self._out(t, m.id))]
         edges = [json.dumps({k: v for k, v in dict(e, **{"from": self._out(t, e["from"]), "to": self._out(t, e["to"])}).items()
                              if not k.startswith("_")}, sort_keys=True)
-                 for e in self._edges.values() if self._edge_visible(e, principal)]
+                 for e in sorted(self._edges.values(), key=lambda e: e["id"]) if self._edge_visible(e, principal, ("secret",))]
         manifest = {"spec": SPEC_VERSION, "tenant": t, "count": len(lines),
                     "sha256": hashlib.sha256("\n".join(lines).encode()).hexdigest(),
-                    "tombstones": [{k: v for k, v in x.items() if not k.startswith("_")}
-                                   for x in self._tombstones.values() if x["tenant"] == t]}
+                    "tombstones": [{k: x[k] for k in sorted(x) if not k.startswith("_")}
+                                   for x in sorted(self._tombstones.values(), key=lambda x: x["id"]) if x["tenant"] == t]}
         return {"manifest": manifest, "memories.jsonl": "\n".join(lines), "edges.jsonl": "\n".join(edges)}
 
     @_enveloped
@@ -767,7 +823,19 @@ class Service:
         man = bundle.get("manifest", {})
         if man.get("tenant", t) != t:
             raise ORPError("forbidden", "bundle tenant mismatch")
-        rows = [json.loads(l) for l in bundle["memories.jsonl"].split("\n") if l.strip()]
+        try:
+            rows = [json.loads(l) for l in bundle["memories.jsonl"].split("\n") if l.strip()]
+            edge_rows = [json.loads(l) for l in str(bundle.get("edges.jsonl", "")).split("\n") if l.strip()]
+        except ValueError as e:
+            raise ORPError("invalid_parameter", f"bad bundle line: {e}")
+        if not all(isinstance(d, dict) and isinstance(d.get("id"), str) for d in rows):
+            raise ORPError("invalid_parameter", "every memories.jsonl line is a record with a string id")
+        if not all(isinstance(e, dict) and isinstance(e.get("from"), str) and isinstance(e.get("to"), str)
+                   and isinstance(e.get("id", ""), str) for e in edge_rows):
+            raise ORPError("invalid_parameter", "every edges.jsonl line is an edge with string from and to")
+        tomb_rows = man.get("tombstones", [])
+        if not isinstance(tomb_rows, list) or not all(isinstance(x, dict) and isinstance(x.get("id"), str) for x in tomb_rows):
+            raise ORPError("invalid_parameter", "manifest.tombstones is a list of objects with a string id")
         id_map: dict[str, str] = {}
 
         def conv(x):
@@ -780,8 +848,11 @@ class Service:
         for d in rows:
             if d.get("tenant", t) != t:
                 raise ORPError("forbidden", "bundle tenant mismatch")
+        for e in edge_rows:
+            if e.get("tenant", t) != t:
+                raise ORPError("forbidden", "edge tenant mismatch")
         n, keys = 0, set()
-        sysp = Principal("system", frozenset({"*"}), tenant=t)
+        built = []
         for d in rows:
             d = dict(d)
             d.pop("written_by", None)
@@ -794,9 +865,20 @@ class Service:
                 meta["_supersedable_by"] = [conv(x) for x in meta["_supersedable_by"]]
             d["meta"] = meta
             try:
-                m = Memory.from_json(d)
-            except (TypeError, ValueError) as e:
+                built.append(Memory.from_json(d))
+            except (TypeError, ValueError, KeyError) as e:
                 raise ORPError("invalid_parameter", f"bad record: {e}")
+        # check edges before changing anything: each endpoint is in the bundle or already in this tenant
+        incoming = {m.id for m in built}
+        for m in built:
+            if m.tenant != t:
+                raise ORPError("forbidden", "bundle tenant mismatch")
+        for e in edge_rows:
+            for end in (conv(e["from"]), conv(e["to"])):
+                o = self.engine.mem.get(end)
+                if end not in incoming and not (o and o.tenant == t):
+                    raise ORPError("invalid_parameter", "edge endpoints must exist in this tenant")
+        for m in built:
             if m.id in self.engine.mem:
                 continue
             got = self.engine.remember(m, Principal(m.meta.get("_creator", "system"), tenant=t), chain_only=True)
@@ -806,10 +888,8 @@ class Service:
                     keys.add((t, m.claim.key()))
         for k in keys:
             self.engine.resolve_chain(k)
-        for l in [l for l in bundle.get("edges.jsonl", "").split("\n") if l.strip()]:
-            e = json.loads(l)
-            if e.get("tenant", t) != t:
-                raise ORPError("forbidden", "edge tenant mismatch")
+        for e in edge_rows:
+            e = dict(e)
             e["from"], e["to"] = conv(e["from"]), conv(e["to"])
             a, b = self.engine.mem.get(e["from"]), self.engine.mem.get(e["to"])
             if not (a and b and a.tenant == t and b.tenant == t):
@@ -818,8 +898,10 @@ class Service:
             if eid in self._edges and self._edges[eid].get("tenant") != t:
                 eid = "edge_" + uuid.uuid4().hex[:16]
             self._edges[eid] = dict(e, id=eid, tenant=t)
-        for x in man.get("tombstones", []):
+        for x in tomb_rows:
             iid = conv(x["id"])
+            if iid in self._tombstones and self._tombstones[iid].get("tenant") != t:
+                iid = id_map.setdefault(x["id"], new_id())
             self._tombstones[iid] = dict(x, _iid=iid, tenant=t)
         self.engine.touch(t)
         return {"imported": n, "id_map": {k: self._out(t, v) for k, v in id_map.items()}}

@@ -38,6 +38,26 @@ export class ORPError extends Error {
 
 type Json = Record<string, any>;
 
+/** Client meta may nest this deep (it is stored, exported and serialised recursively). */
+export const META_MAX_DEPTH = 32;
+
+/** Depth of a JSON value, stopping as soon as it passes the limit (so a hostile value costs little). */
+function jsonDepth(v: unknown, d: number): number {
+  if (d > META_MAX_DEPTH || v === null || typeof v !== "object") return d;
+  let m = d + 1;
+  for (const x of Array.isArray(v) ? v : Object.values(v as Json)) {
+    m = Math.max(m, jsonDepth(x, d + 1));
+    if (m > META_MAX_DEPTH) break;
+  }
+  return m;
+}
+
+function sortedKeys(o: Json): Json {
+  const out: Json = {};
+  for (const k of Object.keys(o).sort(pyCmp)) out[k] = o[k];
+  return out;
+}
+
 function checkKeys(body: unknown, allowed: Set<string>, where: string): asserts body is Json {
   if (body === null || typeof body !== "object" || Array.isArray(body)) {
     throw new ORPError("invalid_parameter", `${where}: expected an object`);
@@ -59,9 +79,14 @@ function enumv<T extends string>(v: unknown, allowed: readonly T[], name: string
 
 const pyRepr = (v: unknown) => (typeof v === "string" ? `'${v}'` : v === undefined || v === null ? "None" : String(v));
 
+const TS_RX = /^\d{4}-\d{2}-\d{2}([T ]\d{2}(:\d{2}(:\d{2}([.,]\d{1,9})?)?)?)?\s*(Z|[+-]\d{2}(:?\d{2})?)?$/;
+
+/** ISO 8601 / RFC 3339 timestamps only; numbers are rejected rather than guessed at (M18). */
 function ts(v: unknown): Micros | null {
   if (v === undefined || v === null) return null;
-  if (typeof v === "number") return v;
+  if (typeof v !== "string" || !TS_RX.test(v.trim())) {
+    throw new ORPError("invalid_parameter", `bad timestamp ${pyRepr(v)}: use ISO 8601, e.g. 2026-05-12T09:30:00Z`);
+  }
   try {
     return parseTime(String(v));
   } catch {
@@ -178,7 +203,8 @@ export class Service {
     this.notes = opts.notes ?? [];
     if (this.store && opts.cacheVectors !== false && "persist" in enc) {
       const st = this.store;
-      (enc as any).persist = { get: (e: string, h: string) => st.getVector(e, h), put: (e: string, h: string, v: Float32Array) => st.putVector(e, h, v) };
+      (enc as any).persist = { get: (e: string, h: string) => st.getVector(e, h), put: (e: string, h: string, v: Float32Array) => st.putVector(e, h, v),
+        delete: (e: string, h: string) => st.deleteVector(e, h) };
     }
     if (this.store) {
       const meta = this.store.meta();
@@ -195,9 +221,18 @@ export class Service {
   /** Load a tenant from the store on first use. */
   ensureTenant(t: string) {
     if (this.loaded.has(t)) return;
-    this.loaded.add(t);
-    if (!this.store) return;
-    const rows = this.store.loadTenant(t);
+    if (!this.store) { this.loaded.add(t); return; }
+    try {
+      this.loadTenantRows(t);
+      this.loaded.add(t); // only once every row is in, so a failed load is retried rather than half-used
+    } catch (e) {
+      this.unloadTenant(t);
+      throw e;
+    }
+  }
+
+  private loadTenantRows(t: string) {
+    const rows = this.store!.loadTenant(t);
     const E = this.engine;
     for (const r of rows.memories) {
       const m = memoryFromJson(JSON.parse(r.record));
@@ -231,6 +266,18 @@ export class Service {
     }
     this.changeCount.set(t, rows.changeCount);
     E.invalidate(t);
+  }
+
+  /** Embed texts ahead of a verb. A remote embedding service that fails is reported as `unavailable` (HTTP 503,
+   * retryable), not as an internal error. */
+  private async warm(texts: string[]) {
+    if (!this.enc.warm || !texts.length) return;
+    try {
+      await this.enc.warm(texts);
+    } catch (e) {
+      if (e instanceof ORPError) throw e;
+      throw new ORPError("unavailable", "the embedding service is unavailable; retry later", { cause: String((e as Error)?.message ?? e) });
+    }
   }
 
   /** Write everything the last verb changed, in one transaction. */
@@ -284,30 +331,51 @@ export class Service {
   private async verb<T>(pr: Principal, write: boolean, fn: () => T | Promise<T>, extra: string[] = []): Promise<T> {
     return this.lock.run(async () => {
       this.ensureTenant(pr.tenant);
-      if (this.enc.warm) await this.enc.warm([...this.engine.pendingTexts(pr.tenant), ...extra]);
+      await this.warm(this.engine.pendingTexts(pr.tenant)); // records must be embedded to be indexed
+      if (extra.length) {
+        try {
+          await this.warm(extra);
+        } catch (e) {
+          // the query alone could not be embedded: recall still answers from the lexical channels and reports
+          // degraded: ["dense_unavailable"] (spec §5.8) rather than failing
+          if (write) throw e;
+        }
+      }
+        const auditStart = this.engine.audit.length;
       try {
         const out = await fn();
         if (write) this.flush();
         return out;
       } catch (e) {
-        if (write) this.rollbackJournal();
+        if (write) this.rollbackJournal(pr.tenant, auditStart);
         throw e;
       }
     });
   }
 
-  /** On an error mid-verb, reload the tenant from the store so memory matches what was committed. */
-  private rollbackJournal() {
-    const E = this.engine;
-    const dirty = E.journal.mem.size || E.journal.deleted.size || this.jIdem.size || this.jChanges.length;
+  /** On an error mid-verb, put memory back to what was committed: drop this verb's audit entries and, with a store,
+   * reload the tenants the verb touched (and only those). Validation runs before any mutation, so this path is for
+   * internal errors such as a store or encoder failure part way through. */
+  private rollbackJournal(tenant: string, auditStart: number) {
+    const E = this.engine, J = E.journal;
+    const dirty = J.mem.size + J.deleted.size + J.claims.size + J.dedupAdd.size + J.dedupDel.size + J.tenants.size +
+      this.jIdem.size + this.jJobs.size + this.jEdges.size + this.jTomb.size + this.jBlocked.size +
+      this.jChanges.length + this.jFeedback.length > 0;
+    const touched = new Set<string>([tenant, ...J.tenants]);
+    for (const i of J.mem) { const m = E.mem.get(i); if (m) touched.add(m.tenant); }
     E.journal = newJournal();
     this.jIdem.clear(); this.jJobs.clear(); this.jEdges.clear(); this.jTomb.clear(); this.jBlocked.clear();
     this.jChanges = []; this.jFeedback = [];
+    E.audit.length = Math.min(E.audit.length, auditStart);
+    E.auditTenant.length = Math.min(E.auditTenant.length, auditStart);
     if (dirty && this.store) {
-      // validation happens before any mutation, so this only runs on an internal error: reload from the store
-      for (const t of this.loaded) this.unloadTenant(t);
+      for (const t of touched) this.unloadTenant(t);
+      const meta = this.store.meta();
+      E.epoch = Number(meta.epoch ?? 0);
+      E.wseq = Number(meta.wseq ?? 0);
+      E.mutations = Number(meta.mutations ?? 0);
+      for (const t of touched) this.changeFeed.set(t, []);
     }
-    E.audit = []; E.auditTenant = [];
   }
 
   private unloadTenant(t: string) {
@@ -321,6 +389,9 @@ export class Service {
     for (const [k, e] of [...this.edgesMap]) if (e.tenant === t) this.edgesMap.delete(k);
     for (const [k, x] of [...this.tombstones]) if (x.tenant === t) this.tombstones.delete(k);
     for (const [k, j] of [...this.jobs]) if (j.tenant === t) this.jobs.delete(k);
+    E.tmut.delete(t);
+    E.tcount.delete(t);
+    this.changeCount.delete(t);
     this.loaded.delete(t);
     E.invalidate(t);
   }
@@ -464,8 +535,11 @@ export class Service {
     if ("meta" in raw && (raw.meta === null || typeof raw.meta !== "object" || Array.isArray(raw.meta))) {
       throw new ORPError("invalid_parameter", "meta must be an object");
     }
-    if (Object.keys(raw.meta ?? {}).some((k) => k.startsWith("_"))) {
-      throw new ORPError("invalid_parameter", "meta keys starting with '_' are reserved for the engine");
+    if (raw.meta !== undefined && jsonDepth(raw.meta, 0) > META_MAX_DEPTH) {
+      throw new ORPError("invalid_parameter", `meta nests deeper than ${META_MAX_DEPTH} levels`);
+    }
+    if (Object.keys(raw.meta ?? {}).some((k) => k.startsWith("_") || DERIVED_META.has(k))) {
+      throw new ORPError("invalid_parameter", `meta keys starting with '_', and the engine-derived keys ${pyList([...DERIVED_META].sort())}, are reserved for the engine`);
     }
     const readers = strs(raw.readers, "readers", true);
     const writers = strs(raw.writers, "writers", true);
@@ -544,23 +618,37 @@ export class Service {
     enumv(body.wait ?? "indexed", WAITS, "wait");
     if (!Array.isArray(body.memories ?? [])) throw new ORPError("invalid_parameter", "memories must be a list");
     return this.verb(pr, true, async () => {
+      const replay = this.replayed(body, pr); // a retry returns the original ids before anything is re-validated (M17)
+      if (replay) return env(replay);
       const raws = (body.memories ?? []) as Json[];
       const mems = raws.map((raw) => this.buildMemory(raw, pr, mode)); // validate all first
-      if (this.enc.warm) await this.enc.warm(mems.flatMap((m) => this.engine.textsFor(m)));
+      await this.warm(mems.flatMap((m) => this.engine.textsFor(m)));
       return env(this.rememberSync(body, pr, mode, mems));
     });
+  }
+
+  private replayed(body: Json, pr: Principal): Json | null {
+    const key = body.idempotency_key;
+    const kk = `${pr.tenant}\0${pr.id}\0${key}`;
+    return key && this.keys.has(kk) ? { ids: this.outl(pr.tenant, this.keys.get(kk)!), replayed: true, stage: "indexed" } : null;
   }
 
   private rememberSync(body: Json, pr: Principal, mode: string, prebuilt?: Memory[]): Json {
     const t = pr.tenant;
     const key = body.idempotency_key;
     const kk = `${t}\0${pr.id}\0${key}`;
-    if (key && this.keys.has(kk)) return { ids: this.outl(t, this.keys.get(kk)!), replayed: true, stage: "indexed" };
+    const replay = this.replayed(body, pr);
+    if (replay) return replay;
     const raws = (body.memories ?? []) as Json[];
     const mems = prebuilt ?? raws.map((raw) => this.buildMemory(raw, pr, mode)); // validate all first
-    const out: string[] = [];
     const E = this.engine;
-    raws.forEach((raw, idx) => {
+    // every check runs before any change, so a batch is all-or-nothing (in every mode, and in the oracle)
+    const seen = new Set<string>();
+    for (const m of mems) {
+      if (seen.has(m.id)) throw new ORPError("invalid_parameter", `${this.out(t, m.id)} appears twice in one batch`);
+      seen.add(m.id);
+    }
+    const plan = raws.map((raw, idx) => {
       const m = mems[idx]!;
       if (!(body.allow_reingest || m.meta.allow_reingest)) {
         // blocked only if the writer could read the retracted record: never reveals others' content
@@ -584,15 +672,8 @@ export class Service {
         if (int(body.if_version, "if_version") !== existing.version) {
           throw new ORPError("version_conflict", "version mismatch", { current: existing.version });
         }
-        m.version = existing.version + 1;
-        m.observed_at = existing.observed_at;
-        m.meta._creator = existing.meta._creator ?? pr.id;
-        for (const k of ["_supersedable_by", "_wseq"]) if (k in existing.meta) m.meta[k] = existing.meta[k];
-        E.dropHashes(m.id);
-        E.mem.delete(m.id);
-        E.removeOrder(m.id, existing.tenant);
-        E.tcount.set(existing.tenant, (E.tcount.get(existing.tenant) ?? 0) - 1);
       }
+      const sup: string[] = [];
       if (mode === "supersede") {
         if (m.kind === "event" || m.kind === "document") throw new ORPError("invalid_parameter", "evidence (event/document) is never superseded");
         for (const old of strs(raw.supersedes ?? [], "supersedes")!) {
@@ -600,20 +681,44 @@ export class Service {
           const om = E.mem.get(oi);
           if (!om || !this.canRead(om, pr, ["secret"]) || !this.canWrite(om, pr)) throw new ORPError("forbidden", `cannot supersede ${old}`);
           if (om.kind === "event" || om.kind === "document") throw new ORPError("invalid_parameter", "evidence (event/document) is never superseded");
-          om.status = "superseded"; om.superseded_by = m.id;
-          om.valid_to = m.valid_from ?? m.event_time ?? nowMicros();
-          om.meta._explicit_superseded = true;
-          om.version++;
-          E.dirty(oi);
-          m.supersedes.push(oi);
-          this.log("supersede", oi, pr);
+          sup.push(oi);
         }
       }
+      return { raw, m, existing, sup };
+    });
+    const out: string[] = [];
+    for (const { raw, m, existing, sup } of plan) {
+      let stale: string[] = [];
+      if (existing) {
+        m.version = existing.version + 1;
+        m.observed_at = existing.observed_at;
+        m.meta._creator = existing.meta._creator ?? pr.id;
+        for (const k of ["_supersedable_by", "_wseq"]) if (k in existing.meta) m.meta[k] = existing.meta[k];
+        E.dropHashes(m.id);
+        stale = E.unchain(m.id); // the new version may state another claim, or none
+        E.mem.delete(m.id);
+        E.removeOrder(m.id, existing.tenant);
+        E.tcount.set(existing.tenant, (E.tcount.get(existing.tenant) ?? 0) - 1);
+      }
+      for (const oi of sup) {
+        const om = E.mem.get(oi)!;
+        om.status = "superseded"; om.superseded_by = m.id;
+        om.valid_to = m.valid_from ?? m.event_time ?? nowMicros();
+        om.meta._explicit_superseded = true;
+        om.version++;
+        E.dirty(oi);
+        m.supersedes.push(oi);
+        this.log("supersede", oi, pr);
+      }
       const ids = E.remember(m, pr, false, raw.id === undefined || raw.id === null);
-      if (existing) E.reclose(m.id);
+      if (existing && (ids.length !== 1 || ids[0] !== m.id)) throw new Error("upsert must store the record under its own id");
+      if (existing) {
+        for (const k of stale) E.resolveChain(k);
+        E.reclose(m.id);
+      }
       out.push(...ids);
       this.log("remember", ids[0]!, pr);
-    });
+    }
     if (key) {
       this.keys.set(kk, out);
       this.jIdem.add(kk);
@@ -625,7 +730,7 @@ export class Service {
   async recall(body: unknown, pr: Principal): Promise<Json> {
     checkKeys(body, RECALL_KEYS, "recall");
     if (typeof body.query !== "string" || !body.query.trim()) {
-      throw new ORPError("invalid_parameter", "query is required (an empty query never means 'everything')");
+      throw new ORPError("invalid_parameter", "query must be a non-empty string (an empty query never means 'everything')");
     }
     const rejected = ["queries", "cursor", "time"].filter((k) => k in body);
     if (rejected.length) throw new ORPError("unsupported_parameter", `not supported by this engine: ${pyList(rejected)}`, { parameters: rejected });
@@ -838,6 +943,12 @@ export class Service {
     const limit = int(q.limit ?? 100, "limit", 1, 1000);
     const cursor = int(q.cursor ?? 0, "cursor", 0);
     const asOf = ts(q.as_of);
+    if (q.thread !== undefined && typeof q.thread !== "string") throw new ORPError("invalid_parameter", "thread must be a string");
+    if (q.scope !== undefined && typeof q.scope !== "string") throw new ORPError("invalid_parameter", "scope must be a string");
+    if (q.include_history !== undefined && typeof q.include_history !== "boolean") {
+      throw new ORPError("invalid_parameter", "include_history must be a boolean");
+    }
+    if (kinds) for (const k of kinds) if (!k.startsWith("x-")) enumv(k, KINDS, "kinds");
     return this.verb(pr, false, () => {
       const req = recallRequest({ query: "", principal: pr, tenant: pr.tenant, as_of: asOf ?? nowMicros(),
         scope: typeof q.scope === "string" ? q.scope : "", kinds, include_history: Boolean(q.include_history) });
@@ -850,9 +961,9 @@ export class Service {
     });
   }
 
-  private edgeVisible(e: Json, pr: Principal): boolean {
+  private edgeVisible(e: Json, pr: Principal, labels: string[] = []): boolean {
     const a = this.engine.mem.get(e.from), b = this.engine.mem.get(e.to);
-    return Boolean(e.tenant === pr.tenant && a && b && this.canRead(a, pr) && this.canRead(b, pr));
+    return Boolean(e.tenant === pr.tenant && a && b && this.canRead(a, pr, labels) && this.canRead(b, pr, labels));
   }
 
   async edges(memId: unknown, pr: Principal): Promise<Json[]> {
@@ -865,7 +976,7 @@ export class Service {
   }
 
   // ------------------------------------------------------------ forget
-  async forget(body: unknown, pr: Principal): Promise<Json> {
+  async forget(body: unknown, pr: Principal, opts: { ifVersion?: number } = {}): Promise<Json> {
     checkKeys(body, FORGET_KEYS, "forget");
     const mode = enumv(body.mode ?? "retract", ["retract", "redact", "purge"], "mode");
     const cascade = body.cascade ?? true;
@@ -880,6 +991,9 @@ export class Service {
         const m = E.mem.get(i);
         if (!m || !this.canRead(m, pr, ["secret"])) throw new ORPError("not_found", cid);
         if (!this.canWrite(m, pr)) throw new ORPError("forbidden", `no write access to ${cid}`);
+        if (opts.ifVersion !== undefined && m.version !== opts.ifVersion) {
+          throw new ORPError("version_conflict", "version mismatch", { current: m.version }); // checked under the lock
+        }
         ids.push(i);
       }
       const affected = E.cascadeSet(ids, cascade);
@@ -919,8 +1033,8 @@ export class Service {
       const m = this.engine.mem.get(this.in_(t, body.target));
       if (!m || !this.canRead(m, pr)) throw new ORPError("not_found", String(body.target));
       const fb = { ...body, target: m.id, actor: pr.id, at: isoformat(nowMicros()), _tenant: t };
-      this.feedbackLog.push(fb);
-      if (this.store) this.jFeedback.push(fb);
+      if (this.store) this.jFeedback.push(fb); // the store keeps it; holding it in memory too would grow without bound
+      else this.feedbackLog.push(fb);
       const out: Json = { recorded: true };
       if (body.signal === "draft_final" && body.draft && body.final) {
         const rule = ruleFromDiff(String(body.draft), String(body.final));
@@ -955,6 +1069,12 @@ export class Service {
   async reflect(body: unknown, pr: Principal): Promise<Json> {
     checkKeys(body, new Set(["scope", "threads", "kinds"]), "reflect");
     const want = body.threads ? new Set(strs(body.threads, "threads")!) : null;
+    const kinds = strs(body.kinds ?? ["summary"], "kinds")!;
+    if (kinds.length === 0 || kinds.some((k) => k !== "summary")) {
+      throw new ORPError("unsupported_parameter", "this engine's reflect produces summaries only", { parameters: ["kinds"] });
+    }
+    if (body.scope !== undefined && typeof body.scope !== "string") throw new ORPError("invalid_parameter", "scope must be a string");
+    const sc = String(body.scope ?? "").replace(/\/+$/, "");
     return this.verb(pr, true, () => {
       const job = "job_" + randomBytes(6).toString("hex");
       const made: string[] = [];
@@ -962,6 +1082,7 @@ export class Service {
       for (const m of this.engine.mem.values()) {
         if ((m.kind === "event" || m.kind === "document") && m.status === "active" && this.canRead(m, pr)) {
           if (want && !want.has(m.thread)) continue;
+          if (sc && !(m.scope === sc || m.scope.startsWith(sc + "/"))) continue;
           let a = threads.get(m.thread);
           if (!a) threads.set(m.thread, (a = []));
           a.push(m);
@@ -1038,11 +1159,12 @@ export class Service {
       const mems = [...this.engine.mem.values()].filter((m) => m.tenant === t && this.canRead(m, pr, ["secret"]));
       mems.sort((a, b) => pyCmp(this.out(t, a.id), this.out(t, b.id)));
       const lines = mems.map((m) => pyDumps(this.record(m, pr, true), { sortKeys: true, floatKeys: FLOATS }));
-      const edges = [...this.edgesMap.values()].filter((e) => this.edgeVisible(e, pr))
+      const edges = [...this.edgesMap.values()].sort((x, y) => pyCmp(x.id, y.id)).filter((e) => this.edgeVisible(e, pr, ["secret"]))
         .map((e) => pyDumps({ ...stripUnderscore(e), from: this.out(t, e.from), to: this.out(t, e.to) }, { sortKeys: true }));
       const manifest = { spec: SPEC_VERSION, tenant: t, count: lines.length,
         sha256: createHash("sha256").update(lines.join("\n")).digest("hex"),
-        tombstones: [...this.tombstones.values()].filter((x) => x.tenant === t).map(stripUnderscore) };
+        tombstones: [...this.tombstones.values()].filter((x) => x.tenant === t).sort((x, y) => pyCmp(x.id, y.id))
+          .map((x) => sortedKeys(stripUnderscore(x))) };
       return env({ manifest, "memories.jsonl": lines.join("\n"), "edges.jsonl": edges.join("\n") });
     });
   }
@@ -1066,8 +1188,28 @@ export class Service {
       throw new ORPError("invalid_parameter", `bad bundle line: ${(e as Error).message}`);
     }
     for (const d of rows) if ((d.tenant ?? t) !== t) throw new ORPError("forbidden", "bundle tenant mismatch");
-    const edgeRows: Json[] = String(b["edges.jsonl"] ?? "").split("\n").filter((l) => l.trim()).map((l) => JSON.parse(l));
-    for (const e of edgeRows) if ((e.tenant ?? t) !== t) throw new ORPError("forbidden", "edge tenant mismatch");
+    for (const d of rows) {
+      if (d === null || typeof d !== "object" || Array.isArray(d) || typeof d.id !== "string") {
+        throw new ORPError("invalid_parameter", "every memories.jsonl line is a record with a string id");
+      }
+    }
+    let edgeRows: Json[];
+    try {
+      edgeRows = String(b["edges.jsonl"] ?? "").split("\n").filter((l) => l.trim()).map((l) => JSON.parse(l));
+    } catch (e) {
+      throw new ORPError("invalid_parameter", `bad edges.jsonl: ${(e as Error).message}`);
+    }
+    for (const e of edgeRows) {
+      if (e === null || typeof e !== "object" || Array.isArray(e) || typeof e.from !== "string" || typeof e.to !== "string" ||
+        (e.id !== undefined && typeof e.id !== "string")) {
+        throw new ORPError("invalid_parameter", "every edges.jsonl line is an edge with string from and to");
+      }
+      if ((e.tenant ?? t) !== t) throw new ORPError("forbidden", "edge tenant mismatch");
+    }
+    const tombRows = man.tombstones ?? [];
+    if (!Array.isArray(tombRows) || tombRows.some((x: any) => !x || typeof x.id !== "string")) {
+      throw new ORPError("invalid_parameter", "manifest.tombstones is a list of objects with a string id");
+    }
     return this.verb(pr, true, () => {
       const E = this.engine;
       // a bundle can name engine ids of tenants not loaded yet; check collisions against the store too
@@ -1104,8 +1246,16 @@ export class Service {
           throw new ORPError("invalid_parameter", `bad record: ${(e as Error).message}`);
         }
       }
+      // check edges before changing anything: each endpoint is in the bundle or already in this tenant
+      const incoming = new Set(mems.map((m) => m.id));
+      for (const m of mems) if (m.tenant !== t) throw new ORPError("forbidden", "bundle tenant mismatch");
+      for (const e0 of edgeRows) {
+        for (const end of [conv(e0.from), conv(e0.to)]) {
+          const o = E.mem.get(end);
+          if (!incoming.has(end) && !(o && o.tenant === t)) throw new ORPError("invalid_parameter", "edge endpoints must exist in this tenant");
+        }
+      }
       for (const m of mems) {
-        if (m.tenant !== t) throw new ORPError("forbidden", "bundle tenant mismatch");
         if (E.mem.has(m.id)) continue;
         const got = E.remember(m, new Principal((m.meta._creator as string) ?? "system", [], t), true);
         if (got.length && got[0] === m.id) {
@@ -1119,12 +1269,18 @@ export class Service {
         const a = E.mem.get(e.from), bb = E.mem.get(e.to);
         if (!(a && bb && a.tenant === t && bb.tenant === t)) throw new ORPError("invalid_parameter", "edge endpoints must exist in this tenant");
         let eid = e.id || "edge_" + randomBytes(8).toString("hex");
-        if (this.edgesMap.has(eid) && this.edgesMap.get(eid)!.tenant !== t) eid = "edge_" + randomBytes(8).toString("hex");
+        if ((this.edgesMap.has(eid) && this.edgesMap.get(eid)!.tenant !== t) || this.storeOtherTenant("edges", "id", eid, t)) {
+          eid = "edge_" + randomBytes(8).toString("hex");
+        }
         this.edgesMap.set(eid, { ...e, id: eid, tenant: t });
         this.jEdges.add(eid);
       }
-      for (const x of (man.tombstones ?? []) as Json[]) {
-        const iid = conv(x.id);
+      for (const x of tombRows as Json[]) {
+        let iid = conv(x.id);
+        if ((this.tombstones.has(iid) && this.tombstones.get(iid)!.tenant !== t) || this.storeOtherTenant("tombstones", "iid", iid, t)) {
+          if (!idMap.has(x.id)) idMap.set(x.id, newId());
+          iid = idMap.get(x.id)!;
+        }
         this.tombstones.set(iid, { ...x, _iid: iid, tenant: t });
         this.jTomb.add(iid);
       }
@@ -1134,8 +1290,13 @@ export class Service {
   }
 
   private storeHasOtherTenant(iid: string, t: string): boolean {
+    return this.storeOtherTenant("memories", "iid", iid, t);
+  }
+
+  /** Whether a row with this key exists in the store under another tenant (tenants not loaded yet count too). */
+  private storeOtherTenant(table: "memories" | "edges" | "tombstones", col: "iid" | "id", key: string, t: string): boolean {
     if (!this.store) return false;
-    const r = this.store.db.prepare("SELECT tenant FROM memories WHERE iid = ?").get(iid) as Json | undefined;
+    const r = this.store.db.prepare(`SELECT tenant FROM ${table} WHERE ${col} = ?`).get(key) as Json | undefined;
     return Boolean(r && r.tenant !== t);
   }
 
@@ -1192,6 +1353,8 @@ export class Service {
 }
 
 const FLOATS = new Set(["confidence"]);
+/** Computed by the engine from content; never taken from a client (an upsert recomputes them). */
+const DERIVED_META = new Set(["entities", "time_refs"]);
 
 function src(uri: string): Source {
   return { uri, span: "", hash: "", observed_at: "" };

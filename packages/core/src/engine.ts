@@ -227,7 +227,12 @@ export class Engine {
   /** Mark a partition for rebuild (content changed or a unit was removed). */
   invalidate(tenant: string) {
     this.dirtyParts.add(tenant);
+    this.gen.set(tenant, (this.gen.get(tenant) ?? 0) + 1);
   }
+
+  /** Bumped whenever a tenant's index must be rebuilt or its records are reloaded: a background build that started
+   * before the bump is never installed. */
+  private gen = new Map<string, number>();
 
   private hashSet(h: string, id: string) {
     this.hash.set(h, id);
@@ -259,6 +264,7 @@ export class Engine {
 
   dirty(id: string) {
     this.journal.mem.add(id);
+    this.journal.deleted.delete(id);
   }
 
   appendOrder(m: Memory) {
@@ -292,7 +298,7 @@ export class Engine {
         if (acl !== null) m.readers = m.readers === null ? new Set(acl) : new Set([...m.readers].filter((x) => acl.has(x)));
         m.labels = [...new Set([...m.labels, ...labels])].sort();
       }
-      const ik = m.meta.idempotency_key as string | undefined;
+      const ik = m.meta._idempotency_key as string | undefined; // engine-reserved; clients cannot set "_" keys
       const h = ik ? idemDedupKey(m.tenant, writer, ik) : dedupContent ? dedupKey(m, writer) : null;
       const prev = h === null ? undefined : this.hash.get(h);
       if (prev !== undefined && this.mem.has(prev)) {
@@ -465,6 +471,11 @@ export class Engine {
   forget(memId: string, mode = "retract", cascade = true, principal: Principal = SYSTEM, reason = ""): string[] {
     const hit = this.cascadeSet([memId], cascade);
     const tenant = this.mem.get(memId)?.tenant ?? null;
+    const keys = new Set<string>(); // claim chains to re-resolve, collected before a purge removes the records
+    for (const i of hit) {
+      const m = this.mem.get(i);
+      if (m?.claim) keys.add(m.tenant + "\0" + claimKey(m.claim));
+    }
     for (const i of hit) {
       const m = this.mem.get(i);
       if (!m) continue;
@@ -474,6 +485,7 @@ export class Engine {
         this.tcount.set(m.tenant, (this.tcount.get(m.tenant) ?? 0) - 1);
         this.dropHashes(i);
         this.enc.forget?.(m.content);
+        this.enc.forgetTexts?.(this.textsFor(m));
         this.journal.deleted.add(i);
         this.journal.mem.delete(i);
       } else {
@@ -481,6 +493,7 @@ export class Engine {
         m.version++;
         if (mode === "redact") {
           this.enc.forget?.(m.content);
+          this.enc.forgetTexts?.(this.textsFor(m));
           m.content = "[redacted]";
           delete m.meta.time_refs;
           delete m.meta.entities;
@@ -493,28 +506,26 @@ export class Engine {
       this.audit.push({ op: `forget:${mode}`, id: i, by: principal.id, reason, at: isoformat(nowMicros()) });
       this.auditTenant.push(m.tenant);
     }
-    const keys = new Set<string>();
-    for (const i of hit) {
-      const m = this.mem.get(i);
-      if (m?.claim) keys.add(m.tenant + "\0" + claimKey(m.claim));
-    }
-    for (const k of keys) this.resolveChain(k); // a retracted superseder restores the version it replaced
+    for (const k of keys) this.resolveChain(k); // a retracted or purged superseder restores the version it replaced
     this.touch(tenant);
     return hit;
   }
 
+  /** Memories affected by forgetting `ids`: with cascade, everything derived (transitively) from them; without,
+   * derived memories left with no remaining source (M28). Only records with a source in the affected set are
+   * considered, and never across tenants (M03). Each pass works from a snapshot, as the oracle does. */
   cascadeSet(ids: string[], cascade = true): string[] {
     const hit = [...new Set(ids)];
+    const tenants = new Set(hit.map((i) => this.mem.get(i)?.tenant).filter((t): t is string => t !== undefined));
     let changed = true;
     while (changed) {
       changed = false;
       const hs = new Set(hit);
       for (const m of this.mem.values()) {
-        if (!m.derived_from.length || hs.has(m.id)) continue;
-        const gone = m.derived_from.map((s) => hs.has(s) || !this.mem.has(s) || this.mem.get(s)!.status === "retracted");
-        if ((cascade && m.derived_from.some((s) => hs.has(s))) || gone.every(Boolean)) {
+        if (!m.derived_from.length || hs.has(m.id) || !tenants.has(m.tenant)) continue;
+        if (!m.derived_from.some((s) => hs.has(s))) continue;
+        if (cascade || m.derived_from.every((s) => hs.has(s) || !this.mem.has(s) || this.mem.get(s)!.status === "retracted")) {
           hit.push(m.id);
-          hs.add(m.id);
           changed = true;
         }
       }
@@ -524,7 +535,26 @@ export class Engine {
 
   history(subject: string, predicate: string, tenant = "default"): Memory[] {
     const key = tenant + "\0" + `${subject.toLowerCase().trim()}|${predicate.toLowerCase().trim()}`;
-    return (this.claims.get(key) ?? []).filter((i) => this.mem.has(i)).map((i) => this.mem.get(i)!);
+    const want = key.slice(tenant.length + 1);
+    return (this.claims.get(key) ?? []).filter((i) => { const m = this.mem.get(i); return m !== undefined && m.claim !== null && claimKey(m.claim) === want; })
+      .map((i) => this.mem.get(i)!);
+  }
+
+  /** Remove a record from every claim chain (an upsert that changed or dropped its claim); returns the chain keys. */
+  unchain(memId: string): string[] {
+    const keys: string[] = [];
+    for (const [k, ids] of this.claims) {
+      if (!ids.includes(memId)) continue;
+      keys.push(k);
+      this.claims.set(k, ids.filter((i) => i !== memId));
+      this.journal.claims.add(k);
+      for (const i of this.claims.get(k)!) {
+        const o = this.mem.get(i);
+        const sb = o?.meta._supersedable_by as string[] | undefined;
+        if (o && sb?.includes(memId)) { o.meta._supersedable_by = sb.filter((x) => x !== memId); this.dirty(i); }
+      }
+    }
+    return keys;
   }
 
   // ------------------------------------------------------------ index
@@ -546,7 +576,7 @@ export class Engine {
    * keeps answering. Installed only if nothing in the tenant changed meanwhile (otherwise the next recall rebuilds). */
   async warmPartition(tenant: string, chunk = 400): Promise<boolean> {
     if (this.parts.has(tenant) && !this.dirtyParts.has(tenant)) return true;
-    const before = `${this.tmut.get(tenant) ?? 0}|${this.epoch}`;
+    const before = `${this.tmut.get(tenant) ?? 0}|${this.epoch}|${this.gen.get(tenant) ?? 0}`;
     const ids = [...(this.order.get(tenant) ?? [])];
     const part = new Partition(tenant, this.enc.dim);
     for (let i = 0; i < ids.length; i += chunk) {
@@ -555,9 +585,9 @@ export class Engine {
         if (m) part.add(m, this.enc, this.p.seg_sentences);
       }
       await new Promise((r) => setImmediate(r));
-      if (`${this.tmut.get(tenant) ?? 0}|${this.epoch}` !== before) return false;
+      if (`${this.tmut.get(tenant) ?? 0}|${this.epoch}|${this.gen.get(tenant) ?? 0}` !== before) return false;
     }
-    if (`${this.tmut.get(tenant) ?? 0}|${this.epoch}` !== before) return false;
+    if (`${this.tmut.get(tenant) ?? 0}|${this.epoch}|${this.gen.get(tenant) ?? 0}` !== before) return false;
     this.parts.set(tenant, part);
     this.dirtyParts.delete(tenant);
     return true;
@@ -683,7 +713,7 @@ export class Engine {
     this.P = P;
     const n = P.n;
     const tenant = req.principal.tenant;
-    if (this.mem.size === 0) return { items: [], tokens: 0, budget: req.budget_tokens, coverage: 0, snapshot: this.snapshot(tenant), notes: [] };
+    if ((this.tcount.get(tenant) ?? 0) <= 0) return { items: [], tokens: 0, budget: req.budget_tokens, coverage: 0, snapshot: this.snapshot(tenant), notes: [] };
     const p = this.p;
     const now = req.as_of ?? nowMicros();
     const mask = this.maskFor(P, req);

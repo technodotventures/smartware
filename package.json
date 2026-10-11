@@ -17,7 +17,8 @@
     "test": "node --test --test-reporter=dot packages/*/test/*.test.js packages/adapters/*/test/*.test.js",
     "test:py": "python3 -m unittest discover -s tests -t . && python3 tools/bridge/run_suite.py -q && cd clients/python && python3 -m unittest discover -s tests -t .",
     "check:schemas": "node tools/gen-schemas.mjs --check",
-    "check:release": "node tools/release-check.mjs"
+    "check:release": "node tools/release-check.mjs",
+    "fuzz": "node tools/fuzz/persist_fuzz.mjs 20 150 && python3 tools/fuzz/diff_fuzz.py 25 120 1 --frozen-clock --idprob=1 && python3 tools/fuzz/diff_fuzz.py 12 120 100 --frozen-clock --idprob=1 --reopen"
   },
   "devDependencies": {
     "typescript": "6.0.3",

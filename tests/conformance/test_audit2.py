@@ -35,7 +35,8 @@ def recall(s, pr, q, **kw):
 
 
 def shipped_params() -> Params:
-    p = json.load(open(os.path.join(ROOT, "results", "orp_params.json")))["params"]
+    with open(os.path.join(ROOT, "results", "orp_params.json")) as fh:
+        p = json.load(fh)["params"]
     return Params(**{k: tuple(v) if isinstance(v, list) else v for k, v in p.items()})
 
 

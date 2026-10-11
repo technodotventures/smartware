@@ -31,7 +31,8 @@ class SchemaDrift(unittest.TestCase):
         self.assertEqual(props("ForgetRequest"), api._FORGET_KEYS)
 
     def test_spec_field_table_covered(self):
-        spec = open(os.path.join(ROOT, "spec", "ORP-0.1.md")).read()
+        with open(os.path.join(ROOT, "spec", "ORP-0.1.md")) as fh:
+            spec = fh.read()
         table = spec[spec.index("### 3.1 The Memory record"):spec.index("### 3.2 Kinds")]
         fields = set()
         for row in table.splitlines():

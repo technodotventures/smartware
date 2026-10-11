@@ -8,8 +8,13 @@ export const DAY = 86_400 * US;
 export const MIN_TIME: Micros = -62135596800 * US; // datetime.min (0001-01-01)
 const EPOCH_DATE = Date.UTC(1970, 0, 1);
 
+let lastNow = 0;
+/** Wall-clock microseconds, strictly increasing within a process (the oracle stamps microseconds too, so records
+ * written in the same millisecond keep their write order). */
 export function nowMicros(): Micros {
-  return Date.now() * 1000;
+  const t = Math.floor((performance.timeOrigin + performance.now()) * 1000);
+  lastNow = t > lastNow ? t : lastNow + 1;
+  return lastNow;
 }
 
 export function fromParts(y: number, mo: number, d: number, h = 0, mi = 0, s = 0, us = 0): Micros {

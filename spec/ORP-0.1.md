@@ -80,7 +80,7 @@ ORP turns the best mechanisms we found into requirements, and turns each failure
 | `confidence` | number 0..1 | MAY | Engine's or author's confidence. Declared scale. |
 | `labels` | string[] | MAY | Sensitivity (`pii`, `secret`, `health`, `legal`) and topical labels. |
 | `load` | enum | MAY | `always \| on_scope \| on_query` (default). Profiles, standing rules and identity are `always`. |
-| `meta` | object | MAY | Free-form, namespaced keys (`x-acme-...`). Engines MUST round-trip it. [M14] |
+| `meta` | object | MAY | Free-form, namespaced keys (`x-acme-...`). Engines MUST round-trip it. [M14] Keys starting with `_` and the engine-derived keys `entities` and `time_refs` are reserved; an engine MAY reject meta nested deeper than 32 levels (`invalid_parameter`). |
 
 Embeddings and index structures are **not** part of the record. They are engine internals and MUST be rebuildable from records. [M15]
 

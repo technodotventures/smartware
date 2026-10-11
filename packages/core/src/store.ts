@@ -159,6 +159,10 @@ export class SqliteStore {
     return new Float32Array(b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength));
   }
 
+  deleteVector(encoder: string, sha: string) {
+    this.q("DELETE FROM vectors WHERE encoder = ? AND text_sha = ?").run(encoder, sha);
+  }
+
   putVector(encoder: string, sha: string, v: Float32Array) {
     this.q("INSERT OR REPLACE INTO vectors VALUES (?, ?, ?)").run(encoder, sha, new Uint8Array(v.buffer, v.byteOffset, v.byteLength));
   }
@@ -167,8 +171,9 @@ export class SqliteStore {
     this.db.exec("BEGIN IMMEDIATE");
     try {
       for (const [k, v] of Object.entries(d.meta)) this.q("INSERT OR REPLACE INTO orp_meta VALUES (?, ?)").run(k, v);
-      for (const m of d.memories) this.q("INSERT OR REPLACE INTO memories VALUES (?, ?, ?, ?)").run(m.iid, m.tenant, m.ord, m.record);
+      // deletes before inserts, so an id purged and then re-used inside one verb ends up present
       for (const i of d.deleted) this.q("DELETE FROM memories WHERE iid = ?").run(i);
+      for (const m of d.memories) this.q("INSERT OR REPLACE INTO memories VALUES (?, ?, ?, ?)").run(m.iid, m.tenant, m.ord, m.record);
       for (const c of d.claims) {
         this.q("DELETE FROM claims WHERE tenant = ? AND key = ?").run(c.tenant, c.key);
         c.iids.forEach((iid, pos) => this.q("INSERT INTO claims VALUES (?, ?, ?, ?)").run(c.tenant, c.key, pos, iid));

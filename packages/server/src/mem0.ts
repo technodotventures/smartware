@@ -144,10 +144,22 @@ export async function mem0Route(svc: Service, pr: Principal, req: IncomingMessag
       const cur = g.memories[0];
       const text = b.text ?? b.memory ?? b.data;
       if (typeof text !== "string" || !text) throw new ORPError("invalid_parameter", "text is required");
+      // carry every client-settable field over, so a mem0 update changes the text (and metadata) and nothing else
       const keep: Json = {};
-      for (const k of ["kind", "scope", "readers", "writers", "actor", "role", "thread", "seq", "labels", "load"]) if (cur[k] !== undefined && cur[k] !== "" && cur[k] !== null) keep[k] = cur[k];
+      for (const k of ["kind", "scope", "readers", "writers", "actor", "role", "origin", "thread", "seq", "labels", "load",
+        "event_time", "valid_from", "valid_to", "expires_at", "sources", "derived_from", "confidence", "support"]) {
+        if (cur[k] !== undefined && cur[k] !== "" && cur[k] !== null) keep[k] = cur[k];
+      }
       if (cur.readers === null) keep.readers = null;
-      const meta = { ...(cur.meta ?? {}), ...(b.metadata ? { mem0: b.metadata } : {}) };
+      if (cur.writers === null) keep.writers = null;
+      if (text === cur.content) {
+        if (cur.claim) keep.claim = cur.claim; // a metadata-only update keeps the claim
+      } else if (keep.origin === "extracted" || keep.origin === "inferred") {
+        keep.origin = "human"; // new text written by the caller; lineage stays in derived_from
+      }
+      const meta: Json = {};
+      for (const [k, v] of Object.entries(cur.meta ?? {})) if (!k.startsWith("_") && k !== "entities" && k !== "time_refs") meta[k] = v;
+      if (b.metadata) meta.mem0 = b.metadata;
       await svc.remember({ memories: [{ ...keep, id, content: text, meta }], mode: "upsert", if_version: cur.version }, pr);
       return ok({ message: "Memory updated successfully!" });
     }

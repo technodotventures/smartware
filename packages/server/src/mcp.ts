@@ -116,6 +116,44 @@ export interface SessionOptions {
   notify?: (msg: Json) => void;
 }
 
+/** The subset of JSON Schema the tool definitions use: type, enum, items, properties, required, minimum, maximum,
+ * minLength. Arguments that do not match are rejected as invalid_parameter before any verb runs. */
+export function checkSchema(v: unknown, sch: Json | undefined, path: string): void {
+  if (!sch) return;
+  const bad = (why: string) => { throw new ORPError("invalid_parameter", `${path}: ${why}`); };
+  const types: string[] = sch.type === undefined ? [] : Array.isArray(sch.type) ? sch.type : [sch.type];
+  if (types.length) {
+    const ok = types.some((t) => {
+      switch (t) {
+        case "string": return typeof v === "string";
+        case "integer": return typeof v === "number" && Number.isInteger(v);
+        case "number": return typeof v === "number" && Number.isFinite(v);
+        case "boolean": return typeof v === "boolean";
+        case "array": return Array.isArray(v);
+        case "object": return v !== null && typeof v === "object" && !Array.isArray(v);
+        case "null": return v === null;
+        default: return true;
+      }
+    });
+    if (!ok) bad(`expected ${types.join(" or ")}`);
+  }
+  if (Array.isArray(sch.enum) && !sch.enum.includes(v)) bad(`must be one of ${JSON.stringify(sch.enum)}`);
+  if (typeof v === "number") {
+    if (typeof sch.minimum === "number" && v < sch.minimum) bad(`must be at least ${sch.minimum}`);
+    if (typeof sch.maximum === "number" && v > sch.maximum) bad(`must be at most ${sch.maximum}`);
+  }
+  if (typeof v === "string" && typeof sch.minLength === "number" && v.length < sch.minLength) bad(`must have at least ${sch.minLength} characters`);
+  if (Array.isArray(v) && sch.items) v.forEach((x, i) => checkSchema(x, sch.items, `${path}[${i}]`));
+  if (v !== null && typeof v === "object" && !Array.isArray(v) && sch.properties) {
+    const o = v as Json;
+    for (const r of (sch.required ?? []) as string[]) if (!(r in o)) bad(`missing ${r}`);
+    for (const [k, x] of Object.entries(o)) {
+      if (k in sch.properties) checkSchema(x, sch.properties[k], `${path}.${k}`);
+      else if (sch.additionalProperties === false) bad(`unexpected ${k}`);
+    }
+  }
+}
+
 export class McpSession {
   clientCaps: Json = {};
   protocol = LATEST;
@@ -246,6 +284,7 @@ export class McpSession {
     if (extra.length || missing.length) {
       throw new ORPError(extra.length ? "unsupported_parameter" : "invalid_parameter", `${tool.name}: unexpected ${JSON.stringify(extra)} missing ${JSON.stringify(missing)}`);
     }
+    for (const k of Object.keys(a)) checkSchema(a[k], props[k], `${tool.name}.${k}`); // types as the tool declares them
     const s = this.svc, pr = this.pr, full = tool.set.includes("full");
     let out: Json;
     switch (tool.name) {

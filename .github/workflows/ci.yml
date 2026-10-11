@@ -15,15 +15,15 @@ jobs:
         node: ["22", "24"]
         python: ["3.11", "3.13"]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with: { persist-credentials: false }
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with: { node-version: "${{ matrix.node }}" }
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
         with: { python-version: "${{ matrix.python }}" }
       # explicit flag for this install, never repo-level config (the project has no native modules to build)
       - run: npm ci --ignore-scripts --no-audit --no-fund || npm install --ignore-scripts --no-audit --no-fund
-      - run: pip install numpy scipy jsonschema
+      - run: pip install --only-binary=:all: -r requirements-dev.txt
       - name: release gate (lifecycle scripts, dependency allowlist, payload signatures, credentials)
         run: node tools/release-check.mjs
       - run: npm run build
@@ -33,3 +33,5 @@ jobs:
         run: npm run test:py
       - name: conformance doctor reaches L4
         run: node packages/server/bin/orp.js doctor --self
+      - name: persistence and differential fuzz (short; run longer locally with npm run fuzz)
+        run: node tools/fuzz/persist_fuzz.mjs 3 80 && python3 tools/fuzz/diff_fuzz.py 4 80 1 --frozen-clock --idprob=1

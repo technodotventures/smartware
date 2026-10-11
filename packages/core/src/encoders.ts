@@ -20,12 +20,15 @@ export interface Encoder {
   forget?(content: string): void;
   /** For encoders that must be warmed: whether a vector for this text is ready. */
   has?(text: string): boolean;
+  /** Drop cached and persisted vectors of these exact texts (purge and redact). */
+  forgetTexts?(texts: string[]): void;
 }
 
 /** Optional persistent vector cache (the store's vectors table), so restarts do not re-embed. */
 export interface VectorCache {
   get(encoder: string, sha: string): Float32Array | null;
   put(encoder: string, sha: string, v: Float32Array): void;
+  delete?(encoder: string, sha: string): void;
 }
 
 const enc = new TextEncoder();
@@ -190,6 +193,7 @@ export class ApiEncoder implements Encoder {
 
   async warm(texts: string[]): Promise<void> {
     let need = [...new Set(texts.filter((t) => !this.cache.has(t)))];
+    if (this.cache.size > 200_000) this.cache.clear(); // indexes hold their own copies; keep this bounded
     if (this.persist && need.length) {
       need = need.filter((t) => {
         const v = this.persist!.get(this.name, sha(t));
@@ -227,6 +231,13 @@ export class ApiEncoder implements Encoder {
 
   forget(content: string): void {
     forgetCached(this.cache, content);
+  }
+
+  forgetTexts(texts: string[]): void {
+    for (const t of texts) {
+      this.cache.delete(t);
+      this.persist?.delete?.(this.name, sha(t));
+    }
   }
 }
 

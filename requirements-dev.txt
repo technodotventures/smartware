@@ -1,0 +1,4 @@
+# Test-only Python dependencies (the oracle and the benchmark harness). Pinned; CI installs exactly these.
+numpy==2.5.3
+scipy==1.18.1
+jsonschema==4.26.0
