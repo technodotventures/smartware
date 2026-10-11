@@ -1,4 +1,4 @@
-"""ORP reference engine (v0.1.3).
+"""ORP reference engine (v0.1.4).
 
 A single-process implementation of the Open Recall Protocol (spec/ORP-0.1.md):
 bi-temporal memory records, explicit supersession, provenance-closed access control,
@@ -41,6 +41,7 @@ from . import timeparse
 from ._text import STOPWORDS, count_tokens, sentences, stem, terms, words
 from .index import BM25
 from .model import SYSTEM, ContextItem, ContextPack, Memory, Principal, RecallRequest
+from . import clock as _clock
 
 
 class Embedder(Protocol):
@@ -162,7 +163,7 @@ class Engine:
                 ids.append(self._hash[h])
                 continue
             if m.observed_at is None:
-                m.observed_at = datetime.now()
+                m.observed_at = _clock.now()
             if m.valid_from is None:
                 m.valid_from = m.event_time or m.observed_at
             m.meta.setdefault("_valid_to", m.valid_to.isoformat() if m.valid_to else None)
@@ -187,7 +188,7 @@ class Engine:
                         ch.append(m.id)
                 else:
                     self._supersede(m, principal)
-            self.audit.append({"op": "remember", "id": m.id, "by": principal.id, "at": datetime.now().isoformat()})
+            self.audit.append({"op": "remember", "id": m.id, "by": principal.id, "at": _clock.now().isoformat()})
             ids.append(m.id)
             touched.add(m.tenant)
         for t in touched:
@@ -329,7 +330,7 @@ class Engine:
                     for s in m.sources:
                         s.span = s.hash = ""
             self.audit.append({"op": f"forget:{mode}", "id": i, "by": principal.id, "reason": reason,
-                               "at": datetime.now().isoformat()})
+                               "at": _clock.now().isoformat()})
         for key in {(self.mem[i].tenant, self.mem[i].claim.key()) for i in hit
                     if i in self.mem and self.mem[i].claim is not None}:
             self.resolve_chain(key)  # a retracted superseder restores the version it replaced
@@ -430,7 +431,7 @@ class Engine:
                 self.ent[e.lower()].add(k)
             if m.actor:
                 self.ent[m.actor.lower()].add(k)
-        self.ts = np.array([((m.event_time or m.observed_at) or datetime(1970, 1, 1)).timestamp() for m in ms])
+        self.ts = np.array([_clock.epoch(((m.event_time or m.observed_at) or datetime(1970, 1, 1))) for m in ms])
         self.ntok = np.array([count_tokens(t) for t in unit_txt])
         self.is_assistant = np.array([m.role == "assistant" for m in ms], dtype=bool)
         self.has_roles = bool(self.is_assistant.any())
@@ -478,8 +479,8 @@ class Engine:
     def _mask(self, req: RecallRequest) -> np.ndarray:
         """Admissible set (§5.1, §5.2). Everything here depends only on the memory itself and the request, except
         the claim view at the end, which is computed over admissible memories only."""
-        as_of = req.as_of or datetime.now()
-        now = datetime.now()  # retention is real time, not the as_of view (§7)
+        as_of = req.as_of or _clock.now()
+        now = _clock.now()  # retention is real time, not the as_of view (§7)
         labels = tuple(req.filters.get("labels", ()))
         drafts = bool(req.filters.get("drafts"))
         sc = req.scope.rstrip("/")
@@ -550,7 +551,7 @@ class Engine:
         if n == 0:
             return ContextPack([], 0, req.budget_tokens, 0.0, self._snapshot(req.principal.tenant))
         p = self.p
-        now = req.as_of or datetime.now()
+        now = req.as_of or _clock.now()
         mask = self._mask(req)
         if not mask.any():
             return ContextPack([], 0, req.budget_tokens, 0.0, self._snapshot(req.principal.tenant),
@@ -639,7 +640,7 @@ class Engine:
             if es[mask].max() > 0:
                 chans["entity"] = (p.w_entity, topranks(es * (1 + 0.01 * (s_bm > 0)) + 1e-9 * s_bm))
         if ti.window:
-            lo, hi = ti.window[0].timestamp(), ti.window[1].timestamp()
+            lo, hi = _clock.epoch(ti.window[0]), _clock.epoch(ti.window[1])
             inwin = (self.ts >= lo) & (self.ts <= hi)
             if (inwin & mask).any():
                 chans["time"] = (p.w_time, topranks(inwin * (s_bm + 0.1 * (s_dense + 1)) + 1e-6 * inwin))
@@ -767,7 +768,7 @@ class Engine:
         bmx = max(float(s_bm[cand].max()), 1e-6)
         ubx = max(float(ub[cand].max()), 1e-6)
         qn = max(1, len(qset))
-        win = (ti.window[0].timestamp(), ti.window[1].timestamp()) if ti.window else None
+        win = (_clock.epoch(ti.window[0]), _clock.epoch(ti.window[1])) if ti.window else None
         tsv = self.ts[cand]
         lo, hi = float(tsv.min()), float(tsv.max())
         where_q = bool(re.search(r"\bwhere\b|\bwhich (city|country|place|state|town)\b", self._qtext.lower()))
@@ -956,7 +957,7 @@ class Engine:
     def _snapshot(self, tenant: str = "default") -> str:
         """Per-tenant, keyed: changes on every write, forget, approval or ACL change in this tenant (and on
         retention expiry), reveals nothing about other tenants (M52)."""
-        now = datetime.now()
+        now = _clock.now()
         exp = sum(1 for m in self.mem.values() if m.tenant == tenant and m.expires_at and m.expires_at <= now) \
             if self._has_expiry else 0
         msg = f"{tenant}|{self.tmut[tenant]}|{self._epoch}|{self.tcount[tenant]}|{exp}".encode()

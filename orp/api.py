@@ -25,6 +25,7 @@ from . import __version__
 from ._text import count_tokens, sentences, terms
 from .engine import Engine, Params
 from .model import KINDS, ORIGINS, SYSTEM, Claim, Memory, Principal, RecallRequest, Source, new_id
+from . import clock as _clock
 
 SPEC_VERSION = "0.1"
 ROLES = ("user", "assistant", "system", "tool", "human", "connector")
@@ -63,7 +64,7 @@ def _ts(v):
     if v is None or isinstance(v, datetime):
         return v
     try:
-        return datetime.fromisoformat(str(v).replace("Z", "+00:00")).replace(tzinfo=None)
+        return _clock.parse(v)  # offsets are converted to UTC, never just dropped
     except ValueError:
         raise ORPError("invalid_parameter", f"bad timestamp {v!r}")
 
@@ -121,6 +122,8 @@ class Service:
     def __init__(self, embedder, params: Params | None = None, tokenizer: str = "orp-approx-1"):
         self.engine = Engine(embedder, params)
         self.tokenizer = tokenizer
+        self.encoder_name = getattr(embedder, "name", "")
+        self.ranker_notes: list[str] = []
         self._keys: dict[tuple, list[str]] = {}
         self._jobs: dict[str, dict] = {}
         self._feedback: list[dict] = []
@@ -154,7 +157,7 @@ class Service:
         m = self.engine.mem.get(mem_id)
         tenant = principal.tenant if m is None else m.tenant
         feed = self._changes[tenant]
-        feed.append({"cursor": len(feed) + 1, "at": datetime.now().isoformat(), "op": op,
+        feed.append({"cursor": len(feed) + 1, "at": _clock.now().isoformat(), "op": op,
                      "id": self._out(tenant, mem_id), "_iid": mem_id, "tenant": tenant, "by": principal.id,
                      "version": m.version if m else None, "status": m.status if m else None, **kw})
 
@@ -166,7 +169,7 @@ class Service:
 
     def _view(self, pr: Principal, as_of=None, labels: tuple = ()) -> set[str]:
         """Ids admissible for `pr` under the same rules as recall (§5.1, §5.2)."""
-        req = RecallRequest(query="", principal=pr, tenant=pr.tenant, as_of=as_of or datetime.now(),
+        req = RecallRequest(query="", principal=pr, tenant=pr.tenant, as_of=as_of or _clock.now(),
                             filters={"labels": labels})
         return set(self.engine.admissible(req))
 
@@ -206,6 +209,7 @@ class Service:
                          "dense:window", "dense:segment-maxpool", "thread(admissible units)", "entity", "temporal",
                          "prf:rm3"],
             "fusion": f"weighted-rrf(k={p.rrf_k})",
+            "encoder": self.encoder_name, "notes": list(self.ranker_notes),
             "ranker": {"name": f"orp-{p.ranker}-1",
                        "features": [x for x in Engine.FEATURES if x not in inactive] if learned else
                        ["coverage", "actor", "role", "order", "current", "prefer"],
@@ -294,7 +298,7 @@ class Service:
             readers=frozenset(readers) if readers is not None else None,
             writers=frozenset(writers) if writers is not None else None,
             actor=raw.get("actor", principal.id), role=raw.get("role", ""), origin=origin,
-            thread=raw.get("thread", ""), seq=_int(raw.get("seq", 0), "seq"), observed_at=datetime.now(),
+            thread=raw.get("thread", ""), seq=_int(raw.get("seq", 0), "seq"), observed_at=_clock.now(),
             event_time=m_kw["event_time"], valid_from=_ts(raw.get("valid_from")),
             valid_to=_ts(raw.get("valid_to")), expires_at=_ts(raw.get("expires_at")),
             claim=claim, sources=sources, derived_from=derived, labels=labels, load=load,
@@ -376,7 +380,7 @@ class Service:
                     if om.kind in ("event", "document"):
                         raise ORPError("invalid_parameter", "evidence (event/document) is never superseded")
                     om.status, om.superseded_by = "superseded", m.id
-                    om.valid_to = m.valid_from or m.event_time or datetime.now()
+                    om.valid_to = m.valid_from or m.event_time or _clock.now()
                     om.meta["_explicit_superseded"] = True
                     om.version += 1
                     m.supersedes.append(oi)
@@ -435,7 +439,7 @@ class Service:
         filters = {"labels": labels, "drafts": bool(inc.get("drafts")), "granularity": gran,
                    "neighbours": nbh if isinstance(nbh, int) else 0, "quotas": quotas, "prefer": prefer}
         req = RecallRequest(query=body["query"], principal=principal, tenant=principal.tenant,
-                            as_of=_ts(body.get("as_of")) or datetime.now(), known_at=_ts(body.get("known_at")),
+                            as_of=_ts(body.get("as_of")) or _clock.now(), known_at=_ts(body.get("known_at")),
                             scope=scope.get("within", ""), kinds=kinds, budget_tokens=tokens,
                             max_items=items_max, include_history=bool(inc.get("history")), filters=filters)
         p = self.engine.p
@@ -485,7 +489,7 @@ class Service:
             raise ORPError("invalid_parameter", "profile requires budget.tokens (no unbounded ambient context)")
         _check_keys(b, {"tokens"}, "budget")
         tokens = _int(b["tokens"], "budget.tokens", 1, MAX_BUDGET)
-        as_of = _ts(body.get("as_of")) or datetime.now()
+        as_of = _ts(body.get("as_of")) or _clock.now()
         subj = body.get("subject")
         if subj is not None and not isinstance(subj, str):
             raise ORPError("invalid_parameter", "subject must be a string")
@@ -494,7 +498,7 @@ class Service:
         cands = [self.engine.mem[i] for i in view if self.engine.mem[i].load == "always"]
         cands = [m for m in cands if not (subj and m.claim and m.claim.subject.lower() != subj.lower()
                                           and m.actor != subj)]
-        cands.sort(key=lambda m: (prio.get(m.kind, 9), -(m.valid_from or m.observed_at).timestamp(), m.id))
+        cands.sort(key=lambda m: (prio.get(m.kind, 9), -_clock.epoch(m.valid_from or m.observed_at), m.id))
         lines, used = [], 0
         for m in cands:
             n = count_tokens(m.content) + 2
@@ -535,6 +539,17 @@ class Service:
         sel = same[max(0, idx - before): idx + after + 1]
         return {"memories": [{"id": self._out(x.tenant, x.id), "actor": x.actor, "content": x.content, "seq": x.seq}
                              for x in sel]}
+
+    @_enveloped
+    def thread(self, thread: str, principal: Principal) -> dict:
+        """Admissible units of one thread in order (spec §8.2 /threads/{thread}/neighbours)."""
+        if not isinstance(thread, str) or not thread:
+            raise ORPError("invalid_parameter", "thread is a non-empty string")
+        view = self._view(principal)
+        ms = sorted((self.engine.mem[i] for i in view if self.engine.mem[i].thread == thread),
+                    key=lambda x: (x.seq, x.observed_at or datetime.min, x.id))
+        return {"memories": [{"id": self._out(x.tenant, x.id), "actor": x.actor, "content": x.content, "seq": x.seq}
+                             for x in ms]}
 
     @_enveloped
     def history(self, subject: str, predicate: str, principal: Principal) -> dict:
@@ -614,7 +629,7 @@ class Service:
                                            reason=str(body.get("reason", "")))
         for i in dict.fromkeys(done):
             if mode == "purge":
-                self._tombstones[i] = {"id": self._out(t, i), "_iid": i, "tenant": t, "at": datetime.now().isoformat()}
+                self._tombstones[i] = {"id": self._out(t, i), "_iid": i, "tenant": t, "at": _clock.now().isoformat()}
             self._log(f"forget:{mode}", i, principal, reason=str(body.get("reason", "")))
         return {"dry_run": False, "affected": visible}
 
@@ -627,7 +642,7 @@ class Service:
         m = self.engine.mem.get(self._in(t, body.get("target")))
         if m is None or not self._can_read(m, principal):
             raise ORPError("not_found", str(body.get("target")))
-        self._feedback.append(dict(body, target=m.id, actor=principal.id, at=datetime.now().isoformat()))
+        self._feedback.append(dict(body, target=m.id, actor=principal.id, at=_clock.now().isoformat()))
         out = {"recorded": True}
         if body["signal"] == "draft_final" and body.get("draft") and body.get("final"):
             rule = _rule_from_diff(str(body["draft"]), str(body["final"]))
@@ -814,17 +829,21 @@ class Service:
                      "_secret", "_has_expiry")
 
     def save(self, path: str):
-        """Full server state (records, idempotency keys, re-ingest blocks, change feeds, audit log). Server-owned
-        file; never load one from an untrusted source."""
-        import os
-        state = {"service": {k: getattr(self, k) for k in self._STATE},
-                 "engine": {k: getattr(self.engine, k) for k in self._ENGINE_STATE}}
-        tmp = path + ".tmp"
-        with open(tmp, "wb") as f:
-            pickle.dump(state, f)
-        os.replace(tmp, path)
+        """Full server state (records, idempotency keys, re-ingest blocks, change feeds, audit log) in a SQLite file
+        (orp/store.py, schema orp-store-1), written in one transaction."""
+        from . import store
+        store.save(self, path)
 
     def load(self, path: str):
+        from . import store
+        if store.is_sqlite(path):
+            store.load(self, path)
+            return
+        # legacy pickle stores (v0.1.3 and earlier): only on explicit opt-in, since loading a pickle can run code
+        import os
+        if os.environ.get("ORP_ALLOW_PICKLE") != "1":
+            raise ValueError(f"{path} is not an ORP SQLite store. If it is a legacy pickle store you created, set "
+                             "ORP_ALLOW_PICKLE=1 once to migrate it; it is rewritten as SQLite on the next save.")
         with open(path, "rb") as f:
             state = pickle.load(f)
         for k, v in state["service"].items():

@@ -5,12 +5,15 @@ reference engine accepts anything with embed()/embed_many(). Two built-ins:
 
 - HashingEmbedder: feature-hashed words and word bigrams. No weights, no network,
   deterministic. Lexical-ish; good for tests and air-gapped installs.
-- SIFEmbedder: loads PPMI-SVD word vectors (the benchmark's encoder) and builds
-  SIF sentence embeddings. Swap in any neural embedder in production.
+- SIFEmbedder: loads PPMI-SVD word vectors (the benchmark's encoder) from an .orpenc file
+  (orp/encfile.py, data only) and builds SIF sentence embeddings.
+
+Pickle files are refused unless ORP_ALLOW_PICKLE=1 is set: a pickle can run code when loaded.
 """
 from __future__ import annotations
 
 import hashlib
+import os
 import pickle
 import re
 
@@ -22,6 +25,7 @@ _W = re.compile(r"[a-z0-9]+(?:'[a-z]+)?")
 class HashingEmbedder:
     def __init__(self, dim: int = 512):
         self.dim = dim
+        self.name = f"hashing-{dim}"
 
     def embed(self, text: str) -> np.ndarray:
         ws = _W.findall(text.lower())
@@ -38,7 +42,18 @@ class HashingEmbedder:
 
 class SIFEmbedder:
     def __init__(self, path: str, a: float = 1e-3):
-        vocab, vecs, pw, pc, a0 = pickle.load(open(path, "rb"))
+        if path.endswith(".orpenc"):
+            from . import encfile
+            head, vocab, vecs, pw, pc = encfile.read(path)
+            a0 = head.get("a")
+            self.name = f"{head.get('name', 'sif')}@{head['sha256'][:12]}"
+        else:
+            if os.environ.get("ORP_ALLOW_PICKLE") != "1":
+                raise ValueError(f"{path}: refusing to load a pickle encoder (it can run code); convert it with "
+                                 "tools/export_encoder.py or set ORP_ALLOW_PICKLE=1 for a file you created yourself")
+            with open(path, "rb") as f:
+                vocab, vecs, pw, pc, a0 = pickle.load(f)
+            self.name = "sif-pickle"
         self.vocab, self.vecs, self.pw, self.pc, self.a = vocab, vecs, pw, pc, a0 or a
         self.dim = vecs.shape[1]
         self._cache = {}

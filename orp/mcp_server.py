@@ -14,7 +14,7 @@ import json
 import os
 import sys
 
-from . import embedders
+from . import embedders, rankers
 from .api import ORPError, Service
 from .model import Principal
 
@@ -298,11 +298,15 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--store", default=os.environ.get("ORP_STORE"))
     ap.add_argument("--embedder", default=os.environ.get("ORP_EMBEDDER", "hashing"))
+    ap.add_argument("--ranker", default=os.environ.get("ORP_RANKER", "auto"))
     a = ap.parse_args()
     pr = Principal(os.environ.get("ORP_PRINCIPAL", "local-user"),
                    frozenset(g for g in os.environ.get("ORP_GROUPS", "").split(",") if g),
                    tenant=os.environ.get("ORP_TENANT", "default"))
-    svc = Service(embedders.load(a.embedder))
+    emb = embedders.load(a.embedder)
+    _, params, notes = rankers.choose(a.ranker, emb)
+    svc = Service(emb, params)
+    svc.encoder_name, svc.ranker_notes = getattr(emb, "name", ""), notes
     if a.store and os.path.exists(a.store):
         svc.load(a.store)
     Server(svc, pr, a.store).serve()
