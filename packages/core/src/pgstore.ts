@@ -149,6 +149,7 @@ export class PgStore implements Store {
     const add = (text: string, params: any[]) => Q.push({ text, params });
     for (const f of d.fence ?? []) add(`SELECT ${this.s}.orp_fence($1, $2, $3)`, [f.tenant, this.leases.node, f.epoch]);
     if (d.meta.secret) add(`INSERT INTO ${this.t("meta")} VALUES ('secret', $1) ON CONFLICT (key) DO NOTHING`, [d.meta.secret]);
+    if (d.meta.encoder) add(`INSERT INTO ${this.t("meta")} VALUES ('encoder', $1) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`, [d.meta.encoder]);
     // global counters only ever move up, whichever process writes them; the next owner of a tenant also gets that
     // tenant's own floor (max_wseq, MAX(ord)) when it loads it
     for (const k of ["epoch", "wseq", "mutations"]) {

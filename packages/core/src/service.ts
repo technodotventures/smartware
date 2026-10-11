@@ -246,6 +246,12 @@ export class Service {
   private applyMeta(meta: Record<string, string>, write: (d: StoreDelta) => void) {
     if (meta.secret) this.engine.secret = Buffer.from(meta.secret, "hex");
     else write({ ...emptyDelta(), meta: { secret: this.engine.secret.toString("hex") } });
+    if (meta.encoder !== this.encoderName) {
+      // indexes are built in memory from the records, so a new encoder needs no migration: each tenant is indexed
+      // with it when first loaded (in the background at start, unless preloading is off)
+      if (meta.encoder) this.notes.push(`encoder changed from ${meta.encoder} to ${this.encoderName}: each tenant is re-indexed with it when first loaded`);
+      write({ ...emptyDelta(), meta: { encoder: this.encoderName } });
+    }
     this.engine.epoch = Number(meta.epoch ?? 0);
     this.engine.wseq = Math.max(this.engine.wseq, Number(meta.wseq ?? 0));
     this.engine.mutations = Number(meta.mutations ?? 0);

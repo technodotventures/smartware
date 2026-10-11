@@ -197,6 +197,8 @@ export async function main(argv: string[]) {
   if (cmd === "version" || f.version) { process.stdout.write(VERSION + "\n"); return; }
   if (cmd === "serve") {
     const svc = buildService(f, log);
+    await svc.ready();
+    for (const n of svc.notes) if (n.startsWith("encoder changed")) log.warn(n);
     if (f.http !== undefined || f.port !== undefined) await serveHttp(svc, f, log);
     else await serveStdio(svc, f, log);
     return;
