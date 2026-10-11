@@ -1,14 +1,12 @@
-# orp-client (Python)
+# smartware-client (Python)
 
-A Python client for the ORP memory protocol over its HTTP binding (spec 0.1), plus compatibility shims for
+A Python client for the Smartware memory protocol over its HTTP binding (spec 0.1), plus compatibility shims for
 LangGraph, mem0 and Letta. Standard library only, Python 3.10 or later, no dependencies.
 
-"ORP" is a working name; the package and module names will be renamed later.
-
 ```python
-from orp_client import OrpClient
+from smartware_client import SmartwareClient
 
-client = OrpClient("https://memory.example.com", token_env="ORP_TOKEN")
+client = SmartwareClient("https://memory.example.com", token_env="SMARTWARE_TOKEN")
 
 client.remember("Priya is vegetarian and allergic to peanuts")   # readable by you alone
 pack = client.recall("what can Priya eat?", budget_tokens=800)    # budgeted, cited context
@@ -31,7 +29,7 @@ Pass at most one of:
 | Argument | Use it for |
 |---|---|
 | `token="..."` | a token you already hold in memory |
-| `token_env="ORP_TOKEN"` | the **name** of an environment variable; it is read on every request, so a rotated token takes effect at once |
+| `token_env="SMARTWARE_TOKEN"` | the **name** of an environment variable; it is read on every request, so a rotated token takes effect at once |
 | `get_token=callable` | a function that returns a fresh token, for example from a secret manager or an OAuth refresh |
 
 With none, requests carry no credentials, which only a `--dev` server on localhost accepts.
@@ -83,9 +81,9 @@ until someone approves it. A batch that mixes procedures with other kinds must n
 server does not support (a mode, a kind) come back as `UnsupportedParameterError` too.
 
 **Nothing is swallowed.** Whenever a response carries a non-empty `degraded[]`, the client calls
-`on_degraded(verb, degraded)`. The default logs a warning on the `orp_client` logger (codes only, never content).
+`on_degraded(verb, degraded)`. The default logs a warning on the `smartware_client` logger (codes only, never content).
 
-**Typed errors.** Every protocol error code has its own class, all subclasses of `OrpError(code, message, status,
+**Typed errors.** Every protocol error code has its own class, all subclasses of `SmartwareError(code, message, status,
 details)`: `UnsupportedParameterError`, `InvalidParameterError`, `VersionConflictError` (`details["current"]` is the
 stored version), `ForbiddenError`, `NotFoundError`, `BudgetTooSmallError`, `RateLimitedError`, `UnauthorizedError`,
 `PayloadTooLargeError`, plus `UnavailableError`, `InternalError` and `TransportError` (no usable response).
@@ -142,11 +140,11 @@ safely.
 Each adapter declares its conformance level and what its host interface cannot carry (`capabilities()` on the
 adapter object). None of them fakes a missing feature.
 
-### LangGraph store (`orp_client.langgraph.OrpStore`, level L2)
+### LangGraph store (`smartware_client.langgraph.SmartwareStore`, level L2)
 
 ```python
-from orp_client.langgraph import OrpStore
-store = OrpStore(client, budget_tokens=1500)
+from smartware_client.langgraph import SmartwareStore
+store = SmartwareStore(client, budget_tokens=1500)
 store.put(("users", "u1", "prefs"), "coffee", {"text": "oat flat white"})
 store.search(("users", "u1"), query="what coffee?")
 ```
@@ -164,14 +162,14 @@ store.search(("users", "u1"), query="what coffee?")
 * `ttl` is not supported (`supports_ttl = False`), and `put(..., ttl=...)` raises `NotImplementedError`.
 * A `filter` combined with a `query` is applied after recall (reported as `langgraph:filter_applied_after_recall`).
   A `filter` without a query is applied to the complete namespace listing, so it misses nothing.
-* LangGraph is not imported. If it is installed, `OrpStore` subclasses its `BaseStore` and returns its `Item` and
+* LangGraph is not imported. If it is installed, `SmartwareStore` subclasses its `BaseStore` and returns its `Item` and
   `SearchItem`; otherwise the module defines stand-ins with the same fields and operation tuples (`GetOp`,
   `SearchOp`, `PutOp`, `ListNamespacesOp`, `MatchCondition`).
 
-### mem0 (`orp_client.mem0.Memory`, level L2)
+### mem0 (`smartware_client.mem0.Memory`, level L2)
 
 ```python
-from orp_client.mem0 import Memory
+from smartware_client.mem0 import Memory
 m = Memory(client)
 m.add("I'm vegetarian", user_id="priya")
 m.search("diet", user_id="priya")   # {"results": [{"id", "memory", "hash", "metadata", "score", "created_at", ...}]}
@@ -186,18 +184,18 @@ m.search("diet", user_id="priya")   # {"results": [{"id", "memory", "hash", "met
   unless you configure other readers, so passing someone else's `user_id` with your key finds nothing of theirs.
 * What it loses, reported through `on_degraded`: `infer=True` needs an LLM to extract facts, which the shim does not
   have, so messages are stored as they are (`mem0:infer_not_supported`; `prompt` and `memory_type` are refused).
-  `history` lists add, update and delete events with times but not the old text of an update, because ORP's upsert
+  `history` lists add, update and delete events with times but not the old text of an update, because Smartware's upsert
   replaces content in place and the shim keeps no shadow copies (`mem0:history_without_old_text`). Ids that are not
   a scope prefix (for example `agent_id` without `user_id`) are filtered after recall in `search`
   (`mem0:filter_applied_after_recall`); `get_all` and `delete_all` page through the complete scope, so they miss
   nothing.
-* `Memory.from_config({"orp": {"url": ..., "token_env": "ORP_TOKEN"}})` builds the client. A token itself is never
+* `Memory.from_config({"smartware": {"url": ..., "token_env": "SMARTWARE_TOKEN"}})` builds the client. A token itself is never
   read from a config dict.
 
-### Letta agent files (`orp_client.letta.import_af`, level L2)
+### Letta agent files (`smartware_client.letta.import_af`, level L2)
 
 ```python
-from orp_client.letta import import_af
+from smartware_client.letta import import_af
 summary = import_af("my_agent.af", client)
 client.profile(2000)   # now includes the agent's core memory blocks
 ```
@@ -223,7 +221,7 @@ relying on it**.
 
 ## Tests
 
-The tests start a real server (`orp serve --http 0 --memory`) per test class, with its own keys file, and stop it
+The tests start a real server (`smartware serve --http 0 --memory`) per test class, with its own keys file, and stop it
 afterwards. They need Node 22 and the built server in `packages/server`.
 
 ```

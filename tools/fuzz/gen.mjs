@@ -1,4 +1,4 @@
-// Random ORP op generator shared by the persistence fuzzer (JS) and exported as JSON for the differential fuzzer.
+// Random Smartware op generator shared by the persistence fuzzer (JS) and exported as JSON for the differential fuzzer.
 // Ops are plain JSON: { verb, pr: {id, groups, tenant}, args: [...] }. Bodies use client ids so both engines agree.
 export function rng(seed) {
   let s = seed >>> 0 || 1;

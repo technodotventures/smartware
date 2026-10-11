@@ -4,7 +4,7 @@
 // MCP over Streamable HTTP acts as an OAuth resource server (RFC 9728 protected-resource metadata).
 import { createHash, createPublicKey, randomBytes, timingSafeEqual, verify as cverify, type KeyObject } from "node:crypto";
 import { readFileSync, writeFileSync, existsSync, renameSync, statSync } from "node:fs";
-import { Principal } from "@orp/core";
+import { Principal } from "@technodotventures/smartware-core";
 
 export class AuthError extends Error {
   constructor(message: string, readonly status = 401, readonly wwwError = "invalid_token") {
@@ -22,7 +22,7 @@ export function hashToken(token: string): string {
 }
 
 export function newToken(): string {
-  return "orp_" + randomBytes(24).toString("base64url");
+  return "smartware_" + randomBytes(24).toString("base64url");
 }
 
 export class KeyStore {
@@ -71,7 +71,7 @@ export class KeyStore {
     } else {
       // legacy reference-server format {"<token>": {id, groups, tenant}}: plain tokens on disk
       for (const [tok, v] of Object.entries(raw as Record<string, PrincipalSpec>)) this.byHash.set(hashToken(tok), { ...v, hash: hashToken(tok) });
-      this.warnings.push(`${path} stores plain tokens; run "orp keys migrate" to keep only hashes`);
+      this.warnings.push(`${path} stores plain tokens; run "smartware keys migrate" to keep only hashes`);
     }
   }
 
@@ -131,7 +131,7 @@ export interface OidcConfig {
   principalClaim?: string; // default "sub"
   groupsClaim?: string; // default "groups"
   tenantClaim?: string; // default "tenant"; falls back to defaultTenant
-  writeScopesClaim?: string; // default "orp_write_scopes": scope prefixes the token may write under
+  writeScopesClaim?: string; // default "smartware_write_scopes": scope prefixes the token may write under
   defaultTenant?: string;
   algorithms?: string[];
   leewaySeconds?: number;
@@ -218,7 +218,7 @@ export class JwtVerifier {
     const groups = (Array.isArray(g) ? g : typeof g === "string" ? g.split(/[\s,]+/) : []).filter((x: unknown) => typeof x === "string" && x && x !== "*");
     const tenant = claims[this.cfg.tenantClaim ?? "tenant"] ?? this.cfg.defaultTenant ?? "default";
     const scopes = new Set<string>(typeof claims.scope === "string" ? claims.scope.split(" ") : Array.isArray(claims.scp) ? claims.scp : []);
-    const ws = claims[this.cfg.writeScopesClaim ?? "orp_write_scopes"];
+    const ws = claims[this.cfg.writeScopesClaim ?? "smartware_write_scopes"];
     const writeScopes = Array.isArray(ws) ? ws.filter((x: unknown) => typeof x === "string") : null;
     // ids and tenants become store keys: control characters (NUL above all) are refused rather than stored
     if (/[\u0000-\u001f\u007f]/.test(id) || /[\u0000-\u001f\u007f]/.test(String(tenant)) || !String(tenant)) throw new AuthError("token has an invalid principal or tenant");

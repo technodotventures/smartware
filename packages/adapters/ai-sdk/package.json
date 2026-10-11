@@ -1,13 +1,13 @@
 {
-  "name": "@orp/ai-sdk",
-  "version": "0.2.0",
-  "description": "ORP memory middleware for the Vercel AI SDK, plus helpers for the OpenAI Agents SDK and the Claude Agent SDK.",
+  "name": "@technodotventures/smartware-ai-sdk",
+  "version": "2.0.0",
+  "description": "Smartware memory middleware for the Vercel AI SDK, plus helpers for the OpenAI Agents SDK and the Claude Agent SDK.",
   "license": "Apache-2.0",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": { ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" } },
   "files": ["dist", "README.md", "conformance.json"],
-  "dependencies": { "@orp/client": "0.2.0", "@orp/tools": "0.2.0" },
+  "dependencies": { "@technodotventures/smartware-client": "2.0.0", "@technodotventures/smartware-tools": "2.0.0" },
   "engines": { "node": ">=22.13" }
 }

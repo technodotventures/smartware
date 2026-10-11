@@ -1,11 +1,11 @@
 // Differential bridge (audit copy of tools/bridge/server.mjs): the TypeScript Service over JSON lines, with a
 // controllable clock (op "clock" freezes Date.now at a given epoch-ms) and the TS-only verbs list/unlink.
 import { createInterface } from "node:readline";
-import { Service, SqliteStore, PgStore, Principal, HashingEncoder, defaultParams, withParams, ORPError } from "../../packages/core/dist/index.js";
+import { Service, SqliteStore, PgStore, Principal, HashingEncoder, defaultParams, withParams, SmartwareError } from "../../packages/core/dist/index.js";
 import { randomBytes } from "node:crypto";
-// ORP_FUZZ_PG=postgres://...: every TypeScript service runs on the Postgres store (a fresh schema each), and
+// SMARTWARE_FUZZ_PG=postgres://...: every TypeScript service runs on the Postgres store (a fresh schema each), and
 // "reopen" restarts it on the same schema
-const PG = process.env.ORP_FUZZ_PG;
+const PG = process.env.SMARTWARE_FUZZ_PG;
 const pgStore = (schema) => { const u = new URL(PG); u.searchParams.set("schema", schema); return new PgStore(u.toString(), { nodeId: "diff-node" }); };
 const schemas = new Map();
 let frozen = null;
@@ -51,7 +51,7 @@ for await (const line of rl) {
     }
     send({ id: m.id, ok: out ?? null });
   } catch (e) {
-    if (e instanceof ORPError) send({ id: m.id, err: e.toJSON().error });
+    if (e instanceof SmartwareError) send({ id: m.id, err: e.toJSON().error });
     else send({ id: m.id, crash: String(e && e.stack || e) });
   }
   busy = false;

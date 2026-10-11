@@ -1,7 +1,7 @@
 """Differential parity, oracle side: build each benchmark haystack in the Python engine, recall every question, and
 write the corpus, the questions and the oracle's packs as JSONL for tools/parity/compare.mjs.
 
-    python3 tools/parity/dump.py locomo test orp-linear-1 out/   (config: orp-linear-1 | orp-rrf-1 | fast)
+    python3 tools/parity/dump.py locomo test smartware-linear-1 out/   (config: smartware-linear-1 | smartware-rrf-1 | fast)
 """
 import gzip
 import json
@@ -10,21 +10,21 @@ import sys
 from dataclasses import replace
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
-from orp import rankers  # noqa: E402
-from orp.embedders import SIFEmbedder  # noqa: E402
-from orp.engine import Engine  # noqa: E402
-from orp.model import Memory, RecallRequest  # noqa: E402
+from smartware import rankers  # noqa: E402
+from smartware.embedders import SIFEmbedder  # noqa: E402
+from smartware.engine import Engine  # noqa: E402
+from smartware.model import Memory, RecallRequest  # noqa: E402
 from bench import data  # noqa: E402
 
 bench, split, config, out = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
 limit = int(sys.argv[5]) if len(sys.argv) > 5 else None
 os.makedirs(out, exist_ok=True)
-enc = SIFEmbedder(os.path.join(os.path.dirname(__file__), "..", "..", "results", "cache", "sif-ppmi-256.orpenc"),
-                  exact=os.environ.get("ORP_PARITY_BLAS") != "1")
-params = rankers.params("orp-rrf-1" if config == "fast" else config)
+enc = SIFEmbedder(os.path.join(os.path.dirname(__file__), "..", "..", "results", "cache", "sif-ppmi-256.swenc"),
+                  exact=os.environ.get("SMARTWARE_PARITY_BLAS") != "1")
+params = rankers.params("smartware-rrf-1" if config == "fast" else config)
 if config == "fast":
     params = replace(params, w_prf=0.0, ranker="rrf")
-params = replace(params, exact_dot=os.environ.get("ORP_PARITY_BLAS") != "1")  # position-independent dense scores
+params = replace(params, exact_dot=os.environ.get("SMARTWARE_PARITY_BLAS") != "1")  # position-independent dense scores
 if bench == "locomo":
     tasks = [t for t in data.load_locomo() if split == "all" or all(q.split == split for q in t.queries)]
 elif bench == "lmes":

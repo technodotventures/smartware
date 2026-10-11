@@ -1,7 +1,7 @@
-// The ORP HTTP client. Identity is bound at construction (a token, or a getToken callback) and is never a call
+// The Smartware HTTP client. Identity is bound at construction (a token, or a getToken callback) and is never a call
 // argument: there is no principal, tenant or actor parameter on any verb (M56). Writes fail closed: a memory is
 // readable by its writer alone unless the caller widens it explicitly.
-import { OrpError } from "./errors.js";
+import { SmartwareError } from "./errors.js";
 import type {
   Bundle, Capabilities, Change, ChangesOptions, ChangesResponse, ContextPack, Edge, FeedbackRequest, ForgetOptions,
   ForgetResponse, HistoryResponse, JobResponse, LinkRequest, ListOptions, ListPage, Memory, MemoryInput,
@@ -62,7 +62,7 @@ interface RequestOptions {
   tenant?: string;
 }
 
-/** The everyday verbs. OrpClient and RunClient both implement it, so adapters accept either. */
+/** The everyday verbs. SmartwareClient and RunClient both implement it, so adapters accept either. */
 export interface MemoryApi {
   recall(query: string, opts?: RecallOptions): Promise<ContextPack>;
   remember(input: string | MemoryInput | Array<string | MemoryInput>, opts?: RememberOptions): Promise<RememberResponse>;
@@ -91,7 +91,7 @@ export function asOfTime(t: Time): string {
   m = /^(\d{4})-(\d{2})$/.exec(s);
   if (m) {
     const y = +m[1]!, mo = +m[2]!;
-    if (mo < 1 || mo > 12) throw new OrpError("invalid_parameter", `bad month in ${JSON.stringify(s)}`);
+    if (mo < 1 || mo > 12) throw new SmartwareError("invalid_parameter", `bad month in ${JSON.stringify(s)}`);
     const last = new Date(Date.UTC(y, mo, 0)).getUTCDate();
     return `${m[1]}-${m[2]}-${String(last).padStart(2, "0")}T23:59:59.999999Z`;
   }
@@ -105,12 +105,12 @@ function defaultOnDegraded(): (values: string[], info: DegradedInfo) => void {
     for (const v of values) {
       if (seen.has(v)) continue;
       seen.add(v);
-      console.warn(`[orp] degraded (${info.source}): ${v}`);
+      console.warn(`[smartware] degraded (${info.source}): ${v}`);
     }
   };
 }
 
-export class OrpClient implements MemoryApi {
+export class SmartwareClient implements MemoryApi {
   /** Verbs most applications never need directly. */
   readonly advanced: AdvancedApi;
   private readonly shared: Shared;
@@ -124,11 +124,11 @@ export class OrpClient implements MemoryApi {
   /** @internal derived clients (forUser) share transport settings and the degraded de-duplication. */
   constructor(opts: ClientOptions, shared: Shared, tenantGuess: string | Promise<string>);
   constructor(opts: ClientOptions, shared?: Shared, tenantGuess?: string | Promise<string>) {
-    if (!opts || typeof opts.url !== "string" || !opts.url) throw new OrpError("invalid_parameter", "url is required");
-    if (opts.token === undefined && opts.getToken === undefined) throw new OrpError("invalid_parameter", "token or getToken is required");
-    if (opts.token !== undefined && opts.getToken !== undefined) throw new OrpError("invalid_parameter", "pass token or getToken, not both");
+    if (!opts || typeof opts.url !== "string" || !opts.url) throw new SmartwareError("invalid_parameter", "url is required");
+    if (opts.token === undefined && opts.getToken === undefined) throw new SmartwareError("invalid_parameter", "token or getToken is required");
+    if (opts.token !== undefined && opts.getToken !== undefined) throw new SmartwareError("invalid_parameter", "pass token or getToken, not both");
     const f = opts.fetch ?? (globalThis.fetch as FetchLike | undefined);
-    if (!f) throw new OrpError("invalid_parameter", "no fetch implementation available");
+    if (!f) throw new SmartwareError("invalid_parameter", "no fetch implementation available");
     this.shared = shared ?? {
       url: opts.url.replace(/\/+$/, ""), fetch: f, onDegraded: opts.onDegraded ?? defaultOnDegraded(),
       retries: Math.max(0, Math.trunc(opts.retries ?? 2)), retryDelayMs: opts.retryDelayMs ?? 200,
@@ -144,7 +144,7 @@ export class OrpClient implements MemoryApi {
   // ------------------------------------------------------------ transport
   private async bearer(): Promise<string> {
     const t = this.token ?? (await this.getTokenFn!());
-    if (typeof t !== "string" || !t) throw new OrpError("unauthorized", "getToken returned no token");
+    if (typeof t !== "string" || !t) throw new SmartwareError("unauthorized", "getToken returned no token");
     return t;
   }
 
@@ -165,10 +165,10 @@ export class OrpClient implements MemoryApi {
       this.meP = Promise.resolve(me);
       return me.tenant;
     } catch (e) {
-      if (!(e instanceof OrpError && e.code === "forbidden")) throw e;
+      if (!(e instanceof SmartwareError && e.code === "forbidden")) throw e;
       const viaMcp = await this.tenantFromMcp().catch(() => null);
       if (viaMcp) return viaMcp;
-      throw new OrpError("forbidden", "could not discover the tenant for this token; pass `tenant` to the client", e.status, {}, e.requestId);
+      throw new SmartwareError("forbidden", "could not discover the tenant for this token; pass `tenant` to the client", e.status, {}, e.requestId);
     }
   }
 
@@ -181,7 +181,7 @@ export class OrpClient implements MemoryApi {
       headers: { ...auth, "content-type": "application/json", accept: "application/json, text/event-stream", ...(sid ? { "mcp-session-id": sid } : {}) },
       body: JSON.stringify(body) });
     const init = await post({ jsonrpc: "2.0", id: 1, method: "initialize",
-      params: { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "orp-client", version: "0.2.0" } } });
+      params: { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "smartware-client", version: "2.0.0" } } });
     const sid = init.headers.get("mcp-session-id");
     await init.text();
     if (!init.ok || !sid) return null;
@@ -189,7 +189,7 @@ export class OrpClient implements MemoryApi {
       const res = await post({ jsonrpc: "2.0", id: 2, method: "resources/list" }, sid);
       const body = (await res.json()) as Json;
       for (const r of (body?.result?.resources ?? []) as Json[]) {
-        const m = /^orp:\/\/([^/]+)\/capabilities$/.exec(String(r.uri ?? ""));
+        const m = /^smartware:\/\/([^/]+)\/capabilities$/.exec(String(r.uri ?? ""));
         if (m) return decodeURIComponent(m[1]!);
       }
       return null;
@@ -233,7 +233,7 @@ export class OrpClient implements MemoryApi {
         // The request may or may not have reached the gateway: only safe requests go again.
         if (o.retry && attempt < S.retries) { await sleep(this.backoff(attempt)); continue; }
         const timeout = (e as Error)?.name === "TimeoutError";
-        throw new OrpError("network", timeout ? `${o.verb}: timed out` : `${o.verb}: network error`, 0);
+        throw new SmartwareError("network", timeout ? `${o.verb}: timed out` : `${o.verb}: network error`, 0);
       }
       if ((res.status === 429 || res.status === 503) && o.retry && attempt < S.retries) {
         await res.body?.cancel().catch(() => undefined);
@@ -244,9 +244,9 @@ export class OrpClient implements MemoryApi {
       let body: unknown = undefined;
       if (text) { try { body = JSON.parse(text); } catch { body = undefined; } }
       const rid = res.headers.get("x-request-id") ?? undefined;
-      if (!res.ok) throw OrpError.fromResponse(res.status, body, rid);
+      if (!res.ok) throw SmartwareError.fromResponse(res.status, body, rid);
       if (body === undefined || body === null || typeof body !== "object") {
-        throw new OrpError("internal", `${o.verb}: response is not JSON`, res.status, {}, rid);
+        throw new SmartwareError("internal", `${o.verb}: response is not JSON`, res.status, {}, rid);
       }
       const deg = (body as Json).degraded;
       if (Array.isArray(deg) && deg.length) this.reportDegraded(deg.map(String), o.verb);
@@ -265,7 +265,7 @@ export class OrpClient implements MemoryApi {
   // ------------------------------------------------------------ everyday verbs
   /** A budgeted, cited context pack for a question. */
   async recall(query: string, opts: RecallOptions = {}): Promise<ContextPack> {
-    if (typeof query !== "string" || !query.trim()) throw new OrpError("invalid_parameter", "query is required (an empty query never means 'everything')");
+    if (typeof query !== "string" || !query.trim()) throw new SmartwareError("invalid_parameter", "query is required (an empty query never means 'everything')");
     const body: Json = { query, budget: { tokens: opts.budgetTokens ?? DEFAULT_RECALL_BUDGET } };
     if (opts.maxItems !== undefined) body.budget.items = opts.maxItems;
     if (opts.asOf !== undefined) body.as_of = asOfTime(opts.asOf);
@@ -285,21 +285,21 @@ export class OrpClient implements MemoryApi {
    * audience: "tenant"; procedures go in as drafts that need approval unless you set mode. */
   async remember(input: string | MemoryInput | Array<string | MemoryInput>, opts: RememberOptions = {}): Promise<RememberResponse> {
     const list = (Array.isArray(input) ? input : [input]).map((m) => (typeof m === "string" ? { content: m } : m));
-    if (!list.length) throw new OrpError("invalid_parameter", "nothing to remember");
+    if (!list.length) throw new SmartwareError("invalid_parameter", "nothing to remember");
     if (opts.audience !== undefined && opts.audience !== "self" && opts.audience !== "tenant") {
-      throw new OrpError("unsupported_parameter", `audience ${String(opts.audience)} (use "self" or "tenant", or explicit readers)`);
+      throw new SmartwareError("unsupported_parameter", `audience ${String(opts.audience)} (use "self" or "tenant", or explicit readers)`);
     }
     let selfReaders: string[] | null = null;
     const memories: Json[] = [];
     for (const m of list) {
-      if (!m || typeof m !== "object" || typeof m.content !== "string") throw new OrpError("invalid_parameter", "each memory needs string content");
+      if (!m || typeof m !== "object" || typeof m.content !== "string") throw new SmartwareError("invalid_parameter", "each memory needs string content");
       const out: Json = { ...m };
       if (out.kind === undefined) out.kind = opts.kind ?? (out.claim ? "fact" : "event");
       if (out.thread === undefined && opts.thread !== undefined) out.thread = opts.thread;
       if (out.scope === undefined && opts.scope !== undefined) out.scope = opts.scope;
       if ("readers" in m && m.readers !== undefined) {
-        if (m.readers === null) throw new OrpError("invalid_parameter", "readers: null means the whole tenant; say so with audience: \"tenant\"");
-        if (opts.audience === "tenant") throw new OrpError("invalid_parameter", "pass explicit readers or audience: \"tenant\", not both");
+        if (m.readers === null) throw new SmartwareError("invalid_parameter", "readers: null means the whole tenant; say so with audience: \"tenant\"");
+        if (opts.audience === "tenant") throw new SmartwareError("invalid_parameter", "pass explicit readers or audience: \"tenant\", not both");
       } else if (opts.audience === "tenant") {
         out.readers = null;
       } else {
@@ -312,7 +312,7 @@ export class OrpClient implements MemoryApi {
     if (mode === undefined) {
       const procs = memories.filter((m) => m.kind === "procedure").length;
       if (procs && procs !== memories.length) {
-        throw new OrpError("invalid_parameter", "procedures default to drafts (mode propose); send them in their own call or set mode");
+        throw new SmartwareError("invalid_parameter", "procedures default to drafts (mode propose); send them in their own call or set mode");
       }
       if (procs) mode = "propose";
     }
@@ -329,7 +329,7 @@ export class OrpClient implements MemoryApi {
    * affected ids and changes nothing. */
   async forget(ids: string | string[], opts: ForgetOptions = {}): Promise<ForgetResponse> {
     const list = Array.isArray(ids) ? ids : [ids];
-    if (!list.length || !list.every((x) => typeof x === "string" && x)) throw new OrpError("invalid_parameter", "ids must be non-empty strings");
+    if (!list.length || !list.every((x) => typeof x === "string" && x)) throw new SmartwareError("invalid_parameter", "ids must be non-empty strings");
     const body: Json = { ids: list };
     if (opts.mode !== undefined) body.mode = opts.mode;
     if (opts.cascade !== undefined) body.cascade = opts.cascade;
@@ -342,7 +342,7 @@ export class OrpClient implements MemoryApi {
   /** Always-loaded context (rules, preferences, profile facts) within a required token budget. */
   async profile(opts: ProfileOptions): Promise<ProfilePack> {
     if (!opts || typeof opts.budgetTokens !== "number" || !(opts.budgetTokens > 0)) {
-      throw new OrpError("invalid_parameter", "profile requires budgetTokens (no unbounded ambient context)");
+      throw new SmartwareError("invalid_parameter", "profile requires budgetTokens (no unbounded ambient context)");
     }
     const body: Json = { budget: { tokens: Math.trunc(opts.budgetTokens) } };
     if (opts.subject !== undefined) body.subject = opts.subject;
@@ -354,10 +354,10 @@ export class OrpClient implements MemoryApi {
    * Reads the record, then upserts it with if_version, so a concurrent edit is never overwritten. */
   async share(id: string, readers: string | string[]): Promise<{ id: string; version: number; readers: string[] | null; changed: boolean }> {
     const add = Array.isArray(readers) ? readers : [readers];
-    if (!add.length || !add.every((r) => typeof r === "string" && r.trim())) throw new OrpError("invalid_parameter", "readers must be non-empty token strings");
+    if (!add.length || !add.every((r) => typeof r === "string" && r.trim())) throw new SmartwareError("invalid_parameter", "readers must be non-empty token strings");
     for (let attempt = 0; ; attempt++) {
       const rec = await this.advanced.get(id);
-      if (rec.status !== "active") throw new OrpError("invalid_parameter", `only active records can be shared (this one is ${rec.status})`);
+      if (rec.status !== "active") throw new SmartwareError("invalid_parameter", `only active records can be shared (this one is ${rec.status})`);
       if (rec.readers === null) return { id: rec.id, version: rec.version, readers: null, changed: false };
       const next = [...new Set([...rec.readers, ...add])].sort();
       if (next.length === rec.readers.length) return { id: rec.id, version: rec.version, readers: rec.readers, changed: false };
@@ -365,7 +365,7 @@ export class OrpClient implements MemoryApi {
         await this.remember([recordToInput(rec, next)], { mode: "upsert", ifVersion: rec.version });
         return { id: rec.id, version: rec.version + 1, readers: next, changed: true };
       } catch (e) {
-        if (e instanceof OrpError && e.code === "version_conflict" && attempt < 2) continue;
+        if (e instanceof SmartwareError && e.code === "version_conflict" && attempt < 2) continue;
         throw e;
       }
     }
@@ -387,10 +387,10 @@ export class OrpClient implements MemoryApi {
   /** A client acting as one user, authenticated by that user's bearer (an OIDC token the gateway verifies).
    * Nothing about the user is asserted by this client: the gateway maps the token to a principal. Tenant
    * discovery starts from this client's tenant, where a platform's users usually live. */
-  forUser(assertionToken: string): OrpClient {
-    if (typeof assertionToken !== "string" || !assertionToken) throw new OrpError("invalid_parameter", "an assertion token is required");
+  forUser(assertionToken: string): SmartwareClient {
+    if (typeof assertionToken !== "string" || !assertionToken) throw new SmartwareError("invalid_parameter", "an assertion token is required");
     const guess = this.tenantP ? this.tenantP.catch(() => this.tenantGuess) : this.tenantGuess;
-    return new OrpClient({ url: this.shared.url, token: assertionToken }, this.shared, guess);
+    return new SmartwareClient({ url: this.shared.url, token: assertionToken }, this.shared, guess);
   }
 }
 
@@ -417,10 +417,10 @@ function recordToInput(rec: Memory, readers: string[]): MemoryInput {
   return out as MemoryInput;
 }
 
-/** Run-scoped client: see OrpClient.run(). */
+/** Run-scoped client: see SmartwareClient.run(). */
 export class RunClient implements MemoryApi {
   private step = 0;
-  constructor(readonly client: OrpClient, readonly runId: string, readonly asOf: string) {}
+  constructor(readonly client: SmartwareClient, readonly runId: string, readonly asOf: string) {}
 
   /** The idempotency key the next write without an explicit step will use. */
   get nextKey(): string {
@@ -429,7 +429,7 @@ export class RunClient implements MemoryApi {
 
   private pinned<T extends { asOf?: Time }>(opts: T): T {
     if (opts.asOf !== undefined && asOfTime(opts.asOf) !== this.asOf) {
-      throw new OrpError("invalid_parameter", "a run pins as_of once; start another run for a different time");
+      throw new SmartwareError("invalid_parameter", "a run pins as_of once; start another run for a different time");
     }
     return { ...opts, asOf: this.asOf };
   }
@@ -475,9 +475,9 @@ export class RunClient implements MemoryApi {
 
 /** Verbs for tools, operators and adapters. */
 export class AdvancedApi {
-  constructor(private readonly c: OrpClient) {}
+  constructor(private readonly c: SmartwareClient) {}
 
-  /** One record by id. Throws OrpError not_found when it is absent or you may not read it (they look the same). */
+  /** One record by id. Throws SmartwareError not_found when it is absent or you may not read it (they look the same). */
   get(id: string): Promise<Memory> {
     return this.c.request<Memory>("GET", `memories/${encodeURIComponent(id)}`, { retry: true, verb: "get" });
   }
@@ -485,7 +485,7 @@ export class AdvancedApi {
   /** Several records by id; missing or unreadable ids are listed in not_found. */
   async getMany(ids: string[]): Promise<{ memories: Memory[]; not_found: string[] }> {
     const out = await Promise.all(ids.map((id) => this.get(id).catch((e) => {
-      if (e instanceof OrpError && e.code === "not_found") return null;
+      if (e instanceof SmartwareError && e.code === "not_found") return null;
       throw e;
     })));
     return { memories: out.filter((m): m is Memory => m !== null), not_found: ids.filter((_, i) => out[i] === null) };

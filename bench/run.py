@@ -43,10 +43,10 @@ REGISTRY = {
     "memoryos": "baselines.memoryos:MemoryOS",
     "bm25": "baselines.reference:BM25Only",
     "dense": "baselines.reference:DenseOnly",
-    "orp": "bench.orp_variants:ORPLtr",
-    "orp-rrf": "bench.orp_variants:ORPRrf",
-    "orp-allfeat": "bench.orp_variants:ORPAllFeatures",
-    "orp-ft": "bench.orp_variants:ORPFactsRanker",
+    "smartware": "bench.smartware_variants:SmartwareLtr",
+    "smartware-rrf": "bench.smartware_variants:SmartwareRrf",
+    "smartware-allfeat": "bench.smartware_variants:SmartwareAllFeatures",
+    "smartware-ft": "bench.smartware_variants:SmartwareFactsRanker",
 }
 
 _TASKS = {}
@@ -69,14 +69,14 @@ _TUNED = None
 
 def make(name: str, **kw):
     """`<system>@tuned` builds the baseline with its dev-tuned configuration (results/baseline_tuning.json).
-    `<system>+facts` stores the shared LLM-extracted facts instead of raw turns; `orp+evidence` keeps both
+    `<system>+facts` stores the shared LLM-extracted facts instead of raw turns; `smartware+evidence` keeps both
     (bench/facts.py)."""
     if name.endswith("+facts"):
         from .facts import FactStore
         return FactStore(make(name[: -len("+facts")], **kw))
-    if name.startswith("orp+evidence"):
-        from .facts import orp_with_evidence
-        return orp_with_evidence(**kw)
+    if name.startswith("smartware+evidence"):
+        from .facts import smartware_with_evidence
+        return smartware_with_evidence(**kw)
     if name.endswith("@ftuned"):  # knobs tuned on the fact stores (results/baseline_tuning_facts.json)
         base = name[: -len("@ftuned")]
         with open(os.path.join(ROOT, "results", "baseline_tuning_facts.json")) as fh:

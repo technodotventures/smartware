@@ -1,7 +1,7 @@
 // Framework-neutral memory tools and hooks. The tools mirror the gateway's "safe" MCP toolset: they carry no
 // identity, audience or provenance fields, so a prompt injection cannot read someone else's memory or widen who
 // sees a write. Identity is the client's credentials; audience and scope are developer configuration.
-import { OrpError, type ContextPack, type MemoryApi, type ProfilePack, type RememberResponse } from "@orp/client";
+import { SmartwareError, type ContextPack, type MemoryApi, type ProfilePack, type RememberResponse } from "@technodotventures/smartware-client";
 import { validate, type JsonSchema } from "./schema.js";
 
 export { validate, toZod, toZodShape, type JsonSchema, type ZodLike } from "./schema.js";
@@ -260,4 +260,4 @@ export function memoryHooks(client: MemoryApi, opts: HookOptions = {}): MemoryHo
 }
 
 /** Re-exported so adapters need one import. */
-export { OrpError };
+export { SmartwareError };

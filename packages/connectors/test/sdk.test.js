@@ -3,7 +3,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { clientId, defineConnector, mapAcl, OrpHttp, ScopedWriter, ScopeError, sync, underPrefix } from "../dist/index.js";
+import { clientId, defineConnector, mapAcl, SmartwareHttp, ScopedWriter, ScopeError, sync, underPrefix } from "../dist/index.js";
 import { api, getRec, startServer } from "./helpers.js";
 
 const item = (id, extra = {}) => ({ id, content: `note ${id} about the quarterly roadmap`, acl: ["alice"], uri: `test://${id}`, ...extra });
@@ -39,7 +39,7 @@ test("writes outside the scope prefix are refused and nothing is written", async
   assert.equal(existsSync(statePath), false);
 
   // the writer itself refuses too, for code that bypasses the runner
-  const w = new ScopedWriter(new OrpHttp({ url: srv.url, token: srv.tokens.connector, tenant: srv.tenant }), "vault", () => false);
+  const w = new ScopedWriter(new SmartwareHttp({ url: srv.url, token: srv.tokens.connector, tenant: srv.tenant }), "vault", () => false);
   await assert.rejects(w.remember({ memories: [{ content: "x", scope: "hr", readers: ["principal:alice"] }] }), ScopeError);
   await assert.rejects(w.remember({ memories: [{ content: "x", scope: "vault", readers: null }] }), /explicit readers/);
   await assert.rejects(w.forget({ ids: ["someone-elses-record"] }), ScopeError);

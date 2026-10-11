@@ -1,5 +1,5 @@
-// The ORP 0.1 wire schemas (JSON Schema 2020-12), written once from spec §3, §4 and §8 and used for everything else:
-// tools/gen-schemas.mjs writes schema/orp-0.1/*.json, schema/openapi.json and schema/mcp-tools.json from this
+// The Smartware 0.1 wire schemas (JSON Schema 2020-12), written once from spec §3, §4 and §8 and used for everything else:
+// tools/gen-schemas.mjs writes schema/smartware-0.1/*.json, schema/openapi.json and schema/mcp-tools.json from this
 // module, and drift tests check it against the spec's field table and against both engines' validators.
 type S = Record<string, any>;
 

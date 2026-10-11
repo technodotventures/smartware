@@ -1,5 +1,5 @@
 """One store file, two engines: the Python oracle and the TypeScript product engine read and write the same SQLite
-store (schema orp-store-1). Skipped when node or the compiled TypeScript engine is not available."""
+store (schema smartware-store-1). Skipped when node or the compiled TypeScript engine is not available."""
 import json
 import os
 import shutil
@@ -7,10 +7,10 @@ import subprocess
 import tempfile
 import unittest
 
-from orp import rankers
-from orp.api import Service
-from orp.embedders import HashingEmbedder
-from orp.model import Principal
+from smartware import rankers
+from smartware.api import Service
+from smartware.embedders import HashingEmbedder
+from smartware.model import Principal
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TOOL = os.path.join(ROOT, "tools", "bridge", "store_tool.mjs")
@@ -40,7 +40,7 @@ def strip(d):
 class StoreInterop(unittest.TestCase):
     def setUp(self):
         self.path = os.path.join(tempfile.mkdtemp(), "shared.db")
-        s = Service(HashingEmbedder(), rankers.params("orp-rrf-1"))
+        s = Service(HashingEmbedder(), rankers.params("smartware-rrf-1"))
         s.remember({"memories": [
             {"content": "Alice moved to Berlin in March", "kind": "fact", "readers": ["group:sales"], "event_time": "2025-03-01",
              "claim": {"subject": "alice", "predicate": "lives_in", "object": "Berlin"}},
@@ -70,7 +70,7 @@ class StoreInterop(unittest.TestCase):
         self.assertFalse(r["replayed"])
         again = node(self.path, "remember", _pj(A), json.dumps({"memories": [{"content": "x"}], "idempotency_key": "k1"}))
         self.assertTrue(again["replayed"])  # Python's idempotency key, honoured by TypeScript
-        t = Service(HashingEmbedder(), rankers.params("orp-rrf-1"))
+        t = Service(HashingEmbedder(), rankers.params("smartware-rrf-1"))
         t.load(self.path)
         self.assertTrue(t.remember({"memories": [{"content": "y"}], "idempotency_key": "k2"}, A)["replayed"])
         self.assertEqual(strip(t.export(ROOTP)), node(self.path, "export", _pj(ROOTP)))

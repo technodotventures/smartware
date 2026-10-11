@@ -11,7 +11,7 @@ import os
 import sys
 import time
 
-from orp.engine import ORPSystem, Params
+from smartware.engine import SmartwareSystem, Params
 
 from .devtune import evaluate
 from .encoders import DenseEncoder, Encoders
@@ -58,7 +58,7 @@ def main():
         best = json.load(open(out))["params"]
 
     def run(cfg):
-        return evaluate(lambda: ORPSystem(**cfg), enc=enc)
+        return evaluate(lambda: SmartwareSystem(**cfg), enc=enc)
 
     r = run(best)
     bj = objective(r)

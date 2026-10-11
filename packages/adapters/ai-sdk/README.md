@@ -1,6 +1,6 @@
-# @orp/ai-sdk
+# @technodotventures/smartware-ai-sdk
 
-ORP memory for the Vercel AI SDK as language-model middleware, plus helpers for the OpenAI Agents SDK and the Claude
+Smartware memory for the Vercel AI SDK as language-model middleware, plus helpers for the OpenAI Agents SDK and the Claude
 Agent SDK. None of those packages is imported: you pass their functions in.
 
 ## Host interfaces targeted
@@ -24,10 +24,10 @@ Written from my knowledge of these releases as of 2025. **Check each against the
 
 ```js
 import { wrapLanguageModel, generateText } from "ai";
-import { OrpClient } from "@orp/client";
-import { memoryMiddleware } from "@orp/ai-sdk";
+import { SmartwareClient } from "@technodotventures/smartware-client";
+import { memoryMiddleware } from "@technodotventures/smartware-ai-sdk";
 
-const memory = new OrpClient({ url: process.env.ORP_URL, getToken: () => session.accessToken });
+const memory = new SmartwareClient({ url: process.env.SMARTWARE_URL, getToken: () => session.accessToken });
 const model = wrapLanguageModel({ model: baseModel, middleware: memoryMiddleware(memory, { budgetTokens: 1500 }) });
 
 const { text } = await generateText({
@@ -56,7 +56,7 @@ loop, pass `memory.run({ runId })` so every step sees one `as_of` and recorded t
 
 ```js
 import { Agent, run, tool } from "@openai/agents";
-import { openAIAgentsTools, recallContext, recordTurn } from "@orp/ai-sdk";
+import { openAIAgentsTools, recallContext, recordTurn } from "@technodotventures/smartware-ai-sdk";
 
 const agent = new Agent({ name: "assistant", instructions: "Use memory_recall before answering about the past.",
   tools: openAIAgentsTools(memory, tool) });
@@ -73,7 +73,7 @@ The native route is MCP: point the SDK at the gateway's MCP endpoint, which serv
 
 ```js
 import { query } from "@anthropic-ai/claude-agent-sdk";
-const options = { mcpServers: { memory: { type: "http", url: `${ORP_URL}/mcp`, headers: { Authorization: `Bearer ${token}` } } } };
+const options = { mcpServers: { memory: { type: "http", url: `${SMARTWARE_URL}/mcp`, headers: { Authorization: `Bearer ${token}` } } } };
 ```
 
 In-process tools and a prompt hook, when you would rather not run MCP over HTTP:
@@ -81,7 +81,7 @@ In-process tools and a prompt hook, when you would rather not run MCP over HTTP:
 ```js
 import { query, tool, createSdkMcpServer } from "@anthropic-ai/claude-agent-sdk";
 import { z } from "zod";
-import { claudeAgentTools, claudeAgentHooks, recordTurn } from "@orp/ai-sdk";
+import { claudeAgentTools, claudeAgentHooks, recordTurn } from "@technodotventures/smartware-ai-sdk";
 
 const server = createSdkMcpServer({ name: "memory", version: "0.2.0", tools: claudeAgentTools(memory, tool, z) });
 for await (const msg of query({ prompt, options: {
@@ -93,10 +93,10 @@ for await (const msg of query({ prompt, options: {
 The SDK's hooks do not carry the assistant's reply, so record it with `recordTurn` after the loop if you want it.
 Tool errors come back as results with `isError: true`, so the model can read them.
 
-## ORP level and what it loses
+## Smartware level and what it loses
 
 **L3.** Identity is the client's credentials; per-call `asOf`, `thread` and `scope` fit in `providerOptions`.
 What the middleware cannot carry per call: recall budgets and audience (both are options). `degraded[]` from the
-gateway goes to the client's `onDegraded`. The tool helpers are `@orp/tools` and have the same limits.
+gateway goes to the client's `onDegraded`. The tool helpers are `@technodotventures/smartware-tools` and have the same limits.
 
-`conformance.json` lists the `orp doctor` checks these interfaces can exercise.
+`conformance.json` lists the `smartware doctor` checks these interfaces can exercise.

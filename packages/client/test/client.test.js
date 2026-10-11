@@ -1,9 +1,9 @@
-// End-to-end tests for @orp/client against an in-process gateway. Run: node --test packages/client/test/
+// End-to-end tests for @technodotventures/smartware-client against an in-process gateway. Run: node --test packages/client/test/
 import { test, before, after } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { OrpClient, OrpError } from "../dist/index.js";
+import { SmartwareClient, SmartwareError } from "../dist/index.js";
 import { startServer, recordingFetch } from "./server.js";
 
 let srv, alice, bob;
@@ -11,8 +11,8 @@ const quiet = () => {};
 
 before(async () => {
   srv = await startServer();
-  alice = new OrpClient({ url: srv.url, token: srv.tokens.alice, onDegraded: quiet });
-  bob = new OrpClient({ url: srv.url, token: srv.tokens.bob, tenant: "acme", onDegraded: quiet });
+  alice = new SmartwareClient({ url: srv.url, token: srv.tokens.alice, onDegraded: quiet });
+  bob = new SmartwareClient({ url: srv.url, token: srv.tokens.bob, tenant: "acme", onDegraded: quiet });
 });
 after(async () => { await srv.close(); });
 
@@ -28,12 +28,12 @@ test("tenant comes from whoami and identity from the token", async () => {
   const rec = await alice.advanced.get(w.ids[0]);
   assert.equal(rec.written_by, "alice");
   // a token from another tenant discovers its own tenant and sees nothing of this one
-  const olga = new OrpClient({ url: srv.url, token: srv.tokens.outsider, onDegraded: quiet });
+  const olga = new SmartwareClient({ url: srv.url, token: srv.tokens.outsider, onDegraded: quiet });
   assert.equal(await olga.tenant(), "elsewhere");
   assert.equal((await olga.recall("Osprey kickoff notes")).items.length, 0);
   // a wrong explicit tenant is refused by the gateway, never silently corrected
-  const olga2 = new OrpClient({ url: srv.url, token: srv.tokens.outsider, tenant: "acme", onDegraded: quiet });
-  await assert.rejects(olga2.recall("Osprey kickoff notes"), (e) => e instanceof OrpError && e.code === "forbidden" && e.status === 403);
+  const olga2 = new SmartwareClient({ url: srv.url, token: srv.tokens.outsider, tenant: "acme", onDegraded: quiet });
+  await assert.rejects(olga2.recall("Osprey kickoff notes"), (e) => e instanceof SmartwareError && e.code === "forbidden" && e.status === 403);
 });
 
 test("fail-closed default audience: others cannot recall a write until it is shared", async () => {
@@ -77,7 +77,7 @@ test("procedures default to drafts that need approval", async () => {
 
 test("run() pins as_of once and replays writes idempotently", async () => {
   const rec = recordingFetch();
-  const c = new OrpClient({ url: srv.url, token: srv.tokens.alice, fetch: rec.fetch, onDegraded: quiet });
+  const c = new SmartwareClient({ url: srv.url, token: srv.tokens.alice, fetch: rec.fetch, onDegraded: quiet });
   const run = c.run({ runId: "r-42" });
   await new Promise((r) => setTimeout(r, 30));
   // valid from after the run started: a fresh view sees it, the run's pinned view does not
@@ -113,8 +113,8 @@ test("retries never repeat a non-idempotent write, and do retry reads and keyed 
     if (call.verb === "remember" && failNext) { failNext = false; return "503-after"; }
     return undefined;
   });
-  const c = new OrpClient({ url: srv.url, token: srv.tokens.alice, fetch: rec.fetch, retries: 3, retryDelayMs: 1, onDegraded: quiet });
-  await assert.rejects(c.remember(content), (e) => e instanceof OrpError && e.status === 503);
+  const c = new SmartwareClient({ url: srv.url, token: srv.tokens.alice, fetch: rec.fetch, retries: 3, retryDelayMs: 1, onDegraded: quiet });
+  await assert.rejects(c.remember(content), (e) => e instanceof SmartwareError && e.status === 503);
   assert.equal(rec.calls.filter((x) => x.verb === "remember").length, 1, "an unkeyed write must not be sent twice");
   const page = await c.advanced.list({ limit: 1000 });
   assert.equal(page.memories.filter((m) => m.content === content).length, 1);
@@ -122,7 +122,7 @@ test("retries never repeat a non-idempotent write, and do retry reads and keyed 
   // a network failure after the gateway committed: also not retried without a key
   let throwNext = true;
   const rec2 = recordingFetch((call) => (call.verb === "remember" && throwNext ? ((throwNext = false), "throw-after") : undefined));
-  const c2 = new OrpClient({ url: srv.url, token: srv.tokens.alice, fetch: rec2.fetch, retries: 3, retryDelayMs: 1, onDegraded: quiet });
+  const c2 = new SmartwareClient({ url: srv.url, token: srv.tokens.alice, fetch: rec2.fetch, retries: 3, retryDelayMs: 1, onDegraded: quiet });
   await assert.rejects(c2.remember(content + " net"), (e) => e.code === "network" && e.status === 0);
   assert.equal(rec2.calls.filter((x) => x.verb === "remember").length, 1);
 
@@ -137,7 +137,7 @@ test("retries never repeat a non-idempotent write, and do retry reads and keyed 
   // reads retry on 429
   let limited = 2;
   const rec3 = recordingFetch((call) => (call.verb === "recall" && limited-- > 0 ? "429" : undefined));
-  const c3 = new OrpClient({ url: srv.url, token: srv.tokens.alice, fetch: rec3.fetch, retries: 2, retryDelayMs: 1, onDegraded: quiet });
+  const c3 = new SmartwareClient({ url: srv.url, token: srv.tokens.alice, fetch: rec3.fetch, retries: 2, retryDelayMs: 1, onDegraded: quiet });
   const p = await c3.recall("unkeyed write");
   assert.ok(Array.isArray(p.items));
   assert.equal(rec3.calls.filter((x) => x.verb === "recall").length, 3);
@@ -147,13 +147,13 @@ test("retries never repeat a non-idempotent write, and do retry reads and keyed 
 });
 
 test("typed errors carry code, status and details", async () => {
-  await assert.rejects(alice.remember({ content: "x", bogus: 1 }), (e) => e instanceof OrpError && e.code === "unsupported_parameter" && e.status === 400);
+  await assert.rejects(alice.remember({ content: "x", bogus: 1 }), (e) => e instanceof SmartwareError && e.code === "unsupported_parameter" && e.status === 400);
   await assert.rejects(alice.recall("x", { budgetTokens: 10 }), (e) => e.code === "budget_too_small");
   const w = await alice.remember({ id: "doc-cfg", content: "Config v1", kind: "fact" });
   await assert.rejects(alice.remember({ id: "doc-cfg", content: "Config v2", kind: "fact" }, { mode: "upsert", ifVersion: 7 }),
     (e) => e.code === "version_conflict" && e.status === 409 && e.details.current === 1);
   assert.deepEqual(w.ids, ["doc-cfg"]);
-  const bad = new OrpClient({ url: srv.url, token: "orp_not-a-real-key", tenant: "acme", onDegraded: quiet });
+  const bad = new SmartwareClient({ url: srv.url, token: "smartware_not-a-real-key", tenant: "acme", onDegraded: quiet });
   await assert.rejects(bad.recall("x"), (e) => e.code === "unauthorized" && e.status === 401);
 });
 
@@ -161,14 +161,14 @@ test("degraded[] reaches onDegraded; the default warns once per value without co
   const seen = [];
   const fake = async () => new Response(JSON.stringify({ items: [{ text: "SECRET CONTENT", memory_ids: ["m"], tokens: 1, score: 1, why: {}, validity: "current", citations: [] }],
     tokens: 1, budget: { tokens: 2000 }, coverage: 1, snapshot: "s", degraded: ["encoder:fallback-hashing"], request_id: "r" }), { status: 200 });
-  const c = new OrpClient({ url: "http://x.invalid", token: "t", tenant: "acme", fetch: fake, onDegraded: (v, info) => seen.push([v, info.source]) });
+  const c = new SmartwareClient({ url: "http://x.invalid", token: "t", tenant: "acme", fetch: fake, onDegraded: (v, info) => seen.push([v, info.source]) });
   await c.recall("q");
   assert.deepEqual(seen, [[["encoder:fallback-hashing"], "recall"]]);
   const warned = [];
   const orig = console.warn;
   console.warn = (...a) => warned.push(a.join(" "));
   try {
-    const d = new OrpClient({ url: "http://x.invalid", token: "t", tenant: "acme", fetch: fake });
+    const d = new SmartwareClient({ url: "http://x.invalid", token: "t", tenant: "acme", fetch: fake });
     await d.recall("q"); await d.recall("q");
   } finally { console.warn = orig; }
   assert.equal(warned.length, 1);
@@ -177,7 +177,7 @@ test("degraded[] reaches onDegraded; the default warns once per value without co
 });
 
 test("forUser acts as the user the gateway verifies, never as the service", async () => {
-  const platform = new OrpClient({ url: srv.url, token: srv.tokens.platform, onDegraded: quiet });
+  const platform = new SmartwareClient({ url: srv.url, token: srv.tokens.platform, onDegraded: quiet });
   const asCarol = platform.forUser(srv.jwt({ sub: "carol", groups: ["sales"] }));
   assert.equal((await asCarol.advanced.whoami()).id, "carol");
   const w = await asCarol.remember("Carol prefers morning standups at 9");
@@ -240,13 +240,13 @@ test("advanced verbs: list pages, thread, links, history, forget dry run, change
   assert.equal((await alice.advanced.job(r.job)).status, "completed");
 });
 
-test("every key the client sends is a property of the ORP 0.1 schema", async () => {
-  const schemaDir = fileURLToPath(new URL("../../../schema/orp-0.1/", import.meta.url));
+test("every key the client sends is a property of the Smartware 0.1 schema", async () => {
+  const schemaDir = fileURLToPath(new URL("../../../schema/smartware-0.1/", import.meta.url));
   const load = (n) => JSON.parse(readFileSync(schemaDir + n + ".schema.json", "utf8"));
   const memIn = load("MemoryInput"), recallReq = load("RecallRequest"), forgetReq = load("ForgetRequest"),
     rememberReq = load("RememberRequest"), profileReq = load("ProfileRequest");
   const rec = recordingFetch();
-  const c = new OrpClient({ url: srv.url, token: srv.tokens.alice, fetch: rec.fetch, onDegraded: quiet });
+  const c = new SmartwareClient({ url: srv.url, token: srv.tokens.alice, fetch: rec.fetch, onDegraded: quiet });
   await c.remember([{ content: "Schema probe one", kind: "fact", claim: { subject: "probe", predicate: "is", object: "one" }, scope: "s/a",
     actor: "alice", role: "user", thread: "probe", seq: 1, event_time: "2026-01-01T00:00:00Z", valid_from: "2026-01-01T00:00:00Z",
     labels: ["x"], load: "on_query", confidence: 0.9, support: 1, meta: { a: 1 }, sources: [{ uri: "https://example.com" }] },
@@ -287,13 +287,13 @@ test("every key the client sends is a property of the ORP 0.1 schema", async () 
 
 test("getToken is called per request and tokens never appear in errors", async () => {
   let n = 0;
-  const c = new OrpClient({ url: srv.url, tenant: "acme", getToken: async () => { n++; return srv.tokens.bob; }, onDegraded: quiet });
+  const c = new SmartwareClient({ url: srv.url, tenant: "acme", getToken: async () => { n++; return srv.tokens.bob; }, onDegraded: quiet });
   await c.recall("anything at all");
   await c.recall("anything at all");
   assert.equal(n, 2);
-  const leaky = new OrpClient({ url: "http://127.0.0.1:1", tenant: "acme", token: "orp_supersecret", retries: 0, onDegraded: quiet });
+  const leaky = new SmartwareClient({ url: "http://127.0.0.1:1", tenant: "acme", token: "smartware_supersecret", retries: 0, onDegraded: quiet });
   await assert.rejects(leaky.recall("x"), (e) => e.code === "network" && !String(e.message).includes("supersecret") && !JSON.stringify(e).includes("supersecret"));
-  assert.throws(() => new OrpClient({ url: srv.url }), (e) => e.code === "invalid_parameter");
+  assert.throws(() => new SmartwareClient({ url: srv.url }), (e) => e.code === "invalid_parameter");
 });
 
 test("coarse as_of means the end of the stated period", async () => {
@@ -304,5 +304,5 @@ test("coarse as_of means the end of the stated period", async () => {
   assert.equal(asOfTime("2024-05-12"), "2024-05-12T23:59:59.999999Z");
   assert.equal(asOfTime("2024-05-12T08:00:00Z"), "2024-05-12T08:00:00Z");
   assert.equal(asOfTime(new Date("2024-05-12T08:00:00Z")), "2024-05-12T08:00:00.000Z");
-  assert.throws(() => asOfTime("2024-13"), OrpError);
+  assert.throws(() => asOfTime("2024-13"), SmartwareError);
 });

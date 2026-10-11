@@ -1,13 +1,13 @@
-// orp doctor: proves a conformance level against any ORP HTTP endpoint, by MUST id, and checks an adopter's own
+// smartware doctor: proves a conformance level against any Smartware HTTP endpoint, by MUST id, and checks an adopter's own
 // integration (removal equivalence for their real principals). The report is the only badge: claiming a level
 // with a known violation is non-conformant (M65).
 //
-//   orp doctor <url> --tenant <t> --token alice=ENV_A --token bob=ENV_B --token admin=ENV_ADMIN --token auditor=ENV_AUD
+//   smartware doctor <url> --tenant <t> --token alice=ENV_A --token bob=ENV_B --token admin=ENV_ADMIN --token auditor=ENV_AUD
 //              [--token other=ENV_OTHER@<other-tenant>] [--json report.json]
-//   orp doctor --self                      spin up an in-process server on a scratch store and run every check
-//   orp doctor <url> --principals p.json --admin admin=ENV --as-of <iso> --encoder <spec>   integration: M67 per principal
+//   smartware doctor --self                      spin up an in-process server on a scratch store and run every check
+//   smartware doctor <url> --principals p.json --admin admin=ENV --as-of <iso> --encoder <spec>   integration: M67 per principal
 //
-// Principals the suite expects (create them in a scratch tenant; "orp doctor --setup --keys k.json" prints commands):
+// Principals the suite expects (create them in a scratch tenant; "smartware doctor --setup --keys k.json" prints commands):
 //   alice: groups [sales]   bob: groups [eng]   admin: groups [admin]   auditor: groups [auditor]   other: another tenant
 import { randomBytes } from "node:crypto";
 import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
@@ -411,18 +411,18 @@ export async function runChecks(url: string, tenant: string, tokens: Partial<Rec
 
 function print(r: DoctorResult) {
   const w = (s: string) => process.stdout.write(s + "\n");
-  w(`orp doctor: ${r.url}`);
+  w(`smartware doctor: ${r.url}`);
   for (const x of r.checks) w(`  ${x.status === "pass" ? "PASS" : x.status === "skip" ? "SKIP" : "FAIL"}  ${x.level}  ${x.id.padEnd(22)} ${x.musts.join(",").padEnd(18)} ${x.status === "fail" || x.status === "skip" ? x.error : ""}`);
   const failed = r.checks.filter((x) => x.status === "fail");
   w(`level reached: ${r.level ?? "none"}${failed.length ? `; failing MUSTs: ${[...new Set(failed.flatMap((x) => x.musts))].join(", ")}` : ""}`);
 }
 
 export async function selfTest(f: Record<string, any>): Promise<DoctorResult> {
-  const { HashingEncoder, Service, SqliteStore, chooseRanker } = await import("@orp/core");
+  const { HashingEncoder, Service, SqliteStore, chooseRanker } = await import("@technodotventures/smartware-core");
   const { Gateway } = await import("./http.js");
   const { Authenticator, KeyStore } = await import("./auth.js");
   const { Log } = await import("./log.js");
-  const dir = mkdtempSync(join(tmpdir(), "orp-doctor-"));
+  const dir = mkdtempSync(join(tmpdir(), "smartware-doctor-"));
   const ks = new KeyStore(join(dir, "keys.json"));
   const tokens: Partial<Record<Who, string>> = {
     alice: ks.add({ id: "alice", tenant: "doctor", groups: ["sales"] }), bob: ks.add({ id: "bob", tenant: "doctor", groups: ["eng"] }),
@@ -430,7 +430,7 @@ export async function selfTest(f: Record<string, any>): Promise<DoctorResult> {
     other: ks.add({ id: "olga", tenant: "elsewhere", groups: ["sales"] }),
   };
   const enc = new HashingEncoder();
-  const svc = new Service(enc, { params: chooseRanker("auto", enc.name).params, store: f.memory ? null : new SqliteStore(join(dir, "orp.db")) });
+  const svc = new Service(enc, { params: chooseRanker("auto", enc.name).params, store: f.memory ? null : new SqliteStore(join(dir, "smartware.db")) });
   const gw = new Gateway(svc, new Authenticator(ks, null), { host: "127.0.0.1", port: 0, mcp: { toolsets: ["safe"], defaultReaders: "self" } }, new Log("silent"));
   await gw.listen();
   try {
@@ -445,16 +445,16 @@ export async function doctor(pos: string[], f: Record<string, any>): Promise<num
   if (f.setup) {
     const k = typeof f.keys === "string" ? f.keys : "keys.json";
     const t = typeof f.tenant === "string" ? f.tenant : "doctor";
-    process.stdout.write([`orp keys add --keys ${k} --id alice --tenant ${t} --groups sales`, `orp keys add --keys ${k} --id bob --tenant ${t} --groups eng`,
-      `orp keys add --keys ${k} --id admin --tenant ${t} --groups admin`, `orp keys add --keys ${k} --id aud --tenant ${t} --groups auditor`,
-      `orp keys add --keys ${k} --id olga --tenant ${t}-other --groups sales`].join("\n") + "\n");
+    process.stdout.write([`smartware keys add --keys ${k} --id alice --tenant ${t} --groups sales`, `smartware keys add --keys ${k} --id bob --tenant ${t} --groups eng`,
+      `smartware keys add --keys ${k} --id admin --tenant ${t} --groups admin`, `smartware keys add --keys ${k} --id aud --tenant ${t} --groups auditor`,
+      `smartware keys add --keys ${k} --id olga --tenant ${t}-other --groups sales`].join("\n") + "\n");
     return 0;
   }
   let r: DoctorResult;
   if (f.self) r = await selfTest(f);
   else {
     const url = pos[0];
-    if (!url) { process.stderr.write("usage: orp doctor <url> --tenant <t> --token alice=ENV ... | orp doctor --self\n"); return 2; }
+    if (!url) { process.stderr.write("usage: smartware doctor <url> --tenant <t> --token alice=ENV ... | smartware doctor --self\n"); return 2; }
     if (f.principals) return integration(url, f);
     const tokens: Partial<Record<Who, string>> = {};
     let otherTenant: string | null = null;
@@ -477,7 +477,7 @@ export async function doctor(pos: string[], f: Record<string, any>): Promise<num
  * equal recall over a clean engine holding only the records that principal can read (M67), and every returned
  * record must be readable by that principal. Needs an admin token (for the full records) and the server's encoder. */
 async function integration(url: string, f: Record<string, any>): Promise<number> {
-  const { Engine, Principal, loadEncoder, chooseRanker, memoryFromJson, recallRequest, parseTime } = await import("@orp/core");
+  const { Engine, Principal, loadEncoder, chooseRanker, memoryFromJson, recallRequest, parseTime } = await import("@technodotventures/smartware-core");
   const spec = JSON.parse(readFileSync(String(f.principals), "utf8")) as { tenant: string; principals: Array<{ name: string; token_env: string; id: string; groups: string[] }>; queries: string[] };
   const adminTok = process.env[String(f.admin).split("=").pop()!];
   if (!adminTok) { process.stderr.write("--admin <ENV> with an admin token is required\n"); return 2; }

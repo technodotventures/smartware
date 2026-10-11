@@ -1,5 +1,5 @@
 // mem0-compatible REST shim (adapter level L2), mounted at /mem0 so a mem0 platform client can point its base URL at
-// an ORP server. It speaks mem0's routes and shapes; underneath every call is an ORP verb with ORP's guarantees.
+// an Smartware server. It speaks mem0's routes and shapes; underneath every call is an Smartware verb with Smartware's guarantees.
 //
 // Identity: mem0 takes user_id / agent_id / run_id from the caller. Here they are scope segments
 // (mem0/user/<u>/agent/<a>/run/<r>) and filters, never the principal, which comes from the API key. mem0's own REST
@@ -8,7 +8,7 @@
 // What it cannot do is reported in degraded[]: no LLM fact extraction (infer), and filters that are not a scope prefix
 // are applied after recall.
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { ORPError, type Principal, type Service } from "@orp/core";
+import { SmartwareError, type Principal, type Service } from "@technodotventures/smartware-core";
 
 type Json = Record<string, any>;
 const ROOT = "mem0";
@@ -86,7 +86,7 @@ export async function mem0Route(svc: Service, pr: Principal, req: IncomingMessag
   if (m === "POST" && route === "memories") { // add
     const b = await readBody();
     const i = ids(b);
-    if (!i.user && !i.agent && !i.run) throw new ORPError("invalid_parameter", "one of user_id, agent_id or run_id is required");
+    if (!i.user && !i.agent && !i.run) throw new SmartwareError("invalid_parameter", "one of user_id, agent_id or run_id is required");
     if (b.infer !== false) degraded.push("mem0:infer_not_supported");
     const msgs: Json[] = typeof b.messages === "string" ? [{ role: "user", content: b.messages }] : Array.isArray(b.messages) ? b.messages : [];
     const mems = msgs.filter((x) => x && x.role !== "system" && typeof x.content === "string" && x.content.trim()).map((x) => ({
@@ -125,7 +125,7 @@ export async function mem0Route(svc: Service, pr: Principal, req: IncomingMessag
   }
   if (m === "DELETE" && route === "memories") {
     const i = ids(q);
-    if (!i.user && !i.agent && !i.run) throw new ORPError("invalid_parameter", "delete_all needs user_id, agent_id or run_id");
+    if (!i.user && !i.agent && !i.run) throw new SmartwareError("invalid_parameter", "delete_all needs user_id, agent_id or run_id");
     const all = await listScope(i);
     if (all.length) await svc.forget({ ids: all.map((x) => x.id), mode: "retract" }, pr);
     return ok({ message: "Memories deleted successfully!" });
@@ -134,16 +134,16 @@ export async function mem0Route(svc: Service, pr: Principal, req: IncomingMessag
   if (parts[2] === "memories" && id) {
     if (m === "GET" && parts.length === 4) {
       const g = await svc.get([id], pr);
-      if (!g.memories.length) throw new ORPError("not_found", id);
+      if (!g.memories.length) throw new SmartwareError("not_found", id);
       return ok(item(g.memories[0]));
     }
     if (m === "PUT" && parts.length === 4) {
       const b = await readBody();
       const g = await svc.get([id], pr);
-      if (!g.memories.length) throw new ORPError("not_found", id);
+      if (!g.memories.length) throw new SmartwareError("not_found", id);
       const cur = g.memories[0];
       const text = b.text ?? b.memory ?? b.data;
-      if (typeof text !== "string" || !text) throw new ORPError("invalid_parameter", "text is required");
+      if (typeof text !== "string" || !text) throw new SmartwareError("invalid_parameter", "text is required");
       // carry every client-settable field over, so a mem0 update changes the text (and metadata) and nothing else
       const keep: Json = {};
       for (const k of ["kind", "scope", "readers", "writers", "actor", "role", "origin", "thread", "seq", "labels", "load",
@@ -169,7 +169,7 @@ export async function mem0Route(svc: Service, pr: Principal, req: IncomingMessag
     }
     if (m === "GET" && parts[4] === "history") {
       const g = await svc.get([id], pr);
-      if (!g.memories.length) throw new ORPError("not_found", id);
+      if (!g.memories.length) throw new SmartwareError("not_found", id);
       const out: Json[] = [];
       let cursor = 0;
       for (;;) {
@@ -181,5 +181,5 @@ export async function mem0Route(svc: Service, pr: Principal, req: IncomingMessag
       return ok(out);
     }
   }
-  throw new ORPError("not_found", url.pathname);
+  throw new SmartwareError("not_found", url.pathname);
 }

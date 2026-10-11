@@ -15,12 +15,12 @@
   "memos@tuned": 0.28,
   "onyx@tuned": 0.35333333333333333,
   "oracle": 0.9533333333333334,
-  "orp": 0.8066666666666666,
+  "smartware": 0.8066666666666666,
   "supermemory-company-brain@tuned": 0.6266666666666667,
   "supermemory@tuned": 0.2733333333333333,
   "sylph@tuned": 0.1
  },
- "orp_minus": {
+ "smartware_minus": {
   "basic-memory@tuned": {
    "diff": 0.38666666666666666,
    "ci95": [
@@ -171,7 +171,7 @@
    "langmem@tuned": 0.75,
    "basic-memory@tuned": 0.375,
    "mcp-memory@tuned": 0.6666666666666666,
-   "orp": 0.9166666666666666,
+   "smartware": 0.9166666666666666,
    "letta@tuned": 0.8333333333333334,
    "memos@tuned": 0.2916666666666667,
    "bm25": 0.7916666666666666,
@@ -193,7 +193,7 @@
    "oracle": 0.95,
    "sylph@tuned": 0.025,
    "gbrain@tuned": 0.0,
-   "orp": 0.65,
+   "smartware": 0.65,
    "mem0@tuned": 0.45,
    "letta@tuned": 0.375,
    "graphiti@tuned": 0.475,
@@ -212,7 +212,7 @@
    "letta@tuned": 0.8888888888888888,
    "oracle": 0.9444444444444444,
    "sylph@tuned": 0.16666666666666666,
-   "orp": 0.7777777777777778,
+   "smartware": 0.7777777777777778,
    "mcp-memory@tuned": 0.6111111111111112,
    "mem0@tuned": 0.7222222222222222,
    "supermemory-company-brain@tuned": 0.9444444444444444,
@@ -245,7 +245,7 @@
    "letta@tuned": 0.7,
    "cognee@tuned": 0.6,
    "sylph@tuned": 0.4,
-   "orp": 0.8
+   "smartware": 0.8
   },
   "single-session-user": {
    "letta@tuned": 0.9523809523809523,
@@ -254,7 +254,7 @@
    "basic-memory@tuned": 0.8571428571428571,
    "mcp-memory@tuned": 0.6190476190476191,
    "hindsight@tuned": 0.8095238095238095,
-   "orp": 1.0,
+   "smartware": 1.0,
    "cognee@tuned": 0.6190476190476191,
    "memoryos@tuned": 0.5238095238095238,
    "bm25": 0.9523809523809523,
@@ -271,7 +271,7 @@
    "memoryos@tuned": 0.2972972972972973,
    "gbrain@tuned": 0.08108108108108109,
    "hindsight@tuned": 0.8108108108108109,
-   "orp": 0.8108108108108109,
+   "smartware": 0.8108108108108109,
    "sylph@tuned": 0.0,
    "bm25": 0.7027027027027027,
    "letta@tuned": 0.6486486486486487,
@@ -316,7 +316,7 @@
   "memos@tuned": 954.1133333333333,
   "onyx@tuned": 899.0733333333334,
   "oracle": 187.84666666666666,
-  "orp": 989.3533333333334,
+  "smartware": 989.3533333333334,
   "supermemory-company-brain@tuned": 987.1533333333333,
   "supermemory@tuned": 113.69333333333333,
   "sylph@tuned": 527.8333333333334

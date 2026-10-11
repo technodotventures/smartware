@@ -1,11 +1,11 @@
 {
-  "name": "@orp/server",
-  "version": "0.2.0",
-  "description": "orp: one binary for ORP memory. MCP (stdio and Streamable HTTP with OAuth), the HTTP binding, doctor and eval.",
+  "name": "smartware",
+  "version": "2.0.0",
+  "description": "smartware: one binary for Smartware memory. MCP (stdio and Streamable HTTP with OAuth), the HTTP binding, doctor and eval.",
   "license": "Apache-2.0",
   "type": "module",
   "bin": {
-    "orp": "bin/orp.js"
+    "smartware": "bin/smartware.js"
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -19,7 +19,7 @@
     "README.md"
   ],
   "dependencies": {
-    "@orp/core": "0.2.0"
+    "@technodotventures/smartware-core": "2.0.0"
   },
   "engines": {
     "node": ">=22.13"

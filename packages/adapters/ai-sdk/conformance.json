@@ -1,8 +1,8 @@
 {
-  "adapter": "@orp/ai-sdk",
+  "adapter": "@technodotventures/smartware-ai-sdk",
   "host_interface": "Vercel AI SDK language-model middleware (transformParams, wrapGenerate, wrapStream); OpenAI Agents SDK and Claude Agent SDK tools and hooks",
   "level": "L3",
-  "level_note": "The middleware recalls with the client's identity and records turns as events; providerOptions can carry thread, scope and as_of but never identity or audience. The SDK tool helpers are @orp/tools and exercise the same checks as it does.",
+  "level_note": "The middleware recalls with the client's identity and records turns as events; providerOptions can carry thread, scope and as_of but never identity or audience. The SDK tool helpers are @technodotventures/smartware-tools and exercise the same checks as it does.",
   "checks": ["identity-bound", "as-of", "reject-unknown", "empty-query", "idempotency", "dedup-scoped", "budget-hard-cap", "pack-shape", "determinism", "profile-budget", "supersession"],
   "check_notes": {
     "as-of": "middleware: providerOptions.memory.asOf per call; tools: as_of argument",

@@ -1,21 +1,21 @@
-// Tests for @orp/langgraph's BaseStore-compatible store against an in-process gateway.
+// Tests for @technodotventures/smartware-langgraph's BaseStore-compatible store against an in-process gateway.
 import { test, before, after } from "node:test";
 import assert from "node:assert/strict";
-import { OrpClient } from "@orp/client";
-import { OrpStore } from "../dist/index.js";
+import { SmartwareClient } from "@technodotventures/smartware-client";
+import { SmartwareStore } from "../dist/index.js";
 import { startServer } from "../../../client/test/server.js";
 
 let srv, alice, bob, degraded;
 before(async () => {
   srv = await startServer();
   degraded = [];
-  alice = new OrpClient({ url: srv.url, token: srv.tokens.alice, onDegraded: (v, i) => degraded.push(...v.map((x) => `${i.source}:${x}`)) });
-  bob = new OrpClient({ url: srv.url, token: srv.tokens.bob, onDegraded: () => {} });
+  alice = new SmartwareClient({ url: srv.url, token: srv.tokens.alice, onDegraded: (v, i) => degraded.push(...v.map((x) => `${i.source}:${x}`)) });
+  bob = new SmartwareClient({ url: srv.url, token: srv.tokens.bob, onDegraded: () => {} });
 });
 after(async () => { await srv.close(); });
 
 test("put, get, search, delete round-trip; values are lossless", async () => {
-  const store = new OrpStore(alice);
+  const store = new SmartwareStore(alice);
   const value = { food: "laksa", spice: 3, tags: ["noodles", "coconut"], nested: { ok: true, none: null, pi: 3.25 } };
   await store.put(["users", "u1", "prefs"], "lunch", value);
   const got = await store.get(["users", "u1", "prefs"], "lunch");
@@ -53,7 +53,7 @@ test("put, get, search, delete round-trip; values are lossless", async () => {
 });
 
 test("namespaces are isolated, and so are principals", async () => {
-  const store = new OrpStore(alice);
+  const store = new SmartwareStore(alice);
   await store.put(["team", "x"], "k", { note: "the marsupial roadmap lives in project x" });
   await store.put(["team", "y"], "k", { note: "the marsupial roadmap is not in project y" });
   await store.put(["team", "x.y"], "k", { note: "dotted namespace segment" });
@@ -70,18 +70,18 @@ test("namespaces are isolated, and so are principals", async () => {
   assert.deepEqual(await store.listNamespaces({ suffix: ["y"] }), [["team", "y"]]);
 
   // another principal with the same namespace and key sees none of it, and writes its own record
-  const bs = new OrpStore(bob);
+  const bs = new SmartwareStore(bob);
   assert.equal(await bs.get(["team", "x"], "k"), null);
   assert.deepEqual(await bs.search(["team"], { query: "marsupial roadmap" }), []);
   await bs.put(["team", "x"], "k", { note: "bob's own" });
   assert.equal((await bs.get(["team", "x"], "k")).value.note, "bob's own");
   assert.equal((await store.get(["team", "x"], "k")).value.note, "the marsupial roadmap lives in project x");
   // a different prefix is a different store
-  assert.equal(await new OrpStore(alice, { prefix: "other" }).get(["team", "x"], "k"), null);
+  assert.equal(await new SmartwareStore(alice, { prefix: "other" }).get(["team", "x"], "k"), null);
 });
 
 test("batch runs mixed operations in order", async () => {
-  const store = new OrpStore(alice, { prefix: "batch" });
+  const store = new SmartwareStore(alice, { prefix: "batch" });
   const res = await store.batch([
     { namespace: ["a"], key: "1", value: { n: 1 } },
     { namespace: ["a"], key: "2", value: { n: 2 }, index: false },
@@ -102,14 +102,14 @@ test("batch runs mixed operations in order", async () => {
 });
 
 test("audience tenant shares the namespace across principals; config as_of pins search", async () => {
-  const shared = new OrpStore(alice, { prefix: "shared", audience: "tenant" });
+  const shared = new SmartwareStore(alice, { prefix: "shared", audience: "tenant" });
   await shared.put(["kb"], "wifi", { text: "The guest wifi password rotates monthly" });
-  const bobShared = new OrpStore(bob, { prefix: "shared", audience: "tenant" });
+  const bobShared = new SmartwareStore(bob, { prefix: "shared", audience: "tenant" });
   assert.equal((await bobShared.get(["kb"], "wifi")).value.text, "The guest wifi password rotates monthly");
   // as_of comes from config: a store pinned before the write cannot see it, one pinned after can
-  const past = new OrpStore(alice, { prefix: "shared", audience: "tenant", asOf: "2000-01-01T00:00:00Z" });
-  const later = new OrpStore(alice, { prefix: "shared", audience: "tenant", asOf: new Date(Date.now() + 3600_000) });
+  const past = new SmartwareStore(alice, { prefix: "shared", audience: "tenant", asOf: "2000-01-01T00:00:00Z" });
+  const later = new SmartwareStore(alice, { prefix: "shared", audience: "tenant", asOf: new Date(Date.now() + 3600_000) });
   assert.equal((await past.search(["kb"], { query: "guest wifi password" })).length, 0);
   assert.equal((await later.search(["kb"], { query: "guest wifi password" }))[0].key, "wifi");
-  assert.ok(OrpStore.capabilities.loses.length > 0 && OrpStore.capabilities.level === "L2");
+  assert.ok(SmartwareStore.capabilities.loses.length > 0 && SmartwareStore.capabilities.level === "L2");
 });

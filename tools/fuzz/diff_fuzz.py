@@ -1,5 +1,5 @@
-"""Differential fuzz: the same random op sequences through the Python oracle (orp.api.Service, HashingEmbedder,
-orp-rrf-1, exact_dot) and the TypeScript Service (tools/bridge/server.mjs, HashingEncoder, same params).
+"""Differential fuzz: the same random op sequences through the Python oracle (smartware.api.Service, HashingEmbedder,
+smartware-rrf-1, exact_dot) and the TypeScript Service (tools/bridge/server.mjs, HashingEncoder, same params).
 Responses are compared after normalising engine-assigned ids (registered in creation order on each side),
 request ids, wall-clock timestamps and snapshot tokens.
 
@@ -20,15 +20,15 @@ from dataclasses import asdict, replace
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, ROOT)
-from orp import rankers  # noqa: E402
-from orp.api import ORPError, Service  # noqa: E402
-from orp.embedders import HashingEmbedder  # noqa: E402
-from orp.model import Principal  # noqa: E402
+from smartware import rankers  # noqa: E402
+from smartware.api import SmartwareError, Service  # noqa: E402
+from smartware.embedders import HashingEmbedder  # noqa: E402
+from smartware.model import Principal  # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ID_PROB = next((a.split("=")[1] for a in sys.argv if a.startswith("--idprob=")), "0.6")
 FROZEN = "--frozen-clock" in sys.argv
-import orp.clock as _pyclock  # noqa: E402
+import smartware.clock as _pyclock  # noqa: E402
 from datetime import datetime as _dt, timedelta as _td  # noqa: E402
 _FAKE = [None]
 _real_now = _pyclock.now
@@ -55,7 +55,7 @@ def rpc(**msg):
     return json.loads(proc.stdout.readline())
 
 
-PARAMS = rankers.params("orp-rrf-1")
+PARAMS = rankers.params("smartware-rrf-1")
 PD = {k: (list(v) if isinstance(v, tuple) else v) for k, v in asdict(PARAMS).items() if k != "exact_dot"}
 
 ENGINE = re.compile(r"mem_[0-9a-f]{24}")
@@ -127,7 +127,7 @@ def py_call(s, verb, p, a):
          "audit_log": lambda: s.audit_log(pr)}[verb]
     try:
         return {"ok": f()}
-    except ORPError as e:
+    except SmartwareError as e:
         return {"err": e.code}
     except Exception as e:  # noqa: BLE001
         return {"crash": f"{type(e).__name__}: {e}"[:200]}
@@ -251,7 +251,7 @@ for seed in range(SEED0, SEED0 + N_SEEDS):
             if verb in ("remember", "forget", "feedback", "approve", "reflect", "link", "import"):
                 break
         if REOPEN and step % 25 == 24:
-            path = os.path.join(tempfile.mkdtemp(prefix="orp-fuzz-"), "reopen.sqlite")
+            path = os.path.join(tempfile.mkdtemp(prefix="smartware-fuzz-"), "reopen.sqlite")
             rpc(op="save", h=h, path=path)
             rpc(op="reopen", h=h, store=path)
 print(f"\ndone: seeds={N_SEEDS} steps={N_STEPS} calls={total} distinct divergences={len(seen)}")

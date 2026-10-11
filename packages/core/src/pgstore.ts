@@ -1,4 +1,4 @@
-// Postgres store (the engine's Store port), schema orp-pg-1, for hosted and multi-node deployments. Several `orp
+// Postgres store (the engine's Store port), schema smartware-pg-1, for hosted and multi-node deployments. Several `smartware
 // serve` processes can share one database: each tenant is served by one process at a time, which holds the
 // tenant's lease, and every write commits only while that lease is still held (a fencing check inside the same
 // transaction). Everything stored is data (text, integers, bytea); nothing is evaluated.
@@ -7,7 +7,7 @@ import { hostname } from "node:os";
 import { parsePgUrl, PgPool, redactPgUrl, type PgQuery, type PgRow } from "./pg.js";
 import type { Lease, Store, StoreDelta, TenantLeases, TenantRows } from "./store.js";
 
-export const PG_SCHEMA = "orp-pg-1";
+export const PG_SCHEMA = "smartware-pg-1";
 
 export interface PgStoreOptions {
   /** Postgres schema (namespace) for the tables; default "public". */
@@ -28,40 +28,40 @@ export interface PgStoreOptions {
 function ddl(s: string): string {
   return `
 SELECT pg_advisory_xact_lock(7158000001);
-CREATE TABLE IF NOT EXISTS ${s}.orp_meta (key text PRIMARY KEY, value text NOT NULL);
-CREATE TABLE IF NOT EXISTS ${s}.orp_memories (iid text PRIMARY KEY, tenant text NOT NULL, ord bigint NOT NULL, record text NOT NULL);
-CREATE INDEX IF NOT EXISTS orp_memories_tenant_ord ON ${s}.orp_memories (tenant, ord);
-CREATE TABLE IF NOT EXISTS ${s}.orp_claims (tenant text NOT NULL, key text NOT NULL, pos int NOT NULL, iid text NOT NULL, PRIMARY KEY (tenant, key, pos));
-CREATE TABLE IF NOT EXISTS ${s}.orp_dedup (hkey text PRIMARY KEY, tenant text NOT NULL, iid text NOT NULL);
-CREATE INDEX IF NOT EXISTS orp_dedup_tenant ON ${s}.orp_dedup (tenant);
-CREATE TABLE IF NOT EXISTS ${s}.orp_idem (tenant text NOT NULL, principal text NOT NULL, key text NOT NULL, ids text NOT NULL, PRIMARY KEY (tenant, principal, key));
-CREATE TABLE IF NOT EXISTS ${s}.orp_blocked (tenant text NOT NULL, chash text NOT NULL, pos int NOT NULL, iid text NOT NULL, PRIMARY KEY (tenant, chash, pos));
-CREATE TABLE IF NOT EXISTS ${s}.orp_edges (id text PRIMARY KEY, tenant text NOT NULL, body text NOT NULL);
-CREATE INDEX IF NOT EXISTS orp_edges_tenant ON ${s}.orp_edges (tenant);
-CREATE TABLE IF NOT EXISTS ${s}.orp_tombstones (iid text PRIMARY KEY, tenant text NOT NULL, body text NOT NULL);
-CREATE INDEX IF NOT EXISTS orp_tombstones_tenant ON ${s}.orp_tombstones (tenant);
-CREATE TABLE IF NOT EXISTS ${s}.orp_changes (tenant text NOT NULL, cursor bigint NOT NULL, body text NOT NULL, PRIMARY KEY (tenant, cursor));
-CREATE TABLE IF NOT EXISTS ${s}.orp_audit (seq bigserial PRIMARY KEY, tenant text NOT NULL, body text NOT NULL);
-CREATE INDEX IF NOT EXISTS orp_audit_tenant ON ${s}.orp_audit (tenant, seq);
-CREATE TABLE IF NOT EXISTS ${s}.orp_jobs (id text PRIMARY KEY, tenant text NOT NULL, body text NOT NULL);
-CREATE INDEX IF NOT EXISTS orp_jobs_tenant ON ${s}.orp_jobs (tenant);
-CREATE TABLE IF NOT EXISTS ${s}.orp_feedback (seq bigserial PRIMARY KEY, tenant text NOT NULL, body text NOT NULL);
-CREATE TABLE IF NOT EXISTS ${s}.orp_counters (tenant text PRIMARY KEY, tmut bigint NOT NULL, tcount bigint NOT NULL, max_wseq bigint NOT NULL DEFAULT 0);
-CREATE TABLE IF NOT EXISTS ${s}.orp_vectors (encoder text NOT NULL, text_sha text NOT NULL, vec bytea NOT NULL, PRIMARY KEY (encoder, text_sha));
-CREATE TABLE IF NOT EXISTS ${s}.orp_leases (tenant text PRIMARY KEY, node text NOT NULL, url text, epoch bigint NOT NULL, expires_at timestamptz NOT NULL);
-DROP FUNCTION IF EXISTS ${s}.orp_fence(text, text, bigint);
+CREATE TABLE IF NOT EXISTS ${s}.smartware_meta (key text PRIMARY KEY, value text NOT NULL);
+CREATE TABLE IF NOT EXISTS ${s}.smartware_memories (iid text PRIMARY KEY, tenant text NOT NULL, ord bigint NOT NULL, record text NOT NULL);
+CREATE INDEX IF NOT EXISTS smartware_memories_tenant_ord ON ${s}.smartware_memories (tenant, ord);
+CREATE TABLE IF NOT EXISTS ${s}.smartware_claims (tenant text NOT NULL, key text NOT NULL, pos int NOT NULL, iid text NOT NULL, PRIMARY KEY (tenant, key, pos));
+CREATE TABLE IF NOT EXISTS ${s}.smartware_dedup (hkey text PRIMARY KEY, tenant text NOT NULL, iid text NOT NULL);
+CREATE INDEX IF NOT EXISTS smartware_dedup_tenant ON ${s}.smartware_dedup (tenant);
+CREATE TABLE IF NOT EXISTS ${s}.smartware_idem (tenant text NOT NULL, principal text NOT NULL, key text NOT NULL, ids text NOT NULL, PRIMARY KEY (tenant, principal, key));
+CREATE TABLE IF NOT EXISTS ${s}.smartware_blocked (tenant text NOT NULL, chash text NOT NULL, pos int NOT NULL, iid text NOT NULL, PRIMARY KEY (tenant, chash, pos));
+CREATE TABLE IF NOT EXISTS ${s}.smartware_edges (id text PRIMARY KEY, tenant text NOT NULL, body text NOT NULL);
+CREATE INDEX IF NOT EXISTS smartware_edges_tenant ON ${s}.smartware_edges (tenant);
+CREATE TABLE IF NOT EXISTS ${s}.smartware_tombstones (iid text PRIMARY KEY, tenant text NOT NULL, body text NOT NULL);
+CREATE INDEX IF NOT EXISTS smartware_tombstones_tenant ON ${s}.smartware_tombstones (tenant);
+CREATE TABLE IF NOT EXISTS ${s}.smartware_changes (tenant text NOT NULL, cursor bigint NOT NULL, body text NOT NULL, PRIMARY KEY (tenant, cursor));
+CREATE TABLE IF NOT EXISTS ${s}.smartware_audit (seq bigserial PRIMARY KEY, tenant text NOT NULL, body text NOT NULL);
+CREATE INDEX IF NOT EXISTS smartware_audit_tenant ON ${s}.smartware_audit (tenant, seq);
+CREATE TABLE IF NOT EXISTS ${s}.smartware_jobs (id text PRIMARY KEY, tenant text NOT NULL, body text NOT NULL);
+CREATE INDEX IF NOT EXISTS smartware_jobs_tenant ON ${s}.smartware_jobs (tenant);
+CREATE TABLE IF NOT EXISTS ${s}.smartware_feedback (seq bigserial PRIMARY KEY, tenant text NOT NULL, body text NOT NULL);
+CREATE TABLE IF NOT EXISTS ${s}.smartware_counters (tenant text PRIMARY KEY, tmut bigint NOT NULL, tcount bigint NOT NULL, max_wseq bigint NOT NULL DEFAULT 0);
+CREATE TABLE IF NOT EXISTS ${s}.smartware_vectors (encoder text NOT NULL, text_sha text NOT NULL, vec bytea NOT NULL, PRIMARY KEY (encoder, text_sha));
+CREATE TABLE IF NOT EXISTS ${s}.smartware_leases (tenant text PRIMARY KEY, node text NOT NULL, url text, epoch bigint NOT NULL, expires_at timestamptz NOT NULL);
+DROP FUNCTION IF EXISTS ${s}.smartware_fence(text, text, bigint);
 -- The fence: the write's own transaction locks the lease row and extends it, so a takeover waits for the commit, and
 -- a writer whose lease changed hands (another node, or a newer epoch) is refused. A lease that merely ran out while
 -- nobody else took it is still this writer's: no other node can have served the tenant in between.
-CREATE OR REPLACE FUNCTION ${s}.orp_fence(t text, n text, e bigint, ttl_ms bigint) RETURNS void LANGUAGE plpgsql AS $$
+CREATE OR REPLACE FUNCTION ${s}.smartware_fence(t text, n text, e bigint, ttl_ms bigint) RETURNS void LANGUAGE plpgsql AS $$
 BEGIN
-  UPDATE ${s}.orp_leases SET expires_at = GREATEST(expires_at, clock_timestamp() + ttl_ms * interval '1 millisecond')
+  UPDATE ${s}.smartware_leases SET expires_at = GREATEST(expires_at, clock_timestamp() + ttl_ms * interval '1 millisecond')
     WHERE tenant = t AND node = n AND epoch = e;
   IF NOT FOUND THEN
-    RAISE EXCEPTION 'orp: lease for tenant % is no longer held by %', t, n USING ERRCODE = 'P0001', HINT = 'orp_lease_lost';
+    RAISE EXCEPTION 'smartware: lease for tenant % is no longer held by %', t, n USING ERRCODE = 'P0001', HINT = 'smartware_lease_lost';
   END IF;
 END $$;
-INSERT INTO ${s}.orp_meta VALUES ('schema', '${PG_SCHEMA}') ON CONFLICT (key) DO NOTHING;
+INSERT INTO ${s}.smartware_meta VALUES ('schema', '${PG_SCHEMA}') ON CONFLICT (key) DO NOTHING;
 `;
 }
 
@@ -101,7 +101,7 @@ export class PgStore implements Store {
         await this.pool.with(async (c) => {
           if (this.s !== '"public"') await c.exec(`CREATE SCHEMA IF NOT EXISTS ${this.s}`);
           await c.exec(ddl(this.s));
-          const r = await c.query(`SELECT value FROM ${this.s}.orp_meta WHERE key = 'schema'`);
+          const r = await c.query(`SELECT value FROM ${this.s}.smartware_meta WHERE key = 'schema'`);
           if (r.rows[0]?.value !== PG_SCHEMA) throw new Error(`store schema ${r.rows[0]?.value}, this engine reads ${PG_SCHEMA}`);
         });
       })();
@@ -112,7 +112,7 @@ export class PgStore implements Store {
 
   /** @internal table name */
   t(name: string): string {
-    return `${this.s}.orp_${name}`;
+    return `${this.s}.smartware_${name}`;
   }
 
   async meta(): Promise<Record<string, string>> {
@@ -161,7 +161,7 @@ export class PgStore implements Store {
     await this.init();
     const Q: PgQuery[] = [];
     const add = (text: string, params: any[]) => Q.push({ text, params });
-    for (const f of d.fence ?? []) add(`SELECT ${this.s}.orp_fence($1, $2, $3, $4)`, [f.tenant, this.leases.node, f.epoch, this.leases.ttlMs]);
+    for (const f of d.fence ?? []) add(`SELECT ${this.s}.smartware_fence($1, $2, $3, $4)`, [f.tenant, this.leases.node, f.epoch, this.leases.ttlMs]);
     if (d.meta.secret) add(`INSERT INTO ${this.t("meta")} VALUES ('secret', $1) ON CONFLICT (key) DO NOTHING`, [d.meta.secret]);
     if (d.meta.encoder) add(`INSERT INTO ${this.t("meta")} VALUES ('encoder', $1) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`, [d.meta.encoder]);
     // global counters only ever move up, whichever process writes them; the next owner of a tenant also gets that
@@ -202,11 +202,11 @@ export class PgStore implements Store {
     }
     if (Q.length === (d.fence ?? []).length) return; // nothing to write
     // fence again as the last statement: the lease then runs from (about) the commit, however long the write took
-    for (const f of d.fence ?? []) add(`SELECT ${this.s}.orp_fence($1, $2, $3, $4)`, [f.tenant, this.leases.node, f.epoch, this.leases.ttlMs]);
+    for (const f of d.fence ?? []) add(`SELECT ${this.s}.smartware_fence($1, $2, $3, $4)`, [f.tenant, this.leases.node, f.epoch, this.leases.ttlMs]);
     try {
       await this.pool.batch(Q); // one round trip, one implicit transaction: all of it or none of it
     } catch (e) {
-      if ((e as any)?.fields?.H === "orp_lease_lost") (e as any).leaseLost = true;
+      if ((e as any)?.fields?.H === "smartware_lease_lost") (e as any).leaseLost = true;
       else if (!(e as any)?.fields) (e as any).unavailable = true; // the connection failed, not the statement: retryable
       throw e;
     }
@@ -249,7 +249,7 @@ export class PgStore implements Store {
       [encoder, sha, Buffer.from(v.buffer, v.byteOffset, v.byteLength)]);
   }
 
-  /** A consistent copy of every table into a new SQLite file (schema orp-store-1), which `orp serve --store` or the
+  /** A consistent copy of every table into a new SQLite file (schema smartware-store-1), which `smartware serve --store` or the
    * Python oracle can open: a portable backup, and the way from Postgres back to a single file. */
   async backupTo(path: string): Promise<void> {
     await this.init();
@@ -267,7 +267,7 @@ export class PgStore implements Store {
           };
           out.db.exec("BEGIN");
           for (const r of (await c.query(`SELECT key, value FROM ${this.t("meta")} WHERE key <> 'schema'`)).rows) {
-            out.db.prepare("INSERT OR REPLACE INTO orp_meta VALUES (?, ?)").run(r.key, r.value);
+            out.db.prepare("INSERT OR REPLACE INTO smartware_meta VALUES (?, ?)").run(r.key, r.value);
           }
           for (const [table, list] of Object.entries(cols)) {
             const names = list.split(", ");
@@ -289,7 +289,7 @@ export class PgStore implements Store {
   }
 }
 
-/** Tenant leases in the orp_leases table. A lease is taken when free, expired or already ours; the epoch increases
+/** Tenant leases in the smartware_leases table. A lease is taken when free, expired or already ours; the epoch increases
  * whenever it changes hands, and writes are fenced on (tenant, node, epoch, not expired). */
 export class PgLeases implements TenantLeases {
   readonly renewEveryMs: number;

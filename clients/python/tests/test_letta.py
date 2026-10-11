@@ -5,7 +5,7 @@ import json
 import os
 import unittest
 
-from orp_client.letta import import_af
+from smartware_client.letta import import_af
 
 from ._server import ServerTestCase
 

@@ -1,0 +1,142 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "https://smartware.software/schema/0.1/ContextPack",
+ "title": "ContextPack",
+ "type": "object",
+ "properties": {
+  "items": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "properties": {
+     "ref": {
+      "type": "string"
+     },
+     "memory_ids": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "kind": {
+      "type": "string",
+      "description": "event | document | fact | preference | procedure | observation | summary | profile | entity, or x-<name>",
+      "anyOf": [
+       {
+        "enum": [
+         "event",
+         "document",
+         "fact",
+         "preference",
+         "procedure",
+         "observation",
+         "summary",
+         "profile",
+         "entity"
+        ]
+       },
+       {
+        "pattern": "^x-"
+       }
+      ]
+     },
+     "scope": {
+      "type": "string"
+     },
+     "text": {
+      "type": "string"
+     },
+     "tokens": {
+      "type": "integer"
+     },
+     "score": {
+      "type": "number"
+     },
+     "why": {
+      "type": "object"
+     },
+     "validity": {
+      "enum": [
+       "current",
+       "superseded",
+       "historical"
+      ]
+     },
+     "event_time": {},
+     "citations": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "superseded": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     }
+    },
+    "required": [
+     "memory_ids",
+     "text",
+     "tokens",
+     "score",
+     "why",
+     "validity",
+     "citations"
+    ],
+    "additionalProperties": false
+   }
+  },
+  "tokens": {
+   "type": "integer"
+  },
+  "budget": {
+   "type": "object",
+   "properties": {
+    "tokens": {
+     "type": "integer"
+    }
+   },
+   "required": [],
+   "additionalProperties": false
+  },
+  "coverage": {
+   "type": "number"
+  },
+  "abstain_hint": {
+   "type": "boolean"
+  },
+  "snapshot": {
+   "type": "string"
+  },
+  "notes": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  },
+  "tokenizer": {
+   "type": "string"
+  },
+  "degraded": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  },
+  "request_id": {
+   "type": "string"
+  }
+ },
+ "required": [
+  "items",
+  "tokens",
+  "budget",
+  "coverage",
+  "snapshot",
+  "degraded",
+  "request_id"
+ ],
+ "additionalProperties": false
+}

@@ -44,7 +44,7 @@ export function parsePgUrl(url: string, env: NodeJS.ProcessEnv = process.env): P
     database: decodeURIComponent(u.pathname.replace(/^\//, "")) || env.PGDATABASE || decodeURIComponent(u.username) || "postgres",
     sslmode,
     sslrootcert: q.get("sslrootcert") || env.PGSSLROOTCERT || undefined,
-    applicationName: q.get("application_name") || "orp",
+    applicationName: q.get("application_name") || "smartware",
     connectTimeoutMs: Number(q.get("connect_timeout") ?? 10) * 1000,
   };
 }

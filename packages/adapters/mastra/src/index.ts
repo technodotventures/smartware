@@ -1,10 +1,10 @@
-// ORP memory for Mastra. Nothing here imports Mastra: pass its createTool (and Zod) in, and add the processors to
+// Smartware memory for Mastra. Nothing here imports Mastra: pass its createTool (and Zod) in, and add the processors to
 // an Agent's inputProcessors / outputProcessors. The shapes below are structural types for the Mastra interfaces
 // this adapter targets (see README for the release and what to check).
-import type { MemoryApi } from "@orp/client";
-import { createMemoryTools, memoryHooks, toZod, type HookOptions, type MemoryHooks, type MemoryTool, type ToolOptions, type ZodLike } from "@orp/tools";
+import type { MemoryApi } from "@technodotventures/smartware-client";
+import { createMemoryTools, memoryHooks, toZod, type HookOptions, type MemoryHooks, type MemoryTool, type ToolOptions, type ZodLike } from "@technodotventures/smartware-tools";
 
-export { memoryHooks as mastraHooks } from "@orp/tools";
+export { memoryHooks as mastraHooks } from "@technodotventures/smartware-tools";
 
 /** The config object Mastra's createTool accepts (the fields this adapter sets). */
 export interface MastraToolConfig {

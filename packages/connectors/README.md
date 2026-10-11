@@ -1,18 +1,18 @@
-# @orp/connectors
+# @technodotventures/smartware-connectors
 
 Connectors carry source permissions into memory. This package has the connector SDK, two built-in connectors
 (a Markdown vault and Slack), and a test kit that proves a connector does not leak. It has no third-party
 dependencies and no install scripts. It needs Node 22.13 or later.
 
 ```js
-import { sync, vaultConnector } from "@orp/connectors";
+import { sync, vaultConnector } from "@technodotventures/smartware-connectors";
 
 const vault = vaultConnector({ dir: "/srv/notes", defaultReaders: ["principal:alice"] });
 const report = await sync(vault, {
   url: "https://memory.example.com",
-  token: process.env.ORP_VAULT_CONNECTOR_KEY, // this connector's own key
+  token: process.env.SMARTWARE_VAULT_CONNECTOR_KEY, // this connector's own key
   tenant: "acme",
-  statePath: "/var/lib/orp/vault-state.json",
+  statePath: "/var/lib/smartware/vault-state.json",
 });
 console.log(report.created, report.updated, report.aclUpdated, report.deleted, report.lag.p95Ms);
 ```
@@ -34,7 +34,7 @@ A connector is a broker, not trusted code.
 - **Nothing sensitive is logged.** The `log` hook receives counts and record ids only, never content or tokens. The
   state file holds hashes, ids, versions and the cursor, no content, and is written with mode 0600.
 - **Data is never code.** Frontmatter is read by a small parser that only understands `key: value` and simple lists,
-  and `.orp-acl.json`, the membership file and Slack responses are read with `JSON.parse`. Nothing is evaluated.
+  and `.smartware-acl.json`, the membership file and Slack responses are read with `JSON.parse`. Nothing is evaluated.
 - **The connector reads only what it wrote.** It is added to the readers of its own records (as
   `principal:<connector id>`), because the server requires read access to forget a record and to report its version.
   It gains no access to anything else.
@@ -46,7 +46,7 @@ at the gateway is listed as open work below.
 
 ## How the runner writes
 
-| Source event | ORP write |
+| Source event | Smartware write |
 |---|---|
 | New item | `remember` (append). Client id `<connector>-<sha256(source id)>`: stable, never contains `~` or `/`. |
 | Changed content | Read the current version (`GET /memories/{id}`), then `remember` with `mode: "upsert"` and `if_version`. On a version conflict it retries once against the server's current version: the source is the truth for records the connector owns. |
@@ -69,7 +69,7 @@ p50, p95 and max for the pass (`report.lag`) and over the last 1000 writes (`rep
 
 ## How ACLs map to readers
 
-`mapAcl` turns each source ACL entry into an ORP access token (spec §6.1):
+`mapAcl` turns each source ACL entry into an Smartware access token (spec §6.1):
 
 | Source ACL entry | Reader token |
 |---|---|
@@ -88,8 +88,8 @@ Unknown users map to nobody. A connector never writes `readers: null`.
   before the first `## ` is one more), all in one thread named after the file path, with `seq` in file order. Section
   ids use the heading's slug, so reordering sections does not change ids. `split: "file"` makes one record per file.
 - Readers come from the first of: the file's frontmatter `readers:` (`[alice, group:eng]`), the nearest
-  `.orp-acl.json` in its folder or a parent (`{"readers": ["alice", "bob"]}`), or `defaultReaders`. A malformed
-  `.orp-acl.json` stops the sync rather than falling back to a wider default.
+  `.smartware-acl.json` in its folder or a parent (`{"readers": ["alice", "bob"]}`), or `defaultReaders`. A malformed
+  `.smartware-acl.json` stops the sync rather than falling back to a wider default.
 - Each folder is a scope below the prefix (`vault/team`), unless `scopeByFolder: false`.
 - Dot folders (`.obsidian`, `.git`, `.trash`) and symlinks are skipped. Files over 1 MiB are skipped.
 - A move is detected when a file disappears and a file with the same body appears in the same pass.
@@ -99,20 +99,20 @@ Unknown users map to nobody. A connector never writes `readers: null`.
 
 `renderVault(url, token, outDir, { tenant })` exports what that token's principal can read and writes the bundle's
 Markdown rendering (spec §8.3 `render/`): one file per thread of evidence (documents and events), with frontmatter
-holding the record fields (`orp_thread`, `orp_ids`, `orp_versions`, `scope`, `kind`, `readers`, plus the note's
-original frontmatter) and a one-line `<!-- orp {...} -->` marker before each record with its id, version, readers,
-times and sources. Derived records (summaries, facts, observations) go under `.orp/derived/`, which the vault
+holding the record fields (`smartware_thread`, `smartware_ids`, `smartware_versions`, `scope`, `kind`, `readers`, plus the note's
+original frontmatter) and a one-line `<!-- smartware {...} -->` marker before each record with its id, version, readers,
+times and sources. Derived records (summaries, facts, observations) go under `.smartware/derived/`, which the vault
 connector never ingests. Thread names are used as paths only when they are plain relative `.md` paths; anything else
 is slugged, and nothing is written outside `outDir` or through a symlink.
 
 Two-way is at the file level, and honestly limited:
 
-- Files to ORP is the connector. ORP to files is `renderVault`. They are separate one-way passes, not a live merge:
+- Files to Smartware is the connector. Smartware to files is `renderVault`. They are separate one-way passes, not a live merge:
   there is no conflict resolution for a note edited in both places between passes.
 - A rendered vault re-ingests to the same records (the test checks this): the markers are stripped on ingest, the
   frontmatter `readers` carries the ACL, and with the same connector name and paths the record ids are identical.
-- It is not byte-identical. Whitespace between sections is normalised, frontmatter is rewritten in ORP's own simple
-  form, and when the records of one thread have different readers, `readers` is left out (`orp_readers: mixed`) and
+- It is not byte-identical. Whitespace between sections is normalised, frontmatter is rewritten in Smartware's own simple
+  form, and when the records of one thread have different readers, `readers` is left out (`smartware_readers: mixed`) and
   re-ingest falls back to the folder ACL or the default.
 - A render shows only what the rendering principal can read, so render with the key of the person who owns the vault.
 
@@ -134,17 +134,17 @@ Two-way is at the file level, and honestly limited:
 
 Records say `channel:C07`; who is in C07 is decided at the gateway. The connector publishes membership
 (`sync(..., { membershipPath })` writes `{format, connector, tenant, groups: {"channel:C07": ["alice", ...]}}`,
-with Slack users already mapped to ORP principal ids), and the gateway must give each user the group
+with Slack users already mapped to Smartware principal ids), and the gateway must give each user the group
 `channel:<id>` for every channel they are in. A principal holding the group `channel:C07` holds the token
 `channel:C07` (spec §6.1, M77). When someone leaves a channel, the next sync drops them from the file and they lose
 every message and every summary derived from the channel at once, with no record rewritten. Three ways to wire it:
 
 1. **Embedded gateway (what the tests do).** Wrap the authenticator:
    ```js
-   import { Authenticator, Gateway, KeyStore } from "@orp/server";
-   import { slackPrincipalResolver, withMembership } from "@orp/connectors";
+   import { Authenticator, Gateway, KeyStore } from "smartware";
+   import { slackPrincipalResolver, withMembership } from "@technodotventures/smartware-connectors";
    const auth = withMembership(new Authenticator(new KeyStore("keys.json"), jwt),
-     slackPrincipalResolver({ membershipPath: "/var/lib/orp/slack-members.json", tenant: "acme" }));
+     slackPrincipalResolver({ membershipPath: "/var/lib/smartware/slack-members.json", tenant: "acme" }));
    ```
    The resolver re-reads the file when it changes. It grants only `channel:` groups (configurable with
    `namespaces`), only from a file written by the named connector, and only in that tenant, so a compromised connector
@@ -153,12 +153,12 @@ every message and every summary derived from the channel at once, with no record
    (`"groups": ["channel:C07", "channel:C09"]`) and set `groupsClaim` if it is not `groups`. Slack's own OIDC sign-in
    does not carry channel membership, so the provider needs a custom claim fed from the membership file or the Slack
    API. Keep token lifetimes short: a revocation takes effect when the token expires.
-3. **API keys.** `orp keys add --id alice --groups channel:C07,channel:C09`. Groups are fixed when the key is issued,
+3. **API keys.** `smartware keys add --id alice --groups channel:C07,channel:C09`. Groups are fixed when the key is issued,
    so a membership change means revoking and re-issuing the key. Suitable only for small, stable teams.
 
 Do not also grant `channel:` groups statically: the resolver adds groups, it never removes them.
 
-`principalResolver` maps a Slack user id to an ORP principal id. You supply it (for example from `users.info` emails
+`principalResolver` maps a Slack user id to an Smartware principal id. You supply it (for example from `users.info` emails
 to your IdP's subject ids, looked up in the connector process). Users it returns `null` for stay as a raw `actor`
 and are never given channel tokens.
 
@@ -176,7 +176,7 @@ to make derived summaries. After every step it checks, for every fixture princip
 2. **Re-narrowing (M59).** No summary made by `reflect` is readable or recalled by a principal who lost access to any
    item it was derived from.
 3. **Removal equivalence (M67).** For each query, recall through the server equals recall over a clean in-process
-   `Engine` from `@orp/core`, rebuilt from only the records that principal can read (using the server's encoder and
+   `Engine` from `@technodotventures/smartware-core`, rebuilt from only the records that principal can read (using the server's encoder and
    ranker, in the server's write order, at the same `as_of`), item for item and in order.
 
 It reports per-step failures (leaks are marked `[LEAK]`) and the sync lag. The tests run it against a correct
@@ -199,7 +199,7 @@ against local fixtures and a fake Slack API, never the real Slack.
 ## Known limits and open work
 
 - **Server-side scope binding.** The scope prefix is enforced by the SDK, not by the gateway. A key-to-scope binding
-  in `orp serve` would make it a hard boundary.
+  in `smartware serve` would make it a hard boundary.
 - **Content de-duplication (engine).** The engine de-duplicates a write against an identical record by the same writer
   with the same thread, actor, content and readers, even when an idempotency key is given. Two identical Slack
   messages from one person in one channel (say, two "ok"s) become one record. The runner detects this, reports it as
@@ -209,5 +209,5 @@ against local fixtures and a fake Slack API, never the real Slack.
 - **Slack.** Deletions and edits are seen only inside the re-scan window; replies to a thread whose parent is older
   than the window are not picked up; archived channels and channels the bot leaves stop syncing (their members lose
   the channel token). Enterprise Grid, shared channels, files and message attachments are not handled.
-- **Membership resolver in `orp serve`.** The CLI has no flag for it yet; today it needs an embedded gateway or the
+- **Membership resolver in `smartware serve`.** The CLI has no flag for it yet; today it needs an embedded gateway or the
   OIDC or key routes above.

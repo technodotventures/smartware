@@ -1,6 +1,6 @@
 # Brief: implement your project's LLM-free retrieval baseline
 
-Harness lives in /home/claude/mp/orp (Python 3.13, numpy/scipy/sklearn/networkx available, no network, no pip installs).
+Harness lives in /home/claude/mp/smartware (Python 3.13, numpy/scipy/sklearn/networkx available, no network, no pip installs).
 Read these first: bench/system.py (System/Item interface), bench/encoders.py (shared BM25 + dense embedder),
 bench/text.py (shared tokeniser/stemmer/token counter), bench/data.py (Turn/Corpus/Query), baselines/reference.py (tiny example).
 
@@ -22,7 +22,7 @@ Write ONE file, baselines/<module>.py, defining the class named in your message.
 6. You may use q.time (the question's timestamp) only where the project uses a "now"; note that several projects use
    wall-clock now: in that case use q.time (the benchmark's "now"), and say so.
 7. Do NOT run bench.run and do NOT compute recall/accuracy on any split. The only allowed check is:
-     cd /home/claude/mp/orp && python3 -m bench.smoke <system-name>
+     cd /home/claude/mp/smartware && python3 -m bench.smoke <system-name>
    which prints no scores. It must pass and stay under ~2 s per query.
 8. Put a module docstring listing: what is faithful, what is approximated, parameters, and any deliberate deviations.
    Also set class attributes name="<system-name>", family="<one of: memory-sdk | company-brain | personal-brain |

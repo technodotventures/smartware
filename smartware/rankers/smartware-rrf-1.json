@@ -1,0 +1,9 @@
+{
+ "name": "smartware-rrf-1",
+ "kind": "rrf",
+ "fit_encoder": null,
+ "fitted_on": "defaults",
+ "params": {
+  "ranker": "rrf"
+ }
+}

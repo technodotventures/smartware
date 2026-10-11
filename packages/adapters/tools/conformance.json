@@ -1,5 +1,5 @@
 {
-  "adapter": "@orp/tools",
+  "adapter": "@technodotventures/smartware-tools",
   "host_interface": "framework-neutral tool objects { name, description, inputSchema, execute } and before/after hooks",
   "level": "L3",
   "level_note": "Identity is the client's credentials and readers are enforced by the gateway, so governed recall holds for what the tools expose. The tools cannot set readers, ids or derivations, so checks that need those are run against the client or the gateway directly.",

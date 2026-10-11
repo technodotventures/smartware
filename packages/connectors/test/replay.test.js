@@ -74,11 +74,11 @@ test("replay kit drives a real connector with custom steps (vault)", async (t) =
       queries: ["incident retro database", "hiring plan"],
       steps: [
         { name: "add team notes", reflect: ["team/retro.md"], apply: () => {
-          writeFileSync(join(dir, "team", ".orp-acl.json"), JSON.stringify({ readers: ["alice", "bob"] }));
+          writeFileSync(join(dir, "team", ".smartware-acl.json"), JSON.stringify({ readers: ["alice", "bob"] }));
           writeFileSync(join(dir, "team", "retro.md"), "## What happened\nThe incident retro found a database failover gap.\n");
           writeFileSync(join(dir, "hiring.md"), "The hiring plan adds two engineers in Q3.\n");
         }, expect: { bob: { sees: ["team/retro.md#what-happened"], hidden: ["hiring.md#_"] } } },
-        { name: "remove bob from team/", apply: () => writeFileSync(join(dir, "team", ".orp-acl.json"), JSON.stringify({ readers: ["alice"] })),
+        { name: "remove bob from team/", apply: () => writeFileSync(join(dir, "team", ".smartware-acl.json"), JSON.stringify({ readers: ["alice"] })),
           expect: { bob: { hidden: ["team/retro.md#what-happened"] }, alice: { sees: ["team/retro.md#what-happened", "hiring.md#_"] } } },
       ],
     },

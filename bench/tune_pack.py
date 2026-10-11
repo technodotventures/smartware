@@ -6,7 +6,7 @@ import os
 
 from .devtune import evaluate
 from .encoders import DenseEncoder, Encoders
-from .orp_variants import ORPLtr
+from .smartware_variants import SmartwareLtr
 from .tune import objective
 
 GRID = {"long_unit_tokens": [150, 350, 500], "snippet_sentences": [3, 6], "prompt_merge_words": [8, 20],
@@ -16,12 +16,12 @@ GRID = {"long_unit_tokens": [150, 350, 500], "snippet_sentences": [3, 6], "promp
 def main():
     enc = Encoders(DenseEncoder.load())
     best = {}
-    bj = objective(evaluate(lambda: ORPLtr(), enc=enc))
+    bj = objective(evaluate(lambda: SmartwareLtr(), enc=enc))
     print("start", round(bj, 4), flush=True)
     for k, vals in GRID.items():
         for v in vals:
             cfg = dict(best, **{k: v})
-            j = objective(evaluate(lambda: ORPLtr(**cfg), enc=enc))
+            j = objective(evaluate(lambda: SmartwareLtr(**cfg), enc=enc))
             print(k, v, round(j, 4), "best", round(bj, 4), flush=True)
             if j > bj + 1e-4:
                 bj, best = j, cfg

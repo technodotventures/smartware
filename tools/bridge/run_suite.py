@@ -11,9 +11,9 @@ from dataclasses import asdict
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 sys.path.insert(0, ROOT)
-import orp.api as api  # noqa: E402
-from orp.engine import Engine as PyEngine, Params  # noqa: E402
-from orp.model import Memory  # noqa: E402
+import smartware.api as api  # noqa: E402
+from smartware.engine import Engine as PyEngine, Params  # noqa: E402
+from smartware.model import Memory  # noqa: E402
 
 _proc = subprocess.Popen(["node", os.path.join(ROOT, "tools", "bridge", "server.mjs")], stdin=subprocess.PIPE,
                          stdout=subprocess.PIPE, text=True, bufsize=1)
@@ -28,7 +28,7 @@ def rpc(**msg):
     out = json.loads(_proc.stdout.readline())
     if "err" in out:
         e = out["err"]
-        raise api.ORPError(e["code"], e["message"], **(e.get("details") or {}))
+        raise api.SmartwareError(e["code"], e["message"], **(e.get("details") or {}))
     if "crash" in out:
         raise RuntimeError("TS crash: " + out["crash"])
     return out["ok"]
@@ -98,7 +98,7 @@ class _EngineProxy:
         self.mem = _MemProxy(h)
 
     def remember(self, items, principal=None):
-        from orp.model import SYSTEM
+        from smartware.model import SYSTEM
         items = [items] if isinstance(items, Memory) else items
         return rpc(op="engine_remember", h=self.h, memories=[m.to_json() for m in items], principal=_pr(principal or SYSTEM))
 
@@ -125,7 +125,7 @@ class _EdgesProxy(dict):
 
 
 class TSService:
-    def __init__(self, embedder=None, params: Params | None = None, tokenizer="orp-approx-1"):
+    def __init__(self, embedder=None, params: Params | None = None, tokenizer="smartware-approx-1"):
         name = type(embedder).__name__ if embedder is not None else "HashEmbedder"
         enc = {"RandomEmbedder": "random", "Broken": "broken", "HashingEmbedder": "hashing"}.get(name, "md5")
         pd = {}
@@ -142,7 +142,7 @@ class TSService:
         return rpc(op="call", h=self.h, verb=verb, args=list(args), principal=_pr(pr))
 
     def capabilities(self, principal=None):
-        from orp.model import SYSTEM
+        from smartware.model import SYSTEM
         return self._call("capabilities", principal or SYSTEM)
 
     def save(self, path):

@@ -1,9 +1,9 @@
-"""Give every baseline the same dev-only tuning budget the ORP engine had.
+"""Give every baseline the same dev-only tuning budget the Smartware engine had.
 
 For each baseline, every combination in its class attribute TUNABLE (documented, user- or
 operator-exposed knobs chosen by the engineer who studied that project) is screened on a fixed
 dev subset, and the best 4 are evaluated on the full DEV splits with the same objective used for
-ORP (bench.tune.objective); the best full-dev configuration is recorded. (Graphiti and Hindsight
+Smartware (bench.tune.objective); the best full-dev configuration is recorded. (Graphiti and Hindsight
 were evaluated on the full grid before screening was introduced to save time.)
 Test splits are never read.
 

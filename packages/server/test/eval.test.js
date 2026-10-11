@@ -1,4 +1,4 @@
-// orp eval: metrics, baselines, intervals, and the reader/judge path against a fake OpenAI-compatible API.
+// smartware eval: metrics, baselines, intervals, and the reader/judge path against a fake OpenAI-compatible API.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createServer } from "node:http";
@@ -7,8 +7,8 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { pack, scoreQuery, bootstrap, readSet, runEval, modelFrom } from "../dist/eval.js";
 
-const dir = mkdtempSync(join(tmpdir(), "orp-eval-"));
-const set = join(dir, "tiny.orpbench.jsonl");
+const dir = mkdtempSync(join(tmpdir(), "smartware-eval-"));
+const set = join(dir, "tiny.swbench.jsonl");
 const mems = [
   { id: "u1", content: "I adopted a dog called Biscuit last spring", actor: "user", role: "user", thread: "s1", seq: 0, observed_at: "2025-04-02T10:00:00" },
   { id: "u2", content: "That's lovely! What breed is Biscuit?", actor: "assistant", role: "assistant", thread: "s1", seq: 1, observed_at: "2025-04-02T10:00:30" },
@@ -16,7 +16,7 @@ const mems = [
   { id: "u4", content: "My sister lives in Perth and works as a nurse", actor: "user", role: "user", thread: "s2", seq: 0, observed_at: "2025-06-10T09:00:00" },
   { id: "u5", content: "We should plan the Perth trip for December", actor: "user", role: "user", thread: "s2", seq: 1, observed_at: "2025-06-10T09:01:00" },
 ];
-writeFileSync(set, JSON.stringify({ format: "orp-bench-1", id: "h1", memories: mems, questions: [
+writeFileSync(set, JSON.stringify({ format: "smartware-bench-1", id: "h1", memories: mems, questions: [
   { id: "q1", question: "What breed is my dog?", as_of: "2025-07-01T00:00:00", answer: "beagle", evidence: ["u3"], category: "single-hop" },
   { id: "q2", question: "Where does my sister live?", as_of: "2025-07-01T00:00:00", answer: "Perth", evidence: ["u4"], category: "single-hop" }] }) + "\n");
 
@@ -31,13 +31,13 @@ test("metrics: greedy skip packing, evidence recall and MRR", () => {
   assert.ok(ci.lo <= ci.mean && ci.mean <= ci.hi);
 });
 
-test("runEval: ORP and baselines on a tiny set", async () => {
+test("runEval: Smartware and baselines on a tiny set", async () => {
   const sets = await readSet(set);
-  const { summary, rows } = await runEval(sets, { systems: ["orp", "bm25", "dense"], encoder: "hashing", ranker: "auto", k: 50, qaBudget: 2000, concurrency: 2 });
+  const { summary, rows } = await runEval(sets, { systems: ["smartware", "bm25", "dense"], encoder: "hashing", ranker: "auto", k: 50, qaBudget: 2000, concurrency: 2 });
   assert.equal(summary.questions, 2);
-  assert.equal(summary.systems.orp["recall@1000"].mean, 1);
-  assert.ok(summary.systems.bm25["recall@1000_vs_orp"]);
-  assert.equal(rows.filter((r) => r.system === "orp").length, 2);
+  assert.equal(summary.systems.smartware["recall@1000"].mean, 1);
+  assert.ok(summary.systems.bm25["recall@1000_vs_smartware"]);
+  assert.equal(rows.filter((r) => r.system === "smartware").length, 2);
 });
 
 test("reader and judge through an OpenAI-compatible API, with the gold-evidence ceiling", async () => {
@@ -57,13 +57,13 @@ test("reader and judge through an OpenAI-compatible API, with the gold-evidence 
     });
   });
   await new Promise((ok) => srv.listen(0, "127.0.0.1", ok));
-  process.env.ORP_EVAL_TEST_KEY = "test-key-not-real";
+  process.env.SMARTWARE_EVAL_TEST_KEY = "test-key-not-real";
   try {
-    const reader = modelFrom(`openai:fake-model@http://127.0.0.1:${srv.address().port}/v1`, "ORP_EVAL_TEST_KEY");
-    const { summary, rows } = await runEval(await readSet(set), { systems: ["orp", "bm25"], encoder: "hashing", ranker: "auto", k: 50, reader, qaBudget: 2000, concurrency: 2 });
+    const reader = modelFrom(`openai:fake-model@http://127.0.0.1:${srv.address().port}/v1`, "SMARTWARE_EVAL_TEST_KEY");
+    const { summary, rows } = await runEval(await readSet(set), { systems: ["smartware", "bm25"], encoder: "hashing", ranker: "auto", k: 50, reader, qaBudget: 2000, concurrency: 2 });
     assert.equal(seenAuth, "Bearer test-key-not-real");
     assert.equal(summary.systems.ceiling.qa.mean, 1);
-    assert.equal(summary.systems.orp.qa.mean, 1);
+    assert.equal(summary.systems.smartware.qa.mean, 1);
     assert.ok(rows.every((r) => !JSON.stringify(r).includes("test-key-not-real")));
   } finally { srv.close(); }
 });

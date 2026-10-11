@@ -1,16 +1,16 @@
-// A minimal HTTP client for the ORP HTTP binding (spec §8.2), just enough for connectors and the test kit.
+// A minimal HTTP client for the Smartware HTTP binding (spec §8.2), just enough for connectors and the test kit.
 // It never logs request bodies or tokens. The principal is whoever the bearer token resolves to on the server.
 
 export type Json = Record<string, any>;
 
-export class OrpHttpError extends Error {
+export class SmartwareHttpError extends Error {
   constructor(readonly status: number, readonly code: string, message: string, readonly details: Json = {}) {
     super(message);
-    this.name = "OrpHttpError";
+    this.name = "SmartwareHttpError";
   }
 }
 
-export interface OrpHttpOptions {
+export interface SmartwareHttpOptions {
   url: string;
   token: string;
   tenant?: string;
@@ -18,13 +18,13 @@ export interface OrpHttpOptions {
   timeoutMs?: number;
 }
 
-export class OrpHttp {
+export class SmartwareHttp {
   readonly base: string;
   readonly tenant: string;
   readonly #token: string; // private field: never enumerable, never serialised
   readonly timeoutMs: number;
 
-  constructor(opt: OrpHttpOptions) {
+  constructor(opt: SmartwareHttpOptions) {
     if (!opt.url) throw new Error("url is required");
     if (!opt.token) throw new Error("token is required");
     this.base = opt.url.replace(/\/+$/, "");
@@ -53,9 +53,9 @@ export class OrpHttp {
     try { json = text ? JSON.parse(text) : {}; } catch { json = null; }
     if (!r.ok) {
       const e = json?.error ?? {};
-      throw new OrpHttpError(r.status, String(e.code ?? `http_${r.status}`), String(e.message ?? `HTTP ${r.status}`), e.details ?? {});
+      throw new SmartwareHttpError(r.status, String(e.code ?? `http_${r.status}`), String(e.message ?? `HTTP ${r.status}`), e.details ?? {});
     }
-    if (json === null || typeof json !== "object") throw new OrpHttpError(r.status, "bad_response", "server did not return JSON");
+    if (json === null || typeof json !== "object") throw new SmartwareHttpError(r.status, "bad_response", "server did not return JSON");
     return json as Json;
   }
 
@@ -73,7 +73,7 @@ export class OrpHttp {
     try {
       return await this.call("GET", `${this.path("memories")}/${encodeURIComponent(id)}`);
     } catch (e) {
-      if (e instanceof OrpHttpError && e.status === 404) return null;
+      if (e instanceof SmartwareHttpError && e.status === 404) return null;
       throw e;
     }
   }

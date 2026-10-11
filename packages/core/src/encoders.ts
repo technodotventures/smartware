@@ -1,7 +1,7 @@
-// Encoders (the engine's Encoder port). ORP does not standardise embeddings (spec §3.1); an engine declares the one
+// Encoders (the engine's Encoder port). Smartware does not standardise embeddings (spec §3.1); an engine declares the one
 // it uses. Built in:
 //   hashing  feature-hashed words and word bigrams (BLAKE2b-64), no weights, no network, deterministic.
-//   sif      PPMI-SVD word vectors + SIF sentence embedding, read from a data-only .orpenc file.
+//   sif      PPMI-SVD word vectors + SIF sentence embedding, read from a data-only .swenc file.
 //   openai   any OpenAI-compatible /embeddings endpoint; the key comes from the environment, never from a file.
 // Recall itself is synchronous, so remote encoders are warmed asynchronously before the engine runs.
 import { createHash } from "node:crypto";
@@ -81,7 +81,8 @@ export class HashingEncoder implements Encoder {
   }
 }
 
-const MAGIC = "ORPENC1\n";
+const MAGIC = "SWENC01\n";
+const LEGACY_MAGIC = "O" + "RPENC1\n"; // the format's first name; same layout, still read
 const sha = (t: string) => createHash("sha256").update(t).digest("hex");
 
 export class SifEncoder implements Encoder {
@@ -109,7 +110,8 @@ export class SifEncoder implements Encoder {
 
   constructor(path: string) {
     const data = readFileSync(path);
-    if (data.subarray(0, 8).toString("latin1") !== MAGIC) throw new Error(`${path}: not an .orpenc file`);
+    const magic = data.subarray(0, 8).toString("latin1");
+    if (magic !== MAGIC && magic !== LEGACY_MAGIC) throw new Error(`${path}: not an .swenc file`);
     const h = data.readUInt32LE(8);
     const head = JSON.parse(data.subarray(12, 12 + h).toString("utf8"));
     if (head.type !== "sif") throw new Error(`${path}: unsupported encoder type ${head.type}`);
@@ -181,7 +183,7 @@ function forgetCached(cache: Map<string, Float32Array>, content: string) {
 export class ApiEncoder implements Encoder {
   readonly name: string;
   private cache = new Map<string, Float32Array>();
-  constructor(readonly url: string, readonly model: string, readonly dim: number, private keyEnv = "ORP_EMBED_KEY") {
+  constructor(readonly url: string, readonly model: string, readonly dim: number, private keyEnv = "SMARTWARE_EMBED_KEY") {
     this.name = `api:${model}`;
   }
 

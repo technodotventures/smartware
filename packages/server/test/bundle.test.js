@@ -5,14 +5,14 @@ import { execFileSync } from "node:child_process";
 import { mkdtempSync, readFileSync, writeFileSync, existsSync, symlinkSync, mkdirSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { HashingEncoder, Principal, Service, SqliteStore } from "@orp/core";
+import { HashingEncoder, Principal, Service, SqliteStore } from "@technodotventures/smartware-core";
 import { exportBundle, importBundle, readBundleFiles, readZip, writeBundleFiles, writeZip } from "../dist/bundle.js";
 import { importLetta, importMcpMemory, importMem0 } from "../dist/importers.js";
 
 const enc = new HashingEncoder();
-const dir = () => mkdtempSync(join(tmpdir(), "orp-bundle-"));
+const dir = () => mkdtempSync(join(tmpdir(), "smartware-bundle-"));
 const open = (path) => new Service(enc, { store: path ? new SqliteStore(path) : null, secretScan: false });
-const BIN = new URL("../bin/orp.js", import.meta.url).pathname;
+const BIN = new URL("../bin/smartware.js", import.meta.url).pathname;
 const FIXTURE = new URL("../../../clients/python/tests/fixtures/travel_planner.af", import.meta.url).pathname;
 
 async function seed(s, t = "acme") {
@@ -46,23 +46,23 @@ test("zip round trip; unsafe names, corruption and symbolic links are refused", 
   assert.throws(() => readBundleFiles(join(d, "b")), /symbolic link/);
 });
 
-test("export to .orp and to a directory, import into another store, export again: identical records", async () => {
+test("export to .smartware and to a directory, import into another store, export again: identical records", async () => {
   const d = dir();
   const s1 = open(join(d, "a.db"));
   await seed(s1);
-  for (const out of [join(d, "acme.orp"), join(d, "acme-dir")]) {
+  for (const out of [join(d, "acme.smartware"), join(d, "acme-dir")]) {
     const files = await exportBundle(s1, "acme", { render: true });
     writeBundleFiles(out, files);
     const back = readBundleFiles(out);
     assert.deepEqual([...back.keys()].sort(), [...files.keys()].sort());
     const man = JSON.parse(back.get("manifest.json").toString());
-    assert.equal(man.format, "orp-bundle-1");
+    assert.equal(man.format, "smartware-bundle-1");
     assert.equal(man.counts.memories, 5);
     assert.equal(man.counts.tombstones, 1);
     assert.ok(man.files["memories.jsonl"].sha256);
     assert.ok([...back.keys()].some((k) => k.startsWith("render/threads/")));
     assert.ok(back.get("memories.jsonl").toString().includes("4921"), "the operator export includes secret-labelled records");
-    const s2 = open(join(d, `b-${out.endsWith(".orp") ? 1 : 2}.db`));
+    const s2 = open(join(d, `b-${out.endsWith(".smartware") ? 1 : 2}.db`));
     const r = await importBundle(s2, "acme", back);
     assert.equal(r.imported, 5);
     const again = await exportBundle(s2, "acme");
@@ -91,9 +91,9 @@ test("the CLI exports and imports bundles", () => {
   const s1 = open(join(d, "src.db"));
   return seed(s1).then(() => {
     s1.close();
-    const out = execFileSync(process.execPath, [BIN, "export", "--store", join(d, "src.db"), "--tenant", "acme", "--out", join(d, "x.orp"), "--render"], { encoding: "utf8" });
+    const out = execFileSync(process.execPath, [BIN, "export", "--store", join(d, "src.db"), "--tenant", "acme", "--out", join(d, "x.smartware"), "--render"], { encoding: "utf8" });
     assert.match(out, /exported 5 memories, 1 edges, 1 tombstones/);
-    const imp = JSON.parse(execFileSync(process.execPath, [BIN, "import", join(d, "x.orp"), "--store", join(d, "dst.db"), "--tenant", "acme"], { encoding: "utf8" }));
+    const imp = JSON.parse(execFileSync(process.execPath, [BIN, "import", join(d, "x.smartware"), "--store", join(d, "dst.db"), "--tenant", "acme"], { encoding: "utf8" }));
     assert.equal(imp.imported, 5);
     assert.ok(existsSync(join(d, "dst.db")));
   });

@@ -1,17 +1,17 @@
-// Test support: an in-process ORP gateway on port 0 with an in-memory engine, API keys for a few principals and an
+// Test support: an in-process Smartware gateway on port 0 with an in-memory engine, API keys for a few principals and an
 // OIDC issuer (a local JWKS file) for forUser tests. Shared by the client and adapter tests.
 import { generateKeyPairSync, sign } from "node:crypto";
 import { mkdtempSync, writeFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { HashingEncoder, Service, chooseRanker } from "@orp/core";
-import { Authenticator, Gateway, JwtVerifier, KeyStore, Log } from "@orp/server";
+import { HashingEncoder, Service, chooseRanker } from "@technodotventures/smartware-core";
+import { Authenticator, Gateway, JwtVerifier, KeyStore, Log } from "smartware";
 
 export const ISSUER = "https://idp.example.test";
-export const AUDIENCE = "orp-test";
+export const AUDIENCE = "smartware-test";
 
 export async function startServer({ tenant = "acme", rate } = {}) {
-  const dir = mkdtempSync(join(tmpdir(), "orp-client-"));
+  const dir = mkdtempSync(join(tmpdir(), "smartware-client-"));
   const ks = new KeyStore(join(dir, "keys.json"));
   const tokens = {
     alice: ks.add({ id: "alice", tenant, groups: ["sales"] }),

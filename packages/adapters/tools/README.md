@@ -1,4 +1,4 @@
-# @orp/tools
+# @technodotventures/smartware-tools
 
 Memory tools and hooks for any agent framework, with no framework imported. The other adapters build on it.
 
@@ -22,10 +22,10 @@ Messages can be strings, `{ role, content }` with string or `[{ type: "text", te
 ## Setup
 
 ```js
-import { OrpClient } from "@orp/client";
-import { createMemoryTools, memoryHooks } from "@orp/tools";
+import { SmartwareClient } from "@technodotventures/smartware-client";
+import { createMemoryTools, memoryHooks } from "@technodotventures/smartware-tools";
 
-const memory = new OrpClient({ url, token });
+const memory = new SmartwareClient({ url, token });
 const tools = createMemoryTools(memory, { scope: `users/${hostUserId}` });
 // tools.recall, tools.remember, tools.forget, tools.profile
 const result = await tools.recall.execute({ query: "what does the user drink?" });
@@ -64,10 +64,10 @@ and labels writes but never grants access), `thread`, `audience` (`"self"` by de
 Procedures are stored as drafts that a person approves. Writes carry `meta.via: "tool"`, and the gateway records the
 authenticated writer as `written_by`.
 
-## ORP level
+## Smartware level
 
 L3 for what the tools expose: identity comes from the client's credentials and the gateway enforces readers. The
-tools cannot set readers, ids or derivations, so `conformance.json` lists which `orp doctor` checks this interface
+tools cannot set readers, ids or derivations, so `conformance.json` lists which `smartware doctor` checks this interface
 can exercise and why the rest cannot be.
 
 ## What it loses, and how it says so

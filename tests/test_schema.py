@@ -5,13 +5,13 @@ import os
 import re
 import unittest
 
-from orp import api
-from orp.api import Service
-from orp.embedders import HashingEmbedder
-from orp.model import Principal
+from smartware import api
+from smartware.api import Service
+from smartware.embedders import HashingEmbedder
+from smartware.model import Principal
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SD = os.path.join(ROOT, "schema", "orp-0.1")
+SD = os.path.join(ROOT, "schema", "smartware-0.1")
 
 
 def load(name):
@@ -31,7 +31,7 @@ class SchemaDrift(unittest.TestCase):
         self.assertEqual(props("ForgetRequest"), api._FORGET_KEYS)
 
     def test_spec_field_table_covered(self):
-        with open(os.path.join(ROOT, "spec", "ORP-0.1.md")) as fh:
+        with open(os.path.join(ROOT, "spec", "Smartware-0.1.md")) as fh:
             spec = fh.read()
         table = spec[spec.index("### 3.1 The Memory record"):spec.index("### 3.2 Kinds")]
         fields = set()

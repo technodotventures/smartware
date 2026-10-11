@@ -11,7 +11,7 @@
 // and the gateway gives each user the token channel:<id> for every channel they are in. A member who leaves a
 // channel loses the token on the next sync, and with it every message and every summary derived from the channel.
 import { existsSync, readFileSync, statSync } from "node:fs";
-import { Principal } from "@orp/core";
+import { Principal } from "@technodotventures/smartware-core";
 import { defineConnector, type AclChange, type Connector, type SourceItem } from "./sdk.js";
 
 export interface SlackOptions {
@@ -29,7 +29,7 @@ export interface SlackOptions {
   rescanSeconds?: number;
   /** Also pull thread replies with conversations.replies (default true). */
   includeThreads?: boolean;
-  /** Maps a Slack user id (U...) to an ORP principal id; null drops the user (fail closed). Default: the Slack id. */
+  /** Maps a Slack user id (U...) to an Smartware principal id; null drops the user (fail closed). Default: the Slack id. */
   principalResolver?: (slackUserId: string) => string | null;
   pageSize?: number; // default 200
   maxRetries?: number; // on HTTP 429, default 5

@@ -69,10 +69,10 @@ test("slack: history with pagination and rate limits; a member who leaves a chan
   t.after(() => fake.server.close());
   const srv = await startServer({ membership: "slack" });
   t.after(() => srv.close());
-  process.env.ORP_TEST_SLACK_TOKEN = BOT_TOKEN;
-  t.after(() => { delete process.env.ORP_TEST_SLACK_TOKEN; });
-  const users = { U1: "alice", U2: "bob" }; // U9 is a guest with no ORP identity
-  const conn = slackConnector({ tokenEnv: "ORP_TEST_SLACK_TOKEN", apiBase: fake.base, pageSize: 2, principalResolver: (u) => users[u] ?? null });
+  process.env.SMARTWARE_TEST_SLACK_TOKEN = BOT_TOKEN;
+  t.after(() => { delete process.env.SMARTWARE_TEST_SLACK_TOKEN; });
+  const users = { U1: "alice", U2: "bob" }; // U9 is a guest with no Smartware identity
+  const conn = slackConnector({ tokenEnv: "SMARTWARE_TEST_SLACK_TOKEN", apiBase: fake.base, pageSize: 2, principalResolver: (u) => users[u] ?? null });
   const statePath = join(srv.dir, "slack-state.json");
   const opts = { url: srv.url, token: srv.tokens.connector, tenant: srv.tenant, statePath, membershipPath: srv.membershipPath };
   const mid = (ch, n) => clientId("slack", `${ch}/${fake.s.ts(n)}`);
@@ -146,9 +146,9 @@ test("slack: history with pagination and rate limits; a member who leaves a chan
 test("slack: the token comes only from the named environment variable, and only over https", async () => {
   assert.throws(() => slackConnector({ tokenEnv: "X", apiBase: "http://slack.example.com/api" }), /https/);
   assert.throws(() => slackConnector({ tokenEnv: "not a var name" }), /environment variable/);
-  delete process.env.ORP_TEST_MISSING_TOKEN;
-  const c = slackConnector({ tokenEnv: "ORP_TEST_MISSING_TOKEN", apiBase: "http://127.0.0.1:9/api" });
-  await assert.rejects(c.pull(null), /ORP_TEST_MISSING_TOKEN is not set/);
+  delete process.env.SMARTWARE_TEST_MISSING_TOKEN;
+  const c = slackConnector({ tokenEnv: "SMARTWARE_TEST_MISSING_TOKEN", apiBase: "http://127.0.0.1:9/api" });
+  await assert.rejects(c.pull(null), /SMARTWARE_TEST_MISSING_TOKEN is not set/);
 });
 
 test("slack resolver grants only channel tokens, only from the slack connector's file, only in its tenant", async (t) => {

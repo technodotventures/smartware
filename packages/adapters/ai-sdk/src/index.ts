@@ -1,12 +1,12 @@
-// ORP memory for the Vercel AI SDK (language-model middleware), plus helpers for the OpenAI Agents SDK and the
+// Smartware memory for the Vercel AI SDK (language-model middleware), plus helpers for the OpenAI Agents SDK and the
 // Claude Agent SDK. Structural types only: nothing here imports those packages.
-import { OrpError, type MemoryApi, type RememberResponse } from "@orp/client";
+import { SmartwareError, type MemoryApi, type RememberResponse } from "@technodotventures/smartware-client";
 import {
   createMemoryTools, memoryHooks, toZodShape,
   type HookOptions, type MemoryTool, type ToolOptions, type ZodLike,
-} from "@orp/tools";
+} from "@technodotventures/smartware-tools";
 
-export { formatContext, lastUserText, messageText } from "@orp/tools";
+export { formatContext, lastUserText, messageText } from "@technodotventures/smartware-tools";
 
 // ---------------------------------------------------------------- AI SDK middleware
 
@@ -59,13 +59,13 @@ const CALL_KEYS = new Set(["thread", "scope", "asOf"]);
 function callOptions(params: CallParams, key: string): CallMemoryOptions {
   const raw = params.providerOptions?.[key] ?? params.providerMetadata?.[key];
   if (raw === undefined) return {};
-  if (!raw || typeof raw !== "object") throw new OrpError("invalid_parameter", `providerOptions.${key} must be an object`);
+  if (!raw || typeof raw !== "object") throw new SmartwareError("invalid_parameter", `providerOptions.${key} must be an object`);
   const extra = Object.keys(raw).filter((k) => !CALL_KEYS.has(k));
   if (extra.length) {
     // principal, user, tenant, readers ...: identity and audience come from credentials and config, never a call
-    throw new OrpError("unsupported_parameter", `providerOptions.${key}: unsupported ${extra.join(", ")}`, 0, { parameters: extra });
+    throw new SmartwareError("unsupported_parameter", `providerOptions.${key}: unsupported ${extra.join(", ")}`, 0, { parameters: extra });
   }
-  for (const k of Object.keys(raw)) if (typeof raw[k] !== "string") throw new OrpError("invalid_parameter", `providerOptions.${key}.${k} must be a string`);
+  for (const k of Object.keys(raw)) if (typeof raw[k] !== "string") throw new SmartwareError("invalid_parameter", `providerOptions.${key}.${k} must be a string`);
   return raw as CallMemoryOptions;
 }
 
@@ -79,7 +79,7 @@ function replyText(result: any): string {
 /** Recall before the model call, record the turn after. Use with wrapLanguageModel({ model, middleware }). */
 export function memoryMiddleware(client: MemoryApi, opts: MiddlewareOptions = {}): Middleware {
   const key = opts.providerKey ?? "memory";
-  const onError = opts.onError ?? ((e: unknown) => console.warn(`[orp] ai-sdk: could not record the turn (${e instanceof OrpError ? e.code : "error"})`));
+  const onError = opts.onError ?? ((e: unknown) => console.warn(`[smartware] ai-sdk: could not record the turn (${e instanceof SmartwareError ? e.code : "error"})`));
   const hooksFor = (params: CallParams): ReturnType<typeof memoryHooks> => {
     const c = callOptions(params, key);
     const h: HookOptions = { budgetTokens: opts.budgetTokens ?? 1500, profileBudget: opts.profileBudget ?? 0,
@@ -184,7 +184,7 @@ export function claudeAgentTools<T>(client: MemoryApi, tool: ClaudeToolFn<T>, z:
       try {
         return { content: [{ type: "text", text: JSON.stringify(await t.execute(args)) }] };
       } catch (e) {
-        if (e instanceof OrpError) return { content: [{ type: "text", text: `${e.code}: ${e.message}` }], isError: true };
+        if (e instanceof SmartwareError) return { content: [{ type: "text", text: `${e.code}: ${e.message}` }], isError: true };
         throw e;
       }
     }));

@@ -1,4 +1,4 @@
-// Engine parameters (port of orp.engine.Params) and the shipped rankers, which are data (spec §5.10, M53).
+// Engine parameters (port of smartware.engine.Params) and the shipped rankers, which are data (spec §5.10, M53).
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
@@ -37,7 +37,7 @@ export const FEATURES = ["rr_bm25", "rr_bm25_win", "rr_dense", "rr_dense_win", "
   "prev_is_question", "next_reply", "when_q", "count_q", "nb_bm25", "has_time", "has_number", "when_x_time",
   "count_x_number", "where_x_place", "ent_overlap", "rr_thread_x_cover", "rr_sub", "n_parts", "rr_qexp"] as const;
 
-export const RANKERS = ["orp-linear-1", "orp-rrf-1"] as const;
+export const RANKERS = ["smartware-linear-1", "smartware-rrf-1"] as const;
 
 export interface RankerSpec {
   name: string; kind: string; fit_encoder: string | null; fitted_on: string; selection?: string;
@@ -72,10 +72,10 @@ export function chooseRanker(name: string | undefined | null, encoderName: strin
   const notes: string[] = [];
   let n = name ?? "auto";
   if (n === "" || n === "auto") {
-    n = encoderName === rankerSpec("orp-linear-1").fit_encoder ? "orp-linear-1" : "orp-rrf-1";
-    if (n === "orp-rrf-1") {
-      notes.push(`ranker auto: encoder ${encoderName || "unknown"} is not the one orp-linear-1 was fit with, so ` +
-        "orp-rrf-1 is used");
+    n = encoderName === rankerSpec("smartware-linear-1").fit_encoder ? "smartware-linear-1" : "smartware-rrf-1";
+    if (n === "smartware-rrf-1") {
+      notes.push(`ranker auto: encoder ${encoderName || "unknown"} is not the one smartware-linear-1 was fit with, so ` +
+        "smartware-rrf-1 is used");
     }
   }
   return { name: n, params: rankerParams(n), notes };

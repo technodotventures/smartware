@@ -9,10 +9,10 @@ import tempfile
 import time
 import unittest
 
-from orp_client import (BudgetTooSmallError, InvalidParameterError, NotFoundError, OrpClient, UnauthorizedError,
+from smartware_client import (BudgetTooSmallError, InvalidParameterError, NotFoundError, SmartwareClient, UnauthorizedError,
                         UnsupportedParameterError, VersionConflictError)
 
-from ._server import NODE, OrpServer, ServerTestCase
+from ._server import NODE, SmartwareServer, ServerTestCase
 
 
 class FailClosedTests(ServerTestCase):
@@ -77,7 +77,7 @@ class FailClosedTests(ServerTestCase):
     def test_identity_is_never_a_call_argument(self) -> None:
         banned = {"principal", "tenant", "actor_id", "user", "user_id", "as_principal"}
         for name in ("recall", "remember", "forget", "profile", "share", "history", "run"):
-            params = set(inspect.signature(getattr(OrpClient, name)).parameters)
+            params = set(inspect.signature(getattr(SmartwareClient, name)).parameters)
             self.assertFalse(params & banned, name)
 
     def test_profile_requires_a_budget(self) -> None:
@@ -190,8 +190,8 @@ class ErrorTests(ServerTestCase):
             self.alice.advanced.get("no-such-record")
 
     def test_bad_token_is_unauthorized_and_never_echoed(self) -> None:
-        secret = "orp_this-is-not-a-real-token-123456"
-        c = OrpClient(self.server.url, token=secret, tenant="acme")
+        secret = "smartware_this-is-not-a-real-token-123456"
+        c = SmartwareClient(self.server.url, token=secret, tenant="acme")
         with self.assertRaises(UnauthorizedError) as cm:
             c.recall("x")
         self.assertEqual(cm.exception.status, 401)
@@ -200,29 +200,29 @@ class ErrorTests(ServerTestCase):
         self.assertNotIn(secret, repr(c._t))
 
     def test_token_from_env_and_callable(self) -> None:
-        os.environ["ORP_PYTEST_TOKEN"] = self.server.tokens["alice"]
+        os.environ["SMARTWARE_PYTEST_TOKEN"] = self.server.tokens["alice"]
         try:
-            self.assertEqual(OrpClient(self.server.url, token_env="ORP_PYTEST_TOKEN").principal, "alice")
+            self.assertEqual(SmartwareClient(self.server.url, token_env="SMARTWARE_PYTEST_TOKEN").principal, "alice")
         finally:
-            del os.environ["ORP_PYTEST_TOKEN"]
+            del os.environ["SMARTWARE_PYTEST_TOKEN"]
         with self.assertRaises(UnauthorizedError):
-            OrpClient(self.server.url, token_env="ORP_PYTEST_TOKEN", tenant="acme").recall("x")
+            SmartwareClient(self.server.url, token_env="SMARTWARE_PYTEST_TOKEN", tenant="acme").recall("x")
         calls = []
 
         def fresh() -> str:
             calls.append(1)
             return self.server.tokens["bob"]
 
-        self.assertEqual(OrpClient(self.server.url, get_token=fresh).principal, "bob")
+        self.assertEqual(SmartwareClient(self.server.url, get_token=fresh).principal, "bob")
         self.assertTrue(calls)
         with self.assertRaises(ValueError):
-            OrpClient(self.server.url, token="a", token_env="B")
+            SmartwareClient(self.server.url, token="a", token_env="B")
 
     def test_plain_http_to_a_remote_host_is_refused(self) -> None:
         with self.assertRaises(ValueError):
-            OrpClient("http://memory.example.com", token="t")
-        OrpClient("http://memory.example.com", token="t", allow_insecure_http=True)
-        OrpClient("https://memory.example.com", token="t")
+            SmartwareClient("http://memory.example.com", token="t")
+        SmartwareClient("http://memory.example.com", token="t", allow_insecure_http=True)
+        SmartwareClient("https://memory.example.com", token="t")
 
 
 _SIGN_JS = r"""
@@ -247,20 +247,20 @@ class ForUserTests(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
-        cls.tmp = tempfile.mkdtemp(prefix="orp-oidc-")
+        cls.tmp = tempfile.mkdtemp(prefix="smartware-oidc-")
         jwks = os.path.join(cls.tmp, "jwks.json")
-        out = subprocess.run([NODE, "-e", _SIGN_JS, jwks, "https://issuer.test", "orp-test"], capture_output=True,
+        out = subprocess.run([NODE, "-e", _SIGN_JS, jwks, "https://issuer.test", "smartware-test"], capture_output=True,
                              text=True, check=True, timeout=60)
         cls.assertions = json.loads(out.stdout)
-        cls.server = OrpServer({"svc": {"tenant": "acme", "groups": ["platform"]}},
-                               ["--oidc-issuer", "https://issuer.test", "--oidc-audience", "orp-test", "--jwks", jwks])
+        cls.server = SmartwareServer({"svc": {"tenant": "acme", "groups": ["platform"]}},
+                               ["--oidc-issuer", "https://issuer.test", "--oidc-audience", "smartware-test", "--jwks", jwks])
 
     @classmethod
     def tearDownClass(cls) -> None:
         cls.server.stop()
 
     def test_for_user_acts_as_that_user_only(self) -> None:
-        svc = OrpClient(self.server.url, token=self.server.tokens["svc"])
+        svc = SmartwareClient(self.server.url, token=self.server.tokens["svc"])
         dave = svc.for_user(self.assertions["dave"])
         erin = svc.for_user(self.assertions["erin"])
         self.assertEqual((dave.principal, dave.tenant), ("dave", "acme"))
@@ -278,7 +278,7 @@ if __name__ == "__main__":
 
 class AsOfPrecision(unittest.TestCase):
     def test_coarse_as_of_is_end_of_period(self):
-        from orp_client import as_of_time
+        from smartware_client import as_of_time
         self.assertEqual(as_of_time("2024"), "2024-12-31T23:59:59.999999Z")
         self.assertEqual(as_of_time("2024-02"), "2024-02-29T23:59:59.999999Z")
         self.assertEqual(as_of_time("2024-05-12"), "2024-05-12T23:59:59.999999Z")

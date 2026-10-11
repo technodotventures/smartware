@@ -1,6 +1,6 @@
-# @orp/mastra
+# @technodotventures/smartware-mastra
 
-ORP memory for Mastra agents (what Coffee and the Studio OS run on): memory tools built with your own `createTool`,
+Smartware memory for Mastra agents (what Coffee and the Studio OS run on): memory tools built with your own `createTool`,
 and an input/output processor pair that recalls before the model call and records the turn after. Mastra is never
 imported: you pass its functions in.
 
@@ -24,10 +24,10 @@ before relying on it.** The parts this adapter touches:
 import { createTool } from "@mastra/core/tools";
 import { Agent } from "@mastra/core/agent";
 import { z } from "zod";
-import { OrpClient } from "@orp/client";
-import { mastraTools, memoryProcessors } from "@orp/mastra";
+import { SmartwareClient } from "@technodotventures/smartware-client";
+import { mastraTools, memoryProcessors } from "@technodotventures/smartware-mastra";
 
-const memory = new OrpClient({ url: process.env.ORP_URL, token: process.env.ORP_TOKEN });
+const memory = new SmartwareClient({ url: process.env.SMARTWARE_URL, token: process.env.SMARTWARE_TOKEN });
 const { input, output } = memoryProcessors(memory, { resourceScope: "users", profileBudget: 300 });
 
 export const agent = new Agent({
@@ -47,18 +47,18 @@ run sees one `as_of` and recorded writes replay safely on retry.
 Without processors, the hook pair does the same job by hand:
 
 ```js
-import { mastraHooks } from "@orp/mastra";
+import { mastraHooks } from "@technodotventures/smartware-mastra";
 const hooks = mastraHooks(memory, { thread: threadId });
 const context = await hooks.before(messages);
 const res = await agent.generate(messages, { context: context ? [{ role: "system", content: context }] : [] });
 await hooks.after(messages, { role: "assistant", content: res.text });
 ```
 
-## ORP level
+## Smartware level
 
 L3. Identity is the client's credentials. Mastra's `resourceId` and `runtimeContext` are never used as a principal:
 with `resourceScope: "users"`, resourceId `u_1` becomes the scope `users/u_1`, which narrows recall and labels
-writes but grants nothing. The tools are `@orp/tools`, so the model cannot set identity, audience or provenance.
+writes but grants nothing. The tools are `@technodotventures/smartware-tools`, so the model cannot set identity, audience or provenance.
 
 ## What it loses, and how it says so
 
@@ -67,4 +67,4 @@ writes but grants nothing. The tools are `@orp/tools`, so the model cannot set i
   writes. A failure in either throws, so Mastra's own error handling sees it.
 - `degraded[]` from the gateway goes to the client's `onDegraded`.
 
-`conformance.json` lists the `orp doctor` checks this interface can exercise.
+`conformance.json` lists the `smartware doctor` checks this interface can exercise.

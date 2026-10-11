@@ -1,11 +1,11 @@
-"""Write an ORP-Bench set in the neutral eval format (orp-bench-1) that `orp eval` reads, from the same loaders the
+"""Write an Smartware Bench set in the neutral eval format (smartware-bench-1) that `smartware eval` reads, from the same loaders the
 benchmark used, so the TypeScript engine is measured on exactly the published data.
 
-    python3 tools/eval/export_bench.py locomo test out/locomo_test.orpbench.jsonl
-    python3 tools/eval/export_bench.py lmes test out/lme_s_test.orpbench.jsonl      (needs ../data/lme_s)
+    python3 tools/eval/export_bench.py locomo test out/locomo_test.swbench.jsonl
+    python3 tools/eval/export_bench.py lmes test out/lme_s_test.swbench.jsonl      (needs ../data/lme_s)
 
 Format, one haystack per line:
-    {"format": "orp-bench-1", "id": ..., "memories": [{id, content, kind, actor, role, thread, seq, observed_at,
+    {"format": "smartware-bench-1", "id": ..., "memories": [{id, content, kind, actor, role, thread, seq, observed_at,
      meta}], "questions": [{id, question, as_of, answer, evidence: [memory ids], evidence_threads?: [threads],
      category}]}
 """
@@ -39,7 +39,7 @@ with open(out, "w") as f:
         mems = [{"id": t.id, "content": t.text, "kind": "event", "actor": t.speaker, "role": t.role,
                  "thread": t.session_id, "seq": t.idx, "observed_at": t.ts.isoformat(),
                  "meta": {"thread_label": label.get(t.session_id, "")}} for t in c.turns]
-        rec = {"format": "orp-bench-1", "id": c.id, "memories": mems,
+        rec = {"format": "smartware-bench-1", "id": c.id, "memories": mems,
                "questions": [{"id": q.qid, "question": q.text, "as_of": q.time.isoformat() if q.time else None,
                               "answer": q.answer, "evidence": sorted(q.gold_turns),
                               "evidence_threads": sorted(q.gold_sessions), "category": q.category}

@@ -1,5 +1,5 @@
 // Shared text utilities: tokeniser, stemmer, stopwords, token counting, sentence split.
-// A line-for-line port of orp/_text.py. Any change here changes recall, so the oracle is the test.
+// A line-for-line port of smartware/_text.py. Any change here changes recall, so the oracle is the test.
 
 const WORD = /[a-z0-9]+(?:'[a-z]+)?/g;
 // Python's \w is Unicode-aware (letters, digits, underscore); JavaScript's is not, so spell it out.

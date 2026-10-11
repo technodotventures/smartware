@@ -32,7 +32,7 @@ jobs:
       - name: oracle suite, oracle suite against the TypeScript engine, Python client
         run: npm run test:py
       - name: conformance doctor reaches L4
-        run: node packages/server/bin/orp.js doctor --self
+        run: node packages/server/bin/smartware.js doctor --self
       - name: persistence and differential fuzz (short; run longer locally with npm run fuzz)
         run: node tools/fuzz/persist_fuzz.mjs 3 80 && python3 tools/fuzz/diff_fuzz.py 4 80 1 --frozen-clock --idprob=1
 
@@ -42,13 +42,13 @@ jobs:
     services:
       postgres:
         image: postgres:16
-        env: { POSTGRES_PASSWORD: orp-ci }
+        env: { POSTGRES_PASSWORD: smartware-ci }
         ports: ["5432:5432"]
         options: >-
           --health-cmd "pg_isready -U postgres" --health-interval 2s --health-timeout 5s --health-retries 30
     env:
-      PGPASSWORD: orp-ci
-      ORP_TEST_PG: postgres://postgres@127.0.0.1:5432/postgres?sslmode=disable
+      PGPASSWORD: smartware-ci
+      SMARTWARE_TEST_PG: postgres://postgres@127.0.0.1:5432/postgres?sslmode=disable
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with: { persist-credentials: false }
@@ -62,8 +62,8 @@ jobs:
       - name: Postgres store, leases, forwarding, backup
         run: node --test packages/server/test/pg.test.js
       - name: oracle conformance suite against the product engine on Postgres
-        run: ORP_BRIDGE_PG="$ORP_TEST_PG" python3 tools/bridge/run_suite.py -q
+        run: SMARTWARE_BRIDGE_PG="$SMARTWARE_TEST_PG" python3 tools/bridge/run_suite.py -q
       - name: persistence and differential fuzz on Postgres
         run: |
-          ORP_FUZZ_PG="$ORP_TEST_PG" node tools/fuzz/persist_fuzz.mjs 3 80
-          ORP_FUZZ_PG="$ORP_TEST_PG" python3 tools/fuzz/diff_fuzz.py 4 80 1 --frozen-clock --idprob=1 --reopen
+          SMARTWARE_FUZZ_PG="$SMARTWARE_TEST_PG" node tools/fuzz/persist_fuzz.mjs 3 80
+          SMARTWARE_FUZZ_PG="$SMARTWARE_TEST_PG" python3 tools/fuzz/diff_fuzz.py 4 80 1 --frozen-clock --idprob=1 --reopen

@@ -1,8 +1,8 @@
 {
-  "name": "orp-kit",
+  "name": "smartware-kit",
   "private": true,
-  "version": "0.2.0",
-  "description": "ORP (working name): the memory and context protocol kit. Engine, server, clients, adapters, doctor and eval.",
+  "version": "2.0.0",
+  "description": "Smartware 2.0: the memory and context protocol kit. Engine, server, clients, adapters, doctor and eval.",
   "license": "Apache-2.0",
   "type": "module",
   "workspaces": [

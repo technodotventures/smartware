@@ -1,4 +1,4 @@
-// SQLite store (the engine's Store port), schema orp-store-1, shared with the Python oracle (orp/store.py), so
+// SQLite store (the engine's Store port), schema smartware-store-1, shared with the Python oracle (smartware/store.py), so
 // either engine opens a file the other wrote (one writer at a time). Uses Node's built-in node:sqlite: no native
 // module to compile, nothing runs at install. Everything stored is data (JSON text, integers); nothing is evaluated.
 //
@@ -8,10 +8,10 @@ import { createRequire } from "node:module";
 import { chmodSync, existsSync, mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 
-export const SCHEMA = "orp-store-1";
+export const SCHEMA = "smartware-store-1";
 
 const DDL = `
-CREATE TABLE IF NOT EXISTS orp_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS smartware_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS memories (iid TEXT PRIMARY KEY, tenant TEXT NOT NULL, ord INTEGER NOT NULL, record TEXT NOT NULL);
 CREATE INDEX IF NOT EXISTS memories_tenant_ord ON memories (tenant, ord);
 CREATE TABLE IF NOT EXISTS claims (tenant TEXT NOT NULL, key TEXT NOT NULL, pos INTEGER NOT NULL, iid TEXT NOT NULL,
@@ -161,8 +161,8 @@ export class SqliteStore implements Store {
     if (isNew) chmodSync(path, 0o600);
     this.db.exec("PRAGMA journal_mode=WAL; PRAGMA synchronous=NORMAL; PRAGMA busy_timeout=5000;");
     this.db.exec(DDL);
-    const row = this.q("SELECT value FROM orp_meta WHERE key='schema'").get() as Row | undefined;
-    if (!row) this.q("INSERT INTO orp_meta VALUES ('schema', ?)").run(SCHEMA);
+    const row = this.q("SELECT value FROM smartware_meta WHERE key='schema'").get() as Row | undefined;
+    if (!row) this.q("INSERT INTO smartware_meta VALUES ('schema', ?)").run(SCHEMA);
     else if (row.value !== SCHEMA) throw new Error(`${path}: store schema ${row.value}, this engine reads ${SCHEMA}`);
   }
 
@@ -178,7 +178,7 @@ export class SqliteStore implements Store {
 
   metaSync(): Record<string, string> {
     const out: Record<string, string> = {};
-    for (const r of this.q("SELECT key, value FROM orp_meta").all() as Row[]) out[r.key] = r.value;
+    for (const r of this.q("SELECT key, value FROM smartware_meta").all() as Row[]) out[r.key] = r.value;
     const mx = this.q("SELECT MAX(ord) AS m FROM memories").get() as Row;
     out.max_ord = String(mx?.m ?? 0);
     return out;
@@ -252,7 +252,7 @@ export class SqliteStore implements Store {
   flushSync(d: StoreDelta) {
     this.db.exec("BEGIN IMMEDIATE");
     try {
-      for (const [k, v] of Object.entries(d.meta)) this.q("INSERT OR REPLACE INTO orp_meta VALUES (?, ?)").run(k, v);
+      for (const [k, v] of Object.entries(d.meta)) this.q("INSERT OR REPLACE INTO smartware_meta VALUES (?, ?)").run(k, v);
       for (const id of d.edgesDel ?? []) this.q("DELETE FROM edges WHERE id = ?").run(id);
       for (const v of d.vectorsDel ?? []) this.q("DELETE FROM vectors WHERE encoder = ? AND text_sha = ?").run(v.encoder, v.sha);
       // deletes before inserts, so an id purged and then re-used inside one verb ends up present

@@ -1,4 +1,4 @@
-// Deterministic temporal expressions (port of orp/timeparse.py).
+// Deterministic temporal expressions (port of smartware/timeparse.py).
 // Query side: "last month", "in May 2023", "two weeks ago" -> a window and an ordering intent relative to as_of.
 // Write side: resolve "yesterday", "last Friday" inside a memory against its own time.
 import { addDays, fromParts, isValidDate, parts, replace, strftime, type Micros } from "./time.js";

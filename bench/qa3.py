@@ -167,9 +167,9 @@ def score(source: str = "claude"):
     idx = rng.integers(0, len(qs), (10000, len(qs)))
     comp = {}
     for s in systems:
-        if s in ("orp", "oracle"):
+        if s in ("smartware", "oracle"):
             continue
-        d = np.array([per_q[q]["orp"] - per_q[q][s] for q in qs])
+        d = np.array([per_q[q]["smartware"] - per_q[q][s] for q in qs])
         bs = d[idx].mean(1)
         p = float(min(1.0, 2 * min((bs <= 0).mean(), (bs >= 0).mean())))
         comp[s] = {"diff": float(d.mean()), "ci95": [float(np.percentile(bs, 2.5)), float(np.percentile(bs, 97.5))],
@@ -186,7 +186,7 @@ def score(source: str = "claude"):
     po = float((a == b).mean()) if len(both) else None
     pe = float(a.mean() * b.mean() + (1 - a.mean()) * (1 - b.mean())) if len(both) else None
     kappa = (po - pe) / (1 - pe) if len(both) and pe < 1 else None
-    out = {"n_questions": len(qs), "accuracy": acc, "orp_minus": comp,
+    out = {"n_questions": len(qs), "accuracy": acc, "smartware_minus": comp,
            "by_category": {c: {s: float(np.mean(x)) for (cc, s), x in cat.items() if cc == c}
                            for c in sorted({c for c, _ in cat})},
            "n_by_category": {c: len([q for q in qs if key[next(u for u in key if key[u]["qid"] == q)]["category"] == c])
@@ -199,7 +199,7 @@ def score(source: str = "claude"):
                         "w"), indent=1)
     for s in sorted(acc, key=lambda s: -acc[s]):
         c = comp.get(s)
-        print(f"{s:34s} {acc[s] * 100:5.1f}" + (f"  ORP-minus {c['diff'] * 100:+.1f} [{c['ci95'][0] * 100:+.1f}, "
+        print(f"{s:34s} {acc[s] * 100:5.1f}" + (f"  Smartware-minus {c['diff'] * 100:+.1f} [{c['ci95'][0] * 100:+.1f}, "
                                                  f"{c['ci95'][1] * 100:+.1f}] p_holm={c['p_holm']:.3f}" if c else ""))
     print("judge agreement", out["judge_agreement"])
 

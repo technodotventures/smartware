@@ -1,0 +1,31 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "https://smartware.software/schema/0.1/ForgetResponse",
+ "title": "ForgetResponse",
+ "type": "object",
+ "properties": {
+  "dry_run": {
+   "type": "boolean"
+  },
+  "affected": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  },
+  "degraded": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  },
+  "request_id": {
+   "type": "string"
+  }
+ },
+ "required": [
+  "dry_run",
+  "affected"
+ ],
+ "additionalProperties": false
+}

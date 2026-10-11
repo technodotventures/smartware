@@ -19,11 +19,11 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BUDGET, BATCH, SEED = 1000, 15, 3
 CLEAN = {"render": "clean"}
 VARIANTS = {  # name -> (registry system, kwargs, chronological display)
-    "orp": ("orp", {"render": "v012"}, False),  # v0.1.2 rendering (the engine default became "clean" in v0.1.3)
-    "orp-clean": ("orp", CLEAN, False),
-    "orp-clean-chrono": ("orp", CLEAN, True),
-    "orp-clean-nodates": ("orp", {**CLEAN, "resolve_dates": False}, True),
-    "orp-clean-full": ("orp", {**CLEAN, "long_unit_tokens": 10 ** 6}, True),
+    "smartware": ("smartware", {"render": "v012"}, False),  # v0.1.2 rendering (the engine default became "clean" in v0.1.3)
+    "smartware-clean": ("smartware", CLEAN, False),
+    "smartware-clean-chrono": ("smartware", CLEAN, True),
+    "smartware-clean-nodates": ("smartware", {**CLEAN, "resolve_dates": False}, True),
+    "smartware-clean-full": ("smartware", {**CLEAN, "long_unit_tokens": 10 ** 6}, True),
 }
 
 
@@ -139,7 +139,7 @@ def judge(r, size: int = 150):
     print((len(items) + size - 1) // size, "judge batches")
 
 
-def score(r, source="claude", ref="orp"):
+def score(r, source="claude", ref="smartware"):
     d = _dir(r)
     key = json.load(open(os.path.join(d, "_key.json")))
     v = {}

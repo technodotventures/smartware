@@ -1,6 +1,6 @@
 {
  "runs": {
-  "orp+facts": {
+  "smartware+facts": {
    "J": 0.8391924534222184,
    "dev": {
     "recall@500": 0.797302001740644,
@@ -15,7 +15,7 @@
     "n": 383
    }
   },
-  "orp": {
+  "smartware": {
    "J": 0.8279298571074027,
    "dev": {
     "recall@500": 0.7560922541340296,
@@ -90,7 +90,7 @@
     "n": 383
    }
   },
-  "orp+evidence": {
+  "smartware+evidence": {
    "J": 0.843234533573959,
    "dev": {
     "recall@500": 0.7911227154046997,
@@ -557,7 +557,7 @@
   }
  },
  "choice": {
-  "orp": "orp+evidence",
+  "smartware": "smartware+evidence",
   "bm25": "bm25+facts",
   "dense": "dense+facts",
   "graphiti@tuned": "graphiti@tuned+facts",

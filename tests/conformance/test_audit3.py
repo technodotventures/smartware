@@ -5,23 +5,23 @@ from __future__ import annotations
 import json
 import unittest
 
-from orp import rankers
-from orp.api import ORPError, Service
-from orp.embedders import HashingEmbedder
-from orp.model import Principal
+from smartware import rankers
+from smartware.api import SmartwareError, Service
+from smartware.embedders import HashingEmbedder
+from smartware.model import Principal
 
 A = Principal("alice", frozenset(), tenant="t1")
 ROOT = Principal("root", frozenset({"*"}), tenant="t1")
 
 
 def svc():
-    return Service(HashingEmbedder(), rankers.params("orp-rrf-1"))
+    return Service(HashingEmbedder(), rankers.params("smartware-rrf-1"))
 
 
 def err(fn, *a):
     try:
         fn(*a)
-    except ORPError as e:
+    except SmartwareError as e:
         return e.code
     return "ok"
 
@@ -169,7 +169,7 @@ class Audit3(unittest.TestCase):
         self.assertEqual(s.engine.mem["c1~t1"].meta.get("entities"), [])
 
     def test_remap_is_deterministic(self):
-        from orp.api import _remap_id
+        from smartware.api import _remap_id
         self.assertEqual(_remap_id("t", "mem_" + "a" * 24), _remap_id("t", "mem_" + "a" * 24))
         self.assertNotEqual(_remap_id("t", "mem_" + "a" * 24), _remap_id("u", "mem_" + "a" * 24))
         self.assertRegex(_remap_id("t", "x"), r"^mem_[0-9a-f]{24}$")

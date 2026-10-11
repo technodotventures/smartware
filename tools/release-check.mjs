@@ -1,7 +1,7 @@
 // Release gate (run in CI and before any publish). Fails on:
 //   - npm lifecycle scripts in any package (preinstall, install, postinstall, prepare, prepublish, prepublishOnly,
 //     preuninstall, uninstall, postuninstall): the July 2026 compromise ran through exactly this path
-//   - dependencies outside the allowlist (only @orp/* at runtime; TypeScript and Node types for development)
+//   - dependencies outside the allowlist (only @technodotventures/smartware-* at runtime; TypeScript and Node types for development)
 //   - published files outside each package's "files" allowlist, or anything that looks like state or secrets
 //   - payload signatures from the 2026 incident (atob(, eval("global., global.<x>='<digits>-, the createRequire
 //     prepend followed by an over-long line) and any over-long line in source
@@ -31,7 +31,7 @@ const components = [];
 for (const dir of pkgDirs) {
   const p = JSON.parse(readFileSync(join(ROOT, dir, "package.json"), "utf8"));
   for (const k of Object.keys(p.scripts ?? {})) if (LIFECYCLE.includes(k)) fail(`${dir}: lifecycle script "${k}"`);
-  for (const [d] of Object.entries({ ...p.dependencies, ...p.optionalDependencies })) if (!d.startsWith("@orp/")) fail(`${dir}: runtime dependency ${d} outside the allowlist`);
+  for (const [d] of Object.entries({ ...p.dependencies, ...p.optionalDependencies })) if (!(d === "smartware" || d.startsWith("@technodotventures/smartware-"))) fail(`${dir}: runtime dependency ${d} outside the allowlist`);
   for (const d of Object.keys(p.devDependencies ?? {})) if (!DEV_ALLOW.has(d)) fail(`${dir}: dev dependency ${d} not in the allowlist`);
   if (!Array.isArray(p.files)) fail(`${dir}: no "files" allowlist`);
   if (p.license !== "Apache-2.0") fail(`${dir}: licence is ${p.license}`);
@@ -45,7 +45,7 @@ for (const dir of pkgDirs) {
   };
   for (const f of ["package.json", "README.md", "LICENSE", ...(p.files ?? [])]) walk(f);
   for (const f of files) {
-    if (/(^|\/)(\.env|keys\.json|.*\.db|.*\.db-wal|.*\.pem|.*\.key|id_rsa.*|.*\.orpenc|.*\.pkl)$/.test(f)) fail(`${dir}: would publish ${f}`);
+    if (/(^|\/)(\.env|keys\.json|.*\.db|.*\.db-wal|.*\.pem|.*\.key|id_rsa.*|.*\.swenc|.*\.pkl)$/.test(f)) fail(`${dir}: would publish ${f}`);
     if (/(^|\/)test(s)?\//.test(f)) fail(`${dir}: would publish test file ${f}`);
   }
   const hashes = files.sort().map((f) => ({ f, sha: createHash("sha256").update(readFileSync(join(ROOT, dir, f))).digest("hex") }));
@@ -74,7 +74,7 @@ const SECRET = [[/-----BEGIN (?:RSA |EC |OPENSSH |DSA |PGP )?PRIVATE KEY-----/, 
   [/\bsk-(?:proj-)?[A-Za-z0-9]{32,}\b/, "OpenAI key"], [/\bxox[abprs]-[0-9A-Za-z-]{20,}\b/, "Slack token"], [/\bnpm_[A-Za-z0-9]{36}\b/, "npm token"]];
 const SECRET_ALLOW = /(^|\/)test(s)?\/|secrets\.ts$|release-check\.mjs$|test_.*\.py$/;
 for (const f of tracked) {
-  if (SECRET_ALLOW.test(f) || /\.(png|jpg|gz|db|orpenc|pkl)$/.test(f)) continue;
+  if (SECRET_ALLOW.test(f) || /\.(png|jpg|gz|db|swenc|pkl)$/.test(f)) continue;
   let text;
   try { text = readFileSync(join(ROOT, f), "utf8"); } catch { continue; }
   for (const [rx, name] of SECRET) if (rx.test(text)) fail(`${f}: looks like a ${name}`);

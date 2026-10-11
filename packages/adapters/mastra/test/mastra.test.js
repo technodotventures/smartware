@@ -1,7 +1,7 @@
-// Tests for @orp/mastra with stand-ins for Mastra's createTool and Zod (neither can be installed here).
+// Tests for @technodotventures/smartware-mastra with stand-ins for Mastra's createTool and Zod (neither can be installed here).
 import { test, before, after } from "node:test";
 import assert from "node:assert/strict";
-import { OrpClient } from "@orp/client";
+import { SmartwareClient } from "@technodotventures/smartware-client";
 import { mastraTools, memoryProcessors, toolInput } from "../dist/index.js";
 import { startServer } from "../../../client/test/server.js";
 
@@ -9,8 +9,8 @@ let srv, alice, bob;
 const quiet = () => {};
 before(async () => {
   srv = await startServer();
-  alice = new OrpClient({ url: srv.url, token: srv.tokens.alice, onDegraded: quiet });
-  bob = new OrpClient({ url: srv.url, token: srv.tokens.bob, onDegraded: quiet });
+  alice = new SmartwareClient({ url: srv.url, token: srv.tokens.alice, onDegraded: quiet });
+  bob = new SmartwareClient({ url: srv.url, token: srv.tokens.bob, onDegraded: quiet });
 });
 after(async () => { await srv.close(); });
 

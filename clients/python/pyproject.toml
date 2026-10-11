@@ -3,9 +3,9 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "orp-client"
-version = "0.1.0"
-description = "Python client for the ORP memory protocol, with LangGraph, mem0 and Letta compatibility shims"
+name = "smartware-client"
+version = "2.0.0"
+description = "Python client for the Smartware memory protocol, with LangGraph, mem0 and Letta compatibility shims"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "Apache-2.0" }
@@ -18,7 +18,7 @@ classifiers = [
 ]
 
 [tool.setuptools]
-packages = ["orp_client"]
+packages = ["smartware_client"]
 
 [tool.setuptools.package-data]
-orp_client = ["py.typed"]
+smartware_client = ["py.typed"]

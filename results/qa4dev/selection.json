@@ -1,12 +1,12 @@
 {
- "winner": "orp-clean",
+ "winner": "smartware-clean",
  "mean": {
   "bm25": 0.6534090909090908,
   "mem0@tuned": 0.7045454545454546,
-  "orp": 0.6477272727272727,
-  "orp-clean": 0.7329545454545454,
-  "orp-clean-chrono": 0.6761363636363636,
-  "orp-clean-full": 0.6647727272727273,
-  "orp-clean-nodates": 0.6477272727272727
+  "smartware": 0.6477272727272727,
+  "smartware-clean": 0.7329545454545454,
+  "smartware-clean-chrono": 0.6761363636363636,
+  "smartware-clean-full": 0.6647727272727273,
+  "smartware-clean-nodates": 0.6477272727272727
  }
 }

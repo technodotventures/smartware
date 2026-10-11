@@ -1,4 +1,4 @@
-// Wire types for the ORP 0.1 HTTP binding, written by hand to match schema/orp-0.1/*.schema.json.
+// Wire types for the Smartware 0.1 HTTP binding, written by hand to match schema/smartware-0.1/*.schema.json.
 // Identity fields (principal, tenant, actor of the request) are deliberately absent from every request type:
 // the gateway takes them from the bearer token (M56).
 

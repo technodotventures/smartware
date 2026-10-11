@@ -8,7 +8,7 @@ import unittest
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Dict, List
 
-from orp_client import OrpClient, RateLimitedError, TransportError, UnavailableError
+from smartware_client import SmartwareClient, RateLimitedError, TransportError, UnavailableError
 
 from ._server import ServerTestCase
 
@@ -64,8 +64,8 @@ class _Stub:
         self.httpd.server_close()
 
 
-def _client(url: str, retries: int = 3, **kw) -> OrpClient:
-    c = OrpClient(url, token="t", tenant="acme", retries=retries, **kw)
+def _client(url: str, retries: int = 3, **kw) -> SmartwareClient:
+    c = SmartwareClient(url, token="t", tenant="acme", retries=retries, **kw)
     c.delays = []  # type: ignore[attr-defined]
     c._t._sleep = c.delays.append  # type: ignore[attr-defined]  # record instead of waiting
     return c
@@ -155,7 +155,7 @@ class RealServerRateLimitTests(ServerTestCase):
     server_args = ["--rate", "2:1"]
 
     def test_429_is_retried_for_reads_only(self) -> None:
-        c = OrpClient(self.server.url, token=self.server.tokens["alice"], tenant="acme", retries=5)
+        c = SmartwareClient(self.server.url, token=self.server.tokens["alice"], tenant="acme", retries=5)
         c.principal
         for _ in range(4):  # back-to-back reads exceed the burst; each one still succeeds
             c.recall("anything at all")
@@ -167,9 +167,9 @@ class RealServerRateLimitTests(ServerTestCase):
         self.assertEqual(found, [])
 
     def test_adapter_writes_carry_keys_and_ride_out_429(self) -> None:
-        from orp_client.langgraph import OrpStore
-        c = OrpClient(self.server.url, token=self.server.tokens["alice"], tenant="acme", retries=5)
-        store = OrpStore(c)
+        from smartware_client.langgraph import SmartwareStore
+        c = SmartwareClient(self.server.url, token=self.server.tokens["alice"], tenant="acme", retries=5)
+        store = SmartwareStore(c)
         c.recall("drain")
         store.put(("busy",), "k", {"text": "first"})
         store.put(("busy",), "k", {"text": "second"})  # an upsert under the rate limit

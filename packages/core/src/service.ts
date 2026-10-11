@@ -1,5 +1,5 @@
-// ORP service layer (spec §4): the verbs with request validation, principal binding, concurrency control,
-// governance (§6) and lifecycle (§7). A port of orp/api.py; the conformance suite and the doctor test both.
+// Smartware service layer (spec §4): the verbs with request validation, principal binding, concurrency control,
+// governance (§6) and lifecycle (§7). A port of smartware/api.py; the conformance suite and the doctor test both.
 //
 // Transports call Service methods with a principal resolved from credentials, never from request bodies.
 // Every response carries request_id and degraded[]. Client-supplied ids are unique per tenant (M02): they are
@@ -18,7 +18,7 @@ import { countTokens, sentences, terms } from "./text.js";
 import { epochSeconds, isoformat, MIN_TIME, nowMicros, parseTime, type Micros } from "./time.js";
 
 export const SPEC_VERSION = "0.1";
-export const ENGINE_VERSION = "0.2.0";
+export const ENGINE_VERSION = "2.0.0";
 export const ROLES = ["user", "assistant", "system", "tool", "human", "connector"];
 export const LOADS = ["always", "on_scope", "on_query"];
 export const WAITS = ["accepted", "stored", "indexed"];
@@ -26,7 +26,7 @@ export const DEFAULT_RECALL_BUDGET = 2000;
 export const MAX_ITEMS = 200, MAX_BUDGET = 32000;
 const ENGINE_ID = /^mem_[0-9a-f]{24}$/;
 
-export class ORPError extends Error {
+export class SmartwareError extends Error {
   constructor(readonly code: string, message: string, readonly details: Record<string, any> = {}) {
     super(message);
   }
@@ -75,15 +75,15 @@ function sortedKeys(o: Json): Json {
 
 function checkKeys(body: unknown, allowed: Set<string>, where: string): asserts body is Json {
   if (body === null || typeof body !== "object" || Array.isArray(body)) {
-    throw new ORPError("invalid_parameter", `${where}: expected an object`);
+    throw new SmartwareError("invalid_parameter", `${where}: expected an object`);
   }
   if (!NESTED.has(where) && hasNul(body)) {
     // NUL is never meaningful in memory text or ids, and stores and keys cannot carry it safely
-    throw new ORPError("invalid_parameter", `${where}: strings may not contain the NUL character`);
+    throw new SmartwareError("invalid_parameter", `${where}: strings may not contain the NUL character`);
   }
   const extra = Object.keys(body).filter((k) => !allowed.has(k)).sort(pyCmp);
   if (extra.length) {
-    throw new ORPError("unsupported_parameter", `${where}: unsupported parameter(s) ${pyList(extra)}`, { parameters: extra });
+    throw new SmartwareError("unsupported_parameter", `${where}: unsupported parameter(s) ${pyList(extra)}`, { parameters: extra });
   }
 }
 
@@ -91,7 +91,7 @@ const pyList = (xs: string[]) => "[" + xs.map((x) => `'${x}'`).join(", ") + "]";
 
 function enumv<T extends string>(v: unknown, allowed: readonly T[], name: string): T {
   if (!(allowed as readonly unknown[]).includes(v)) {
-    throw new ORPError("unsupported_parameter", `${name} ${pyRepr(v)} not in ${pyList([...allowed])}`);
+    throw new SmartwareError("unsupported_parameter", `${name} ${pyRepr(v)} not in ${pyList([...allowed])}`);
   }
   return v as T;
 }
@@ -104,37 +104,37 @@ const TS_RX = /^\d{4}-\d{2}-\d{2}([T ]\d{2}(:\d{2}(:\d{2}([.,]\d{1,9})?)?)?)?\s*
 function ts(v: unknown): Micros | null {
   if (v === undefined || v === null) return null;
   if (typeof v !== "string" || !TS_RX.test(v.trim())) {
-    throw new ORPError("invalid_parameter", `bad timestamp ${pyRepr(v)}: use ISO 8601, e.g. 2026-05-12T09:30:00Z`);
+    throw new SmartwareError("invalid_parameter", `bad timestamp ${pyRepr(v)}: use ISO 8601, e.g. 2026-05-12T09:30:00Z`);
   }
   try {
     return parseTime(String(v));
   } catch {
-    throw new ORPError("invalid_parameter", `bad timestamp ${pyRepr(v)}`);
+    throw new SmartwareError("invalid_parameter", `bad timestamp ${pyRepr(v)}`);
   }
 }
 
 function strs(v: unknown, name: string, nullable = false): string[] | null {
   if ((v === null || v === undefined) && nullable) return null;
   if (!Array.isArray(v) || !v.every((x) => typeof x === "string")) {
-    throw new ORPError("invalid_parameter", `${name} must be a list of strings`);
+    throw new SmartwareError("invalid_parameter", `${name} must be a list of strings`);
   }
   return [...v];
 }
 
 function int(v: unknown, name: string, lo?: number, hi?: number): number {
   if (typeof v !== "number" || !Number.isFinite(v) || !Number.isInteger(v)) {
-    throw new ORPError("invalid_parameter", `${name} must be an integer`);
+    throw new SmartwareError("invalid_parameter", `${name} must be an integer`);
   }
   if ((lo !== undefined && v < lo) || (hi !== undefined && v > hi)) {
-    throw new ORPError("invalid_parameter", `${name} must be within [${lo ?? "None"}, ${hi ?? "None"}]`);
+    throw new SmartwareError("invalid_parameter", `${name} must be within [${lo ?? "None"}, ${hi ?? "None"}]`);
   }
   return v;
 }
 
 function num(v: unknown, name: string, lo?: number, hi?: number): number {
-  if (typeof v !== "number" || !Number.isFinite(v)) throw new ORPError("invalid_parameter", `${name} must be a number`);
+  if (typeof v !== "number" || !Number.isFinite(v)) throw new SmartwareError("invalid_parameter", `${name} must be a number`);
   if ((lo !== undefined && v < lo) || (hi !== undefined && v > hi)) {
-    throw new ORPError("invalid_parameter", `${name} must be within [${lo ?? "None"}, ${hi ?? "None"}]`);
+    throw new SmartwareError("invalid_parameter", `${name} must be within [${lo ?? "None"}, ${hi ?? "None"}]`);
   }
   return v;
 }
@@ -229,11 +229,11 @@ export class Service {
 
   constructor(readonly enc: Encoder, opts: ServiceOptions = {}) {
     this.engine = new Engine(enc, opts.params);
-    this.tokenizer = opts.tokenizer ?? "orp-approx-1";
+    this.tokenizer = opts.tokenizer ?? "smartware-approx-1";
     this.store = opts.store ?? null;
     this.secretScan = opts.secretScan ?? true;
     this.encoderName = opts.encoderName ?? enc.name;
-    this.rankerName = opts.rankerName ?? `orp-${this.engine.p.ranker}-1`;
+    this.rankerName = opts.rankerName ?? `smartware-${this.engine.p.ranker}-1`;
     this.notes = opts.notes ?? [];
     this.idleTenantMs = opts.idleTenantMs ?? 10 * 60_000;
     this.releaseOnClose = opts.releaseLeasesOnClose ?? true;
@@ -288,7 +288,7 @@ export class Service {
       if (!L || this.holds(t)) return { mine: true };
       return await this.lock.run(() => this.acquire(t));
     } catch (e) {
-      if (!(e instanceof ORPError) && (e as any)?.unavailable) throw new ORPError("unavailable", "the store could not be reached; retry");
+      if (!(e instanceof SmartwareError) && (e as any)?.unavailable) throw new SmartwareError("unavailable", "the store could not be reached; retry");
       throw e;
     }
   }
@@ -306,7 +306,7 @@ export class Service {
 
   private async acquire(t: string): Promise<{ mine: true } | { mine: false; owner: string; url: string | null }> {
     const L = this.store!.leases!;
-    if (this.closing) throw new ORPError("unavailable", "this node is shutting down; retry");
+    if (this.closing) throw new SmartwareError("unavailable", "this node is shutting down; retry");
     if (this.holds(t)) return { mine: true };
     const before = this.held.get(t);
     const got = await L.acquire(t);
@@ -364,7 +364,7 @@ export class Service {
     if (this.store?.leases) {
       this.lastUsed.set(t, Date.now());
       const r = await this.acquire(t);
-      if (!r.mine) throw new ORPError("unavailable", "this tenant is served by another node; retry there", { node: r.owner, url: r.url });
+      if (!r.mine) throw new SmartwareError("unavailable", "this tenant is served by another node; retry there", { node: r.owner, url: r.url });
     }
     if (this.loaded.has(t)) return;
     if (!this.store) { this.loaded.add(t); return; }
@@ -425,8 +425,8 @@ export class Service {
     try {
       await this.enc.warm(texts);
     } catch (e) {
-      if (e instanceof ORPError) throw e;
-      throw new ORPError("unavailable", "the embedding service is unavailable; retry later", { cause: String((e as Error)?.message ?? e) });
+      if (e instanceof SmartwareError) throw e;
+      throw new SmartwareError("unavailable", "the embedding service is unavailable; retry later", { cause: String((e as Error)?.message ?? e) });
     }
   }
 
@@ -452,7 +452,7 @@ export class Service {
       for (const i of J.mem) { const m = E.mem.get(i); if (m) ts.add(m.tenant); }
       d.fence = [...ts].map((t) => {
         const h = this.held.get(t);
-        if (!h) throw new ORPError("unavailable", "this node no longer holds the tenant; retry", { tenant: t });
+        if (!h) throw new SmartwareError("unavailable", "this node no longer holds the tenant; retry", { tenant: t });
         return { tenant: t, epoch: h.epoch };
       });
       d.wseqFloor = E.wseq;
@@ -489,9 +489,9 @@ export class Service {
     } catch (e) {
       if ((e as any)?.leaseLost) { // another node took the tenant over: let go of it here; the caller retries there
         for (const f of d.fence ?? []) { this.held.delete(f.tenant); if (this.loaded.has(f.tenant)) this.unloadTenant(f.tenant); }
-        throw new ORPError("unavailable", "this tenant moved to another node; retry", { tenant });
+        throw new SmartwareError("unavailable", "this tenant moved to another node; retry", { tenant });
       }
-      if ((e as any)?.unavailable) throw new ORPError("unavailable", "the store could not be reached; retry");
+      if ((e as any)?.unavailable) throw new SmartwareError("unavailable", "the store could not be reached; retry");
       throw e;
     }
     E.audit = [];
@@ -526,7 +526,7 @@ export class Service {
           throw e;
         }
       } catch (e) {
-        if (!(e instanceof ORPError) && (e as any)?.unavailable) throw new ORPError("unavailable", "the store could not be reached; retry");
+        if (!(e instanceof SmartwareError) && (e as any)?.unavailable) throw new SmartwareError("unavailable", "the store could not be reached; retry");
         throw e;
       }
     });
@@ -577,7 +577,7 @@ export class Service {
 
   // ------------------------------------------------------------ ids
   private in_(tenant: string, cid: unknown): string {
-    if (typeof cid !== "string") throw new ORPError("invalid_parameter", "ids are strings");
+    if (typeof cid !== "string") throw new SmartwareError("invalid_parameter", "ids are strings");
     const q = `${cid}~${tenant}`;
     return this.engine.mem.has(q) ? q : cid;
   }
@@ -654,8 +654,8 @@ export class Service {
     const learned = p.ranker === "linear" || p.ranker === "gbdt";
     const inactive = new Set([...p.drop_features, "rr_qexp", ...(p.w_sub <= 0 ? ["rr_sub"] : [])]);
     return env({
-      spec: SPEC_VERSION, engine: `orp-ts/${ENGINE_VERSION}`,
-      conformance: { claimed: ["L1", "L2", "L3", "L4"], suite: "orp doctor (spec/MUSTS.md)" },
+      spec: SPEC_VERSION, engine: `smartware-ts/${ENGINE_VERSION}`,
+      conformance: { claimed: ["L1", "L2", "L3", "L4"], suite: "smartware doctor (spec/MUSTS.md)" },
       kinds: [...KINDS], origins: [...ORIGINS], roles: ROLES,
       tokens: ["principal:<id>", "public", "group:<g>", "channel:<c>", "role:<r>", "label:<l>", "team:<t>", "org:<o>"],
       channels: ["lexical:bm25(k1=1.2,b=0.75, admissible-set statistics)", "lexical:window(unit+admissible neighbours)",
@@ -700,43 +700,43 @@ export class Service {
   private buildMemory(raw: unknown, pr: Principal, mode: string): Memory {
     checkKeys(raw, MEM_KEYS, "memory");
     const t = pr.tenant;
-    if (typeof raw.content !== "string" || !raw.content) throw new ORPError("invalid_parameter", "content must be a non-empty string");
+    if (typeof raw.content !== "string" || !raw.content) throw new SmartwareError("invalid_parameter", "content must be a non-empty string");
     const kind = raw.kind ?? "event";
     if (!(KINDS as readonly string[]).includes(kind) && !String(kind).startsWith("x-")) {
-      throw new ORPError("unsupported_parameter", `kind ${pyRepr(kind)}`);
+      throw new SmartwareError("unsupported_parameter", `kind ${pyRepr(kind)}`);
     }
     const origin = enumv(raw.origin ?? (kind === "event" || kind === "document" ? "observed" : "human"), ORIGINS, "origin");
     if (raw.role !== undefined && raw.role !== null) enumv(raw.role, ROLES, "role");
     const load = enumv(raw.load ?? "on_query", LOADS, "load");
     for (const fld of ["scope", "thread", "actor"]) {
-      if (fld in raw && typeof raw[fld] !== "string") throw new ORPError("invalid_parameter", `${fld} must be a string`);
+      if (fld in raw && typeof raw[fld] !== "string") throw new SmartwareError("invalid_parameter", `${fld} must be a string`);
     }
     if ("meta" in raw && (raw.meta === null || typeof raw.meta !== "object" || Array.isArray(raw.meta))) {
-      throw new ORPError("invalid_parameter", "meta must be an object");
+      throw new SmartwareError("invalid_parameter", "meta must be an object");
     }
     if (raw.meta !== undefined && jsonDepth(raw.meta, 0) > META_MAX_DEPTH) {
-      throw new ORPError("invalid_parameter", `meta nests deeper than ${META_MAX_DEPTH} levels`);
+      throw new SmartwareError("invalid_parameter", `meta nests deeper than ${META_MAX_DEPTH} levels`);
     }
     if (Object.keys(raw.meta ?? {}).some((k) => k.startsWith("_") || DERIVED_META.has(k))) {
-      throw new ORPError("invalid_parameter", `meta keys starting with '_', and the engine-derived keys ${pyList([...DERIVED_META].sort())}, are reserved for the engine`);
+      throw new SmartwareError("invalid_parameter", `meta keys starting with '_', and the engine-derived keys ${pyList([...DERIVED_META].sort())}, are reserved for the engine`);
     }
     const readers = strs(raw.readers, "readers", true);
     const writers = strs(raw.writers, "writers", true);
     let labels = strs(raw.labels ?? [], "labels")!;
     const derived = strs(raw.derived_from ?? [], "derived_from")!.map((s) => this.in_(t, s));
     if ((origin === "extracted" || origin === "inferred") && !derived.length) {
-      throw new ORPError("invalid_parameter", "extracted/inferred memories require derived_from");
+      throw new SmartwareError("invalid_parameter", "extracted/inferred memories require derived_from");
     }
     for (const s of derived) {
       const src = this.engine.mem.get(s);
-      if (!src || !this.canRead(src, pr, ["secret"])) throw new ORPError("forbidden", `cannot derive from ${this.out(t, s)}`);
+      if (!src || !this.canRead(src, pr, ["secret"])) throw new SmartwareError("forbidden", `cannot derive from ${this.out(t, s)}`);
     }
     let claim: Claim | null = null;
     if (raw.claim !== undefined && raw.claim !== null) {
       const c = raw.claim;
       checkKeys(c, new Set(["subject", "predicate", "object", "cardinality"]), "claim");
       if (!["subject", "predicate", "object"].every((k) => typeof c[k] === "string" && c[k])) {
-        throw new ORPError("invalid_parameter", "claim needs string subject, predicate and object");
+        throw new SmartwareError("invalid_parameter", "claim needs string subject, predicate and object");
       }
       enumv(c.cardinality ?? "one", ["one", "many"], "claim.cardinality");
       claim = { subject: c.subject, predicate: c.predicate, object: c.object, cardinality: c.cardinality ?? "one" };
@@ -744,14 +744,14 @@ export class Service {
     let sources: Source[] = [];
     for (const s of (raw.sources ?? []) as unknown[]) {
       checkKeys(s, new Set(["uri", "span", "hash", "observed_at"]), "source");
-      if (typeof s.uri !== "string") throw new ORPError("invalid_parameter", "source.uri is required");
+      if (typeof s.uri !== "string") throw new SmartwareError("invalid_parameter", "source.uri is required");
       sources.push({ uri: String(s.uri), span: s.span !== undefined ? String(s.span) : "", hash: s.hash !== undefined ? String(s.hash) : "",
         observed_at: s.observed_at !== undefined ? String(s.observed_at) : "" });
     }
     const meta: Json = { ...(raw.meta ?? {}) };
     const eventTime = this.parseTimeField(raw, meta);
     if (origin !== "observed" && !sources.length) {
-      sources = derived.length ? derived.map((s) => src(`orp://${t}/mem/${this.out(t, s)}`)) : [src(`orp://${t}/principal/${pr.id}`)];
+      sources = derived.length ? derived.map((s) => src(`smartware://${t}/mem/${this.out(t, s)}`)) : [src(`smartware://${t}/principal/${pr.id}`)];
     }
     if (this.secretScan) {
       const hits = scanSecrets(raw.content);
@@ -761,7 +761,7 @@ export class Service {
       }
     }
     if (!pr.mayWriteScope(raw.scope ?? "")) {
-      throw new ORPError("forbidden", `this credential may only write under ${JSON.stringify(pr.writeScopes)}`);
+      throw new SmartwareError("forbidden", `this credential may only write under ${JSON.stringify(pr.writeScopes)}`);
     }
     const m = makeMemory({
       content: raw.content, kind, tenant: t, scope: raw.scope ?? "",
@@ -775,11 +775,11 @@ export class Service {
     if (raw.id !== undefined && raw.id !== null) {
       const cid = raw.id;
       if (typeof cid !== "string" || !cid || cid.includes("~")) {
-        throw new ORPError("invalid_parameter", "client ids are non-empty strings without '~'");
+        throw new SmartwareError("invalid_parameter", "client ids are non-empty strings without '~'");
       }
       if (ENGINE_ID.test(cid)) { // an engine id may only name an existing record of this tenant (upsert)
         const ex = this.engine.mem.get(cid);
-        if (!ex || ex.tenant !== t) throw new ORPError("invalid_parameter", "ids of the form mem_<24 hex> are engine-assigned");
+        if (!ex || ex.tenant !== t) throw new SmartwareError("invalid_parameter", "ids of the form mem_<24 hex> are engine-assigned");
         m.id = cid;
       } else {
         m.id = `${cid}~${t}`;
@@ -795,7 +795,7 @@ export class Service {
     checkKeys(body, REMEMBER_KEYS, "remember");
     const mode = enumv(body.mode ?? "append", ["append", "upsert", "supersede", "propose"], "mode");
     enumv(body.wait ?? "indexed", WAITS, "wait");
-    if (!Array.isArray(body.memories ?? [])) throw new ORPError("invalid_parameter", "memories must be a list");
+    if (!Array.isArray(body.memories ?? [])) throw new SmartwareError("invalid_parameter", "memories must be a list");
     return this.verb(pr, true, async () => {
       const replay = this.replayed(body, pr); // a retry returns the original ids before anything is re-validated (M17)
       if (replay) return env(replay);
@@ -824,7 +824,7 @@ export class Service {
     // every check runs before any change, so a batch is all-or-nothing (in every mode, and in the oracle)
     const seen = new Set<string>();
     for (const m of mems) {
-      if (seen.has(m.id)) throw new ORPError("invalid_parameter", `${this.out(t, m.id)} appears twice in one batch`);
+      if (seen.has(m.id)) throw new SmartwareError("invalid_parameter", `${this.out(t, m.id)} appears twice in one batch`);
       seen.add(m.id);
     }
     const plan = raws.map((raw, idx) => {
@@ -834,32 +834,32 @@ export class Service {
         for (const bid of this.blocked.get(`${t}\0${contentHash(m)}`) ?? []) {
           const bm = E.mem.get(bid);
           if (bm && (this.canRead(bm, pr, ["secret"]) || bm.meta._creator === pr.id)) {
-            throw new ORPError("forbidden", "content was retracted; re-ingest blocked");
+            throw new SmartwareError("forbidden", "content was retracted; re-ingest blocked");
           }
         }
       }
       const existing = E.mem.get(m.id);
       if (existing) {
-        if (mode !== "upsert") throw new ORPError("version_conflict", `${this.out(t, m.id)} exists; use mode=upsert with if_version`);
-        if (!this.canWrite(existing, pr)) throw new ORPError("forbidden", `no write access to ${this.out(t, m.id)}`);
+        if (mode !== "upsert") throw new SmartwareError("version_conflict", `${this.out(t, m.id)} exists; use mode=upsert with if_version`);
+        if (!this.canWrite(existing, pr)) throw new SmartwareError("forbidden", `no write access to ${this.out(t, m.id)}`);
         if (body.if_version === undefined || body.if_version === null) {
-          throw new ORPError("invalid_parameter", "upsert of an existing record requires if_version");
+          throw new SmartwareError("invalid_parameter", "upsert of an existing record requires if_version");
         }
         if (existing.status === "retracted" && !body.allow_reingest) {
-          throw new ORPError("forbidden", "record was retracted; upsert would restore it (set allow_reingest)");
+          throw new SmartwareError("forbidden", "record was retracted; upsert would restore it (set allow_reingest)");
         }
         if (int(body.if_version, "if_version") !== existing.version) {
-          throw new ORPError("version_conflict", "version mismatch", { current: existing.version });
+          throw new SmartwareError("version_conflict", "version mismatch", { current: existing.version });
         }
       }
       const sup: string[] = [];
       if (mode === "supersede") {
-        if (m.kind === "event" || m.kind === "document") throw new ORPError("invalid_parameter", "evidence (event/document) is never superseded");
+        if (m.kind === "event" || m.kind === "document") throw new SmartwareError("invalid_parameter", "evidence (event/document) is never superseded");
         for (const old of strs(raw.supersedes ?? [], "supersedes")!) {
           const oi = this.in_(t, old);
           const om = E.mem.get(oi);
-          if (!om || !this.canRead(om, pr, ["secret"]) || !this.canWrite(om, pr)) throw new ORPError("forbidden", `cannot supersede ${old}`);
-          if (om.kind === "event" || om.kind === "document") throw new ORPError("invalid_parameter", "evidence (event/document) is never superseded");
+          if (!om || !this.canRead(om, pr, ["secret"]) || !this.canWrite(om, pr)) throw new SmartwareError("forbidden", `cannot supersede ${old}`);
+          if (om.kind === "event" || om.kind === "document") throw new SmartwareError("invalid_parameter", "evidence (event/document) is never superseded");
           sup.push(oi);
         }
       }
@@ -909,10 +909,10 @@ export class Service {
   async recall(body: unknown, pr: Principal): Promise<Json> {
     checkKeys(body, RECALL_KEYS, "recall");
     if (typeof body.query !== "string" || !body.query.trim()) {
-      throw new ORPError("invalid_parameter", "query must be a non-empty string (an empty query never means 'everything')");
+      throw new SmartwareError("invalid_parameter", "query must be a non-empty string (an empty query never means 'everything')");
     }
     const rejected = ["queries", "cursor", "time"].filter((k) => k in body);
-    if (rejected.length) throw new ORPError("unsupported_parameter", `not supported by this engine: ${pyList(rejected)}`, { parameters: rejected });
+    if (rejected.length) throw new SmartwareError("unsupported_parameter", `not supported by this engine: ${pyList(rejected)}`, { parameters: rejected });
     const budget = body.budget ?? { tokens: DEFAULT_RECALL_BUDGET };
     checkKeys(budget, new Set(["tokens", "items"]), "budget");
     const inc = body.include ?? {};
@@ -920,7 +920,7 @@ export class Service {
     let scope = body.scope ?? {};
     if (typeof scope === "string") scope = { within: scope };
     checkKeys(scope, new Set(["within", "prefer"]), "scope");
-    if (typeof (scope.within ?? "") !== "string") throw new ORPError("invalid_parameter", "scope.within must be a string");
+    if (typeof (scope.within ?? "") !== "string") throw new SmartwareError("invalid_parameter", "scope.within must be a string");
     const prefer = strs(scope.prefer ?? [], "scope.prefer")!;
     const mode = enumv(body.mode ?? "balanced", ["fast", "balanced", "deep"], "mode");
     const gran = enumv(body.granularity ?? "auto", ["unit", "span", "thread", "auto"], "granularity");
@@ -933,14 +933,14 @@ export class Service {
       kinds = strs(body.kinds, "kinds");
     }
     for (const k of kinds ?? []) {
-      if (!(KINDS as readonly string[]).includes(k) && !k.startsWith("x-")) throw new ORPError("unsupported_parameter", `kind ${pyRepr(k)}`);
+      if (!(KINDS as readonly string[]).includes(k) && !k.startsWith("x-")) throw new SmartwareError("unsupported_parameter", `kind ${pyRepr(k)}`);
     }
     const tokens = int(budget.tokens ?? DEFAULT_RECALL_BUDGET, "budget.tokens", undefined, MAX_BUDGET);
-    if (tokens < 50) throw new ORPError("budget_too_small", "budget.tokens must be >= 50");
+    if (tokens < 50) throw new SmartwareError("budget_too_small", "budget.tokens must be >= 50");
     const itemsMax = int(budget.items ?? 50, "budget.items", 1, MAX_ITEMS);
     const nbh = inc.neighbours ?? 0;
     if (!(nbh === 0 || nbh === null || nbh === "auto") && (typeof nbh !== "number" || !Number.isInteger(nbh) || nbh < 0 || nbh > 10)) {
-      throw new ORPError("invalid_parameter", "include.neighbours must be an integer 0..10 or 'auto'");
+      throw new SmartwareError("invalid_parameter", "include.neighbours must be an integer 0..10 or 'auto'");
     }
     let minCov: number | null = null;
     if (body.min_coverage !== undefined && body.min_coverage !== null) minCov = num(body.min_coverage, "min_coverage", 0, 1);
@@ -976,7 +976,7 @@ export class Service {
           if (nxt && this.readableId(nxt, pr)) sup.push(this.out(t, nxt));
         }
         items.push({
-          ref: `orp://${t}/mem/${this.out(t, it.memory_ids[0]!)}`, memory_ids: this.outl(t, it.memory_ids),
+          ref: `smartware://${t}/mem/${this.out(t, it.memory_ids[0]!)}`, memory_ids: this.outl(t, it.memory_ids),
           kind: m0 ? m0.kind : "event", scope: m0 ? m0.scope : "", text: it.text, tokens: it.tokens, score: it.score,
           why: (inc.explain ?? true) ? it.why : {}, validity: it.valid,
           citations: it.citations.map((c) => this.out(t, c)), superseded: sup,
@@ -996,13 +996,13 @@ export class Service {
     checkKeys(body, new Set(["subject", "budget", "as_of"]), "profile");
     const b = body.budget;
     if (b === null || typeof b !== "object" || !b.tokens) {
-      throw new ORPError("invalid_parameter", "profile requires budget.tokens (no unbounded ambient context)");
+      throw new SmartwareError("invalid_parameter", "profile requires budget.tokens (no unbounded ambient context)");
     }
     checkKeys(b, new Set(["tokens"]), "budget");
     const tokens = int(b.tokens, "budget.tokens", 1, MAX_BUDGET);
     const asOf = ts(body.as_of) ?? nowMicros();
     const subj = body.subject;
-    if (subj !== undefined && subj !== null && typeof subj !== "string") throw new ORPError("invalid_parameter", "subject must be a string");
+    if (subj !== undefined && subj !== null && typeof subj !== "string") throw new SmartwareError("invalid_parameter", "subject must be a string");
     return this.verb(pr, false, () => {
       const view = this.view(pr, asOf);
       const prio: Record<string, number> = { procedure: 0, preference: 1, profile: 2, fact: 3 };
@@ -1042,7 +1042,7 @@ export class Service {
       const iid = this.in_(pr.tenant, memId);
       const view = this.view(pr);
       const m = this.engine.mem.get(iid);
-      if (!m || !view.has(iid)) throw new ORPError("not_found", String(memId));
+      if (!m || !view.has(iid)) throw new SmartwareError("not_found", String(memId));
       const same = !m.thread ? [m] : this.threadSorted(view, m.thread, m.tenant);
       const idx = same.findIndex((x) => x.id === iid);
       const sel = same.slice(Math.max(0, idx - b), idx + a + 1);
@@ -1057,7 +1057,7 @@ export class Service {
 
   /** Admissible units of one thread in order (spec §8.2 /threads/{thread}/neighbours). */
   async thread(thread: unknown, pr: Principal): Promise<Json> {
-    if (typeof thread !== "string" || !thread) throw new ORPError("invalid_parameter", "thread is a non-empty string");
+    if (typeof thread !== "string" || !thread) throw new SmartwareError("invalid_parameter", "thread is a non-empty string");
     return this.verb(pr, false, () => {
       const ms = this.threadSorted(this.view(pr), thread, pr.tenant);
       return env({ memories: ms.map((x) => ({ id: this.out(x.tenant, x.id), actor: x.actor, content: x.content, seq: x.seq })) });
@@ -1066,7 +1066,7 @@ export class Service {
 
   async history(subject: unknown, predicate: unknown, pr: Principal): Promise<Json> {
     if (typeof subject !== "string" || typeof predicate !== "string") {
-      throw new ORPError("invalid_parameter", "subject and predicate are strings");
+      throw new SmartwareError("invalid_parameter", "subject and predicate are strings");
     }
     return this.verb(pr, false, () => {
       const t = pr.tenant;
@@ -1088,7 +1088,7 @@ export class Service {
       for (const end of ["from", "to"]) {
         const iid = this.in_(pr.tenant, body[end]);
         const m = this.engine.mem.get(iid);
-        if (!m || !this.canRead(m, pr)) throw new ORPError("not_found", String(body[end]));
+        if (!m || !this.canRead(m, pr)) throw new SmartwareError("not_found", String(body[end]));
         e[end] = iid;
       }
       const eid = "edge_" + randomBytes(8).toString("hex");
@@ -1102,10 +1102,10 @@ export class Service {
   async unlink(edgeId: unknown, pr: Principal): Promise<Json> {
     return this.verb(pr, true, () => {
       const e = this.edgesMap.get(String(edgeId));
-      if (!e || !this.edgeVisible(e, pr)) throw new ORPError("not_found", String(edgeId));
+      if (!e || !this.edgeVisible(e, pr)) throw new SmartwareError("not_found", String(edgeId));
       const a = this.engine.mem.get(e.from)!, b = this.engine.mem.get(e.to)!;
       if (!(isAdmin(pr) || e._by === pr.id || this.canWrite(a, pr) || this.canWrite(b, pr))) {
-        throw new ORPError("forbidden", "no write access to this edge");
+        throw new SmartwareError("forbidden", "no write access to this edge");
       }
       this.edgesMap.delete(String(edgeId));
       this.jEdges.delete(String(edgeId));
@@ -1123,10 +1123,10 @@ export class Service {
     const limit = int(q.limit ?? 100, "limit", 1, 1000);
     const cursor = int(q.cursor ?? 0, "cursor", 0);
     const asOf = ts(q.as_of);
-    if (q.thread !== undefined && typeof q.thread !== "string") throw new ORPError("invalid_parameter", "thread must be a string");
-    if (q.scope !== undefined && typeof q.scope !== "string") throw new ORPError("invalid_parameter", "scope must be a string");
+    if (q.thread !== undefined && typeof q.thread !== "string") throw new SmartwareError("invalid_parameter", "thread must be a string");
+    if (q.scope !== undefined && typeof q.scope !== "string") throw new SmartwareError("invalid_parameter", "scope must be a string");
     if (q.include_history !== undefined && typeof q.include_history !== "boolean") {
-      throw new ORPError("invalid_parameter", "include_history must be a boolean");
+      throw new SmartwareError("invalid_parameter", "include_history must be a boolean");
     }
     if (kinds) for (const k of kinds) if (!k.startsWith("x-")) enumv(k, KINDS, "kinds");
     return this.verb(pr, false, () => {
@@ -1160,7 +1160,7 @@ export class Service {
     checkKeys(body, FORGET_KEYS, "forget");
     const mode = enumv(body.mode ?? "retract", ["retract", "redact", "purge"], "mode");
     const cascade = body.cascade ?? true;
-    if (typeof cascade !== "boolean") throw new ORPError("invalid_parameter", "cascade must be a boolean");
+    if (typeof cascade !== "boolean") throw new SmartwareError("invalid_parameter", "cascade must be a boolean");
     const list = strs(body.ids, "ids")!;
     return this.verb(pr, !body.dry_run, () => {
       const t = pr.tenant;
@@ -1169,10 +1169,10 @@ export class Service {
       for (const cid of list) {
         const i = this.in_(t, cid);
         const m = E.mem.get(i);
-        if (!m || !this.canRead(m, pr, ["secret"])) throw new ORPError("not_found", cid);
-        if (!this.canWrite(m, pr)) throw new ORPError("forbidden", `no write access to ${cid}`);
+        if (!m || !this.canRead(m, pr, ["secret"])) throw new SmartwareError("not_found", cid);
+        if (!this.canWrite(m, pr)) throw new SmartwareError("forbidden", `no write access to ${cid}`);
         if (opts.ifVersion !== undefined && m.version !== opts.ifVersion) {
-          throw new ORPError("version_conflict", "version mismatch", { current: m.version }); // checked under the lock
+          throw new SmartwareError("version_conflict", "version mismatch", { current: m.version }); // checked under the lock
         }
         ids.push(i);
       }
@@ -1217,7 +1217,7 @@ export class Service {
     return this.verb(pr, true, () => {
       const t = pr.tenant;
       const m = this.engine.mem.get(this.in_(t, body.target));
-      if (!m || !this.canRead(m, pr)) throw new ORPError("not_found", String(body.target));
+      if (!m || !this.canRead(m, pr)) throw new SmartwareError("not_found", String(body.target));
       const fb = { ...body, target: m.id, actor: pr.id, at: isoformat(nowMicros()), _tenant: t };
       if (this.store) this.jFeedback.push(fb); // the store keeps it; holding it in memory too would grow without bound
       else this.feedbackLog.push(fb);
@@ -1239,8 +1239,8 @@ export class Service {
       const E = this.engine;
       const iid = this.in_(pr.tenant, memId);
       const m = E.mem.get(iid);
-      if (!m || m.status !== "draft" || !this.canRead(m, pr, ["secret"])) throw new ORPError("not_found", String(memId));
-      if (!(this.canWrite(m, pr) || pr.groups.has("approver"))) throw new ORPError("forbidden", "approval requires write access or the approver role");
+      if (!m || m.status !== "draft" || !this.canRead(m, pr, ["secret"])) throw new SmartwareError("not_found", String(memId));
+      if (!(this.canWrite(m, pr) || pr.groups.has("approver"))) throw new SmartwareError("forbidden", "approval requires write access or the approver role");
       m.status = "active";
       m.version++;
       E.dirty(iid);
@@ -1257,9 +1257,9 @@ export class Service {
     const want = body.threads ? new Set(strs(body.threads, "threads")!) : null;
     const kinds = strs(body.kinds ?? ["summary"], "kinds")!;
     if (kinds.length === 0 || kinds.some((k) => k !== "summary")) {
-      throw new ORPError("unsupported_parameter", "this engine's reflect produces summaries only", { parameters: ["kinds"] });
+      throw new SmartwareError("unsupported_parameter", "this engine's reflect produces summaries only", { parameters: ["kinds"] });
     }
-    if (body.scope !== undefined && typeof body.scope !== "string") throw new ORPError("invalid_parameter", "scope must be a string");
+    if (body.scope !== undefined && typeof body.scope !== "string") throw new SmartwareError("invalid_parameter", "scope must be a string");
     const sc = String(body.scope ?? "").replace(/\/+$/, "");
     return this.verb(pr, true, () => {
       const job = "job_" + randomBytes(6).toString("hex");
@@ -1288,7 +1288,7 @@ export class Service {
           x.tenant === pr.tenant && sameReaders(x.readers, acl)).map((x) => x.id);
         const last = ms[ms.length - 1]!;
         const r = this.rememberSync({ memories: [{ kind: "summary", content: extractiveSummary(ms), origin: "extracted",
-          derived_from: ms.map((m) => m.id), thread: th, supersedes: prev, sources: [{ uri: `orp://${pr.tenant}/thread/${th}` }],
+          derived_from: ms.map((m) => m.id), thread: th, supersedes: prev, sources: [{ uri: `smartware://${pr.tenant}/thread/${th}` }],
           event_time: isoformat((last.event_time ?? last.observed_at)!) }], mode: prev.length ? "supersede" : "append",
           idempotency_key: key }, sysp, prev.length ? "supersede" : "append");
         made.push(...r.ids);
@@ -1302,7 +1302,7 @@ export class Service {
   async job(jobId: unknown, pr: Principal): Promise<Json> {
     return this.verb(pr, false, () => {
       const j = this.jobs.get(String(jobId));
-      if (!j || j.tenant !== pr.tenant) throw new ORPError("not_found", String(jobId));
+      if (!j || j.tenant !== pr.tenant) throw new SmartwareError("not_found", String(jobId));
       return env({ ...j });
     });
   }
@@ -1327,7 +1327,7 @@ export class Service {
   }
 
   async auditLog(pr: Principal): Promise<Json> {
-    if (!pr.groups.has("auditor")) throw new ORPError("forbidden", "audit requires the auditor role");
+    if (!pr.groups.has("auditor")) throw new SmartwareError("forbidden", "audit requires the auditor role");
     return this.verb(pr, false, async () => {
       const t = pr.tenant;
       if (this.store) return env({ entries: (await this.store.audit(t)).map((a) => ({ ...a, id: this.out(t, a.id) })) });
@@ -1359,42 +1359,42 @@ export class Service {
    * tenant; closure, labels, de-duplication and claim chains are re-applied; engine ids that collide with another
    * tenant's are remapped (id_map). */
   async import(bundle: unknown, pr: Principal): Promise<Json> {
-    if (!isAdmin(pr)) throw new ORPError("forbidden", "import requires the tenant admin role");
+    if (!isAdmin(pr)) throw new SmartwareError("forbidden", "import requires the tenant admin role");
     const t = pr.tenant;
     if (bundle === null || typeof bundle !== "object" || typeof ((bundle as Json)["memories.jsonl"] ?? "") !== "string") {
-      throw new ORPError("invalid_parameter", "bundle needs memories.jsonl");
+      throw new SmartwareError("invalid_parameter", "bundle needs memories.jsonl");
     }
     const b = bundle as Json;
     const man = (b.manifest ?? {}) as Json;
-    if ((man.tenant ?? t) !== t) throw new ORPError("forbidden", "bundle tenant mismatch");
+    if ((man.tenant ?? t) !== t) throw new SmartwareError("forbidden", "bundle tenant mismatch");
     let rows: Json[];
     try {
       rows = String(b["memories.jsonl"]).split("\n").filter((l) => l.trim()).map((l) => JSON.parse(l));
     } catch (e) {
-      throw new ORPError("invalid_parameter", `bad bundle line: ${(e as Error).message}`);
+      throw new SmartwareError("invalid_parameter", `bad bundle line: ${(e as Error).message}`);
     }
-    for (const d of rows) if ((d.tenant ?? t) !== t) throw new ORPError("forbidden", "bundle tenant mismatch");
+    for (const d of rows) if ((d.tenant ?? t) !== t) throw new SmartwareError("forbidden", "bundle tenant mismatch");
     for (const d of rows) {
       if (d === null || typeof d !== "object" || Array.isArray(d) || typeof d.id !== "string") {
-        throw new ORPError("invalid_parameter", "every memories.jsonl line is a record with a string id");
+        throw new SmartwareError("invalid_parameter", "every memories.jsonl line is a record with a string id");
       }
     }
     let edgeRows: Json[];
     try {
       edgeRows = String(b["edges.jsonl"] ?? "").split("\n").filter((l) => l.trim()).map((l) => JSON.parse(l));
     } catch (e) {
-      throw new ORPError("invalid_parameter", `bad edges.jsonl: ${(e as Error).message}`);
+      throw new SmartwareError("invalid_parameter", `bad edges.jsonl: ${(e as Error).message}`);
     }
     for (const e of edgeRows) {
       if (e === null || typeof e !== "object" || Array.isArray(e) || typeof e.from !== "string" || typeof e.to !== "string" ||
         (e.id !== undefined && typeof e.id !== "string")) {
-        throw new ORPError("invalid_parameter", "every edges.jsonl line is an edge with string from and to");
+        throw new SmartwareError("invalid_parameter", "every edges.jsonl line is an edge with string from and to");
       }
-      if ((e.tenant ?? t) !== t) throw new ORPError("forbidden", "edge tenant mismatch");
+      if ((e.tenant ?? t) !== t) throw new SmartwareError("forbidden", "edge tenant mismatch");
     }
     const tombRows = man.tombstones ?? [];
     if (!Array.isArray(tombRows) || tombRows.some((x: any) => !x || typeof x.id !== "string")) {
-      throw new ORPError("invalid_parameter", "manifest.tombstones is a list of objects with a string id");
+      throw new SmartwareError("invalid_parameter", "manifest.tombstones is a list of objects with a string id");
     }
     return this.verb(pr, true, async () => {
       const E = this.engine;
@@ -1441,16 +1441,16 @@ export class Service {
         try {
           mems.push(memoryFromJson(d));
         } catch (e) {
-          throw new ORPError("invalid_parameter", `bad record: ${(e as Error).message}`);
+          throw new SmartwareError("invalid_parameter", `bad record: ${(e as Error).message}`);
         }
       }
       // check edges before changing anything: each endpoint is in the bundle or already in this tenant
       const incoming = new Set(mems.map((m) => m.id));
-      for (const m of mems) if (m.tenant !== t) throw new ORPError("forbidden", "bundle tenant mismatch");
+      for (const m of mems) if (m.tenant !== t) throw new SmartwareError("forbidden", "bundle tenant mismatch");
       for (const e0 of edgeRows) {
         for (const end of [conv(e0.from), conv(e0.to)]) {
           const o = E.mem.get(end);
-          if (!incoming.has(end) && !(o && o.tenant === t)) throw new ORPError("invalid_parameter", "edge endpoints must exist in this tenant");
+          if (!incoming.has(end) && !(o && o.tenant === t)) throw new SmartwareError("invalid_parameter", "edge endpoints must exist in this tenant");
         }
       }
       for (const m of mems) {
@@ -1465,7 +1465,7 @@ export class Service {
       for (const e0 of edgeRows) {
         const e: Json = { ...e0, from: conv(e0.from), to: conv(e0.to) };
         const a = E.mem.get(e.from), bb = E.mem.get(e.to);
-        if (!(a && bb && a.tenant === t && bb.tenant === t)) throw new ORPError("invalid_parameter", "edge endpoints must exist in this tenant");
+        if (!(a && bb && a.tenant === t && bb.tenant === t)) throw new SmartwareError("invalid_parameter", "edge endpoints must exist in this tenant");
         let eid = e.id || "edge_" + randomBytes(8).toString("hex");
         if ((this.edgesMap.has(eid) && this.edgesMap.get(eid)!.tenant !== t) || (await this.storeOtherTenant("edges", eid, t))) {
           eid = "edge_" + randomBytes(8).toString("hex");
@@ -1523,7 +1523,7 @@ export class Service {
   async saveTo(path: string): Promise<void> {
     return this.lock.run(async () => {
       if (this.store) {
-        if (!this.store.backupTo) throw new ORPError("unsupported_parameter", `a ${this.store.kind} store is backed up with its own tools`);
+        if (!this.store.backupTo) throw new SmartwareError("unsupported_parameter", `a ${this.store.kind} store is backed up with its own tools`);
         await this.store.backupTo(path);
         return;
       }

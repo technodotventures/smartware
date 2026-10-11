@@ -1,7 +1,7 @@
-// End-to-end tests for @orp/tools against an in-process gateway. Run: node --test packages/adapters/tools/test/
+// End-to-end tests for @technodotventures/smartware-tools against an in-process gateway. Run: node --test packages/adapters/tools/test/
 import { test, before, after } from "node:test";
 import assert from "node:assert/strict";
-import { OrpClient } from "@orp/client";
+import { SmartwareClient } from "@technodotventures/smartware-client";
 import { createMemoryTools, memoryHooks, messageText, formatContext } from "../dist/index.js";
 import { startServer } from "../../../client/test/server.js";
 
@@ -9,8 +9,8 @@ let srv, alice, bob;
 const quiet = () => {};
 before(async () => {
   srv = await startServer();
-  alice = new OrpClient({ url: srv.url, token: srv.tokens.alice, onDegraded: quiet });
-  bob = new OrpClient({ url: srv.url, token: srv.tokens.bob, onDegraded: quiet });
+  alice = new SmartwareClient({ url: srv.url, token: srv.tokens.alice, onDegraded: quiet });
+  bob = new SmartwareClient({ url: srv.url, token: srv.tokens.bob, onDegraded: quiet });
 });
 after(async () => { await srv.close(); });
 
@@ -133,7 +133,7 @@ test("adapter conformance profiles name real doctor checks; packages carry no sc
     const pkg = JSON.parse(readFileSync(new URL(`packages/${p}/package.json`, root), "utf8"));
     assert.equal(pkg.scripts, undefined, `${p} has scripts`);
     assert.equal(pkg.license, "Apache-2.0");
-    assert.deepEqual(Object.keys(pkg.dependencies ?? {}).filter((d) => !d.startsWith("@orp/")), [], `${p} has third-party dependencies`);
+    assert.deepEqual(Object.keys(pkg.dependencies ?? {}).filter((d) => !(d === "smartware" || d.startsWith("@technodotventures/smartware-"))), [], `${p} has third-party dependencies`);
     for (const f of readdirSync(new URL(`packages/${p}/dist/`, root)).filter((f) => f.endsWith(".js"))) {
       const src = readFileSync(new URL(`packages/${p}/dist/${f}`, root), "utf8");
       assert.doesNotMatch(src, /\beval\s*\(|new\s+Function\s*\(/, `${p}/dist/${f}`);

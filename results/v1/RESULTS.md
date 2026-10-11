@@ -1,4 +1,4 @@
-# ORP-Bench results (test splits)
+# Smartware Bench results (test splits)
 
 Evidence recall inside a fixed context budget (R@B = share of gold evidence turns contained in the first B tokens of returned context). Ans@1000 = share of the gold answer's content words present in that context. SessAll@5 = all gold sessions among the first 5 sessions surfaced (LongMemEval's retrieval metric). Every system uses the same BM25 and dense encoder and no LLM. Numbers are percentages.
 
@@ -6,8 +6,8 @@ Evidence recall inside a fixed context budget (R@B = share of gold evidence turn
 
 | # | System | R@500 | R@1000 | R@2000 | R@4000 | Full@2000 | Ans@1000 | SessAll@5 | MRR | p50 ms |
 |---|---|---|---|---|---|---|---|---|---|---|
-| 1 | **ORP reference engine** | 72.0 | 80.2 | 86.1 | 89.5 | 79.9 | 79.5 | 80.1 | 60.2 | 20.4 |
-| 2 | orp-rrf | 66.3 | 75.0 | 81.4 | 86.2 | 74.3 | 75.7 | 77.5 | 55.2 | 7.0 |
+| 1 | **Smartware reference engine** | 72.0 | 80.2 | 86.1 | 89.5 | 79.9 | 79.5 | 80.1 | 60.2 | 20.4 |
+| 2 | smartware-rrf | 66.3 | 75.0 | 81.4 | 86.2 | 74.3 | 75.7 | 77.5 | 55.2 | 7.0 |
 | 3 | Supermemory Company Brain | 59.4 | 71.4 | 78.5 | 82.8 | 72.1 | 68.8 | 77.4 | 55.8 | 4.0 |
 | 4 | Cognee | 54.8 | 67.5 | 76.9 | 82.7 | 69.7 | 68.9 | 72.0 | 45.4 | 2.1 |
 | 5 | _BM25 turns (reference)_ | 58.6 | 67.0 | 72.7 | 74.6 | 65.6 | 66.9 | 76.6 | 46.0 | 0.3 |
@@ -30,8 +30,8 @@ Recall@1000 by question category:
 
 | System | multi-hop | open-domain | single-hop | temporal |
 |---|---|---|---|---|
-| **ORP reference engine** | 52.3 | 50.6 | 91.2 | 84.3 |
-| orp-rrf | 43.4 | 41.0 | 87.9 | 78.6 |
+| **Smartware reference engine** | 52.3 | 50.6 | 91.2 | 84.3 |
+| smartware-rrf | 43.4 | 41.0 | 87.9 | 78.6 |
 | Supermemory Company Brain | 40.9 | 41.7 | 83.7 | 74.1 |
 | Cognee | 37.6 | 32.3 | 81.2 | 67.5 |
 | _BM25 turns (reference)_ | 40.8 | 35.9 | 78.2 | 69.6 |
@@ -55,10 +55,10 @@ Recall@1000 by question category:
 
 | # | System | R@500 | R@1000 | R@2000 | R@4000 | Full@2000 | Ans@1000 | SessAll@5 | MRR | p50 ms |
 |---|---|---|---|---|---|---|---|---|---|---|
-| 1 | **ORP reference engine** | 76.0 | 82.2 | 90.0 | 95.8 | 83.2 | 71.2 | 88.5 | 74.7 | 48.1 |
+| 1 | **Smartware reference engine** | 76.0 | 82.2 | 90.0 | 95.8 | 83.2 | 71.2 | 88.5 | 74.7 | 48.1 |
 | 2 | mem0 | 63.4 | 74.7 | 82.6 | 88.2 | 74.1 | 70.0 | 83.5 | 62.0 | 2.8 |
 | 3 | Graphiti (Zep) | 61.8 | 74.2 | 82.8 | 87.6 | 75.1 | 64.2 | 80.1 | 52.2 | 6.0 |
-| 4 | orp-rrf | 68.4 | 73.8 | 78.8 | 91.5 | 68.3 | 70.5 | 87.2 | 70.9 | 33.0 |
+| 4 | smartware-rrf | 68.4 | 73.8 | 78.8 | 91.5 | 68.3 | 70.5 | 87.2 | 70.9 | 33.0 |
 | 5 | _Dense turns (reference)_ | 56.7 | 65.2 | 75.1 | 85.2 | 63.4 | 63.9 | 83.2 | 63.6 | 0.3 |
 | 6 | Supermemory Company Brain | 53.0 | 64.4 | 74.4 | 80.9 | 63.9 | 67.5 | 84.8 | 58.9 | 6.8 |
 | 7 | Letta | 50.0 | 63.2 | 75.6 | 81.7 | 64.9 | 60.1 | 86.9 | 67.4 | 1.5 |
@@ -79,10 +79,10 @@ Recall@1000 by question category:
 
 | System | knowledge-update | multi-session | single-session-assistant | single-session-preference | single-session-user | temporal-reasoning |
 |---|---|---|---|---|---|---|
-| **ORP reference engine** | 86.8 | 71.7 | 89.1 | 80.1 | 94.4 | 80.6 |
+| **Smartware reference engine** | 86.8 | 71.7 | 89.1 | 80.1 | 94.4 | 80.6 |
 | mem0 | 89.2 | 55.6 | 89.1 | 57.7 | 90.7 | 74.1 |
 | Graphiti (Zep) | 85.5 | 53.7 | 93.5 | 56.4 | 96.3 | 71.7 |
-| orp-rrf | 79.3 | 61.2 | 91.3 | 66.0 | 88.9 | 68.6 |
+| smartware-rrf | 79.3 | 61.2 | 91.3 | 66.0 | 88.9 | 68.6 |
 | _Dense turns (reference)_ | 74.7 | 45.8 | 80.4 | 60.3 | 83.3 | 63.1 |
 | Supermemory Company Brain | 70.2 | 44.4 | 91.3 | 43.6 | 90.7 | 59.4 |
 | Letta | 72.0 | 45.0 | 78.3 | 54.5 | 87.0 | 58.1 |
@@ -100,11 +100,11 @@ Recall@1000 by question category:
 | Sylph | 10.5 | 10.2 | 30.4 | 14.7 | 13.0 | 10.9 |
 | _n_ | 62 | 101 | 46 | 26 | 54 | 93 |
 
-## ORP-Gov: permission-aware recall (same ranker, different access-control strategy)
+## Smartware Gov: permission-aware recall (same ranker, different access-control strategy)
 
 | Strategy | Recall@1000 (permitted askers) | Queries with any unreadable item in context | Forbidden askers shown gold evidence |
 |---|---|---|---|
-| ORP: admissibility before ranking + provenance closure | 82.1 | 0.0 | 0.0 |
+| Smartware: admissibility before ranking + provenance closure | 82.1 | 0.0 | 0.0 |
 | Filter after top-10 | 77.2 | 0.0 | 0.0 |
 | Filter after top-50 | 82.2 | 0.0 | 0.0 |
 | Workspace scope only (no per-item ACL) | 79.4 | 99.7 | 83.3 |

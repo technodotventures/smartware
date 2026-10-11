@@ -24,7 +24,7 @@ What this means:
 - From about 50,000 units, recall is 0.3 to 0.4 s and memory is about 40 KB per long unit. Large tenants should be
   split by scope (recall within a scope only scores that scope's records) until an approximate dense index lands (an
   ANN behind the Index port, with the exact scorer re-ranking its candidates; parity is then measured, not assumed).
-- Cold build happens once per tenant per process. `orp serve --http` warms every tenant in the background at start
+- Cold build happens once per tenant per process. `smartware serve --http` warms every tenant in the background at start
   (most recently written first, in small chunks, so requests keep being served); `--no-preload` turns this off.
 
 Exact-preserving optimisations made after the first measurement (each re-verified against the oracle: LoCoMo and

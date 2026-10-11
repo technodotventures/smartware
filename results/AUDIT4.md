@@ -37,7 +37,7 @@ Documented rather than changed: re-importing from another project's file restore
 | Postgres tests, over TLS, including certificate verification | 12 pass |
 | Oracle conformance suite / against the product engine / on Postgres | 138 / 127 / 127 pass |
 | Python client | 49 pass |
-| `orp doctor --self` | L4 |
+| `smartware doctor --self` | L4 |
 | Persistence fuzz, SQLite and Postgres (4 x 100 each) | 0 failing checks |
 | Differential fuzz, oracle vs product (10 x 120) and on Postgres with restarts (6 x 100) | 0 divergences |
 | Strict parity, LoCoMo test, fast mode | 100% identical packs |

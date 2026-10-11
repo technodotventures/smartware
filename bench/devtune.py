@@ -52,7 +52,7 @@ def evaluate(make_system, benches=("locomo", "lme"), enc=None, cats=False, subse
 
 
 if __name__ == "__main__":
-    from orp.engine import ORPSystem
+    from smartware.engine import SmartwareSystem
     kw = json.loads(sys.argv[1]) if len(sys.argv) > 1 else {}
-    r = evaluate(lambda: ORPSystem(**kw), cats=True)
+    r = evaluate(lambda: SmartwareSystem(**kw), cats=True)
     print(json.dumps(r, indent=1))

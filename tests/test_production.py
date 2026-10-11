@@ -5,10 +5,10 @@ import pickle
 import tempfile
 import unittest
 
-from orp import embedders, rankers, store
-from orp.api import ORPError, Service
-from orp.embedders import HashingEmbedder
-from orp.model import Principal
+from smartware import embedders, rankers, store
+from smartware.api import SmartwareError, Service
+from smartware.embedders import HashingEmbedder
+from smartware.model import Principal
 
 A = Principal("alice", frozenset({"sales"}), tenant="acme")
 ROOT = Principal("root", frozenset({"*"}), tenant="acme")
@@ -37,7 +37,7 @@ def _strip(d):
 class StoreTest(unittest.TestCase):
     def test_round_trip_is_lossless(self):
         s = _svc()
-        p = os.path.join(tempfile.mkdtemp(), "orp.db")
+        p = os.path.join(tempfile.mkdtemp(), "smartware.db")
         s.save(p)
         self.assertTrue(store.is_sqlite(p))
         t = Service(HashingEmbedder())
@@ -53,7 +53,7 @@ class StoreTest(unittest.TestCase):
         p = os.path.join(tempfile.mkdtemp(), "old.bin")
         with open(p, "wb") as f:
             pickle.dump({"service": {}, "engine": {}}, f)
-        os.environ.pop("ORP_ALLOW_PICKLE", None)
+        os.environ.pop("SMARTWARE_ALLOW_PICKLE", None)
         with self.assertRaises(ValueError):
             Service(HashingEmbedder()).load(p)
 
@@ -63,14 +63,14 @@ class EncoderTest(unittest.TestCase):
         p = os.path.join(tempfile.mkdtemp(), "enc.pkl")
         with open(p, "wb") as f:
             pickle.dump(({}, None, None, None, 0.001), f)
-        os.environ.pop("ORP_ALLOW_PICKLE", None)
+        os.environ.pop("SMARTWARE_ALLOW_PICKLE", None)
         with self.assertRaises(ValueError):
             embedders.load("sif:" + p)
 
-    def test_orpenc_round_trip(self):
+    def test_swenc_round_trip(self):
         import numpy as np
-        from orp import encfile
-        p = os.path.join(tempfile.mkdtemp(), "e.orpenc")
+        from smartware import encfile
+        p = os.path.join(tempfile.mkdtemp(), "e.swenc")
         vecs = np.random.RandomState(0).rand(3, 4).astype("float32")
         encfile.write(p, {"a": 0, "b": 1, "c": 2}, vecs, np.array([.5, .3, .2], "float32"), np.zeros(4, "float32"), 1e-3)
         e = embedders.load("sif:" + p)
@@ -92,18 +92,18 @@ class ClockTest(unittest.TestCase):
 class RankerTest(unittest.TestCase):
     def test_auto_uses_learned_ranker_only_with_its_encoder(self):
         name, p, notes = rankers.choose("auto", HashingEmbedder())
-        self.assertEqual((name, p.ranker), ("orp-rrf-1", "rrf"))
+        self.assertEqual((name, p.ranker), ("smartware-rrf-1", "rrf"))
         self.assertTrue(notes)
 
         class Fake:
-            name = rankers.spec("orp-linear-1")["fit_encoder"]
+            name = rankers.spec("smartware-linear-1")["fit_encoder"]
         name, p, notes = rankers.choose("auto", Fake())
-        self.assertEqual((name, p.ranker, len(p.lin_w)), ("orp-linear-1", "linear", 39))
+        self.assertEqual((name, p.ranker, len(p.lin_w)), ("smartware-linear-1", "linear", 39))
 
     def test_capabilities_name_the_ranker_and_encoder(self):
-        s = Service(HashingEmbedder(), rankers.params("orp-linear-1"))
+        s = Service(HashingEmbedder(), rankers.params("smartware-linear-1"))
         c = s.capabilities(A)
-        self.assertEqual(c["ranker"]["name"], "orp-linear-1")
+        self.assertEqual(c["ranker"]["name"], "smartware-linear-1")
         self.assertEqual(c["encoder"], "hashing-512")
 
 

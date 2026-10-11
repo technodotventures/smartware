@@ -1,13 +1,13 @@
-// orp eval: re-measure recall on your own data, with your own reader, on your own machine.
+// smartware eval: re-measure recall on your own data, with your own reader, on your own machine.
 //
-//   orp eval --data set.orpbench.jsonl [--systems orp,bm25,dense] [--encoder ...] [--ranker auto]
-//            [--reader openai:<model>@<base-url> | anthropic:<model>] [--reader-key-env ORP_EVAL_KEY]
+//   smartware eval --data set.swbench.jsonl [--systems smartware,bm25,dense] [--encoder ...] [--ranker auto]
+//            [--reader openai:<model>@<base-url> | anthropic:<model>] [--reader-key-env SMARTWARE_EVAL_KEY]
 //            [--judge same|openai:...|anthropic:...] [--qa-budget 2000] [--limit N] [--out results/]
-//   orp eval --data questions.jsonl --url <server> --token-env ORP_TOKEN   (a live deployment: questions only)
+//   smartware eval --data questions.jsonl --url <server> --token-env SMARTWARE_TOKEN   (a live deployment: questions only)
 //
-// Input (orp-bench-1, one haystack per line): {"memories": [{id, content, actor, role, thread, seq, observed_at, meta}],
+// Input (smartware-bench-1, one haystack per line): {"memories": [{id, content, actor, role, thread, seq, observed_at, meta}],
 // "questions": [{id, question, as_of, answer, evidence: [memory ids], category}]}. tools/eval/export_bench.py writes
-// the published ORP-Bench sets in this format.
+// the published Smartware Bench sets in this format.
 //
 // Every run reports BM25 over raw units and dense retrieval as baselines, and (with a reader) the gold-evidence
 // ceiling, so a weak reader shows up as a low ceiling rather than a bad memory system. Every number comes with a 95%
@@ -17,7 +17,7 @@ import { createReadStream, mkdirSync, writeFileSync } from "node:fs";
 import { createInterface } from "node:readline";
 import { join } from "node:path";
 import { BM25, chooseRanker, Engine, isoformat, loadEncoder, memoryFromJson, parseTime, recallRequest, strftime, terms,
-  type Encoder } from "@orp/core";
+  type Encoder } from "@technodotventures/smartware-core";
 
 type Json = Record<string, any>;
 export interface Item { ids: string[]; text: string }
@@ -107,11 +107,11 @@ export function bootstrap(xs: number[], base?: number[], n = 2000, seed = 7): { 
 // ------------------------------------------------------------ systems
 interface System { name: string; build(h: Haystack): void; retrieve(q: Question, k: number): Item[] }
 
-function orpSystem(enc: Encoder, ranker: string): System {
+function smartwareSystem(enc: Encoder, ranker: string): System {
   const { params } = chooseRanker(ranker, enc.name);
   let eng: Engine;
   return {
-    name: "orp",
+    name: "smartware",
     build(h) {
       eng = new Engine(enc, params);
       eng.remember(h.memories.map((d) => {
@@ -231,7 +231,7 @@ export interface EvalOptions { systems: string[]; encoder: string; ranker: strin
 
 export async function runEval(sets: Haystack[], o: EvalOptions): Promise<{ rows: Json[]; summary: Json }> {
   const enc = loadEncoder(o.encoder);
-  const systems: System[] = o.systems.map((s) => s === "orp" ? orpSystem(enc, o.ranker) : s === "bm25" ? bm25System() : s === "dense" ? denseSystem(enc) : (() => { throw new Error(`unknown system ${s}`); })());
+  const systems: System[] = o.systems.map((s) => s === "smartware" ? smartwareSystem(enc, o.ranker) : s === "bm25" ? bm25System() : s === "dense" ? denseSystem(enc) : (() => { throw new Error(`unknown system ${s}`); })());
   const rows: Json[] = [];
   for (const h of sets) {
     const unitText = new Map(h.memories.map((d) => [d.id, String(d.content)]));
@@ -294,14 +294,14 @@ function table(summary: Json): string {
 
 export async function evalCmd(_pos: string[], f: Record<string, any>): Promise<number> {
   const data = typeof f.data === "string" ? f.data : null;
-  if (!data) { process.stderr.write("orp eval --data <set.orpbench.jsonl> (see tools/eval/export_bench.py)\n"); return 2; }
+  if (!data) { process.stderr.write("smartware eval --data <set.swbench.jsonl> (see tools/eval/export_bench.py)\n"); return 2; }
   const sets = await readSet(data, f.limit ? Number(f.limit) : undefined);
-  const keyEnv = typeof f["reader-key-env"] === "string" ? f["reader-key-env"] : "ORP_EVAL_KEY";
+  const keyEnv = typeof f["reader-key-env"] === "string" ? f["reader-key-env"] : "SMARTWARE_EVAL_KEY";
   const reader = typeof f.reader === "string" ? modelFrom(f.reader, keyEnv) : undefined;
   const judge = typeof f.judge === "string" && f.judge !== "same" ? modelFrom(f.judge, typeof f["judge-key-env"] === "string" ? f["judge-key-env"] : keyEnv) : undefined;
   const t0 = Date.now();
   const { rows, summary } = await runEval(sets, {
-    systems: (typeof f.systems === "string" ? f.systems : "orp,bm25,dense").split(","), encoder: typeof f.encoder === "string" ? f.encoder : "hashing",
+    systems: (typeof f.systems === "string" ? f.systems : "smartware,bm25,dense").split(","), encoder: typeof f.encoder === "string" ? f.encoder : "hashing",
     ranker: typeof f.ranker === "string" ? f.ranker : "auto", k: Number(f.k ?? 50), reader, judge, qaBudget: Number(f["qa-budget"] ?? 2000),
     concurrency: Number(f.concurrency ?? 8),
   });

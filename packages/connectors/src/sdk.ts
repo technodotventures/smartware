@@ -1,7 +1,7 @@
 // Connector SDK. A connector is a broker, not trusted code: it runs as its own principal in its own process, holds
 // the source credentials itself (the engine never sees them), and may write only inside its declared scope prefix.
 //
-// The runner (sync) turns what a connector pulls from its source into ORP writes:
+// The runner (sync) turns what a connector pulls from its source into Smartware writes:
 //   new item        -> remember (append), client id derived from the source id
 //   changed item    -> remember (upsert) with if_version, after reading the current version
 //   ACL-only change -> remember (upsert) that changes only readers (spec M57); the engine re-narrows derived
@@ -12,7 +12,7 @@
 import { createHash } from "node:crypto";
 import { closeSync, existsSync, fsyncSync, mkdirSync, openSync, readFileSync, renameSync, writeSync } from "node:fs";
 import { dirname } from "node:path";
-import { OrpHttp, OrpHttpError, type Json } from "./http.js";
+import { SmartwareHttp, SmartwareHttpError, type Json } from "./http.js";
 
 // ------------------------------------------------------------ types
 
@@ -21,7 +21,7 @@ export interface SourceItem {
   /** Stable id in the source system (a path, path#section, channel/ts). Any string. */
   id: string;
   content: string;
-  /** Source ACL. Each entry is a source principal (mapped through principalResolver to principal:<id>), an ORP token
+  /** Source ACL. Each entry is a source principal (mapped through principalResolver to principal:<id>), an Smartware token
    * with a namespace (group:, channel:, role:, team:, org:, principal:), or "public" / "*" for everyone in the tenant. */
   acl: string[];
   /** Where the evidence lives, e.g. file://notes/a.md#intro or slack://C07/p1712345000041. */
@@ -63,8 +63,8 @@ export interface PullResult {
 export interface Connector {
   readonly name: string;
   readonly scopePrefix: string;
-  /** Maps a source principal (e.g. a Slack user id or a vault user name) to an ORP principal id, or null when the
-   * user has no ORP identity (the entry is then dropped: fail closed). Default: the identity. */
+  /** Maps a source principal (e.g. a Slack user id or a vault user name) to an Smartware principal id, or null when the
+   * user has no Smartware identity (the entry is then dropped: fail closed). Default: the identity. */
   readonly principalResolver: (sourcePrincipal: string) => string | null;
   pull(cursor: unknown | null): Promise<PullResult> | PullResult;
 }
@@ -123,7 +123,7 @@ export function clientId(connector: string, sourceId: string): string {
   return `${connector}-${sha256(sourceId).slice(0, 32)}`;
 }
 
-/** Map a source ACL to ORP reader tokens. Unknown users map to nothing (fail closed); never to null (tenant-wide). */
+/** Map a source ACL to Smartware reader tokens. Unknown users map to nothing (fail closed); never to null (tenant-wide). */
 export function mapAcl(acl: readonly string[], resolve: (s: string) => string | null): string[] {
   const out = new Set<string>();
   for (const raw of acl) {
@@ -162,7 +162,7 @@ export interface SyncState {
   scopePrefix: string;
   cursor: unknown;
   items: Record<string, ItemState>;
-  /** Group memberships (e.g. channel:C07 -> ORP principal ids), for the gateway's principal resolver. */
+  /** Group memberships (e.g. channel:C07 -> Smartware principal ids), for the gateway's principal resolver. */
   groups: Record<string, string[]>;
   /** Recent sync lag samples in ms (newest last, at most 1000). */
   lag: number[];
@@ -200,7 +200,7 @@ export function writeJsonAtomic(path: string, value: unknown) {
 /** The only way the runner writes. It refuses any record outside the connector's scope prefix, any record without
  * explicit readers (null would mean everyone in the tenant), and any forget of a record this connector does not own. */
 export class ScopedWriter {
-  constructor(readonly http: OrpHttp, readonly scopePrefix: string, private owned: (id: string) => boolean) {}
+  constructor(readonly http: SmartwareHttp, readonly scopePrefix: string, private owned: (id: string) => boolean) {}
 
   check(memories: Json[]) {
     for (const m of memories) {
@@ -314,11 +314,11 @@ function stableJson(v: unknown): string {
   return JSON.stringify(v);
 }
 
-/** Run one sync pass: pull from the source and apply the changes to the ORP server. */
+/** Run one sync pass: pull from the source and apply the changes to the Smartware server. */
 export async function sync(connector: Connector, opt: SyncOptions): Promise<SyncReport> {
   const c = connector;
   const log = opt.log ?? (() => {});
-  const http = new OrpHttp({ url: opt.url, token: opt.token, tenant: opt.tenant });
+  const http = new SmartwareHttp({ url: opt.url, token: opt.token, tenant: opt.tenant });
   const state = loadState(opt.statePath, c);
   if (state.scopePrefix !== c.scopePrefix) {
     throw new ScopeError(`state file was written for scope prefix ${JSON.stringify(state.scopePrefix)}; refusing to reuse it for ${JSON.stringify(c.scopePrefix)}`);
@@ -383,7 +383,7 @@ export async function sync(connector: Connector, opt: SyncOptions): Promise<Sync
         break;
       } catch (e) {
         // the source is the truth for records this connector owns: one retry against the server's current version
-        if (e instanceof OrpHttpError && e.code === "version_conflict" && typeof e.details.current === "number" && attempt === 0) {
+        if (e instanceof SmartwareHttpError && e.code === "version_conflict" && typeof e.details.current === "number" && attempt === 0) {
           report.conflicts++;
           v = e.details.current;
           continue;
@@ -408,7 +408,7 @@ export async function sync(connector: Connector, opt: SyncOptions): Promise<Sync
       }
       st.version = 1;
     } catch (e) {
-      if (!(e instanceof OrpHttpError)) throw e;
+      if (!(e instanceof SmartwareHttpError)) throw e;
       if (e.code === "version_conflict") { // the record exists (e.g. the state file was lost): fall back to upsert
         const cur = await http.get(st.id);
         if (!cur) throw new Error(`record ${st.id} exists but this connector cannot read its version; restore the state file`);
@@ -469,7 +469,7 @@ export async function sync(connector: Connector, opt: SyncOptions): Promise<Sync
       await w.forget({ ids: [st.id], mode: opt.deleteMode ?? "retract", cascade: true, reason: `source deleted (${c.name})` });
       st.version++;
     } catch (e) {
-      if (!(e instanceof OrpHttpError && e.status === 404)) throw e;
+      if (!(e instanceof SmartwareHttpError && e.status === 404)) throw e;
       if (await http.get(st.id)) throw e; // readable but not forgettable: report, never pretend it is gone
     }
     st.deleted = true;

@@ -1,4 +1,4 @@
-// ORP data model: the records conforming implementations exchange (spec §3). Field names match the wire format
+// Smartware data model: the records conforming implementations exchange (spec §3). Field names match the wire format
 // and the oracle's Memory.to_json(), so a store or bundle written by one engine reads in the other.
 import { createHash, randomBytes } from "node:crypto";
 import { isoformat, parseTime, type Micros } from "./time.js";

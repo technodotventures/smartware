@@ -2,7 +2,7 @@
 budget, shuffled together with system labels hidden. Readers (LLM agents) answer from the
 context only; a separate judge grades answers against gold without seeing system names.
 
-python -m bench.qa_export --systems orp,supermemory-company-brain,cognee,graphiti,mem0,bm25 \
+python -m bench.qa_export --systems smartware,supermemory-company-brain,cognee,graphiti,mem0,bm25 \
     --locomo 150 --lme 120 --budget 1000 --batch 60
 """
 from __future__ import annotations

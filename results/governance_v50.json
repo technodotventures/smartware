@@ -1,5 +1,5 @@
 {
- "orp": {
+ "smartware": {
   "permitted_n": 2481,
   "forbidden_n": 3389,
   "recall@1000": 0.8966814456536343,
@@ -47,5 +47,5 @@
   "answer_leak": 0.0,
   "rank_side_channel": null
  },
- "_orp_leak_examples": []
+ "_smartware_leak_examples": []
 }

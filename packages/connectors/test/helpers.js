@@ -1,16 +1,16 @@
-// Shared test helper: an in-process ORP server on port 0 with its own scratch store and keys.
+// Shared test helper: an in-process Smartware server on port 0 with its own scratch store and keys.
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { HashingEncoder, Service, SqliteStore, chooseRanker } from "@orp/core";
-import { Authenticator, Gateway, KeyStore, Log } from "@orp/server";
+import { HashingEncoder, Service, SqliteStore, chooseRanker } from "@technodotventures/smartware-core";
+import { Authenticator, Gateway, KeyStore, Log } from "smartware";
 import { slackPrincipalResolver, withMembership } from "../dist/index.js";
 
 export const TENANT = "acme";
 
 /** Start a server. With membership, the gateway adds channel:<id> groups from a connector's membership file. */
 export async function startServer({ membership } = {}) {
-  const dir = mkdtempSync(join(tmpdir(), "orp-conn-"));
+  const dir = mkdtempSync(join(tmpdir(), "smartware-conn-"));
   const keysPath = join(dir, "keys.json");
   const ks = new KeyStore(keysPath);
   const tokens = {
@@ -22,7 +22,7 @@ export async function startServer({ membership } = {}) {
   };
   const enc = new HashingEncoder();
   const { params } = chooseRanker("auto", enc.name);
-  const svc = new Service(enc, { params, store: new SqliteStore(join(dir, "orp.db")) });
+  const svc = new Service(enc, { params, store: new SqliteStore(join(dir, "smartware.db")) });
   let auth = new Authenticator(new KeyStore(keysPath), null);
   const membershipPath = join(dir, "membership.json");
   if (membership) auth = withMembership(auth, slackPrincipalResolver({ membershipPath, connector: membership, tenant: TENANT }));

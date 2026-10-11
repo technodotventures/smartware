@@ -8,7 +8,7 @@ not about which project has the better extraction prompt.
   "<system>+facts"      the system's own recall path over a store of facts instead of raw turns (what mem0,
                         Hindsight, LangMem, MemOS and similar store after LLM extraction). Each fact claims the turns
                         it cites, so evidence recall stays comparable.
-  "orp+evidence"        ORP as the protocol intends: raw turns stay as evidence and the facts are stored as derived
+  "smartware+evidence"        Smartware as the protocol intends: raw turns stay as evidence and the facts are stored as derived
                         memories (kind fact, derived_from the cited turns, provenance-closed).
 """
 from __future__ import annotations
@@ -108,14 +108,14 @@ class FactStore:
         return out
 
 
-def orp_with_evidence(**kw):
-    """ORP storing raw turns as evidence and the facts as derived memories (spec §3, §6.3)."""
-    from orp.engine import ORPSystem
-    from orp.model import Claim, Memory  # noqa: F401
-    from .orp_variants import _load
+def smartware_with_evidence(**kw):
+    """Smartware storing raw turns as evidence and the facts as derived memories (spec §3, §6.3)."""
+    from smartware.engine import SmartwareSystem
+    from smartware.model import Claim, Memory  # noqa: F401
+    from .smartware_variants import _load
 
-    class ORPEvidence(ORPSystem):
-        name = "orp+evidence"
+    class SmartwareEvidence(SmartwareSystem):
+        name = "smartware+evidence"
 
         def build(self, corpus, enc):
             super().build(corpus, enc)
@@ -138,5 +138,5 @@ def orp_with_evidence(**kw):
             eng.remember(mems)
             eng._build()
 
-    params = {**_load(kw.pop("_params", "orp_params.json")), **kw}
-    return ORPEvidence(**params)
+    params = {**_load(kw.pop("_params", "smartware_params.json")), **kw}
+    return SmartwareEvidence(**params)

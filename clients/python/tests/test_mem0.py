@@ -4,8 +4,8 @@ from __future__ import annotations
 import unittest
 from typing import List, Tuple
 
-from orp_client import NotFoundError, OrpClient
-from orp_client.mem0 import Memory
+from smartware_client import NotFoundError, SmartwareClient
+from smartware_client.mem0 import Memory
 
 from ._server import ServerTestCase
 
@@ -13,7 +13,7 @@ from ._server import ServerTestCase
 class Mem0Tests(ServerTestCase):
     def setUp(self) -> None:
         self.degraded: List[Tuple[str, List[str]]] = []
-        alice = OrpClient(self.server.url, token=self.server.tokens["alice"],
+        alice = SmartwareClient(self.server.url, token=self.server.tokens["alice"],
                           on_degraded=lambda v, d: self.degraded.append((v, d)))
         self.m = Memory(alice)
         self.bob_m = Memory(self.client("bob"))

@@ -1,7 +1,7 @@
 // Scale benchmark for the product engine: one tenant with N memories (real LongMemEval-S turns), SQLite store.
 // Measures write throughput, cold start (process restart: load from the store, first recall builds the index),
 // warm recall latency (p50/p95) and resident memory.
-//   node tools/bench/scale.mjs <set.orpbench.jsonl> <N> [encoder spec]
+//   node tools/bench/scale.mjs <set.swbench.jsonl> <N> [encoder spec]
 import { createReadStream, mkdtempSync, rmSync } from "node:fs";
 import { createInterface } from "node:readline";
 import { tmpdir } from "node:os";
@@ -18,8 +18,8 @@ for await (const line of rl) {
   for (const m of h.memories) { if (turns.length < N && String(m.content).trim()) turns.push(m); }
   if (turns.length >= N && queries.length >= 60) break;
 }
-const dir = mkdtempSync(join(tmpdir(), "orp-scale-"));
-const path = join(dir, "orp.db");
+const dir = mkdtempSync(join(tmpdir(), "smartware-scale-"));
+const path = join(dir, "smartware.db");
 const pr = new Principal("u1", ["team"], "t1");
 const enc = loadEncoder(encSpec);
 const { params, name } = chooseRanker("auto", enc.name);

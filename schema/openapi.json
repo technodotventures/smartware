@@ -1,9 +1,9 @@
 {
  "openapi": "3.1.0",
  "info": {
-  "title": "ORP HTTP binding",
+  "title": "Smartware HTTP binding",
   "version": "0.1",
-  "description": "Open Recall Protocol (working name) HTTP binding, spec §8.2. The principal always comes from the bearer token."
+  "description": "Smartware protocol HTTP binding, spec §8.2. The principal always comes from the bearer token."
  },
  "servers": [
   {
@@ -15,7 +15,7 @@
    "bearer": {
     "type": "http",
     "scheme": "bearer",
-    "description": "API key (orp_...) or an OAuth 2.1 / OIDC access token"
+    "description": "API key (smartware_...) or an OAuth 2.1 / OIDC access token"
    }
   },
   "schemas": {

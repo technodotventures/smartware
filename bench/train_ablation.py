@@ -1,5 +1,5 @@
 """Fit the ablated learned ranker (no position/length-correlated features) with the same model family,
-regularisation and packing as the shipped ORP ranker, on dev only. Writes results/orp_ablate_params.json."""
+regularisation and packing as the shipped Smartware ranker, on dev only. Writes results/smartware_ablate_params.json."""
 from __future__ import annotations
 
 import json
@@ -9,16 +9,16 @@ from dataclasses import replace
 
 import numpy as np
 
-from orp.engine import Engine
+from smartware.engine import Engine
 
 from .encoders import DenseEncoder, Encoders
 from .ltr import collect, fit, fit_gbdt
-from .train_orp import ABLATE, R, eval_runs
+from .train_smartware import ABLATE, R, eval_runs
 from .tune import objective
 
 
 def main():
-    shipped = json.load(open(R("orp_params.json")))
+    shipped = json.load(open(R("smartware_params.json")))
     kind, cfg = shipped["model"]
     base = json.load(open(R("tuned_params.json")))["params"]
     runs = collect(base, Encoders(DenseEncoder.load()))
@@ -47,16 +47,16 @@ def main():
     final = dict(base, drop_features=list(ABLATE), **pack, **{k: (list(v) if isinstance(v, tuple) else v)
                                                               for k, v in model(abl).items()})
     json.dump({"params": final, "dropped": list(ABLATE), "cv_J": j, "shipped_cv_J": shipped["cv_J"]},
-              open(R("orp_ablate_params.json"), "w"))
+              open(R("smartware_ablate_params.json"), "w"))
     print("ablation CV J", round(j, 4), "vs shipped", round(shipped["cv_J"], 4))
     if "--ship" in sys.argv and j > shipped["cv_J"]:
-        # step 2 of the pipeline (python -m bench.train_orp && python -m bench.train_ablation --ship): keep the
-        # all-feature model as orp_allfeat_params.json and ship the ablated one if its dev CV objective is higher
-        json.dump(shipped, open(R("orp_allfeat_params.json"), "w"))
+        # step 2 of the pipeline (python -m bench.train_smartware && python -m bench.train_ablation --ship): keep the
+        # all-feature model as smartware_allfeat_params.json and ship the ablated one if its dev CV objective is higher
+        json.dump(shipped, open(R("smartware_allfeat_params.json"), "w"))
         json.dump({"params": final, "model": [kind, cfg], "cv_J": j, "log": shipped.get("log"),
                    "selection": f"Grouped 5-fold CV on dev: the ranker without position/length-correlated features "
                                 f"{list(ABLATE)} scored {j:.4f} vs {shipped['cv_J']:.4f} with all features, so it ships."},
-                  open(R("orp_params.json"), "w"))
+                  open(R("smartware_params.json"), "w"))
         print("shipped the ablated ranker")
 
 

@@ -1,13 +1,13 @@
 {
  "dev_J": {
   "locomo": {
-   "orp+facts": 0.8391924534222184,
-   "orp": 0.8279298571074027,
+   "smartware+facts": 0.8391924534222184,
+   "smartware": 0.8279298571074027,
    "bm25": 0.6820223787913082,
    "bm25+facts": 0.8091858146688435,
    "dense": 0.4991255360054315,
    "dense+facts": 0.7221346284988583,
-   "orp+evidence": 0.843234533573959,
+   "smartware+evidence": 0.843234533573959,
    "graphiti@tuned": 0.6161997199203466,
    "graphiti@tuned+facts": 0.782043220293873,
    "hindsight@tuned": 0.6129961494844002,
@@ -39,7 +39,7 @@
    "memoryos@tuned": 0.5002486272068518,
    "memoryos@tuned+facts": 0.389471174556031,
    "graphiti@ftuned+facts": 0.782043220293873,
-   "orp-ft+facts": 0.844313308053517,
+   "smartware-ft+facts": 0.844313308053517,
    "hindsight@ftuned+facts": 0.6933278753448466,
    "mem0@ftuned+facts": 0.8029015636717987,
    "letta@ftuned+facts": 0.753727658329486,
@@ -71,15 +71,15 @@
    "memos@tuned": 0.400343977711402,
    "langmem@tuned": 0.7070651831591823,
    "memoryos@tuned": 0.5105362619283074,
-   "orp+facts": 0.7821837943717929,
-   "orp": 0.775630843826119,
+   "smartware+facts": 0.7821837943717929,
+   "smartware": 0.775630843826119,
    "bm25": 0.7201248491783779,
    "bm25+facts": 0.803045954281999,
    "dense": 0.7070063128067514,
    "dense+facts": 0.7861466724913695,
    "graphiti@tuned+facts": 0.7983987794354621,
    "hindsight@tuned+facts": 0.8120038732274577,
-   "orp+evidence": 0.7572552487200612,
+   "smartware+evidence": 0.7572552487200612,
    "letta@tuned+facts": 0.7866653492226658,
    "supermemory-company-brain@tuned+facts": 0.7674051555022448,
    "gbrain@tuned+facts": 0.43396468878675815,
@@ -93,7 +93,7 @@
    "langmem@tuned+facts": 0.7737665722509224,
    "sylph@tuned+facts": 0.504366986755344,
    "memoryos@tuned+facts": 0.5890196932033056,
-   "orp-ft+facts": 0.7905583249338233,
+   "smartware-ft+facts": 0.7905583249338233,
    "graphiti@ftuned+facts": 0.7983987794354621,
    "hindsight@ftuned+facts": 0.8120038732274577,
    "letta@ftuned+facts": 0.7959096774253274,
@@ -113,7 +113,7 @@
  },
  "choice": {
   "locomo": {
-   "orp": "orp-ft+facts",
+   "smartware": "smartware-ft+facts",
    "graphiti": "graphiti@tuned+facts",
    "hindsight": "hindsight@ftuned+facts",
    "mem0": "mem0@ftuned+facts",
@@ -131,7 +131,7 @@
    "memoryos": "memoryos@tuned"
   },
   "lme": {
-   "orp": "orp-ft+facts",
+   "smartware": "smartware-ft+facts",
    "graphiti": "graphiti@tuned+facts",
    "hindsight": "hindsight@tuned+facts",
    "mem0": "mem0@ftuned+facts",
@@ -149,7 +149,7 @@
    "memoryos": "memoryos@ftuned+facts"
   },
   "hotpot": {
-   "orp": "orp-ft+facts",
+   "smartware": "smartware-ft+facts",
    "graphiti": "graphiti@tuned+facts",
    "hindsight": "hindsight@ftuned+facts",
    "mem0": "mem0@ftuned+facts",

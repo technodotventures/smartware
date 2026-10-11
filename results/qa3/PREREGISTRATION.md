@@ -9,7 +9,7 @@ the context a system returned; a separate judge grades it. This is how LongMemEv
 |---|---|
 | Official `longmemeval_s_cleaned.json` test split, not our rebuild | Our own data construction |
 | 150 test questions, stratified by question type, seeded (seed 3), drawn before any context is exported | Cherry-picking questions |
-| **All 15 baselines** at their raw-turn dev-tuned settings, plus BM25, plus ORP v0.1.2 shipped | Choosing weak comparators |
+| **All 15 baselines** at their raw-turn dev-tuned settings, plus BM25, plus Smartware v0.1.2 shipped | Choosing weak comparators |
 | An **oracle** context (the gold evidence turns only, dated) as a ceiling | A reader too weak to tell systems apart |
 | Day-precision question times for every system (end of the question's day) | The date quirk, applied to all alike |
 | Same budget for all: 1,000 tokens (chars/4), each system's own rendering, greedy packing | Unequal context sizes |
@@ -17,12 +17,12 @@ the context a system returned; a separate judge grades it. This is how LongMemEv
 | Judges see only uid, question, question type, gold and answer | Judges favouring a system |
 | Judge rules follow LongMemEval's official per-type rules (off-by-one days accepted for temporal questions; updated answer required for knowledge updates; preference answers judged on use of the user's stated preferences) | Our own grading rules |
 | A second, independent judge pass on a seeded 20% subset; agreement (Cohen's kappa) reported | A single noisy judge |
-| Paired bootstrap 95% CIs for ORP against every system, plus Holm-adjusted p-values over the 16 comparisons | Picking the comparison after the fact |
-| Reader and judge: Claude Sonnet sub-agents; ORP was designed by Claude (Opus) | Disclosed, not removable here |
+| Paired bootstrap 95% CIs for Smartware against every system, plus Holm-adjusted p-values over the 16 comparisons | Picking the comparison after the fact |
+| Reader and judge: Claude Sonnet sub-agents; Smartware was designed by Claude (Opus) | Disclosed, not removable here |
 
 ## Reported
 
-Accuracy per system (overall and per question type), ORP minus each system with CI and Holm-adjusted p, oracle
+Accuracy per system (overall and per question type), Smartware minus each system with CI and Holm-adjusted p, oracle
 ceiling, judge agreement. All raw answers, verdicts and the uid-to-system key are kept in `results/qa3/`.
 No question, system, prompt or rule is changed after export. Failed reader batches are rerun with the same brief and
 logged; nothing is dropped silently.
@@ -30,9 +30,9 @@ logged; nothing is dropped silently.
 ## Outcome (10 Oct 2026)
 
 All 2,700 reader answers and verdicts collected (one item omitted by its reader was rerun alone with the same brief;
-`RERUNS.log`). ORP 80.7% correct; best of the 15: Graphiti and mem0 72.7%, Hindsight 72.0%; BM25 71.3%; oracle
-95.3%. ORP minus each system is positive with a 95% interval above zero for all 16 comparisons, Holm-adjusted p at
-most 0.031. Second judge agreement 99.8% on 540 items (kappa 0.996). Weakest type for ORP: single-session-assistant
+`RERUNS.log`). Smartware 80.7% correct; best of the 15: Graphiti and mem0 72.7%, Hindsight 72.0%; BM25 71.3%; oracle
+95.3%. Smartware minus each system is positive with a 95% interval above zero for all 16 comparisons, Holm-adjusted p at
+most 0.031. Second judge agreement 99.8% on 540 items (kappa 0.996). Weakest type for Smartware: single-session-assistant
 (77.8% against BM25's 94.4%), where long assistant replies are cut to snippets.
 
 ## Addendum: external reader and judge (fixed 10 Oct 2026, before any external output exists)
@@ -49,8 +49,8 @@ Amendment (before any external output): the run may call DeepSeek's own API dire
 ## Outcome of the external run (10 Oct 2026)
 
 DeepSeek V3 (`deepseek-chat`, DeepSeek API, temperature 0) read and judged all 2,700 items (inputs verified unchanged by
-SHA-256). ORP 46.0%; mem0 56.0%, BM25 55.3%, Hindsight 54.7%; oracle 61.3%. ORP minus mem0 -10.0 [-18.0, -2.0], Holm
+SHA-256). Smartware 46.0%; mem0 56.0%, BM25 55.3%, Hindsight 54.7%; oracle 61.3%. Smartware minus mem0 -10.0 [-18.0, -2.0], Holm
 p 0.133; no comparison against the top six is significant after Holm. The reader answered "I don't know" on 38 of 150
-oracle contexts and 71 of 150 ORP contexts (mem0 and BM25: 58). It does not confirm the Claude-read result: ORP's
+oracle contexts and 71 of 150 Smartware contexts (mem0 and BM25: 58). It does not confirm the Claude-read result: Smartware's
 advantage there comes from questions that need facts combined (multi-session, temporal), which this reader mostly
 declines to answer even from gold evidence.

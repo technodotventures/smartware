@@ -7,7 +7,7 @@ import { Service, SqliteStore, Principal, HashingEncoder, rankerParams } from ".
 const [db, op, prj, arg] = process.argv.slice(2);
 const p = JSON.parse(prj);
 const pr = new Principal(p.id, p.groups, p.tenant);
-const svc = new Service(new HashingEncoder(), { params: rankerParams("orp-rrf-1"), store: new SqliteStore(db), secretScan: false });
+const svc = new Service(new HashingEncoder(), { params: rankerParams("smartware-rrf-1"), store: new SqliteStore(db), secretScan: false });
 let out;
 if (op === "export") out = await svc.export(pr);
 else if (op === "recall") out = await svc.recall({ query: arg, as_of: "2027-01-01T00:00:00" }, pr);

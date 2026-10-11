@@ -1,5 +1,5 @@
 {
-  "adapter": "@orp/langgraph",
+  "adapter": "@technodotventures/smartware-langgraph",
   "host_interface": "LangGraph JS BaseStore: batch, get, search, put, delete, listNamespaces",
   "level": "L2",
   "level_note": "BaseStore has no place for as_of, budgets or principals. as_of and budget come from the store's config and are reported as degraded on search; the principal is the client's credentials; the audience is config. Per-call temporal and governance checks cannot be expressed through this interface.",

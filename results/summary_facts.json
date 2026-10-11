@@ -1,7 +1,7 @@
 {
  "locomo": {
   "test": {
-   "orp+facts": {
+   "smartware+facts": {
     "n": 1152,
     "ans@500": 0.7271585686625501,
     "recall@500": 0.7853958097199761,
@@ -163,7 +163,7 @@
     "latency_p95_ms": 0.7451109999863093,
     "build_ms_per_corpus": 8.614756857144
    },
-   "orp+evidence": {
+   "smartware+evidence": {
     "n": 1152,
     "ans@500": 0.7518341768971104,
     "recall@500": 0.7615142572208087,

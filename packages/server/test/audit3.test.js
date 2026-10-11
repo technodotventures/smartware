@@ -7,7 +7,7 @@ import { createHash } from "node:crypto";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { ApiEncoder, HashingEncoder, Principal, Service, SqliteStore, chooseRanker } from "@orp/core";
+import { ApiEncoder, HashingEncoder, Principal, Service, SqliteStore, chooseRanker } from "@technodotventures/smartware-core";
 import { Gateway, routeTemplate } from "../dist/http.js";
 import { Log } from "../dist/log.js";
 import { McpSession } from "../dist/mcp.js";
@@ -15,7 +15,7 @@ import { mem0Route } from "../dist/mem0.js";
 
 const enc = new HashingEncoder();
 const params = chooseRanker("auto", enc.name).params;
-const tmpdb = () => join(mkdtempSync(join(tmpdir(), "orp-audit3-")), "db.sqlite");
+const tmpdb = () => join(mkdtempSync(join(tmpdir(), "smartware-audit3-")), "db.sqlite");
 const open = (path) => new Service(enc, { params, store: path ? new SqliteStore(path) : null, secretScan: false });
 const P = (id, groups = [], tenant = "t1") => new Principal(id, groups, tenant);
 const star = (t) => new Principal("root", ["*"], t);
@@ -211,11 +211,11 @@ test("MCP tool arguments are type-checked", async () => {
   const m = new McpSession(s, pr, { toolsets: ["safe"], defaultReaders: "self" });
   const call = async (name, args) => (await m.handle({ jsonrpc: "2.0", id: 2, method: "tools/call", params: { name, arguments: args } })).result;
   for (const args of [{ query: "paris", budget_tokens: 120.9 }, { query: "paris", include_history: "false" }, { query: "paris", budget_tokens: "300" }]) {
-    const r = await call("orp_recall", args);
+    const r = await call("smartware_recall", args);
     assert.equal(r.isError, true, JSON.stringify(args));
     assert.equal(r.structuredContent.error.code, "invalid_parameter");
   }
-  assert.equal((await call("orp_recall", { query: "paris", budget_tokens: 300 })).isError, false);
+  assert.equal((await call("smartware_recall", { query: "paris", budget_tokens: 300 })).isError, false);
 });
 
 test("mem0 PUT keeps the record's other fields and gets fresh derived meta", async () => {

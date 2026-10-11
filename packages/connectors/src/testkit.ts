@@ -1,5 +1,5 @@
 // Connector test kit. replayFixture replays a scripted source (add, edit, ACL change, delete, membership change)
-// through a connector into a live ORP server, and after every step checks:
+// through a connector into a live Smartware server, and after every step checks:
 //   1. source truth: each fixture principal can read exactly the items the source ACL allows; an item a principal
 //      lost access to is gone from their get and recall;
 //   2. derived memories re-narrow (M59): a summary made by reflect is never visible to a principal who cannot read
@@ -10,8 +10,8 @@
 import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { chooseRanker, Engine, HashingEncoder, memoryFromJson, parseTime, Principal, recallRequest, type Encoder } from "@orp/core";
-import { OrpHttp, type Json } from "./http.js";
+import { chooseRanker, Engine, HashingEncoder, memoryFromJson, parseTime, Principal, recallRequest, type Encoder } from "@technodotventures/smartware-core";
+import { SmartwareHttp, type Json } from "./http.js";
 import { clientId, defineConnector, lagReport, mapAcl, sync, type Connector, type LagReport, type SourceItem, type SyncReport } from "./sdk.js";
 
 // ------------------------------------------------------------ a scripted source
@@ -128,9 +128,9 @@ export async function replayFixture(opt: ReplayOptions): Promise<ReplayResult> {
   const tenant = server.tenant ?? "default";
   const connector = opt.connector ?? fixtureConnector(new FixtureSource());
   const source = (connector as Partial<FixtureConnector>).source;
-  const statePath = opt.statePath ?? join(mkdtempSync(join(tmpdir(), "orp-replay-")), "state.json");
-  const admin = new OrpHttp({ url: server.url, token: server.adminToken, tenant });
-  const who = new Map<string, { http: OrpHttp; pr: Principal }>();
+  const statePath = opt.statePath ?? join(mkdtempSync(join(tmpdir(), "smartware-replay-")), "state.json");
+  const admin = new SmartwareHttp({ url: server.url, token: server.adminToken, tenant });
+  const who = new Map<string, { http: SmartwareHttp; pr: Principal }>();
   const truthResolve = fixture.resolve ?? ((s: string) => s);
   const enc = server.encoder ?? new HashingEncoder();
   const caps = await admin.capabilities();
@@ -143,7 +143,7 @@ export async function replayFixture(opt: ReplayOptions): Promise<ReplayResult> {
 
   const refreshPrincipals = async () => {
     for (const [name, token] of Object.entries(server.principals)) {
-      const http = new OrpHttp({ url: server.url, token, tenant });
+      const http = new SmartwareHttp({ url: server.url, token, tenant });
       const w = await http.whoami(); // groups as the gateway resolves them now (memberships included)
       who.set(name, { http, pr: new Principal(w.id, w.groups ?? [], w.tenant ?? tenant) });
     }
@@ -260,7 +260,7 @@ function defaultQueries(source: FixtureSource | undefined, extra: Map<string, st
 }
 
 /** M67 for every principal and query: server recall == recall over a clean engine of only that principal's records. */
-export async function removalEquivalence(admin: OrpHttp, who: Map<string, { http: OrpHttp; pr: Principal }>, tenant: string,
+export async function removalEquivalence(admin: SmartwareHttp, who: Map<string, { http: SmartwareHttp; pr: Principal }>, tenant: string,
   enc: Encoder, params: any, queries: string[]): Promise<{ checks: number; failures: string[] }> {
   const exp = await admin.export();
   const feed = await admin.changes(0, 100_000);

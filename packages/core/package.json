@@ -1,7 +1,7 @@
 {
-  "name": "@orp/core",
-  "version": "0.2.0",
-  "description": "ORP engine: admissibility-first recall over a single SQLite file. Zero runtime dependencies.",
+  "name": "@technodotventures/smartware-core",
+  "version": "2.0.0",
+  "description": "Smartware engine: admissibility-first recall over a single SQLite file. Zero runtime dependencies.",
   "license": "Apache-2.0",
   "type": "module",
   "main": "dist/index.js",

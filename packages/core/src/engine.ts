@@ -1,4 +1,4 @@
-// ORP product engine: a faithful port of the reference engine (orp/engine.py), restructured for production.
+// Smartware product engine: a faithful port of the reference engine (smartware/engine.py), restructured for production.
 //
 // What changed from the oracle, and why recall is unchanged:
 //  - One partition per tenant. Every recall quantity is computed over the asker's admissible set, which never

@@ -2,8 +2,8 @@
 import { Service, SqliteStore, PgStore, Principal, HashingEncoder, rankerParams, chooseRanker } from "../../packages/core/dist/index.js";
 import { randomBytes } from "node:crypto";
 
-// ORP_FUZZ_PG=postgres://... runs the same checks against the Postgres store (one fresh schema per run)
-const PG = process.env.ORP_FUZZ_PG;
+// SMARTWARE_FUZZ_PG=postgres://... runs the same checks against the Postgres store (one fresh schema per run)
+const PG = process.env.SMARTWARE_FUZZ_PG;
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -14,7 +14,7 @@ export const params = chooseRanker("auto", enc.name).params;
 
 export function tmpdb(tag = "db") {
   if (PG) return `pg:fuzz_${tag.replace(/[^a-z0-9_]/gi, "").toLowerCase()}_${randomBytes(4).toString("hex")}`;
-  const d = mkdtempSync(join(tmpdir(), "orp-fuzz-"));
+  const d = mkdtempSync(join(tmpdir(), "smartware-fuzz-"));
   return join(d, tag + ".sqlite");
 }
 
@@ -56,6 +56,6 @@ export async function dumpStore(svc) {
     return out;
   }
   const db = svc.store.db;
-  for (const t of TABLES) out[t] = db.prepare(`SELECT * FROM ${t === "meta" ? "orp_meta" : t}`).all().map((r) => JSON.stringify(r)).sort();
+  for (const t of TABLES) out[t] = db.prepare(`SELECT * FROM ${t === "meta" ? "smartware_meta" : t}`).all().map((r) => JSON.stringify(r)).sort();
   return out;
 }

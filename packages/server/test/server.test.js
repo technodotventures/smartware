@@ -1,4 +1,4 @@
-// End-to-end tests for orp serve: HTTP binding, auth (hashed keys, OIDC JWTs), MCP over Streamable HTTP and stdio,
+// End-to-end tests for smartware serve: HTTP binding, auth (hashed keys, OIDC JWTs), MCP over Streamable HTTP and stdio,
 // limits. Run: node --test packages/server/test/
 import { test, before, after } from "node:test";
 import assert from "node:assert/strict";
@@ -7,10 +7,10 @@ import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { spawn } from "node:child_process";
-import { HashingEncoder, Service, SqliteStore, chooseRanker } from "@orp/core";
+import { HashingEncoder, Service, SqliteStore, chooseRanker } from "@technodotventures/smartware-core";
 import { Authenticator, Gateway, JwtVerifier, KeyStore, Log } from "../dist/index.js";
 
-const dir = mkdtempSync(join(tmpdir(), "orp-srv-"));
+const dir = mkdtempSync(join(tmpdir(), "smartware-srv-"));
 const keysPath = join(dir, "keys.json");
 let gw, base, svc, tokA, tokB, tokEve, tokAdmin, tokStar, jwk, privKey;
 const ISS = "https://idp.example.com";
@@ -35,7 +35,7 @@ before(async () => {
   writeFileSync(join(dir, "jwks.json"), JSON.stringify({ keys: [jwk] }));
   const enc = new HashingEncoder();
   const { params } = chooseRanker("auto", enc.name);
-  svc = new Service(enc, { params, store: new SqliteStore(join(dir, "orp.db")) });
+  svc = new Service(enc, { params, store: new SqliteStore(join(dir, "smartware.db")) });
   const jwtv = new JwtVerifier({ issuer: ISS, audience: "http://127.0.0.1/mcp", jwks: join(dir, "jwks.json"), tenantClaim: "org" });
   gw = new Gateway(svc, new Authenticator(new KeyStore(keysPath), jwtv), {
     host: "127.0.0.1", port: 0, rate: { rps: 1000, burst: 40 }, allowedOrigins: ["https://app.example.com"], maxBody: 200_000,
@@ -162,11 +162,11 @@ test("MCP over Streamable HTTP: sessions bound to the token's principal", async 
   const { sid, rpc } = await mcpSession(tokA);
   const tools = await rpc(2, "tools/list", {});
   const names = tools.result.tools.map((t) => t.name);
-  assert.ok(names.includes("orp_recall") && names.includes("create_entities"));
-  assert.ok(!JSON.stringify(tools.result.tools.find((t) => t.name === "orp_remember").inputSchema).includes("readers"));
-  const w = await rpc(3, "tools/call", { name: "orp_remember", arguments: { content: "The Lisbon offsite is on 14 November", kind: "event" } });
+  assert.ok(names.includes("smartware_recall") && names.includes("create_entities"));
+  assert.ok(!JSON.stringify(tools.result.tools.find((t) => t.name === "smartware_remember").inputSchema).includes("readers"));
+  const w = await rpc(3, "tools/call", { name: "smartware_remember", arguments: { content: "The Lisbon offsite is on 14 November", kind: "event" } });
   assert.equal(w.result.isError, false);
-  const r = await rpc(4, "tools/call", { name: "orp_recall", arguments: { query: "when is the offsite?" } });
+  const r = await rpc(4, "tools/call", { name: "smartware_recall", arguments: { query: "when is the offsite?" } });
   assert.match(r.result.content[0].text, /Lisbon/);
   // safe toolset writes default to the writer only: bob cannot see alice's MCP write
   const rb = await call("POST", "/v1/acme/recall", tokB, { query: "when is the offsite?" });
@@ -199,8 +199,8 @@ test("MCP memory-server compatibility tools", async () => {
 });
 
 test("MCP stdio: initialize, tools, and elicitation-confirmed forget", async () => {
-  const p = spawn(process.execPath, [new URL("../bin/orp.js", import.meta.url).pathname, "serve", "--memory"],
-    { env: { ...process.env, ORP_PRINCIPAL: "zed", ORP_TENANT: "t1" }, stdio: ["pipe", "pipe", "pipe"] });
+  const p = spawn(process.execPath, [new URL("../bin/smartware.js", import.meta.url).pathname, "serve", "--memory"],
+    { env: { ...process.env, SMARTWARE_PRINCIPAL: "zed", SMARTWARE_TENANT: "t1" }, stdio: ["pipe", "pipe", "pipe"] });
   const lines = [];
   let buf = "";
   const waiters = [];
@@ -213,9 +213,9 @@ test("MCP stdio: initialize, tools, and elicitation-confirmed forget", async () 
   const wait = async (pred) => { for (;;) { const hit = lines.find(pred); if (hit) return hit; await new Promise((r) => waiters.push(r)); } };
   send({ jsonrpc: "2.0", id: 1, method: "initialize", params: { protocolVersion: "2025-06-18", capabilities: { elicitation: {} } } });
   await wait((l) => l.id === 1);
-  send({ jsonrpc: "2.0", id: 2, method: "tools/call", params: { name: "orp_remember", arguments: { content: "door code is in the vault" } } });
+  send({ jsonrpc: "2.0", id: 2, method: "tools/call", params: { name: "smartware_remember", arguments: { content: "door code is in the vault" } } });
   const id = JSON.parse((await wait((l) => l.id === 2)).result.content[0].text).ids[0];
-  send({ jsonrpc: "2.0", id: 3, method: "tools/call", params: { name: "orp_forget", arguments: { ids: [id] } } });
+  send({ jsonrpc: "2.0", id: 3, method: "tools/call", params: { name: "smartware_forget", arguments: { ids: [id] } } });
   const ask = await wait((l) => l.method === "elicitation/create");
   send({ jsonrpc: "2.0", id: ask.id, result: { action: "accept", content: { confirm: true } } });
   const done = await wait((l) => l.id === 3);
@@ -223,14 +223,14 @@ test("MCP stdio: initialize, tools, and elicitation-confirmed forget", async () 
   p.kill();
 });
 
-test("orp doctor --self reaches L4", async () => {
+test("smartware doctor --self reaches L4", async () => {
   const { selfTest } = await import("../dist/doctor.js");
   const r = await selfTest({ memory: true });
   assert.deepEqual(r.checks.filter((c) => c.status !== "pass").map((c) => c.id), []);
   assert.equal(r.level, "L4");
 });
 
-test("orp doctor --principals: removal equivalence on real principals", async () => {
+test("smartware doctor --principals: removal equivalence on real principals", async () => {
   await call("POST", "/v1/acme/remember", tokA, { memories: [
     { content: "Q4 pipeline review: Acme deal at risk over pricing", readers: ["group:sales"], thread: "int-1", seq: 1 },
     { content: "Engineering capacity is tight for the Acme integration", readers: ["group:eng"], thread: "int-1", seq: 2 },

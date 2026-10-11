@@ -1,8 +1,8 @@
 {
- "note": "MCP tool definitions by toolset (orp serve --tools safe|full|mcp-memory)",
+ "note": "MCP tool definitions by toolset (smartware serve --tools safe|full|mcp-memory)",
  "tools": [
   {
-   "name": "orp_recall",
+   "name": "smartware_recall",
    "title": "Recall memory",
    "set": [
     "safe",
@@ -49,7 +49,7 @@
    }
   },
   {
-   "name": "orp_remember",
+   "name": "smartware_remember",
    "title": "Remember",
    "set": [
     "safe"
@@ -115,7 +115,7 @@
    }
   },
   {
-   "name": "orp_remember",
+   "name": "smartware_remember",
    "title": "Remember",
    "set": [
     "full"
@@ -267,7 +267,7 @@
    }
   },
   {
-   "name": "orp_forget",
+   "name": "smartware_forget",
    "title": "Forget",
    "set": [
     "safe"
@@ -301,7 +301,7 @@
    }
   },
   {
-   "name": "orp_forget",
+   "name": "smartware_forget",
    "title": "Forget",
    "set": [
     "full"
@@ -343,7 +343,7 @@
    }
   },
   {
-   "name": "orp_profile",
+   "name": "smartware_profile",
    "title": "Profile",
    "set": [
     "safe",
@@ -373,7 +373,7 @@
    }
   },
   {
-   "name": "orp_history",
+   "name": "smartware_history",
    "title": "History",
    "set": [
     "safe",
@@ -402,7 +402,7 @@
    }
   },
   {
-   "name": "orp_get",
+   "name": "smartware_get",
    "title": "Get",
    "set": [
     "full"
@@ -429,7 +429,7 @@
    }
   },
   {
-   "name": "orp_neighbours",
+   "name": "smartware_neighbours",
    "title": "Neighbours",
    "set": [
     "full"
@@ -459,7 +459,7 @@
    }
   },
   {
-   "name": "orp_feedback",
+   "name": "smartware_feedback",
    "title": "Feedback",
    "set": [
     "full"
@@ -503,7 +503,7 @@
    }
   },
   {
-   "name": "orp_reflect",
+   "name": "smartware_reflect",
    "title": "Reflect",
    "set": [
     "full"

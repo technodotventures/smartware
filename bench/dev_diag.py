@@ -42,7 +42,7 @@ def run(system, kw, bench):
 def main():
     name, kw = sys.argv[1], json.loads(sys.argv[2])
     benches = (sys.argv[3] if len(sys.argv) > 3 else "locomo,lme,lmes").split(",")
-    system = sys.argv[4] if len(sys.argv) > 4 else "orp"
+    system = sys.argv[4] if len(sys.argv) > 4 else "smartware"
     out = os.path.join(ROOT, "results", "dev_diag", f"{name}.json")
     res = json.load(open(out)) if os.path.exists(out) else {"system": system, "kw": kw, "rows": {}}
     for b in benches:

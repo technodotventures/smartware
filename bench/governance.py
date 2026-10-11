@@ -1,4 +1,4 @@
-"""ORP-Gov v2: permission-aware recall for multi-tenant SaaS.
+"""Smartware Gov v2: permission-aware recall for multi-tenant SaaS.
 
 Each LoCoMo test conversation becomes a workspace (tenant). Its sessions are channels; each of
 6 principals belongs to a seeded random share of channels (visibility). Inside channels, 20% of
@@ -22,7 +22,7 @@ Turns are inserted in a seeded interleaved order across sessions (as channels in
 tie-breaks that depend on hidden units would show up.
 
 Strategies (same ranker everywhere; only access control differs):
-  orp                ORP §5.1/§6.3: admissibility before ranking, admissible-set statistics, masked expansion
+  smartware                Smartware §5.1/§6.3: admissibility before ranking, admissible-set statistics, masked expansion
   global_stats       admissibility before ranking, but collection statistics and neighbour features computed over
                      all memories (common when a search engine filters by ACL inside a shared index)
   post_filter@10/@50 rank with the shared index (global statistics, same spans), cut to the top k items, then drop
@@ -41,9 +41,9 @@ import sys
 from collections import defaultdict
 from dataclasses import replace
 
-from orp.api import Service
-from orp.engine import Params
-from orp.model import Principal, RecallRequest
+from smartware.api import Service
+from smartware.engine import Params
+from smartware.model import Principal, RecallRequest
 
 from .data import load_locomo
 from .encoders import DenseEncoder, Encoders
@@ -140,7 +140,7 @@ def run(params: Params, visibility: float = 0.5, private_share: float = 0.2, max
             return svc
 
         gp = replace(params, admissible_stats=False)
-        V = {"orp": build(True, "closed", params), "global_stats": build(True, "closed", gp),
+        V = {"smartware": build(True, "closed", params), "global_stats": build(True, "closed", gp),
              "scope_only": build(False, "none", params), "derived_bank": build(True, "bank", params)}
         # leak evidence = shingles that occur ONLY in text the asker cannot read
         read_text = {u: set().union(*(shingles(t.text) for t in c.turns if can_read(u, t.id))) for u in members}
@@ -167,7 +167,7 @@ def run(params: Params, visibility: float = 0.5, private_share: float = 0.2, max
                 pr = prins[u]
                 body = {"query": q.text, "as_of": q.time.isoformat(), "budget": {"tokens": 4000}}
                 res = {name: to_items(V[name].recall(body, pr), V[name])
-                       for name in ("orp", "global_stats", "scope_only", "derived_bank")}
+                       for name in ("smartware", "global_stats", "scope_only", "derived_bank")}
                 gl = V["global_stats"].engine  # shared index: statistics over every memory
                 upk = gl.recall(RecallRequest(query=q.text, principal=admin, tenant="org", as_of=q.time,
                                               budget_tokens=None, max_items=50, filters={"granularity": "auto"}))
@@ -184,7 +184,7 @@ def run(params: Params, visibility: float = 0.5, private_share: float = 0.2, max
                     ctx = set().union(*(shingles(it.text, speakers=spk) for it in kept)) if kept else set()
                     leak = ctx & (unread_text[u] | other_text)
                     r = {"kind": kind, "text_leak": float(bool(leak))}
-                    if leak and name == "orp" and len(examples) < 40:
+                    if leak and name == "smartware" and len(examples) < 40:
                         examples.append({"u": u, "qid": q.qid, "shingles": sorted(leak)[:3],
                                          "lines": [ln for it in kept for ln in it.text.split("\n")
                                                    if shingles(ln, speakers=spk) & leak][:3]})
@@ -193,7 +193,7 @@ def run(params: Params, visibility: float = 0.5, private_share: float = 0.2, max
                     else:
                         r["answer_leak"] = float(any(ctx & (tid_text[g] - read_text[u]) for g in q.gold_turns))
                     rows[name].append(r)
-        for name, p_ in (("orp", params), ("global_stats", gp)):
+        for name, p_ in (("smartware", params), ("global_stats", gp)):
             for u in list(members)[:2]:
                 clean = build(True, "none", p_, exclude_for=u)
                 full_store = build(True, "none", p_)
@@ -223,13 +223,13 @@ def run(params: Params, visibility: float = 0.5, private_share: float = 0.2, max
                      "text_leak": sum(r["text_leak"] for r in rs) / max(1, len(rs)),
                      "answer_leak": sum(r["answer_leak"] for r in forb) / max(1, len(forb)),
                      "rank_side_channel": (sum(side) / len(side)) if side else None}
-    out["_orp_leak_examples"] = examples
+    out["_smartware_leak_examples"] = examples
     return out
 
 
 def final_params() -> Params:
-    from .orp_variants import ORPLtr
-    return ORPLtr().params
+    from .smartware_variants import SmartwareLtr
+    return SmartwareLtr().params
 
 
 if __name__ == "__main__":

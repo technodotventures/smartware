@@ -5,7 +5,7 @@ system) is given to one answering model, and a judge model grades the answer
 against the gold answer with the LoCoMo/LongMemEval-style yes/no prompt. Both
 prompts and models are pinned below and must be reported with any result.
 
-    ANTHROPIC_API_KEY=... python -m bench.qa --bench locomo --systems orp,mem0,graphiti --budget 1000 --limit 300
+    ANTHROPIC_API_KEY=... python -m bench.qa --bench locomo --systems smartware,mem0,graphiti --budget 1000 --limit 300
 """
 from __future__ import annotations
 
@@ -20,8 +20,8 @@ from .encoders import DenseEncoder, Encoders
 from .metrics import pack
 from .run import make
 
-ANSWER_MODEL = os.environ.get("ORP_QA_MODEL", "claude-haiku-4-5-20251001")
-JUDGE_MODEL = os.environ.get("ORP_JUDGE_MODEL", "claude-haiku-4-5-20251001")
+ANSWER_MODEL = os.environ.get("SMARTWARE_QA_MODEL", "claude-haiku-4-5-20251001")
+JUDGE_MODEL = os.environ.get("SMARTWARE_JUDGE_MODEL", "claude-haiku-4-5-20251001")
 
 ANSWER_PROMPT = """You are answering a question about past conversations using only the memory context below.
 Each block starts with the date of the conversation. Resolve relative dates against that date.
@@ -55,7 +55,7 @@ def call(model: str, prompt: str) -> str:
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--bench", default="locomo")
-    ap.add_argument("--systems", default="orp")
+    ap.add_argument("--systems", default="smartware")
     ap.add_argument("--budget", type=int, default=1000)
     ap.add_argument("--limit", type=int, default=300)
     ap.add_argument("--out", default="results/qa.json")

@@ -13,11 +13,11 @@ from collections import Counter
 from datetime import datetime, timedelta
 from unittest import mock
 
-from orp import engine as engine_mod
-from orp.api import ORPError, Service
-from orp.engine import Params
-from orp.model import Principal
-from tests.conformance.test_orp import ADMIN, ALICE, BOB, HashEmbedder, ev, make_service, texts
+from smartware import engine as engine_mod
+from smartware.api import SmartwareError, Service
+from smartware.engine import Params
+from smartware.model import Principal
+from tests.conformance.test_smartware import ADMIN, ALICE, BOB, HashEmbedder, ev, make_service, texts
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 T0 = datetime(2025, 6, 1)
@@ -35,7 +35,7 @@ def recall(s, pr, q, **kw):
 
 
 def shipped_params() -> Params:
-    with open(os.path.join(ROOT, "results", "orp_params.json")) as fh:
+    with open(os.path.join(ROOT, "results", "smartware_params.json")) as fh:
         p = json.load(fh)["params"]
     return Params(**{k: tuple(v) if isinstance(v, list) else v for k, v in p.items()})
 
@@ -144,7 +144,7 @@ class Supersession(unittest.TestCase):
         d = self.s.remember({"memories": [{"kind": "procedure", "content": "exec rule", "readers": ["group:exec"]}],
                              "mode": "propose"}, ADMIN)["ids"][0]
         approver = Principal("pat", frozenset({"approver"}), tenant="acme")
-        with self.assertRaises(ORPError):
+        with self.assertRaises(SmartwareError):
             self.s.approve(d, approver)
 
 
@@ -175,11 +175,11 @@ class Writes(unittest.TestCase):
                {"sources": [{"uri": "x", "bogus": 1}]}, {"seq": "first"}, {"confidence": 7},
                {"meta": {"_creator": "root"}}]
         for b in bad:
-            with self.assertRaises(ORPError, msg=str(b)):
+            with self.assertRaises(SmartwareError, msg=str(b)):
                 self.s.remember({"memories": [dict(ev("prod api key sk-live-123", thread="t"), **b)]}, ALICE)
         for body in ({"query": "x", "budget": {"tokens": "lots"}}, {"query": "x", "kinds": {"fact": "many"}},
                      {"query": "x", "min_coverage": "high"}, {"query": "x", "budget": {"tokens": 10 ** 7}}):
-            with self.assertRaises(ORPError, msg=str(body)):
+            with self.assertRaises(SmartwareError, msg=str(body)):
                 self.s.recall(body, ALICE)
 
     def test_M59_M72_label_change_on_source_reaches_derived(self):
@@ -204,19 +204,19 @@ class Writes(unittest.TestCase):
 
     def test_M71_import_requires_admin_and_stays_in_tenant(self):
         b = self.s.export(ADMIN)
-        with self.assertRaises(ORPError):
+        with self.assertRaises(SmartwareError):
             self.s.import_(b, ALICE)
         a1 = self.s.remember({"memories": [ev("edge a", thread="t")]}, ADMIN)["ids"][0]
         a2 = self.s.remember({"memories": [ev("edge b", thread="t")]}, ADMIN)["ids"][0]
         eid = self.s.link({"type": "relates", "from": a1, "to": a2}, ADMIN)["id"]
         evil = {"memories.jsonl": "", "edges.jsonl": json.dumps({"id": eid, "type": "relates", "from": "x",
                                                                  "to": "y", "tenant": "other"})}
-        with self.assertRaises(ORPError):
+        with self.assertRaises(SmartwareError):
             self.s.import_(evil, OTHER)
         self.assertEqual(self.s._edges[eid]["tenant"], "acme")
         forged = json.dumps({"id": "f1", "kind": "event", "content": "forged", "tenant": "acme",
                              "observed_at": "2020-01-01T00:00:00"})
-        with self.assertRaises(ORPError):
+        with self.assertRaises(SmartwareError):
             self.s.import_({"memories.jsonl": forged}, Principal("nobody", tenant="acme"))
 
     def test_M27_M74_dry_run_lists_only_readable_ids(self):
@@ -241,7 +241,7 @@ class Writes(unittest.TestCase):
                                              readers=["group:exec"])]}, ADMIN)["ids"]
         self.s.forget({"ids": a}, ADMIN)
         self.s.remember({"memories": [ev("quarterly bonus pool is 2m", thread="t", actor="hr")]}, BOB)  # no error
-        with self.assertRaises(ORPError):
+        with self.assertRaises(SmartwareError):
             self.s.remember({"memories": [ev("quarterly bonus pool is 2m", thread="t", actor="hr",
                                              readers=["group:exec"])]}, ADMIN)
 
@@ -319,7 +319,7 @@ class Reads(unittest.TestCase):
         self.assertEqual(len(r["items"][0]["memory_ids"]), 1)
 
     def test_M43_engine_never_exceeds_budget(self):
-        from orp.model import RecallRequest
+        from smartware.model import RecallRequest
         self.s.remember({"memories": [ev(" ".join(["budget"] * 80) + f" {i}", thread=f"t{i}") for i in range(10)]},
                         ADMIN)
         pack = self.s.engine.recall(RecallRequest(query="budget", principal=ALICE, tenant="acme", budget_tokens=60))
@@ -331,7 +331,7 @@ class Reads(unittest.TestCase):
         r = self.s.neighbours(ids[1], 2, 2, ALICE)
         self.assertEqual([m["content"] for m in r["memories"]], ["n0", "n1"])
         self.s.forget({"ids": [ids[0]]}, ALICE)
-        with self.assertRaises(ORPError):
+        with self.assertRaises(SmartwareError):
             self.s.neighbours(ids[0], 1, 1, ALICE)
 
     def test_M25_deep_mode_declared(self):
@@ -361,7 +361,7 @@ class Persistence(unittest.TestCase):
         t.load(path)
         self.assertTrue(t.remember({"memories": [ev("persist me", thread="t")], "idempotency_key": "p1"},
                                    ALICE)["replayed"])
-        with self.assertRaises(ORPError):
+        with self.assertRaises(SmartwareError):
             t.remember({"memories": [ev("forget me", thread="t")]}, ALICE)
         self.assertEqual(len(t.changes(0, ALICE)["changes"]), len(s.changes(0, ALICE)["changes"]))
 

@@ -1,5 +1,5 @@
 """Dev-only selection for the LLM-extraction track: for every system, choose between storing raw turns and storing
-the extracted facts (ORP: raw turns, facts, or turns as evidence plus facts as derived memories) by the LoCoMo dev
+the extracted facts (Smartware: raw turns, facts, or turns as evidence plus facts as derived memories) by the LoCoMo dev
 objective. Test splits are not read. Writes results/facts_dev.json."""
 from __future__ import annotations
 
@@ -12,7 +12,7 @@ from .devtune import evaluate
 from .run import REGISTRY, make
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-BASE = [n for n in REGISTRY if not n.startswith("orp") and n not in ("bm25", "dense")]
+BASE = [n for n in REGISTRY if not n.startswith("smartware") and n not in ("bm25", "dense")]
 
 
 BENCH = "locomo"
@@ -32,7 +32,7 @@ def job(name):
 def main():
     global BENCH
     BENCH = sys.argv[2] if len(sys.argv) > 2 else "locomo"
-    names = ["orp", "orp+facts", "orp+evidence", "bm25", "bm25+facts", "dense", "dense+facts"]
+    names = ["smartware", "smartware+facts", "smartware+evidence", "bm25", "bm25+facts", "dense", "dense+facts"]
     out = {}
     tun = json.load(open(os.path.join(ROOT, "results", "baseline_tuning.json")))
     for b in BASE:
@@ -47,8 +47,8 @@ def main():
             out[n] = {"J": j, "dev": r}
             print(f"{n:36s} J={j:.4f} R@1000={r['recall@1000']:.3f} ans@1000={r['ans@1000']:.3f}", flush=True)
     choice = {}
-    for b in ["orp", "bm25", "dense"] + [f"{b}@tuned" for b in BASE]:
-        opts = [b, b + "+facts"] + (["orp+evidence"] if b == "orp" else [])
+    for b in ["smartware", "bm25", "dense"] + [f"{b}@tuned" for b in BASE]:
+        opts = [b, b + "+facts"] + (["smartware+evidence"] if b == "smartware" else [])
         choice[b] = max(opts, key=lambda o: out[o]["J"])
     fn = "facts_dev.json" if BENCH == "locomo" else f"facts_dev_{BENCH}.json"
     json.dump({"runs": out, "choice": choice}, open(os.path.join(ROOT, "results", fn), "w"), indent=1)

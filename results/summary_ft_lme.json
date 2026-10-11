@@ -1359,7 +1359,7 @@
     "latency_p95_ms": 3.036435000012716,
     "build_ms_per_corpus": 52.13469922513711
    },
-   "orp-ft+facts": {
+   "smartware-ft+facts": {
     "n": 382,
     "ans@500": 0.6057579587375798,
     "recall@500": 0.8041884816753926,

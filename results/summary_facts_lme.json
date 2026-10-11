@@ -1,7 +1,7 @@
 {
  "lme": {
   "test": {
-   "orp+facts": {
+   "smartware+facts": {
     "n": 382,
     "ans@500": 0.609645432833638,
     "recall@500": 0.7972076788830716,
@@ -680,7 +680,7 @@
     "latency_p95_ms": 2.2644170003331965,
     "build_ms_per_corpus": 29.41987289267653
    },
-   "orp+evidence": {
+   "smartware+evidence": {
     "n": 382,
     "ans@500": 0.5651139530720258,
     "recall@500": 0.7109075043630018,

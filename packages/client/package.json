@@ -1,7 +1,7 @@
 {
-  "name": "@orp/client",
-  "version": "0.2.0",
-  "description": "Typed HTTP client for ORP memory: identity bound at construction, fail-closed writes, run-pinned as_of and safe retries.",
+  "name": "@technodotventures/smartware-client",
+  "version": "2.0.0",
+  "description": "Typed HTTP client for Smartware memory: identity bound at construction, fail-closed writes, run-pinned as_of and safe retries.",
   "license": "Apache-2.0",
   "type": "module",
   "main": "dist/index.js",

@@ -1,6 +1,6 @@
 {
 "qa00000": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "311778f1",
 "category": "single-session-user",
 "question": "How many hours did I spend watching documentaries on Netflix last month?",
@@ -8,7 +8,7 @@
 "tokens": 996
 },
 "qa00001": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "6f9b354f",
 "category": "single-session-user",
 "question": "What color did I repaint my bedroom walls?",
@@ -16,7 +16,7 @@
 "tokens": 973
 },
 "qa00002": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "gpt4_e414231e",
 "category": "temporal-reasoning",
 "question": "How many days passed between the day I fixed my mountain bike and the day I decided to upgrade my road bike's pedals?",
@@ -24,7 +24,7 @@
 "tokens": 986
 },
 "qa00003": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "gpt4_76048e76",
 "category": "temporal-reasoning",
 "question": "Which vehicle did I take care of first in February, the bike or the car?",
@@ -32,7 +32,7 @@
 "tokens": 996
 },
 "qa00004": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "d596882b",
 "category": "single-session-assistant",
 "question": "I'm planning another trip to New York City and I was wondering if you could remind me of that vegan eatery you recommended last time, the one with multiple locations throughout the city?",
@@ -40,7 +40,7 @@
 "tokens": 999
 },
 "qa00005": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "f523d9fe",
 "category": "single-session-assistant",
 "question": "I wanted to check back on our previous conversation about Netflix. I mentioned that I wanted to be able to access all seasons of old shows? Do you remember what show I used as an example, the one that only had the last season available?",
@@ -48,7 +48,7 @@
 "tokens": 964
 },
 "qa00006": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "gpt4_85da3956",
 "category": "temporal-reasoning",
 "question": "How many weeks ago did I attend the 'Summer Nights' festival at Universal Studios Hollywood?",
@@ -64,7 +64,7 @@
 "tokens": 983
 },
 "qa00008": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "cc6d1ec1",
 "category": "temporal-reasoning",
 "question": "How long had I been bird watching when I attended the bird watching workshop?",
@@ -72,7 +72,7 @@
 "tokens": 979
 },
 "qa00009": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "gpt4_b4a80587",
 "category": "temporal-reasoning",
 "question": "Which event happened first, the road trip to the coast or the arrival of the new prime lens?",
@@ -96,7 +96,7 @@
 "tokens": 1000
 },
 "qa00012": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "gpt4_93f6379c",
 "category": "temporal-reasoning",
 "question": "Which group did I join first, 'Page Turners' or 'Marketing Professionals'?",
@@ -104,7 +104,7 @@
 "tokens": 975
 },
 "qa00013": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "c4f10528",
 "category": "single-session-assistant",
 "question": "I'm planning to visit Bandung again and I was wondering if you could remind me of the name of that restaurant in Cihampelas Walk that serves a great Nasi Goreng?",
@@ -112,7 +112,7 @@
 "tokens": 981
 },
 "qa00014": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "gpt4_21adecb5",
 "category": "temporal-reasoning",
 "question": "How many months passed between the completion of my undergraduate degree and the submission of my master's thesis?",
@@ -120,7 +120,7 @@
 "tokens": 998
 },
 "qa00015": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "gpt4_ec93e27f",
 "category": "temporal-reasoning",
 "question": "Which mode of transport did I use most recently, a bus or a train?",
@@ -144,7 +144,7 @@
 "tokens": 991
 },
 "qa00018": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "6ade9755",
 "category": "single-session-user",
 "question": "Where do I take yoga classes?",
@@ -152,7 +152,7 @@
 "tokens": 993
 },
 "qa00019": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "gpt4_e061b84g",
 "category": "temporal-reasoning",
 "question": "I mentioned participating in a sports event two weeks ago. What was the event?",
@@ -160,7 +160,7 @@
 "tokens": 996
 },
 "qa00020": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "gpt4_2ba83207",
 "category": "multi-session",
 "question": "Which grocery store did I spend the most money at in the past month?",
@@ -168,7 +168,7 @@
 "tokens": 995
 },
 "qa00021": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "5a7937c8",
 "category": "multi-session",
 "question": "How many days did I spend participating in faith-related activities in December?",
@@ -176,7 +176,7 @@
 "tokens": 986
 },
 "qa00022": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "4dfccbf8",
 "category": "temporal-reasoning",
 "question": "What did I do with Rachel on the Wednesday two months ago?",
@@ -192,7 +192,7 @@
 "tokens": 988
 },
 "qa00024": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "efc3f7c2",
 "category": "multi-session",
 "question": "How much earlier do I wake up on Fridays compared to other weekdays?",
@@ -200,7 +200,7 @@
 "tokens": 983
 },
 "qa00025": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "gpt4_5438fa52",
 "category": "temporal-reasoning",
 "question": "Which event happened first, my attendance at a cultural festival or the start of my Spanish classes?",
@@ -216,7 +216,7 @@
 "tokens": 993
 },
 "qa00027": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "54026fce",
 "category": "single-session-preference",
 "question": "I've been thinking about ways to stay connected with my colleagues. Any suggestions?",
@@ -224,7 +224,7 @@
 "tokens": 995
 },
 "qa00028": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "8cf51dda",
 "category": "single-session-assistant",
 "question": "I'm going back to our previous conversation about the grant aim page on molecular subtypes and endometrial cancer. Can you remind me what were the three objectives we outlined for the project?",
@@ -232,7 +232,7 @@
 "tokens": 982
 },
 "qa00029": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "38146c39",
 "category": "single-session-preference",
 "question": "I've been feeling like my chocolate chip cookies need something extra. Any advice?",
@@ -248,7 +248,7 @@
 "tokens": 973
 },
 "qa00031": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "720133ac",
 "category": "multi-session",
 "question": "What is the total cost of Lola's vet visit and flea medication?",
@@ -256,7 +256,7 @@
 "tokens": 1000
 },
 "qa00032": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "118b2229",
 "category": "single-session-user",
 "question": "How long is my daily commute to work?",
@@ -264,7 +264,7 @@
 "tokens": 999
 },
 "qa00033": {
-"system": "orp",
+"system": "smartware",
 "qid": "gpt4_45189cb4",
 "category": "temporal-reasoning",
 "question": "What is the order of the sports events I watched in January?",
@@ -272,7 +272,7 @@
 "tokens": 999
 },
 "qa00034": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "2a1811e2",
 "category": "temporal-reasoning",
 "question": "How many days had passed between the Hindu festival of Holi and the Sunday mass at St. Mary's Church?",
@@ -280,7 +280,7 @@
 "tokens": 981
 },
 "qa00035": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "08f4fc43",
 "category": "temporal-reasoning",
 "question": "How many days had passed between the Sunday mass at St. Mary's Church and the Ash Wednesday service at the cathedral?",
@@ -288,7 +288,7 @@
 "tokens": 990
 },
 "qa00036": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "d01c6aa8",
 "category": "temporal-reasoning",
 "question": "How old was I when I moved to the United States?",
@@ -296,7 +296,7 @@
 "tokens": 985
 },
 "qa00037": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "gpt4_372c3eed",
 "category": "multi-session",
 "question": "How many years in total did I spend in formal education from high school to the completion of my Bachelor's degree?",
@@ -304,7 +304,7 @@
 "tokens": 992
 },
 "qa00038": {
-"system": "orp",
+"system": "smartware",
 "qid": "4dfccbf8",
 "category": "temporal-reasoning",
 "question": "What did I do with Rachel on the Wednesday two months ago?",
@@ -312,7 +312,7 @@
 "tokens": 989
 },
 "qa00039": {
-"system": "orp",
+"system": "smartware",
 "qid": "08f4fc43",
 "category": "temporal-reasoning",
 "question": "How many days had passed between the Sunday mass at St. Mary's Church and the Ash Wednesday service at the cathedral?",
@@ -320,7 +320,7 @@
 "tokens": 972
 },
 "qa00040": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "gpt4_1d4ab0c9",
 "category": "temporal-reasoning",
 "question": "How many days passed between the day I started watering my herb garden and the day I harvested my first batch of fresh herbs?",
@@ -328,7 +328,7 @@
 "tokens": 997
 },
 "qa00041": {
-"system": "orp",
+"system": "smartware",
 "qid": "4b24c848",
 "category": "knowledge-update",
 "question": "How many tops have I bought from H&M so far?",
@@ -352,7 +352,7 @@
 "tokens": 999
 },
 "qa00044": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "59524333",
 "category": "knowledge-update",
 "question": "What time do I usually go to the gym?",
@@ -360,7 +360,7 @@
 "tokens": 987
 },
 "qa00045": {
-"system": "orp",
+"system": "smartware",
 "qid": "gpt4_ec93e27f",
 "category": "temporal-reasoning",
 "question": "Which mode of transport did I use most recently, a bus or a train?",
@@ -368,7 +368,7 @@
 "tokens": 996
 },
 "qa00046": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "4dfccbf8",
 "category": "temporal-reasoning",
 "question": "What did I do with Rachel on the Wednesday two months ago?",
@@ -376,7 +376,7 @@
 "tokens": 975
 },
 "qa00047": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "gpt4_45189cb4",
 "category": "temporal-reasoning",
 "question": "What is the order of the sports events I watched in January?",
@@ -384,7 +384,7 @@
 "tokens": 978
 },
 "qa00048": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "gpt4_f420262c",
 "category": "temporal-reasoning",
 "question": "What is the order of airlines I flew with from earliest to latest before today?",
@@ -400,7 +400,7 @@
 "tokens": 995
 },
 "qa00050": {
-"system": "orp",
+"system": "smartware",
 "qid": "b6019101",
 "category": "knowledge-update",
 "question": "How many MCU films did I watch in the last 3 months?",
@@ -408,7 +408,7 @@
 "tokens": 993
 },
 "qa00051": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "22d2cb42",
 "category": "knowledge-update",
 "question": "Where did I get my guitar serviced?",
@@ -416,7 +416,7 @@
 "tokens": 975
 },
 "qa00052": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "gpt4_45189cb4",
 "category": "temporal-reasoning",
 "question": "What is the order of the sports events I watched in January?",
@@ -432,7 +432,7 @@
 "tokens": 981
 },
 "qa00054": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "efc3f7c2",
 "category": "multi-session",
 "question": "How much earlier do I wake up on Fridays compared to other weekdays?",
@@ -440,7 +440,7 @@
 "tokens": 991
 },
 "qa00055": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "89941a94",
 "category": "knowledge-update",
 "question": "Before I purchased the gravel bike, do I have other bikes in addition to my mountain bike and my commuter bike?",
@@ -448,7 +448,7 @@
 "tokens": 990
 },
 "qa00056": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "8cf51dda",
 "category": "single-session-assistant",
 "question": "I'm going back to our previous conversation about the grant aim page on molecular subtypes and endometrial cancer. Can you remind me what were the three objectives we outlined for the project?",
@@ -456,7 +456,7 @@
 "tokens": 935
 },
 "qa00057": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "f523d9fe",
 "category": "single-session-assistant",
 "question": "I wanted to check back on our previous conversation about Netflix. I mentioned that I wanted to be able to access all seasons of old shows? Do you remember what show I used as an example, the one that only had the last season available?",
@@ -464,7 +464,7 @@
 "tokens": 982
 },
 "qa00058": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "9bbe84a2",
 "category": "knowledge-update",
 "question": "What was my previous goal for my Apex Legends level before I updated my goal?",
@@ -472,7 +472,7 @@
 "tokens": 977
 },
 "qa00059": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "gpt4_f420262d",
 "category": "temporal-reasoning",
 "question": "What was the airline that I flied with on Valentine's day?",
@@ -488,7 +488,7 @@
 "tokens": 979
 },
 "qa00061": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "gpt4_e414231e",
 "category": "temporal-reasoning",
 "question": "How many days passed between the day I fixed my mountain bike and the day I decided to upgrade my road bike's pedals?",
@@ -504,7 +504,7 @@
 "tokens": 978
 },
 "qa00063": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "4388e9dd",
 "category": "single-session-assistant",
 "question": "I was going through our previous chat and I was wondering, what was Andy wearing in the script you wrote for the comedy movie scene?",
@@ -512,7 +512,7 @@
 "tokens": 995
 },
 "qa00064": {
-"system": "orp",
+"system": "smartware",
 "qid": "af082822",
 "category": "temporal-reasoning",
 "question": "How many weeks ago did I attend the friends and family sale at Nordstrom?",
@@ -520,7 +520,7 @@
 "tokens": 997
 },
 "qa00065": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "55241a1f",
 "category": "multi-session",
 "question": "What is the total number of comments on my recent Facebook Live session and my most popular YouTube video?",
@@ -528,7 +528,7 @@
 "tokens": 998
 },
 "qa00066": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "59524333",
 "category": "knowledge-update",
 "question": "What time do I usually go to the gym?",
@@ -544,7 +544,7 @@
 "tokens": 998
 },
 "qa00068": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "gpt4_59149c78",
 "category": "temporal-reasoning",
 "question": "I mentioned that I participated in an art-related event two weeks ago. Where was that event held at?",
@@ -552,7 +552,7 @@
 "tokens": 972
 },
 "qa00069": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "ba61f0b9",
 "category": "knowledge-update",
 "question": "How many women are on the team led by my former manager Rachel?",
@@ -576,7 +576,7 @@
 "tokens": 988
 },
 "qa00072": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "ad7109d1",
 "category": "single-session-user",
 "question": "What speed is my new internet plan?",
@@ -584,7 +584,7 @@
 "tokens": 998
 },
 "qa00073": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "gpt4_d9af6064",
 "category": "temporal-reasoning",
 "question": "Which device did I set up first, the smart thermostat or the new router?",
@@ -592,7 +592,7 @@
 "tokens": 988
 },
 "qa00074": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "4b24c848",
 "category": "knowledge-update",
 "question": "How many tops have I bought from H&M so far?",
@@ -608,7 +608,7 @@
 "tokens": 992
 },
 "qa00076": {
-"system": "orp",
+"system": "smartware",
 "qid": "ba61f0b9",
 "category": "knowledge-update",
 "question": "How many women are on the team led by my former manager Rachel?",
@@ -616,7 +616,7 @@
 "tokens": 995
 },
 "qa00077": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "311778f1",
 "category": "single-session-user",
 "question": "How many hours did I spend watching documentaries on Netflix last month?",
@@ -624,7 +624,7 @@
 "tokens": 991
 },
 "qa00078": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "gpt4_f2262a51",
 "category": "multi-session",
 "question": "How many different doctors did I visit?",
@@ -632,7 +632,7 @@
 "tokens": 990
 },
 "qa00079": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "118b2229",
 "category": "single-session-user",
 "question": "How long is my daily commute to work?",
@@ -640,7 +640,7 @@
 "tokens": 999
 },
 "qa00080": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "ef9cf60a",
 "category": "multi-session",
 "question": "How much did I spend on gifts for my sister?",
@@ -648,7 +648,7 @@
 "tokens": 975
 },
 "qa00081": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "ef9cf60a",
 "category": "multi-session",
 "question": "How much did I spend on gifts for my sister?",
@@ -656,7 +656,7 @@
 "tokens": 975
 },
 "qa00082": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "gpt4_f420262c",
 "category": "temporal-reasoning",
 "question": "What is the order of airlines I flew with from earliest to latest before today?",
@@ -688,7 +688,7 @@
 "tokens": 989
 },
 "qa00086": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "gpt4_f420262d",
 "category": "temporal-reasoning",
 "question": "What was the airline that I flied with on Valentine's day?",
@@ -696,7 +696,7 @@
 "tokens": 994
 },
 "qa00087": {
-"system": "orp",
+"system": "smartware",
 "qid": "gpt4_e061b84g",
 "category": "temporal-reasoning",
 "question": "I mentioned participating in a sports event two weeks ago. What was the event?",
@@ -712,7 +712,7 @@
 "tokens": 998
 },
 "qa00089": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "c4f10528",
 "category": "single-session-assistant",
 "question": "I'm planning to visit Bandung again and I was wondering if you could remind me of the name of that restaurant in Cihampelas Walk that serves a great Nasi Goreng?",
@@ -728,7 +728,7 @@
 "tokens": 995
 },
 "qa00091": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "22d2cb42",
 "category": "knowledge-update",
 "question": "Where did I get my guitar serviced?",
@@ -744,7 +744,7 @@
 "tokens": 991
 },
 "qa00093": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "1d4e3b97",
 "category": "single-session-preference",
 "question": "I noticed my bike seems to be performing even better during my Sunday group rides. Could there be a reason for this?",
@@ -752,7 +752,7 @@
 "tokens": 986
 },
 "qa00094": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "gpt4_372c3eed",
 "category": "multi-session",
 "question": "How many years in total did I spend in formal education from high school to the completion of my Bachelor's degree?",
@@ -768,7 +768,7 @@
 "tokens": 999
 },
 "qa00096": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "cc06de0d",
 "category": "multi-session",
 "question": "For my daily commute, how much more expensive was the taxi ride compared to the train fare?",
@@ -776,7 +776,7 @@
 "tokens": 991
 },
 "qa00097": {
-"system": "orp",
+"system": "smartware",
 "qid": "bbf86515",
 "category": "temporal-reasoning",
 "question": "How many days before the 'Rack Fest' did I participate in the 'Turbocharged Tuesdays' event?",
@@ -784,7 +784,7 @@
 "tokens": 1000
 },
 "qa00098": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "gpt4_18c2b244",
 "category": "temporal-reasoning",
 "question": "What is the order of the three events: 'I signed up for the rewards program at ShopRite', 'I used a Buy One Get One Free coupon on Luvs diapers at Walmart', and 'I redeemed $12 cashback for a $10 Amazon gift card from Ibotta'?",
@@ -792,7 +792,7 @@
 "tokens": 989
 },
 "qa00099": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "26bdc477",
 "category": "knowledge-update",
 "question": "How many trips have I taken my Canon EOS 80D camera on?",
@@ -824,7 +824,7 @@
 "tokens": 993
 },
 "qa00103": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "gpt4_d9af6064",
 "category": "temporal-reasoning",
 "question": "Which device did I set up first, the smart thermostat or the new router?",
@@ -832,7 +832,7 @@
 "tokens": 988
 },
 "qa00104": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "09ba9854",
 "category": "multi-session",
 "question": "How much will I save by taking the train from the airport to my hotel instead of a taxi?",
@@ -840,7 +840,7 @@
 "tokens": 993
 },
 "qa00105": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "gpt4_70e84552",
 "category": "temporal-reasoning",
 "question": "Which task did I complete first, fixing the fence or trimming the goats' hooves?",
@@ -848,7 +848,7 @@
 "tokens": 995
 },
 "qa00106": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "gpt4_a2d1d1f6",
 "category": "temporal-reasoning",
 "question": "How many days ago did I harvest my first batch of fresh herbs from the herb garden kit?",
@@ -856,7 +856,7 @@
 "tokens": 988
 },
 "qa00107": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "gpt4_76048e76",
 "category": "temporal-reasoning",
 "question": "Which vehicle did I take care of first in February, the bike or the car?",
@@ -864,7 +864,7 @@
 "tokens": 996
 },
 "qa00108": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "gpt4_ec93e27f",
 "category": "temporal-reasoning",
 "question": "Which mode of transport did I use most recently, a bus or a train?",
@@ -872,7 +872,7 @@
 "tokens": 998
 },
 "qa00109": {
-"system": "orp",
+"system": "smartware",
 "qid": "gpt4_f420262c",
 "category": "temporal-reasoning",
 "question": "What is the order of airlines I flew with from earliest to latest before today?",
@@ -880,7 +880,7 @@
 "tokens": 987
 },
 "qa00110": {
-"system": "orp",
+"system": "smartware",
 "qid": "58ef2f1c",
 "category": "single-session-user",
 "question": "When did I volunteer at the local animal shelter's fundraising dinner?",
@@ -888,7 +888,7 @@
 "tokens": 991
 },
 "qa00111": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "370a8ff4",
 "category": "temporal-reasoning",
 "question": "How many weeks had passed since I recovered from the flu when I went on my 10th jog outdoors?",
@@ -896,7 +896,7 @@
 "tokens": 986
 },
 "qa00112": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "2ebe6c92",
 "category": "temporal-reasoning",
 "question": "Which book did I finish a week ago?",
@@ -904,7 +904,7 @@
 "tokens": 992
 },
 "qa00113": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "bc8a6e93",
 "category": "single-session-user",
 "question": "What did I bake for my niece's birthday party?",
@@ -920,7 +920,7 @@
 "tokens": 996
 },
 "qa00115": {
-"system": "orp",
+"system": "smartware",
 "qid": "b01defab",
 "category": "knowledge-update",
 "question": "Did I finish reading 'The Nightingale' by Kristin Hannah?",
@@ -928,7 +928,7 @@
 "tokens": 996
 },
 "qa00116": {
-"system": "orp",
+"system": "smartware",
 "qid": "1de5cff2",
 "category": "single-session-assistant",
 "question": "I was going through our previous conversation about high-end fashion brands, and I was wondering if you could remind me of the brand that uses wild rubber sourced from the Amazon rainforest?",
@@ -936,7 +936,7 @@
 "tokens": 1000
 },
 "qa00117": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "cc06de0d",
 "category": "multi-session",
 "question": "For my daily commute, how much more expensive was the taxi ride compared to the train fare?",
@@ -944,7 +944,7 @@
 "tokens": 989
 },
 "qa00118": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "4f54b7c9",
 "category": "multi-session",
 "question": "How many antique items did I inherit or acquire from my family members?",
@@ -952,7 +952,7 @@
 "tokens": 982
 },
 "qa00119": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "af082822",
 "category": "temporal-reasoning",
 "question": "How many weeks ago did I attend the friends and family sale at Nordstrom?",
@@ -960,7 +960,7 @@
 "tokens": 985
 },
 "qa00120": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "4f54b7c9",
 "category": "multi-session",
 "question": "How many antique items did I inherit or acquire from my family members?",
@@ -968,7 +968,7 @@
 "tokens": 998
 },
 "qa00121": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "gpt4_7ddcf75f",
 "category": "temporal-reasoning",
 "question": "How many days ago did I go on a whitewater rafting trip in the Oregon mountains?",
@@ -976,7 +976,7 @@
 "tokens": 986
 },
 "qa00122": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "21d02d0d",
 "category": "multi-session",
 "question": "How many fun runs did I miss in March due to work commitments?",
@@ -1000,7 +1000,7 @@
 "tokens": 994
 },
 "qa00125": {
-"system": "orp",
+"system": "smartware",
 "qid": "gpt4_f420262d",
 "category": "temporal-reasoning",
 "question": "What was the airline that I flied with on Valentine's day?",
@@ -1008,7 +1008,7 @@
 "tokens": 999
 },
 "qa00126": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "370a8ff4",
 "category": "temporal-reasoning",
 "question": "How many weeks had passed since I recovered from the flu when I went on my 10th jog outdoors?",
@@ -1016,7 +1016,7 @@
 "tokens": 986
 },
 "qa00127": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "gpt4_59149c78",
 "category": "temporal-reasoning",
 "question": "I mentioned that I participated in an art-related event two weeks ago. Where was that event held at?",
@@ -1040,7 +1040,7 @@
 "tokens": 982
 },
 "qa00130": {
-"system": "orp",
+"system": "smartware",
 "qid": "22d2cb42",
 "category": "knowledge-update",
 "question": "Where did I get my guitar serviced?",
@@ -1072,7 +1072,7 @@
 "tokens": 966
 },
 "qa00134": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "gpt4_385a5000",
 "category": "temporal-reasoning",
 "question": "Which seeds were started first, the tomatoes or the marigolds?",
@@ -1080,7 +1080,7 @@
 "tokens": 986
 },
 "qa00135": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "1d4e3b97",
 "category": "single-session-preference",
 "question": "I noticed my bike seems to be performing even better during my Sunday group rides. Could there be a reason for this?",
@@ -1096,7 +1096,7 @@
 "tokens": 974
 },
 "qa00137": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "e56a43b9",
 "category": "multi-session",
 "question": "How much discount will I get on my next purchase at FreshMart?",
@@ -1104,7 +1104,7 @@
 "tokens": 992
 },
 "qa00138": {
-"system": "orp",
+"system": "smartware",
 "qid": "982b5123",
 "category": "temporal-reasoning",
 "question": "How many months ago did I book the Airbnb in San Francisco?",
@@ -1112,7 +1112,7 @@
 "tokens": 995
 },
 "qa00139": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "09ba9854",
 "category": "multi-session",
 "question": "How much will I save by taking the train from the airport to my hotel instead of a taxi?",
@@ -1120,7 +1120,7 @@
 "tokens": 993
 },
 "qa00140": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "gpt4_2ba83207",
 "category": "multi-session",
 "question": "Which grocery store did I spend the most money at in the past month?",
@@ -1136,7 +1136,7 @@
 "tokens": 988
 },
 "qa00142": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "bf659f65",
 "category": "multi-session",
 "question": "How many music albums or EPs have I purchased or downloaded?",
@@ -1152,7 +1152,7 @@
 "tokens": 976
 },
 "qa00144": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "54026fce",
 "category": "single-session-preference",
 "question": "I've been thinking about ways to stay connected with my colleagues. Any suggestions?",
@@ -1168,7 +1168,7 @@
 "tokens": 997
 },
 "qa00146": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "gpt4_ec93e27f",
 "category": "temporal-reasoning",
 "question": "Which mode of transport did I use most recently, a bus or a train?",
@@ -1176,7 +1176,7 @@
 "tokens": 998
 },
 "qa00147": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "d596882b",
 "category": "single-session-assistant",
 "question": "I'm planning another trip to New York City and I was wondering if you could remind me of that vegan eatery you recommended last time, the one with multiple locations throughout the city?",
@@ -1192,7 +1192,7 @@
 "tokens": 988
 },
 "qa00149": {
-"system": "orp",
+"system": "smartware",
 "qid": "6aeb4375",
 "category": "knowledge-update",
 "question": "How many Korean restaurants have I tried in my city?",
@@ -1208,7 +1208,7 @@
 "tokens": 987
 },
 "qa00151": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "gpt4_5438fa52",
 "category": "temporal-reasoning",
 "question": "Which event happened first, my attendance at a cultural festival or the start of my Spanish classes?",
@@ -1216,7 +1216,7 @@
 "tokens": 974
 },
 "qa00152": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "d905b33f",
 "category": "multi-session",
 "question": "What percentage discount did I get on the book from my favorite author?",
@@ -1224,7 +1224,7 @@
 "tokens": 986
 },
 "qa00153": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "55241a1f",
 "category": "multi-session",
 "question": "What is the total number of comments on my recent Facebook Live session and my most popular YouTube video?",
@@ -1232,7 +1232,7 @@
 "tokens": 987
 },
 "qa00154": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "720133ac",
 "category": "multi-session",
 "question": "What is the total cost of Lola's vet visit and flea medication?",
@@ -1240,7 +1240,7 @@
 "tokens": 995
 },
 "qa00155": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "1d4e3b97",
 "category": "single-session-preference",
 "question": "I noticed my bike seems to be performing even better during my Sunday group rides. Could there be a reason for this?",
@@ -1256,7 +1256,7 @@
 "tokens": 968
 },
 "qa00157": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "af082822",
 "category": "temporal-reasoning",
 "question": "How many weeks ago did I attend the friends and family sale at Nordstrom?",
@@ -1272,7 +1272,7 @@
 "tokens": 992
 },
 "qa00159": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "54026fce",
 "category": "single-session-preference",
 "question": "I've been thinking about ways to stay connected with my colleagues. Any suggestions?",
@@ -1280,7 +1280,7 @@
 "tokens": 995
 },
 "qa00160": {
-"system": "orp",
+"system": "smartware",
 "qid": "gpt4_21adecb5",
 "category": "temporal-reasoning",
 "question": "How many months passed between the completion of my undergraduate degree and the submission of my master's thesis?",
@@ -1288,7 +1288,7 @@
 "tokens": 999
 },
 "qa00161": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "352ab8bd",
 "category": "single-session-assistant",
 "question": "Can you remind me what was the average improvement in framerate when using the Hardware-Aware Modular Training (HAMT) agent in the 'To Adapt or Not to Adapt? Real-Time Adaptation for Semantic Segmentation' submission?",
@@ -1296,7 +1296,7 @@
 "tokens": 983
 },
 "qa00162": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "85fa3a3f",
 "category": "multi-session",
 "question": "What is the total cost of the new food bowl, measuring cup, dental chews, and flea and tick collar I got for Max?",
@@ -1320,7 +1320,7 @@
 "tokens": 984
 },
 "qa00165": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "1de5cff2",
 "category": "single-session-assistant",
 "question": "I was going through our previous conversation about high-end fashion brands, and I was wondering if you could remind me of the brand that uses wild rubber sourced from the Amazon rainforest?",
@@ -1328,7 +1328,7 @@
 "tokens": 997
 },
 "qa00166": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "d01c6aa8",
 "category": "temporal-reasoning",
 "question": "How old was I when I moved to the United States?",
@@ -1336,7 +1336,7 @@
 "tokens": 986
 },
 "qa00167": {
-"system": "orp",
+"system": "smartware",
 "qid": "4388e9dd",
 "category": "single-session-assistant",
 "question": "I was going through our previous chat and I was wondering, what was Andy wearing in the script you wrote for the comedy movie scene?",
@@ -1352,7 +1352,7 @@
 "tokens": 979
 },
 "qa00169": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "af082822",
 "category": "temporal-reasoning",
 "question": "How many weeks ago did I attend the friends and family sale at Nordstrom?",
@@ -1368,7 +1368,7 @@
 "tokens": 988
 },
 "qa00171": {
-"system": "orp",
+"system": "smartware",
 "qid": "2ebe6c92",
 "category": "temporal-reasoning",
 "question": "Which book did I finish a week ago?",
@@ -1376,7 +1376,7 @@
 "tokens": 997
 },
 "qa00172": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "gpt4_45189cb4",
 "category": "temporal-reasoning",
 "question": "What is the order of the sports events I watched in January?",
@@ -1384,7 +1384,7 @@
 "tokens": 999
 },
 "qa00173": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "95228167",
 "category": "single-session-preference",
 "question": "I'm getting excited about my visit to the music store this weekend. Any tips on what to look for in a new guitar?",
@@ -1392,7 +1392,7 @@
 "tokens": 992
 },
 "qa00174": {
-"system": "orp",
+"system": "smartware",
 "qid": "d596882b",
 "category": "single-session-assistant",
 "question": "I'm planning another trip to New York City and I was wondering if you could remind me of that vegan eatery you recommended last time, the one with multiple locations throughout the city?",
@@ -1400,7 +1400,7 @@
 "tokens": 989
 },
 "qa00175": {
-"system": "orp",
+"system": "smartware",
 "qid": "gpt4_18c2b244",
 "category": "temporal-reasoning",
 "question": "What is the order of the three events: 'I signed up for the rewards program at ShopRite', 'I used a Buy One Get One Free coupon on Luvs diapers at Walmart', and 'I redeemed $12 cashback for a $10 Amazon gift card from Ibotta'?",
@@ -1408,7 +1408,7 @@
 "tokens": 986
 },
 "qa00176": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "2a1811e2",
 "category": "temporal-reasoning",
 "question": "How many days had passed between the Hindu festival of Holi and the Sunday mass at St. Mary's Church?",
@@ -1416,7 +1416,7 @@
 "tokens": 1000
 },
 "qa00177": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "5a7937c8",
 "category": "multi-session",
 "question": "How many days did I spend participating in faith-related activities in December?",
@@ -1424,7 +1424,7 @@
 "tokens": 1000
 },
 "qa00178": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "gpt4_85da3956",
 "category": "temporal-reasoning",
 "question": "How many weeks ago did I attend the 'Summer Nights' festival at Universal Studios Hollywood?",
@@ -1432,7 +1432,7 @@
 "tokens": 987
 },
 "qa00179": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "gpt4_a2d1d1f6",
 "category": "temporal-reasoning",
 "question": "How many days ago did I harvest my first batch of fresh herbs from the herb garden kit?",
@@ -1440,7 +1440,7 @@
 "tokens": 998
 },
 "qa00180": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "f523d9fe",
 "category": "single-session-assistant",
 "question": "I wanted to check back on our previous conversation about Netflix. I mentioned that I wanted to be able to access all seasons of old shows? Do you remember what show I used as an example, the one that only had the last season available?",
@@ -1448,7 +1448,7 @@
 "tokens": 964
 },
 "qa00181": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "d905b33f",
 "category": "multi-session",
 "question": "What percentage discount did I get on the book from my favorite author?",
@@ -1464,7 +1464,7 @@
 "tokens": 989
 },
 "qa00183": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "61f8c8f8",
 "category": "multi-session",
 "question": "How much faster did I finish the 5K run compared to my previous year's time?",
@@ -1480,7 +1480,7 @@
 "tokens": 983
 },
 "qa00185": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "61f8c8f8",
 "category": "multi-session",
 "question": "How much faster did I finish the 5K run compared to my previous year's time?",
@@ -1496,7 +1496,7 @@
 "tokens": 998
 },
 "qa00187": {
-"system": "orp",
+"system": "smartware",
 "qid": "gpt4_e414231e",
 "category": "temporal-reasoning",
 "question": "How many days passed between the day I fixed my mountain bike and the day I decided to upgrade my road bike's pedals?",
@@ -1512,7 +1512,7 @@
 "tokens": 984
 },
 "qa00189": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "118b2229",
 "category": "single-session-user",
 "question": "How long is my daily commute to work?",
@@ -1528,7 +1528,7 @@
 "tokens": 971
 },
 "qa00191": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "e56a43b9",
 "category": "multi-session",
 "question": "How much discount will I get on my next purchase at FreshMart?",
@@ -1536,7 +1536,7 @@
 "tokens": 998
 },
 "qa00192": {
-"system": "orp",
+"system": "smartware",
 "qid": "85fa3a3f",
 "category": "multi-session",
 "question": "What is the total cost of the new food bowl, measuring cup, dental chews, and flea and tick collar I got for Max?",
@@ -1544,7 +1544,7 @@
 "tokens": 992
 },
 "qa00193": {
-"system": "orp",
+"system": "smartware",
 "qid": "gpt4_76048e76",
 "category": "temporal-reasoning",
 "question": "Which vehicle did I take care of first in February, the bike or the car?",
@@ -1552,7 +1552,7 @@
 "tokens": 989
 },
 "qa00194": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "cc06de0d",
 "category": "multi-session",
 "question": "For my daily commute, how much more expensive was the taxi ride compared to the train fare?",
@@ -1560,7 +1560,7 @@
 "tokens": 991
 },
 "qa00195": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "982b5123",
 "category": "temporal-reasoning",
 "question": "How many months ago did I book the Airbnb in San Francisco?",
@@ -1568,7 +1568,7 @@
 "tokens": 992
 },
 "qa00196": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "gpt4_b4a80587",
 "category": "temporal-reasoning",
 "question": "Which event happened first, the road trip to the coast or the arrival of the new prime lens?",
@@ -1576,7 +1576,7 @@
 "tokens": 986
 },
 "qa00197": {
-"system": "orp",
+"system": "smartware",
 "qid": "311778f1",
 "category": "single-session-user",
 "question": "How many hours did I spend watching documentaries on Netflix last month?",
@@ -1584,7 +1584,7 @@
 "tokens": 999
 },
 "qa00198": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "b86304ba",
 "category": "single-session-user",
 "question": "How much is the painting of a sunset worth in terms of the amount I paid for it?",
@@ -1592,7 +1592,7 @@
 "tokens": 977
 },
 "qa00199": {
-"system": "orp",
+"system": "smartware",
 "qid": "d905b33f",
 "category": "multi-session",
 "question": "What percentage discount did I get on the book from my favorite author?",
@@ -1600,7 +1600,7 @@
 "tokens": 982
 },
 "qa00200": {
-"system": "orp",
+"system": "smartware",
 "qid": "d01c6aa8",
 "category": "temporal-reasoning",
 "question": "How old was I when I moved to the United States?",
@@ -1608,7 +1608,7 @@
 "tokens": 979
 },
 "qa00201": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "4c36ccef",
 "category": "single-session-assistant",
 "question": "Can you remind me of the name of the romantic Italian restaurant in Rome you recommended for dinner?",
@@ -1616,7 +1616,7 @@
 "tokens": 987
 },
 "qa00202": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "bc8a6e93",
 "category": "single-session-user",
 "question": "What did I bake for my niece's birthday party?",
@@ -1632,7 +1632,7 @@
 "tokens": 991
 },
 "qa00204": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "6613b389",
 "category": "temporal-reasoning",
 "question": "How many months before my anniversary did Rachel get engaged?",
@@ -1640,7 +1640,7 @@
 "tokens": 1000
 },
 "qa00205": {
-"system": "orp",
+"system": "smartware",
 "qid": "bf659f65",
 "category": "multi-session",
 "question": "How many music albums or EPs have I purchased or downloaded?",
@@ -1648,7 +1648,7 @@
 "tokens": 982
 },
 "qa00206": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "58ef2f1c",
 "category": "single-session-user",
 "question": "When did I volunteer at the local animal shelter's fundraising dinner?",
@@ -1664,7 +1664,7 @@
 "tokens": 983
 },
 "qa00208": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "54026fce",
 "category": "single-session-preference",
 "question": "I've been thinking about ways to stay connected with my colleagues. Any suggestions?",
@@ -1672,7 +1672,7 @@
 "tokens": 979
 },
 "qa00209": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "ef9cf60a",
 "category": "multi-session",
 "question": "How much did I spend on gifts for my sister?",
@@ -1680,7 +1680,7 @@
 "tokens": 975
 },
 "qa00210": {
-"system": "orp",
+"system": "smartware",
 "qid": "gpt4_1d4ab0c9",
 "category": "temporal-reasoning",
 "question": "How many days passed between the day I started watering my herb garden and the day I harvested my first batch of fresh herbs?",
@@ -1688,7 +1688,7 @@
 "tokens": 1000
 },
 "qa00211": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "26bdc477",
 "category": "knowledge-update",
 "question": "How many trips have I taken my Canon EOS 80D camera on?",
@@ -1704,7 +1704,7 @@
 "tokens": 999
 },
 "qa00213": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "7e00a6cb",
 "category": "single-session-assistant",
 "question": "I'm planning my trip to Amsterdam again and I was wondering, what was the name of that hostel near the Red Light District that you recommended last time?",
@@ -1712,7 +1712,7 @@
 "tokens": 986
 },
 "qa00214": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "982b5123",
 "category": "temporal-reasoning",
 "question": "How many months ago did I book the Airbnb in San Francisco?",
@@ -1744,7 +1744,7 @@
 "tokens": 995
 },
 "qa00218": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "c2ac3c61",
 "category": "multi-session",
 "question": "How many online courses have I completed in total?",
@@ -1752,7 +1752,7 @@
 "tokens": 1000
 },
 "qa00219": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "4b24c848",
 "category": "knowledge-update",
 "question": "How many tops have I bought from H&M so far?",
@@ -1760,7 +1760,7 @@
 "tokens": 998
 },
 "qa00220": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "gpt4_f420262d",
 "category": "temporal-reasoning",
 "question": "What was the airline that I flied with on Valentine's day?",
@@ -1776,7 +1776,7 @@
 "tokens": 986
 },
 "qa00222": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "e56a43b9",
 "category": "multi-session",
 "question": "How much discount will I get on my next purchase at FreshMart?",
@@ -1784,7 +1784,7 @@
 "tokens": 996
 },
 "qa00223": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "38146c39",
 "category": "single-session-preference",
 "question": "I've been feeling like my chocolate chip cookies need something extra. Any advice?",
@@ -1792,7 +1792,7 @@
 "tokens": 979
 },
 "qa00224": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "ad7109d1",
 "category": "single-session-user",
 "question": "What speed is my new internet plan?",
@@ -1808,7 +1808,7 @@
 "tokens": 993
 },
 "qa00226": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "352ab8bd",
 "category": "single-session-assistant",
 "question": "Can you remind me what was the average improvement in framerate when using the Hardware-Aware Modular Training (HAMT) agent in the 'To Adapt or Not to Adapt? Real-Time Adaptation for Semantic Segmentation' submission?",
@@ -1816,7 +1816,7 @@
 "tokens": 983
 },
 "qa00227": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "81507db6",
 "category": "multi-session",
 "question": "How many graduation ceremonies have I attended in the past three months?",
@@ -1824,7 +1824,7 @@
 "tokens": 987
 },
 "qa00228": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "d01c6aa8",
 "category": "temporal-reasoning",
 "question": "How old was I when I moved to the United States?",
@@ -1832,7 +1832,7 @@
 "tokens": 985
 },
 "qa00229": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "95bcc1c8",
 "category": "single-session-user",
 "question": "How many amateur comedians did I watch perform at the open mic night?",
@@ -1848,7 +1848,7 @@
 "tokens": 978
 },
 "qa00231": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "6aeb4375",
 "category": "knowledge-update",
 "question": "How many Korean restaurants have I tried in my city?",
@@ -1856,7 +1856,7 @@
 "tokens": 995
 },
 "qa00232": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "gpt4_e061b84g",
 "category": "temporal-reasoning",
 "question": "I mentioned participating in a sports event two weeks ago. What was the event?",
@@ -1864,7 +1864,7 @@
 "tokens": 978
 },
 "qa00233": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "efc3f7c2",
 "category": "multi-session",
 "question": "How much earlier do I wake up on Fridays compared to other weekdays?",
@@ -1872,7 +1872,7 @@
 "tokens": 985
 },
 "qa00234": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "gpt4_f2262a51",
 "category": "multi-session",
 "question": "How many different doctors did I visit?",
@@ -1888,7 +1888,7 @@
 "tokens": 990
 },
 "qa00236": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "cc6d1ec1",
 "category": "temporal-reasoning",
 "question": "How long had I been bird watching when I attended the bird watching workshop?",
@@ -1896,7 +1896,7 @@
 "tokens": 996
 },
 "qa00237": {
-"system": "orp",
+"system": "smartware",
 "qid": "370a8ff4",
 "category": "temporal-reasoning",
 "question": "How many weeks had passed since I recovered from the flu when I went on my 10th jog outdoors?",
@@ -1912,7 +1912,7 @@
 "tokens": 988
 },
 "qa00239": {
-"system": "orp",
+"system": "smartware",
 "qid": "gpt4_7ddcf75f",
 "category": "temporal-reasoning",
 "question": "How many days ago did I go on a whitewater rafting trip in the Oregon mountains?",
@@ -1920,7 +1920,7 @@
 "tokens": 989
 },
 "qa00240": {
-"system": "orp",
+"system": "smartware",
 "qid": "09ba9854",
 "category": "multi-session",
 "question": "How much will I save by taking the train from the airport to my hotel instead of a taxi?",
@@ -1928,7 +1928,7 @@
 "tokens": 995
 },
 "qa00241": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "bf659f65",
 "category": "multi-session",
 "question": "How many music albums or EPs have I purchased or downloaded?",
@@ -1968,7 +1968,7 @@
 "tokens": 994
 },
 "qa00246": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "6f9b354f",
 "category": "single-session-user",
 "question": "What color did I repaint my bedroom walls?",
@@ -1976,7 +1976,7 @@
 "tokens": 989
 },
 "qa00247": {
-"system": "orp",
+"system": "smartware",
 "qid": "c2ac3c61",
 "category": "multi-session",
 "question": "How many online courses have I completed in total?",
@@ -1992,7 +1992,7 @@
 "tokens": 987
 },
 "qa00249": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "6f9b354f",
 "category": "single-session-user",
 "question": "What color did I repaint my bedroom walls?",
@@ -2008,7 +2008,7 @@
 "tokens": 980
 },
 "qa00251": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "af082822",
 "category": "temporal-reasoning",
 "question": "How many weeks ago did I attend the friends and family sale at Nordstrom?",
@@ -2024,7 +2024,7 @@
 "tokens": 979
 },
 "qa00253": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "d596882b",
 "category": "single-session-assistant",
 "question": "I'm planning another trip to New York City and I was wondering if you could remind me of that vegan eatery you recommended last time, the one with multiple locations throughout the city?",
@@ -2040,7 +2040,7 @@
 "tokens": 999
 },
 "qa00255": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "2a1811e2",
 "category": "temporal-reasoning",
 "question": "How many days had passed between the Hindu festival of Holi and the Sunday mass at St. Mary's Church?",
@@ -2048,7 +2048,7 @@
 "tokens": 992
 },
 "qa00256": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "6aeb4375",
 "category": "knowledge-update",
 "question": "How many Korean restaurants have I tried in my city?",
@@ -2056,7 +2056,7 @@
 "tokens": 996
 },
 "qa00257": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "gpt4_7ddcf75f",
 "category": "temporal-reasoning",
 "question": "How many days ago did I go on a whitewater rafting trip in the Oregon mountains?",
@@ -2064,7 +2064,7 @@
 "tokens": 986
 },
 "qa00258": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "55241a1f",
 "category": "multi-session",
 "question": "What is the total number of comments on my recent Facebook Live session and my most popular YouTube video?",
@@ -2072,7 +2072,7 @@
 "tokens": 982
 },
 "qa00259": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "gpt4_a2d1d1f6",
 "category": "temporal-reasoning",
 "question": "How many days ago did I harvest my first batch of fresh herbs from the herb garden kit?",
@@ -2080,7 +2080,7 @@
 "tokens": 994
 },
 "qa00260": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "4388e9dd",
 "category": "single-session-assistant",
 "question": "I was going through our previous chat and I was wondering, what was Andy wearing in the script you wrote for the comedy movie scene?",
@@ -2088,7 +2088,7 @@
 "tokens": 995
 },
 "qa00261": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "d596882b",
 "category": "single-session-assistant",
 "question": "I'm planning another trip to New York City and I was wondering if you could remind me of that vegan eatery you recommended last time, the one with multiple locations throughout the city?",
@@ -2096,7 +2096,7 @@
 "tokens": 992
 },
 "qa00262": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "59524333",
 "category": "knowledge-update",
 "question": "What time do I usually go to the gym?",
@@ -2112,7 +2112,7 @@
 "tokens": 991
 },
 "qa00264": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "22d2cb42",
 "category": "knowledge-update",
 "question": "Where did I get my guitar serviced?",
@@ -2120,7 +2120,7 @@
 "tokens": 982
 },
 "qa00265": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "eac54adc",
 "category": "temporal-reasoning",
 "question": "How many days ago did I launch my website when I signed a contract with my first client?",
@@ -2128,7 +2128,7 @@
 "tokens": 989
 },
 "qa00266": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "4b24c848",
 "category": "knowledge-update",
 "question": "How many tops have I bought from H&M so far?",
@@ -2152,7 +2152,7 @@
 "tokens": 972
 },
 "qa00269": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "gpt4_93f6379c",
 "category": "temporal-reasoning",
 "question": "Which group did I join first, 'Page Turners' or 'Marketing Professionals'?",
@@ -2160,7 +2160,7 @@
 "tokens": 960
 },
 "qa00270": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "4f54b7c9",
 "category": "multi-session",
 "question": "How many antique items did I inherit or acquire from my family members?",
@@ -2176,7 +2176,7 @@
 "tokens": 989
 },
 "qa00272": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "c2ac3c61",
 "category": "multi-session",
 "question": "How many online courses have I completed in total?",
@@ -2184,7 +2184,7 @@
 "tokens": 999
 },
 "qa00273": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "gpt4_372c3eed",
 "category": "multi-session",
 "question": "How many years in total did I spend in formal education from high school to the completion of my Bachelor's degree?",
@@ -2192,7 +2192,7 @@
 "tokens": 996
 },
 "qa00274": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "b01defab",
 "category": "knowledge-update",
 "question": "Did I finish reading 'The Nightingale' by Kristin Hannah?",
@@ -2208,7 +2208,7 @@
 "tokens": 993
 },
 "qa00276": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "ba61f0b9",
 "category": "knowledge-update",
 "question": "How many women are on the team led by my former manager Rachel?",
@@ -2216,7 +2216,7 @@
 "tokens": 997
 },
 "qa00277": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "21d02d0d",
 "category": "multi-session",
 "question": "How many fun runs did I miss in March due to work commitments?",
@@ -2224,7 +2224,7 @@
 "tokens": 998
 },
 "qa00278": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "2a1811e2",
 "category": "temporal-reasoning",
 "question": "How many days had passed between the Hindu festival of Holi and the Sunday mass at St. Mary's Church?",
@@ -2232,7 +2232,7 @@
 "tokens": 1000
 },
 "qa00279": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "ceb54acb",
 "category": "single-session-assistant",
 "question": "In our previous chat, you suggested 'sexual compulsions' and a few other options for alternative terms for certain behaviors. Can you remind me what the other four options were?",
@@ -2240,7 +2240,7 @@
 "tokens": 1000
 },
 "qa00280": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "59524333",
 "category": "knowledge-update",
 "question": "What time do I usually go to the gym?",
@@ -2248,7 +2248,7 @@
 "tokens": 987
 },
 "qa00281": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "58bf7951",
 "category": "single-session-user",
 "question": "What play did I attend at the local community theater?",
@@ -2256,7 +2256,7 @@
 "tokens": 992
 },
 "qa00282": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "1d4e3b97",
 "category": "single-session-preference",
 "question": "I noticed my bike seems to be performing even better during my Sunday group rides. Could there be a reason for this?",
@@ -2264,7 +2264,7 @@
 "tokens": 986
 },
 "qa00283": {
-"system": "orp",
+"system": "smartware",
 "qid": "1d4e3b97",
 "category": "single-session-preference",
 "question": "I noticed my bike seems to be performing even better during my Sunday group rides. Could there be a reason for this?",
@@ -2272,7 +2272,7 @@
 "tokens": 996
 },
 "qa00284": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "38146c39",
 "category": "single-session-preference",
 "question": "I've been feeling like my chocolate chip cookies need something extra. Any advice?",
@@ -2288,7 +2288,7 @@
 "tokens": 995
 },
 "qa00286": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "b86304ba",
 "category": "single-session-user",
 "question": "How much is the painting of a sunset worth in terms of the amount I paid for it?",
@@ -2296,7 +2296,7 @@
 "tokens": 984
 },
 "qa00287": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "6ade9755",
 "category": "single-session-user",
 "question": "Where do I take yoga classes?",
@@ -2304,7 +2304,7 @@
 "tokens": 993
 },
 "qa00288": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "720133ac",
 "category": "multi-session",
 "question": "What is the total cost of Lola's vet visit and flea medication?",
@@ -2312,7 +2312,7 @@
 "tokens": 995
 },
 "qa00289": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "gpt4_f420262d",
 "category": "temporal-reasoning",
 "question": "What was the airline that I flied with on Valentine's day?",
@@ -2328,7 +2328,7 @@
 "tokens": 997
 },
 "qa00291": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "352ab8bd",
 "category": "single-session-assistant",
 "question": "Can you remind me what was the average improvement in framerate when using the Hardware-Aware Modular Training (HAMT) agent in the 'To Adapt or Not to Adapt? Real-Time Adaptation for Semantic Segmentation' submission?",
@@ -2336,7 +2336,7 @@
 "tokens": 983
 },
 "qa00292": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "gpt4_5438fa52",
 "category": "temporal-reasoning",
 "question": "Which event happened first, my attendance at a cultural festival or the start of my Spanish classes?",
@@ -2352,7 +2352,7 @@
 "tokens": 1000
 },
 "qa00294": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "b86304ba",
 "category": "single-session-user",
 "question": "How much is the painting of a sunset worth in terms of the amount I paid for it?",
@@ -2368,7 +2368,7 @@
 "tokens": 992
 },
 "qa00296": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "gpt4_ec93e27f",
 "category": "temporal-reasoning",
 "question": "Which mode of transport did I use most recently, a bus or a train?",
@@ -2376,7 +2376,7 @@
 "tokens": 987
 },
 "qa00297": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "aae3761f",
 "category": "multi-session",
 "question": "How many hours in total did I spend driving to my three road trip destinations combined?",
@@ -2408,7 +2408,7 @@
 "tokens": 993
 },
 "qa00301": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "gpt4_2ba83207",
 "category": "multi-session",
 "question": "Which grocery store did I spend the most money at in the past month?",
@@ -2424,7 +2424,7 @@
 "tokens": 983
 },
 "qa00303": {
-"system": "orp",
+"system": "smartware",
 "qid": "6ade9755",
 "category": "single-session-user",
 "question": "Where do I take yoga classes?",
@@ -2432,7 +2432,7 @@
 "tokens": 995
 },
 "qa00304": {
-"system": "orp",
+"system": "smartware",
 "qid": "58bf7951",
 "category": "single-session-user",
 "question": "What play did I attend at the local community theater?",
@@ -2440,7 +2440,7 @@
 "tokens": 978
 },
 "qa00305": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "gpt4_e061b84g",
 "category": "temporal-reasoning",
 "question": "I mentioned participating in a sports event two weeks ago. What was the event?",
@@ -2448,7 +2448,7 @@
 "tokens": 996
 },
 "qa00306": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "gpt4_85da3956",
 "category": "temporal-reasoning",
 "question": "How many weeks ago did I attend the 'Summer Nights' festival at Universal Studios Hollywood?",
@@ -2456,7 +2456,7 @@
 "tokens": 987
 },
 "qa00307": {
-"system": "orp",
+"system": "smartware",
 "qid": "5a7937c8",
 "category": "multi-session",
 "question": "How many days did I spend participating in faith-related activities in December?",
@@ -2464,7 +2464,7 @@
 "tokens": 996
 },
 "qa00308": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "7e00a6cb",
 "category": "single-session-assistant",
 "question": "I'm planning my trip to Amsterdam again and I was wondering, what was the name of that hostel near the Red Light District that you recommended last time?",
@@ -2472,7 +2472,7 @@
 "tokens": 986
 },
 "qa00309": {
-"system": "orp",
+"system": "smartware",
 "qid": "gpt4_5438fa52",
 "category": "temporal-reasoning",
 "question": "Which event happened first, my attendance at a cultural festival or the start of my Spanish classes?",
@@ -2480,7 +2480,7 @@
 "tokens": 999
 },
 "qa00310": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "6aeb4375",
 "category": "knowledge-update",
 "question": "How many Korean restaurants have I tried in my city?",
@@ -2488,7 +2488,7 @@
 "tokens": 996
 },
 "qa00311": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "6aeb4375",
 "category": "knowledge-update",
 "question": "How many Korean restaurants have I tried in my city?",
@@ -2496,7 +2496,7 @@
 "tokens": 995
 },
 "qa00312": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "gpt4_70e84552",
 "category": "temporal-reasoning",
 "question": "Which task did I complete first, fixing the fence or trimming the goats' hooves?",
@@ -2512,7 +2512,7 @@
 "tokens": 971
 },
 "qa00314": {
-"system": "orp",
+"system": "smartware",
 "qid": "f523d9fe",
 "category": "single-session-assistant",
 "question": "I wanted to check back on our previous conversation about Netflix. I mentioned that I wanted to be able to access all seasons of old shows? Do you remember what show I used as an example, the one that only had the last season available?",
@@ -2528,7 +2528,7 @@
 "tokens": 973
 },
 "qa00316": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "gpt4_70e84552",
 "category": "temporal-reasoning",
 "question": "Which task did I complete first, fixing the fence or trimming the goats' hooves?",
@@ -2536,7 +2536,7 @@
 "tokens": 978
 },
 "qa00317": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "gpt4_85da3956",
 "category": "temporal-reasoning",
 "question": "How many weeks ago did I attend the 'Summer Nights' festival at Universal Studios Hollywood?",
@@ -2544,7 +2544,7 @@
 "tokens": 999
 },
 "qa00318": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "gpt4_93f6379c",
 "category": "temporal-reasoning",
 "question": "Which group did I join first, 'Page Turners' or 'Marketing Professionals'?",
@@ -2552,7 +2552,7 @@
 "tokens": 987
 },
 "qa00319": {
-"system": "orp",
+"system": "smartware",
 "qid": "gpt4_f2262a51",
 "category": "multi-session",
 "question": "How many different doctors did I visit?",
@@ -2568,7 +2568,7 @@
 "tokens": 1000
 },
 "qa00321": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "gpt4_59149c78",
 "category": "temporal-reasoning",
 "question": "I mentioned that I participated in an art-related event two weeks ago. Where was that event held at?",
@@ -2576,7 +2576,7 @@
 "tokens": 1000
 },
 "qa00322": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "370a8ff4",
 "category": "temporal-reasoning",
 "question": "How many weeks had passed since I recovered from the flu when I went on my 10th jog outdoors?",
@@ -2584,7 +2584,7 @@
 "tokens": 991
 },
 "qa00323": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "81507db6",
 "category": "multi-session",
 "question": "How many graduation ceremonies have I attended in the past three months?",
@@ -2592,7 +2592,7 @@
 "tokens": 987
 },
 "qa00324": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "5a7937c8",
 "category": "multi-session",
 "question": "How many days did I spend participating in faith-related activities in December?",
@@ -2600,7 +2600,7 @@
 "tokens": 1000
 },
 "qa00325": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "4dfccbf8",
 "category": "temporal-reasoning",
 "question": "What did I do with Rachel on the Wednesday two months ago?",
@@ -2608,7 +2608,7 @@
 "tokens": 990
 },
 "qa00326": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "370a8ff4",
 "category": "temporal-reasoning",
 "question": "How many weeks had passed since I recovered from the flu when I went on my 10th jog outdoors?",
@@ -2624,7 +2624,7 @@
 "tokens": 995
 },
 "qa00328": {
-"system": "orp",
+"system": "smartware",
 "qid": "59524333",
 "category": "knowledge-update",
 "question": "What time do I usually go to the gym?",
@@ -2632,7 +2632,7 @@
 "tokens": 989
 },
 "qa00329": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "gpt4_45189cb4",
 "category": "temporal-reasoning",
 "question": "What is the order of the sports events I watched in January?",
@@ -2648,7 +2648,7 @@
 "tokens": 998
 },
 "qa00331": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "bf659f65",
 "category": "multi-session",
 "question": "How many music albums or EPs have I purchased or downloaded?",
@@ -2664,7 +2664,7 @@
 "tokens": 973
 },
 "qa00333": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "58bf7951",
 "category": "single-session-user",
 "question": "What play did I attend at the local community theater?",
@@ -2672,7 +2672,7 @@
 "tokens": 992
 },
 "qa00334": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "311778f1",
 "category": "single-session-user",
 "question": "How many hours did I spend watching documentaries on Netflix last month?",
@@ -2680,7 +2680,7 @@
 "tokens": 996
 },
 "qa00335": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "1de5cff2",
 "category": "single-session-assistant",
 "question": "I was going through our previous conversation about high-end fashion brands, and I was wondering if you could remind me of the brand that uses wild rubber sourced from the Amazon rainforest?",
@@ -2688,7 +2688,7 @@
 "tokens": 994
 },
 "qa00336": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "58ef2f1c",
 "category": "single-session-user",
 "question": "When did I volunteer at the local animal shelter's fundraising dinner?",
@@ -2696,7 +2696,7 @@
 "tokens": 1000
 },
 "qa00337": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "gpt4_7ddcf75f",
 "category": "temporal-reasoning",
 "question": "How many days ago did I go on a whitewater rafting trip in the Oregon mountains?",
@@ -2704,7 +2704,7 @@
 "tokens": 999
 },
 "qa00338": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "1de5cff2",
 "category": "single-session-assistant",
 "question": "I was going through our previous conversation about high-end fashion brands, and I was wondering if you could remind me of the brand that uses wild rubber sourced from the Amazon rainforest?",
@@ -2712,7 +2712,7 @@
 "tokens": 997
 },
 "qa00339": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "gpt4_d9af6064",
 "category": "temporal-reasoning",
 "question": "Which device did I set up first, the smart thermostat or the new router?",
@@ -2728,7 +2728,7 @@
 "tokens": 995
 },
 "qa00341": {
-"system": "orp",
+"system": "smartware",
 "qid": "54026fce",
 "category": "single-session-preference",
 "question": "I've been thinking about ways to stay connected with my colleagues. Any suggestions?",
@@ -2736,7 +2736,7 @@
 "tokens": 978
 },
 "qa00342": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "gpt4_4929293a",
 "category": "temporal-reasoning",
 "question": "Which event happened first, my cousin's wedding or Michael's engagement party?",
@@ -2760,7 +2760,7 @@
 "tokens": 994
 },
 "qa00345": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "7e00a6cb",
 "category": "single-session-assistant",
 "question": "I'm planning my trip to Amsterdam again and I was wondering, what was the name of that hostel near the Red Light District that you recommended last time?",
@@ -2768,7 +2768,7 @@
 "tokens": 983
 },
 "qa00346": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "gpt4_1d4ab0c9",
 "category": "temporal-reasoning",
 "question": "How many days passed between the day I started watering my herb garden and the day I harvested my first batch of fresh herbs?",
@@ -2784,7 +2784,7 @@
 "tokens": 1000
 },
 "qa00348": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "gpt4_f420262c",
 "category": "temporal-reasoning",
 "question": "What is the order of airlines I flew with from earliest to latest before today?",
@@ -2792,7 +2792,7 @@
 "tokens": 990
 },
 "qa00349": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "bc8a6e93",
 "category": "single-session-user",
 "question": "What did I bake for my niece's birthday party?",
@@ -2816,7 +2816,7 @@
 "tokens": 998
 },
 "qa00352": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "bf659f65",
 "category": "multi-session",
 "question": "How many music albums or EPs have I purchased or downloaded?",
@@ -2832,7 +2832,7 @@
 "tokens": 981
 },
 "qa00354": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "2ebe6c92",
 "category": "temporal-reasoning",
 "question": "Which book did I finish a week ago?",
@@ -2856,7 +2856,7 @@
 "tokens": 982
 },
 "qa00357": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "ad7109d1",
 "category": "single-session-user",
 "question": "What speed is my new internet plan?",
@@ -2864,7 +2864,7 @@
 "tokens": 994
 },
 "qa00358": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "4388e9dd",
 "category": "single-session-assistant",
 "question": "I was going through our previous chat and I was wondering, what was Andy wearing in the script you wrote for the comedy movie scene?",
@@ -2880,7 +2880,7 @@
 "tokens": 979
 },
 "qa00360": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "81507db6",
 "category": "multi-session",
 "question": "How many graduation ceremonies have I attended in the past three months?",
@@ -2888,7 +2888,7 @@
 "tokens": 994
 },
 "qa00361": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "gpt4_7ddcf75f",
 "category": "temporal-reasoning",
 "question": "How many days ago did I go on a whitewater rafting trip in the Oregon mountains?",
@@ -2896,7 +2896,7 @@
 "tokens": 993
 },
 "qa00362": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "4f54b7c9",
 "category": "multi-session",
 "question": "How many antique items did I inherit or acquire from my family members?",
@@ -2912,7 +2912,7 @@
 "tokens": 983
 },
 "qa00364": {
-"system": "orp",
+"system": "smartware",
 "qid": "ad7109d1",
 "category": "single-session-user",
 "question": "What speed is my new internet plan?",
@@ -2920,7 +2920,7 @@
 "tokens": 990
 },
 "qa00365": {
-"system": "orp",
+"system": "smartware",
 "qid": "81507db6",
 "category": "multi-session",
 "question": "How many graduation ceremonies have I attended in the past three months?",
@@ -2928,7 +2928,7 @@
 "tokens": 995
 },
 "qa00366": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "gpt4_5438fa52",
 "category": "temporal-reasoning",
 "question": "Which event happened first, my attendance at a cultural festival or the start of my Spanish classes?",
@@ -2936,7 +2936,7 @@
 "tokens": 968
 },
 "qa00367": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "gpt4_f2262a51",
 "category": "multi-session",
 "question": "How many different doctors did I visit?",
@@ -2944,7 +2944,7 @@
 "tokens": 986
 },
 "qa00368": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "ceb54acb",
 "category": "single-session-assistant",
 "question": "In our previous chat, you suggested 'sexual compulsions' and a few other options for alternative terms for certain behaviors. Can you remind me what the other four options were?",
@@ -2952,7 +2952,7 @@
 "tokens": 926
 },
 "qa00369": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "gpt4_385a5000",
 "category": "temporal-reasoning",
 "question": "Which seeds were started first, the tomatoes or the marigolds?",
@@ -2984,7 +2984,7 @@
 "tokens": 999
 },
 "qa00373": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "8cf51dda",
 "category": "single-session-assistant",
 "question": "I'm going back to our previous conversation about the grant aim page on molecular subtypes and endometrial cancer. Can you remind me what were the three objectives we outlined for the project?",
@@ -3000,7 +3000,7 @@
 "tokens": 993
 },
 "qa00375": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "85fa3a3f",
 "category": "multi-session",
 "question": "What is the total cost of the new food bowl, measuring cup, dental chews, and flea and tick collar I got for Max?",
@@ -3008,7 +3008,7 @@
 "tokens": 986
 },
 "qa00376": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "6613b389",
 "category": "temporal-reasoning",
 "question": "How many months before my anniversary did Rachel get engaged?",
@@ -3016,7 +3016,7 @@
 "tokens": 985
 },
 "qa00377": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "982b5123",
 "category": "temporal-reasoning",
 "question": "How many months ago did I book the Airbnb in San Francisco?",
@@ -3032,7 +3032,7 @@
 "tokens": 969
 },
 "qa00379": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "95bcc1c8",
 "category": "single-session-user",
 "question": "How many amateur comedians did I watch perform at the open mic night?",
@@ -3040,7 +3040,7 @@
 "tokens": 987
 },
 "qa00380": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "eac54adc",
 "category": "temporal-reasoning",
 "question": "How many days ago did I launch my website when I signed a contract with my first client?",
@@ -3048,7 +3048,7 @@
 "tokens": 989
 },
 "qa00381": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "09ba9854",
 "category": "multi-session",
 "question": "How much will I save by taking the train from the airport to my hotel instead of a taxi?",
@@ -3056,7 +3056,7 @@
 "tokens": 993
 },
 "qa00382": {
-"system": "orp",
+"system": "smartware",
 "qid": "8cf51dda",
 "category": "single-session-assistant",
 "question": "I'm going back to our previous conversation about the grant aim page on molecular subtypes and endometrial cancer. Can you remind me what were the three objectives we outlined for the project?",
@@ -3064,7 +3064,7 @@
 "tokens": 997
 },
 "qa00383": {
-"system": "orp",
+"system": "smartware",
 "qid": "cc6d1ec1",
 "category": "temporal-reasoning",
 "question": "How long had I been bird watching when I attended the bird watching workshop?",
@@ -3072,7 +3072,7 @@
 "tokens": 977
 },
 "qa00384": {
-"system": "orp",
+"system": "smartware",
 "qid": "gpt4_93f6379c",
 "category": "temporal-reasoning",
 "question": "Which group did I join first, 'Page Turners' or 'Marketing Professionals'?",
@@ -3088,7 +3088,7 @@
 "tokens": 1000
 },
 "qa00386": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "9bbe84a2",
 "category": "knowledge-update",
 "question": "What was my previous goal for my Apex Legends level before I updated my goal?",
@@ -3104,7 +3104,7 @@
 "tokens": 994
 },
 "qa00388": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "61f8c8f8",
 "category": "multi-session",
 "question": "How much faster did I finish the 5K run compared to my previous year's time?",
@@ -3112,7 +3112,7 @@
 "tokens": 998
 },
 "qa00389": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "08f4fc43",
 "category": "temporal-reasoning",
 "question": "How many days had passed between the Sunday mass at St. Mary's Church and the Ash Wednesday service at the cathedral?",
@@ -3120,7 +3120,7 @@
 "tokens": 990
 },
 "qa00390": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "gpt4_4929293a",
 "category": "temporal-reasoning",
 "question": "Which event happened first, my cousin's wedding or Michael's engagement party?",
@@ -3128,7 +3128,7 @@
 "tokens": 997
 },
 "qa00391": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "gpt4_d6585ce9",
 "category": "temporal-reasoning",
 "question": "Who did I go with to the music event last Saturday?",
@@ -3136,7 +3136,7 @@
 "tokens": 999
 },
 "qa00392": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "gpt4_1d4ab0c9",
 "category": "temporal-reasoning",
 "question": "How many days passed between the day I started watering my herb garden and the day I harvested my first batch of fresh herbs?",
@@ -3152,7 +3152,7 @@
 "tokens": 1000
 },
 "qa00394": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "85fa3a3f",
 "category": "multi-session",
 "question": "What is the total cost of the new food bowl, measuring cup, dental chews, and flea and tick collar I got for Max?",
@@ -3168,7 +3168,7 @@
 "tokens": 984
 },
 "qa00396": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "720133ac",
 "category": "multi-session",
 "question": "What is the total cost of Lola's vet visit and flea medication?",
@@ -3176,7 +3176,7 @@
 "tokens": 982
 },
 "qa00397": {
-"system": "orp",
+"system": "smartware",
 "qid": "gpt4_4929293a",
 "category": "temporal-reasoning",
 "question": "Which event happened first, my cousin's wedding or Michael's engagement party?",
@@ -3192,7 +3192,7 @@
 "tokens": 997
 },
 "qa00399": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "26bdc477",
 "category": "knowledge-update",
 "question": "How many trips have I taken my Canon EOS 80D camera on?",
@@ -3216,7 +3216,7 @@
 "tokens": 994
 },
 "qa00402": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "c2ac3c61",
 "category": "multi-session",
 "question": "How many online courses have I completed in total?",
@@ -3232,7 +3232,7 @@
 "tokens": 982
 },
 "qa00404": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "gpt4_21adecb5",
 "category": "temporal-reasoning",
 "question": "How many months passed between the completion of my undergraduate degree and the submission of my master's thesis?",
@@ -3240,7 +3240,7 @@
 "tokens": 1000
 },
 "qa00405": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "ceb54acb",
 "category": "single-session-assistant",
 "question": "In our previous chat, you suggested 'sexual compulsions' and a few other options for alternative terms for certain behaviors. Can you remind me what the other four options were?",
@@ -3248,7 +3248,7 @@
 "tokens": 1000
 },
 "qa00406": {
-"system": "orp",
+"system": "smartware",
 "qid": "38146c39",
 "category": "single-session-preference",
 "question": "I've been feeling like my chocolate chip cookies need something extra. Any advice?",
@@ -3264,7 +3264,7 @@
 "tokens": 993
 },
 "qa00408": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "gpt4_4929293a",
 "category": "temporal-reasoning",
 "question": "Which event happened first, my cousin's wedding or Michael's engagement party?",
@@ -3272,7 +3272,7 @@
 "tokens": 989
 },
 "qa00409": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "6ade9755",
 "category": "single-session-user",
 "question": "Where do I take yoga classes?",
@@ -3304,7 +3304,7 @@
 "tokens": 998
 },
 "qa00413": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "bc8a6e93",
 "category": "single-session-user",
 "question": "What did I bake for my niece's birthday party?",
@@ -3320,7 +3320,7 @@
 "tokens": 969
 },
 "qa00415": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "gpt4_d9af6064",
 "category": "temporal-reasoning",
 "question": "Which device did I set up first, the smart thermostat or the new router?",
@@ -3328,7 +3328,7 @@
 "tokens": 986
 },
 "qa00416": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "95bcc1c8",
 "category": "single-session-user",
 "question": "How many amateur comedians did I watch perform at the open mic night?",
@@ -3344,7 +3344,7 @@
 "tokens": 982
 },
 "qa00418": {
-"system": "orp",
+"system": "smartware",
 "qid": "cc06de0d",
 "category": "multi-session",
 "question": "For my daily commute, how much more expensive was the taxi ride compared to the train fare?",
@@ -3368,7 +3368,7 @@
 "tokens": 992
 },
 "qa00421": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "21d02d0d",
 "category": "multi-session",
 "question": "How many fun runs did I miss in March due to work commitments?",
@@ -3376,7 +3376,7 @@
 "tokens": 989
 },
 "qa00422": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "gpt4_385a5000",
 "category": "temporal-reasoning",
 "question": "Which seeds were started first, the tomatoes or the marigolds?",
@@ -3384,7 +3384,7 @@
 "tokens": 971
 },
 "qa00423": {
-"system": "orp",
+"system": "smartware",
 "qid": "b86304ba",
 "category": "single-session-user",
 "question": "How much is the painting of a sunset worth in terms of the amount I paid for it?",
@@ -3392,7 +3392,7 @@
 "tokens": 999
 },
 "qa00424": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "89941a94",
 "category": "knowledge-update",
 "question": "Before I purchased the gravel bike, do I have other bikes in addition to my mountain bike and my commuter bike?",
@@ -3408,7 +3408,7 @@
 "tokens": 966
 },
 "qa00426": {
-"system": "orp",
+"system": "smartware",
 "qid": "7e00a6cb",
 "category": "single-session-assistant",
 "question": "I'm planning my trip to Amsterdam again and I was wondering, what was the name of that hostel near the Red Light District that you recommended last time?",
@@ -3424,7 +3424,7 @@
 "tokens": 992
 },
 "qa00428": {
-"system": "orp",
+"system": "smartware",
 "qid": "c4f10528",
 "category": "single-session-assistant",
 "question": "I'm planning to visit Bandung again and I was wondering if you could remind me of the name of that restaurant in Cihampelas Walk that serves a great Nasi Goreng?",
@@ -3432,7 +3432,7 @@
 "tokens": 1000
 },
 "qa00429": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "eac54adc",
 "category": "temporal-reasoning",
 "question": "How many days ago did I launch my website when I signed a contract with my first client?",
@@ -3440,7 +3440,7 @@
 "tokens": 984
 },
 "qa00430": {
-"system": "orp",
+"system": "smartware",
 "qid": "720133ac",
 "category": "multi-session",
 "question": "What is the total cost of Lola's vet visit and flea medication?",
@@ -3456,7 +3456,7 @@
 "tokens": 984
 },
 "qa00432": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "gpt4_d6585ce9",
 "category": "temporal-reasoning",
 "question": "Who did I go with to the music event last Saturday?",
@@ -3472,7 +3472,7 @@
 "tokens": 989
 },
 "qa00434": {
-"system": "orp",
+"system": "smartware",
 "qid": "gpt4_d6585ce9",
 "category": "temporal-reasoning",
 "question": "Who did I go with to the music event last Saturday?",
@@ -3480,7 +3480,7 @@
 "tokens": 995
 },
 "qa00435": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "5a7937c8",
 "category": "multi-session",
 "question": "How many days did I spend participating in faith-related activities in December?",
@@ -3488,7 +3488,7 @@
 "tokens": 994
 },
 "qa00436": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "gpt4_f420262c",
 "category": "temporal-reasoning",
 "question": "What is the order of airlines I flew with from earliest to latest before today?",
@@ -3496,7 +3496,7 @@
 "tokens": 973
 },
 "qa00437": {
-"system": "orp",
+"system": "smartware",
 "qid": "gpt4_59149c78",
 "category": "temporal-reasoning",
 "question": "I mentioned that I participated in an art-related event two weeks ago. Where was that event held at?",
@@ -3504,7 +3504,7 @@
 "tokens": 999
 },
 "qa00438": {
-"system": "orp",
+"system": "smartware",
 "qid": "gpt4_b4a80587",
 "category": "temporal-reasoning",
 "question": "Which event happened first, the road trip to the coast or the arrival of the new prime lens?",
@@ -3512,7 +3512,7 @@
 "tokens": 988
 },
 "qa00439": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "gpt4_1d4ab0c9",
 "category": "temporal-reasoning",
 "question": "How many days passed between the day I started watering my herb garden and the day I harvested my first batch of fresh herbs?",
@@ -3520,7 +3520,7 @@
 "tokens": 997
 },
 "qa00440": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "gpt4_59149c78",
 "category": "temporal-reasoning",
 "question": "I mentioned that I participated in an art-related event two weeks ago. Where was that event held at?",
@@ -3536,7 +3536,7 @@
 "tokens": 985
 },
 "qa00442": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "4dfccbf8",
 "category": "temporal-reasoning",
 "question": "What did I do with Rachel on the Wednesday two months ago?",
@@ -3544,7 +3544,7 @@
 "tokens": 975
 },
 "qa00443": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "c2ac3c61",
 "category": "multi-session",
 "question": "How many online courses have I completed in total?",
@@ -3568,7 +3568,7 @@
 "tokens": 988
 },
 "qa00446": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "aae3761f",
 "category": "multi-session",
 "question": "How many hours in total did I spend driving to my three road trip destinations combined?",
@@ -3576,7 +3576,7 @@
 "tokens": 999
 },
 "qa00447": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "gpt4_d6585ce9",
 "category": "temporal-reasoning",
 "question": "Who did I go with to the music event last Saturday?",
@@ -3584,7 +3584,7 @@
 "tokens": 974
 },
 "qa00448": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "58bf7951",
 "category": "single-session-user",
 "question": "What play did I attend at the local community theater?",
@@ -3592,7 +3592,7 @@
 "tokens": 992
 },
 "qa00449": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "95228167",
 "category": "single-session-preference",
 "question": "I'm getting excited about my visit to the music store this weekend. Any tips on what to look for in a new guitar?",
@@ -3616,7 +3616,7 @@
 "tokens": 979
 },
 "qa00452": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "311778f1",
 "category": "single-session-user",
 "question": "How many hours did I spend watching documentaries on Netflix last month?",
@@ -3624,7 +3624,7 @@
 "tokens": 996
 },
 "qa00453": {
-"system": "orp",
+"system": "smartware",
 "qid": "55241a1f",
 "category": "multi-session",
 "question": "What is the total number of comments on my recent Facebook Live session and my most popular YouTube video?",
@@ -3632,7 +3632,7 @@
 "tokens": 997
 },
 "qa00454": {
-"system": "orp",
+"system": "smartware",
 "qid": "efc3f7c2",
 "category": "multi-session",
 "question": "How much earlier do I wake up on Fridays compared to other weekdays?",
@@ -3640,7 +3640,7 @@
 "tokens": 983
 },
 "qa00455": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "b01defab",
 "category": "knowledge-update",
 "question": "Did I finish reading 'The Nightingale' by Kristin Hannah?",
@@ -3648,7 +3648,7 @@
 "tokens": 986
 },
 "qa00456": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "9bbe84a2",
 "category": "knowledge-update",
 "question": "What was my previous goal for my Apex Legends level before I updated my goal?",
@@ -3664,7 +3664,7 @@
 "tokens": 998
 },
 "qa00458": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "d905b33f",
 "category": "multi-session",
 "question": "What percentage discount did I get on the book from my favorite author?",
@@ -3672,7 +3672,7 @@
 "tokens": 990
 },
 "qa00459": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "982b5123",
 "category": "temporal-reasoning",
 "question": "How many months ago did I book the Airbnb in San Francisco?",
@@ -3688,7 +3688,7 @@
 "tokens": 995
 },
 "qa00461": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "38146c39",
 "category": "single-session-preference",
 "question": "I've been feeling like my chocolate chip cookies need something extra. Any advice?",
@@ -3696,7 +3696,7 @@
 "tokens": 994
 },
 "qa00462": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "ba61f0b9",
 "category": "knowledge-update",
 "question": "How many women are on the team led by my former manager Rachel?",
@@ -3704,7 +3704,7 @@
 "tokens": 992
 },
 "qa00463": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "gpt4_e061b84g",
 "category": "temporal-reasoning",
 "question": "I mentioned participating in a sports event two weeks ago. What was the event?",
@@ -3712,7 +3712,7 @@
 "tokens": 997
 },
 "qa00464": {
-"system": "orp",
+"system": "smartware",
 "qid": "e56a43b9",
 "category": "multi-session",
 "question": "How much discount will I get on my next purchase at FreshMart?",
@@ -3720,7 +3720,7 @@
 "tokens": 986
 },
 "qa00465": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "b01defab",
 "category": "knowledge-update",
 "question": "Did I finish reading 'The Nightingale' by Kristin Hannah?",
@@ -3736,7 +3736,7 @@
 "tokens": 991
 },
 "qa00467": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "gpt4_76048e76",
 "category": "temporal-reasoning",
 "question": "Which vehicle did I take care of first in February, the bike or the car?",
@@ -3744,7 +3744,7 @@
 "tokens": 996
 },
 "qa00468": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "61f8c8f8",
 "category": "multi-session",
 "question": "How much faster did I finish the 5K run compared to my previous year's time?",
@@ -3760,7 +3760,7 @@
 "tokens": 996
 },
 "qa00470": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "2ebe6c92",
 "category": "temporal-reasoning",
 "question": "Which book did I finish a week ago?",
@@ -3768,7 +3768,7 @@
 "tokens": 976
 },
 "qa00471": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "bbf86515",
 "category": "temporal-reasoning",
 "question": "How many days before the 'Rack Fest' did I participate in the 'Turbocharged Tuesdays' event?",
@@ -3776,7 +3776,7 @@
 "tokens": 992
 },
 "qa00472": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "8cf51dda",
 "category": "single-session-assistant",
 "question": "I'm going back to our previous conversation about the grant aim page on molecular subtypes and endometrial cancer. Can you remind me what were the three objectives we outlined for the project?",
@@ -3784,7 +3784,7 @@
 "tokens": 988
 },
 "qa00473": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "6f9b354f",
 "category": "single-session-user",
 "question": "What color did I repaint my bedroom walls?",
@@ -3792,7 +3792,7 @@
 "tokens": 989
 },
 "qa00474": {
-"system": "orp",
+"system": "smartware",
 "qid": "aae3761f",
 "category": "multi-session",
 "question": "How many hours in total did I spend driving to my three road trip destinations combined?",
@@ -3800,7 +3800,7 @@
 "tokens": 994
 },
 "qa00475": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "1de5cff2",
 "category": "single-session-assistant",
 "question": "I was going through our previous conversation about high-end fashion brands, and I was wondering if you could remind me of the brand that uses wild rubber sourced from the Amazon rainforest?",
@@ -3808,7 +3808,7 @@
 "tokens": 997
 },
 "qa00476": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "f523d9fe",
 "category": "single-session-assistant",
 "question": "I wanted to check back on our previous conversation about Netflix. I mentioned that I wanted to be able to access all seasons of old shows? Do you remember what show I used as an example, the one that only had the last season available?",
@@ -3824,7 +3824,7 @@
 "tokens": 998
 },
 "qa00478": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "gpt4_a2d1d1f6",
 "category": "temporal-reasoning",
 "question": "How many days ago did I harvest my first batch of fresh herbs from the herb garden kit?",
@@ -3832,7 +3832,7 @@
 "tokens": 994
 },
 "qa00479": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "gpt4_18c2b244",
 "category": "temporal-reasoning",
 "question": "What is the order of the three events: 'I signed up for the rewards program at ShopRite', 'I used a Buy One Get One Free coupon on Luvs diapers at Walmart', and 'I redeemed $12 cashback for a $10 Amazon gift card from Ibotta'?",
@@ -3848,7 +3848,7 @@
 "tokens": 977
 },
 "qa00481": {
-"system": "orp",
+"system": "smartware",
 "qid": "95bcc1c8",
 "category": "single-session-user",
 "question": "How many amateur comedians did I watch perform at the open mic night?",
@@ -3856,7 +3856,7 @@
 "tokens": 992
 },
 "qa00482": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "eac54adc",
 "category": "temporal-reasoning",
 "question": "How many days ago did I launch my website when I signed a contract with my first client?",
@@ -3864,7 +3864,7 @@
 "tokens": 971
 },
 "qa00483": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "95bcc1c8",
 "category": "single-session-user",
 "question": "How many amateur comedians did I watch perform at the open mic night?",
@@ -3872,7 +3872,7 @@
 "tokens": 976
 },
 "qa00484": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "c4f10528",
 "category": "single-session-assistant",
 "question": "I'm planning to visit Bandung again and I was wondering if you could remind me of the name of that restaurant in Cihampelas Walk that serves a great Nasi Goreng?",
@@ -3880,7 +3880,7 @@
 "tokens": 984
 },
 "qa00485": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "4c36ccef",
 "category": "single-session-assistant",
 "question": "Can you remind me of the name of the romantic Italian restaurant in Rome you recommended for dinner?",
@@ -3904,7 +3904,7 @@
 "tokens": 967
 },
 "qa00488": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "81507db6",
 "category": "multi-session",
 "question": "How many graduation ceremonies have I attended in the past three months?",
@@ -3912,7 +3912,7 @@
 "tokens": 990
 },
 "qa00489": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "95228167",
 "category": "single-session-preference",
 "question": "I'm getting excited about my visit to the music store this weekend. Any tips on what to look for in a new guitar?",
@@ -3920,7 +3920,7 @@
 "tokens": 992
 },
 "qa00490": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "c4f10528",
 "category": "single-session-assistant",
 "question": "I'm planning to visit Bandung again and I was wondering if you could remind me of the name of that restaurant in Cihampelas Walk that serves a great Nasi Goreng?",
@@ -3944,7 +3944,7 @@
 "tokens": 1000
 },
 "qa00493": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "4c36ccef",
 "category": "single-session-assistant",
 "question": "Can you remind me of the name of the romantic Italian restaurant in Rome you recommended for dinner?",
@@ -3952,7 +3952,7 @@
 "tokens": 968
 },
 "qa00494": {
-"system": "orp",
+"system": "smartware",
 "qid": "gpt4_d9af6064",
 "category": "temporal-reasoning",
 "question": "Which device did I set up first, the smart thermostat or the new router?",
@@ -3960,7 +3960,7 @@
 "tokens": 997
 },
 "qa00495": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "118b2229",
 "category": "single-session-user",
 "question": "How long is my daily commute to work?",
@@ -3976,7 +3976,7 @@
 "tokens": 985
 },
 "qa00497": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "bbf86515",
 "category": "temporal-reasoning",
 "question": "How many days before the 'Rack Fest' did I participate in the 'Turbocharged Tuesdays' event?",
@@ -3984,7 +3984,7 @@
 "tokens": 994
 },
 "qa00498": {
-"system": "orp",
+"system": "smartware",
 "qid": "4c36ccef",
 "category": "single-session-assistant",
 "question": "Can you remind me of the name of the romantic Italian restaurant in Rome you recommended for dinner?",
@@ -3992,7 +3992,7 @@
 "tokens": 997
 },
 "qa00499": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "9bbe84a2",
 "category": "knowledge-update",
 "question": "What was my previous goal for my Apex Legends level before I updated my goal?",
@@ -4000,7 +4000,7 @@
 "tokens": 977
 },
 "qa00500": {
-"system": "orp",
+"system": "smartware",
 "qid": "352ab8bd",
 "category": "single-session-assistant",
 "question": "Can you remind me what was the average improvement in framerate when using the Hardware-Aware Modular Training (HAMT) agent in the 'To Adapt or Not to Adapt? Real-Time Adaptation for Semantic Segmentation' submission?",
@@ -4008,7 +4008,7 @@
 "tokens": 980
 },
 "qa00501": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "4388e9dd",
 "category": "single-session-assistant",
 "question": "I was going through our previous chat and I was wondering, what was Andy wearing in the script you wrote for the comedy movie scene?",
@@ -4016,7 +4016,7 @@
 "tokens": 1000
 },
 "qa00502": {
-"system": "orp",
+"system": "smartware",
 "qid": "21d02d0d",
 "category": "multi-session",
 "question": "How many fun runs did I miss in March due to work commitments?",
@@ -4024,7 +4024,7 @@
 "tokens": 995
 },
 "qa00503": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "ef9cf60a",
 "category": "multi-session",
 "question": "How much did I spend on gifts for my sister?",
@@ -4032,7 +4032,7 @@
 "tokens": 982
 },
 "qa00504": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "b6019101",
 "category": "knowledge-update",
 "question": "How many MCU films did I watch in the last 3 months?",
@@ -4048,7 +4048,7 @@
 "tokens": 999
 },
 "qa00506": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "gpt4_e414231e",
 "category": "temporal-reasoning",
 "question": "How many days passed between the day I fixed my mountain bike and the day I decided to upgrade my road bike's pedals?",
@@ -4056,7 +4056,7 @@
 "tokens": 998
 },
 "qa00507": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "gpt4_18c2b244",
 "category": "temporal-reasoning",
 "question": "What is the order of the three events: 'I signed up for the rewards program at ShopRite', 'I used a Buy One Get One Free coupon on Luvs diapers at Walmart', and 'I redeemed $12 cashback for a $10 Amazon gift card from Ibotta'?",
@@ -4064,7 +4064,7 @@
 "tokens": 1000
 },
 "qa00508": {
-"system": "orp",
+"system": "smartware",
 "qid": "gpt4_70e84552",
 "category": "temporal-reasoning",
 "question": "Which task did I complete first, fixing the fence or trimming the goats' hooves?",
@@ -4072,7 +4072,7 @@
 "tokens": 991
 },
 "qa00509": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "e56a43b9",
 "category": "multi-session",
 "question": "How much discount will I get on my next purchase at FreshMart?",
@@ -4080,7 +4080,7 @@
 "tokens": 996
 },
 "qa00510": {
-"system": "orp",
+"system": "smartware",
 "qid": "118b2229",
 "category": "single-session-user",
 "question": "How long is my daily commute to work?",
@@ -4096,7 +4096,7 @@
 "tokens": 994
 },
 "qa00512": {
-"system": "orp",
+"system": "smartware",
 "qid": "9bbe84a2",
 "category": "knowledge-update",
 "question": "What was my previous goal for my Apex Legends level before I updated my goal?",
@@ -4104,7 +4104,7 @@
 "tokens": 991
 },
 "qa00513": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "7e00a6cb",
 "category": "single-session-assistant",
 "question": "I'm planning my trip to Amsterdam again and I was wondering, what was the name of that hostel near the Red Light District that you recommended last time?",
@@ -4112,7 +4112,7 @@
 "tokens": 986
 },
 "qa00514": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "85fa3a3f",
 "category": "multi-session",
 "question": "What is the total cost of the new food bowl, measuring cup, dental chews, and flea and tick collar I got for Max?",
@@ -4120,7 +4120,7 @@
 "tokens": 977
 },
 "qa00515": {
-"system": "orp",
+"system": "smartware",
 "qid": "2a1811e2",
 "category": "temporal-reasoning",
 "question": "How many days had passed between the Hindu festival of Holi and the Sunday mass at St. Mary's Church?",
@@ -4136,7 +4136,7 @@
 "tokens": 990
 },
 "qa00517": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "4c36ccef",
 "category": "single-session-assistant",
 "question": "Can you remind me of the name of the romantic Italian restaurant in Rome you recommended for dinner?",
@@ -4144,7 +4144,7 @@
 "tokens": 1000
 },
 "qa00518": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "d905b33f",
 "category": "multi-session",
 "question": "What percentage discount did I get on the book from my favorite author?",
@@ -4152,7 +4152,7 @@
 "tokens": 978
 },
 "qa00519": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "gpt4_e414231e",
 "category": "temporal-reasoning",
 "question": "How many days passed between the day I fixed my mountain bike and the day I decided to upgrade my road bike's pedals?",
@@ -4160,7 +4160,7 @@
 "tokens": 993
 },
 "qa00520": {
-"system": "orp",
+"system": "smartware",
 "qid": "ef9cf60a",
 "category": "multi-session",
 "question": "How much did I spend on gifts for my sister?",
@@ -4176,7 +4176,7 @@
 "tokens": 998
 },
 "qa00522": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "21d02d0d",
 "category": "multi-session",
 "question": "How many fun runs did I miss in March due to work commitments?",
@@ -4184,7 +4184,7 @@
 "tokens": 992
 },
 "qa00523": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "89941a94",
 "category": "knowledge-update",
 "question": "Before I purchased the gravel bike, do I have other bikes in addition to my mountain bike and my commuter bike?",
@@ -4192,7 +4192,7 @@
 "tokens": 990
 },
 "qa00524": {
-"system": "orp",
+"system": "smartware",
 "qid": "gpt4_85da3956",
 "category": "temporal-reasoning",
 "question": "How many weeks ago did I attend the 'Summer Nights' festival at Universal Studios Hollywood?",
@@ -4200,7 +4200,7 @@
 "tokens": 986
 },
 "qa00525": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "6613b389",
 "category": "temporal-reasoning",
 "question": "How many months before my anniversary did Rachel get engaged?",
@@ -4240,7 +4240,7 @@
 "tokens": 948
 },
 "qa00530": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "cc6d1ec1",
 "category": "temporal-reasoning",
 "question": "How long had I been bird watching when I attended the bird watching workshop?",
@@ -4248,7 +4248,7 @@
 "tokens": 971
 },
 "qa00531": {
-"system": "orp",
+"system": "smartware",
 "qid": "bc8a6e93",
 "category": "single-session-user",
 "question": "What did I bake for my niece's birthday party?",
@@ -4256,7 +4256,7 @@
 "tokens": 997
 },
 "qa00532": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "gpt4_21adecb5",
 "category": "temporal-reasoning",
 "question": "How many months passed between the completion of my undergraduate degree and the submission of my master's thesis?",
@@ -4264,7 +4264,7 @@
 "tokens": 1000
 },
 "qa00533": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "gpt4_93f6379c",
 "category": "temporal-reasoning",
 "question": "Which group did I join first, 'Page Turners' or 'Marketing Professionals'?",
@@ -4272,7 +4272,7 @@
 "tokens": 975
 },
 "qa00534": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "58bf7951",
 "category": "single-session-user",
 "question": "What play did I attend at the local community theater?",
@@ -4280,7 +4280,7 @@
 "tokens": 991
 },
 "qa00535": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "gpt4_76048e76",
 "category": "temporal-reasoning",
 "question": "Which vehicle did I take care of first in February, the bike or the car?",
@@ -4288,7 +4288,7 @@
 "tokens": 993
 },
 "qa00536": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "89941a94",
 "category": "knowledge-update",
 "question": "Before I purchased the gravel bike, do I have other bikes in addition to my mountain bike and my commuter bike?",
@@ -4320,7 +4320,7 @@
 "tokens": 999
 },
 "qa00540": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "gpt4_70e84552",
 "category": "temporal-reasoning",
 "question": "Which task did I complete first, fixing the fence or trimming the goats' hooves?",
@@ -4328,7 +4328,7 @@
 "tokens": 992
 },
 "qa00541": {
-"system": "orp",
+"system": "smartware",
 "qid": "ceb54acb",
 "category": "single-session-assistant",
 "question": "In our previous chat, you suggested 'sexual compulsions' and a few other options for alternative terms for certain behaviors. Can you remind me what the other four options were?",
@@ -4336,7 +4336,7 @@
 "tokens": 999
 },
 "qa00542": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "95228167",
 "category": "single-session-preference",
 "question": "I'm getting excited about my visit to the music store this weekend. Any tips on what to look for in a new guitar?",
@@ -4352,7 +4352,7 @@
 "tokens": 999
 },
 "qa00544": {
-"system": "orp",
+"system": "smartware",
 "qid": "gpt4_385a5000",
 "category": "temporal-reasoning",
 "question": "Which seeds were started first, the tomatoes or the marigolds?",
@@ -4360,7 +4360,7 @@
 "tokens": 996
 },
 "qa00545": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "gpt4_385a5000",
 "category": "temporal-reasoning",
 "question": "Which seeds were started first, the tomatoes or the marigolds?",
@@ -4376,7 +4376,7 @@
 "tokens": 964
 },
 "qa00547": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "08f4fc43",
 "category": "temporal-reasoning",
 "question": "How many days had passed between the Sunday mass at St. Mary's Church and the Ash Wednesday service at the cathedral?",
@@ -4392,7 +4392,7 @@
 "tokens": 984
 },
 "qa00549": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "d01c6aa8",
 "category": "temporal-reasoning",
 "question": "How old was I when I moved to the United States?",
@@ -4400,7 +4400,7 @@
 "tokens": 985
 },
 "qa00550": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "cc6d1ec1",
 "category": "temporal-reasoning",
 "question": "How long had I been bird watching when I attended the bird watching workshop?",
@@ -4424,7 +4424,7 @@
 "tokens": 985
 },
 "qa00553": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "6ade9755",
 "category": "single-session-user",
 "question": "Where do I take yoga classes?",
@@ -4432,7 +4432,7 @@
 "tokens": 983
 },
 "qa00554": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "2ebe6c92",
 "category": "temporal-reasoning",
 "question": "Which book did I finish a week ago?",
@@ -4440,7 +4440,7 @@
 "tokens": 992
 },
 "qa00555": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "aae3761f",
 "category": "multi-session",
 "question": "How many hours in total did I spend driving to my three road trip destinations combined?",
@@ -4456,7 +4456,7 @@
 "tokens": 998
 },
 "qa00557": {
-"system": "orp",
+"system": "smartware",
 "qid": "6613b389",
 "category": "temporal-reasoning",
 "question": "How many months before my anniversary did Rachel get engaged?",
@@ -4464,7 +4464,7 @@
 "tokens": 1000
 },
 "qa00558": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "gpt4_4929293a",
 "category": "temporal-reasoning",
 "question": "Which event happened first, my cousin's wedding or Michael's engagement party?",
@@ -4480,7 +4480,7 @@
 "tokens": 1000
 },
 "qa00560": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "58ef2f1c",
 "category": "single-session-user",
 "question": "When did I volunteer at the local animal shelter's fundraising dinner?",
@@ -4496,7 +4496,7 @@
 "tokens": 986
 },
 "qa00562": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "gpt4_d6585ce9",
 "category": "temporal-reasoning",
 "question": "Who did I go with to the music event last Saturday?",
@@ -4504,7 +4504,7 @@
 "tokens": 972
 },
 "qa00563": {
-"system": "orp",
+"system": "smartware",
 "qid": "gpt4_372c3eed",
 "category": "multi-session",
 "question": "How many years in total did I spend in formal education from high school to the completion of my Bachelor's degree?",
@@ -4512,7 +4512,7 @@
 "tokens": 994
 },
 "qa00564": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "gpt4_21adecb5",
 "category": "temporal-reasoning",
 "question": "How many months passed between the completion of my undergraduate degree and the submission of my master's thesis?",
@@ -4520,7 +4520,7 @@
 "tokens": 995
 },
 "qa00565": {
-"system": "orp",
+"system": "smartware",
 "qid": "4f54b7c9",
 "category": "multi-session",
 "question": "How many antique items did I inherit or acquire from my family members?",
@@ -4528,7 +4528,7 @@
 "tokens": 991
 },
 "qa00566": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "26bdc477",
 "category": "knowledge-update",
 "question": "How many trips have I taken my Canon EOS 80D camera on?",
@@ -4536,7 +4536,7 @@
 "tokens": 979
 },
 "qa00567": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "b01defab",
 "category": "knowledge-update",
 "question": "Did I finish reading 'The Nightingale' by Kristin Hannah?",
@@ -4544,7 +4544,7 @@
 "tokens": 990
 },
 "qa00568": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "gpt4_b4a80587",
 "category": "temporal-reasoning",
 "question": "Which event happened first, the road trip to the coast or the arrival of the new prime lens?",
@@ -4552,7 +4552,7 @@
 "tokens": 998
 },
 "qa00569": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "gpt4_b4a80587",
 "category": "temporal-reasoning",
 "question": "Which event happened first, the road trip to the coast or the arrival of the new prime lens?",
@@ -4560,7 +4560,7 @@
 "tokens": 995
 },
 "qa00570": {
-"system": "orp",
+"system": "smartware",
 "qid": "eac54adc",
 "category": "temporal-reasoning",
 "question": "How many days ago did I launch my website when I signed a contract with my first client?",
@@ -4568,7 +4568,7 @@
 "tokens": 992
 },
 "qa00571": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "22d2cb42",
 "category": "knowledge-update",
 "question": "Where did I get my guitar serviced?",
@@ -4576,7 +4576,7 @@
 "tokens": 975
 },
 "qa00572": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "08f4fc43",
 "category": "temporal-reasoning",
 "question": "How many days had passed between the Sunday mass at St. Mary's Church and the Ash Wednesday service at the cathedral?",
@@ -4584,7 +4584,7 @@
 "tokens": 974
 },
 "qa00573": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "ba61f0b9",
 "category": "knowledge-update",
 "question": "How many women are on the team led by my former manager Rachel?",
@@ -4592,7 +4592,7 @@
 "tokens": 992
 },
 "qa00574": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "gpt4_2ba83207",
 "category": "multi-session",
 "question": "Which grocery store did I spend the most money at in the past month?",
@@ -4624,7 +4624,7 @@
 "tokens": 998
 },
 "qa00578": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "58ef2f1c",
 "category": "single-session-user",
 "question": "When did I volunteer at the local animal shelter's fundraising dinner?",
@@ -4640,7 +4640,7 @@
 "tokens": 1000
 },
 "qa00580": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "4b24c848",
 "category": "knowledge-update",
 "question": "How many tops have I bought from H&M so far?",
@@ -4648,7 +4648,7 @@
 "tokens": 982
 },
 "qa00581": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "cc06de0d",
 "category": "multi-session",
 "question": "For my daily commute, how much more expensive was the taxi ride compared to the train fare?",
@@ -4656,7 +4656,7 @@
 "tokens": 990
 },
 "qa00582": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "gpt4_f2262a51",
 "category": "multi-session",
 "question": "How many different doctors did I visit?",
@@ -4664,7 +4664,7 @@
 "tokens": 986
 },
 "qa00583": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "b6019101",
 "category": "knowledge-update",
 "question": "How many MCU films did I watch in the last 3 months?",
@@ -4672,7 +4672,7 @@
 "tokens": 984
 },
 "qa00584": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "b6019101",
 "category": "knowledge-update",
 "question": "How many MCU films did I watch in the last 3 months?",
@@ -4680,7 +4680,7 @@
 "tokens": 999
 },
 "qa00585": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "352ab8bd",
 "category": "single-session-assistant",
 "question": "Can you remind me what was the average improvement in framerate when using the Hardware-Aware Modular Training (HAMT) agent in the 'To Adapt or Not to Adapt? Real-Time Adaptation for Semantic Segmentation' submission?",
@@ -4696,7 +4696,7 @@
 "tokens": 988
 },
 "qa00587": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "b6019101",
 "category": "knowledge-update",
 "question": "How many MCU films did I watch in the last 3 months?",
@@ -4736,7 +4736,7 @@
 "tokens": 983
 },
 "qa00592": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "bbf86515",
 "category": "temporal-reasoning",
 "question": "How many days before the 'Rack Fest' did I participate in the 'Turbocharged Tuesdays' event?",
@@ -4744,7 +4744,7 @@
 "tokens": 990
 },
 "qa00593": {
-"system": "orp",
+"system": "smartware",
 "qid": "26bdc477",
 "category": "knowledge-update",
 "question": "How many trips have I taken my Canon EOS 80D camera on?",
@@ -4760,7 +4760,7 @@
 "tokens": 999
 },
 "qa00595": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "efc3f7c2",
 "category": "multi-session",
 "question": "How much earlier do I wake up on Fridays compared to other weekdays?",
@@ -4776,7 +4776,7 @@
 "tokens": 984
 },
 "qa00597": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "ceb54acb",
 "category": "single-session-assistant",
 "question": "In our previous chat, you suggested 'sexual compulsions' and a few other options for alternative terms for certain behaviors. Can you remind me what the other four options were?",
@@ -4784,7 +4784,7 @@
 "tokens": 986
 },
 "qa00598": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "bbf86515",
 "category": "temporal-reasoning",
 "question": "How many days before the 'Rack Fest' did I participate in the 'Turbocharged Tuesdays' event?",
@@ -4792,7 +4792,7 @@
 "tokens": 994
 },
 "qa00599": {
-"system": "orp",
+"system": "smartware",
 "qid": "89941a94",
 "category": "knowledge-update",
 "question": "Before I purchased the gravel bike, do I have other bikes in addition to my mountain bike and my commuter bike?",
@@ -4800,7 +4800,7 @@
 "tokens": 995
 },
 "qa00600": {
-"system": "orp",
+"system": "smartware",
 "qid": "61f8c8f8",
 "category": "multi-session",
 "question": "How much faster did I finish the 5K run compared to my previous year's time?",
@@ -4808,7 +4808,7 @@
 "tokens": 1000
 },
 "qa00601": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "ad7109d1",
 "category": "single-session-user",
 "question": "What speed is my new internet plan?",
@@ -4816,7 +4816,7 @@
 "tokens": 967
 },
 "qa00602": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "55241a1f",
 "category": "multi-session",
 "question": "What is the total number of comments on my recent Facebook Live session and my most popular YouTube video?",
@@ -4824,7 +4824,7 @@
 "tokens": 987
 },
 "qa00603": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "gpt4_18c2b244",
 "category": "temporal-reasoning",
 "question": "What is the order of the three events: 'I signed up for the rewards program at ShopRite', 'I used a Buy One Get One Free coupon on Luvs diapers at Walmart', and 'I redeemed $12 cashback for a $10 Amazon gift card from Ibotta'?",
@@ -4832,7 +4832,7 @@
 "tokens": 996
 },
 "qa00604": {
-"system": "orp",
+"system": "smartware",
 "qid": "95228167",
 "category": "single-session-preference",
 "question": "I'm getting excited about my visit to the music store this weekend. Any tips on what to look for in a new guitar?",
@@ -4840,7 +4840,7 @@
 "tokens": 975
 },
 "qa00605": {
-"system": "orp-clean-full",
+"system": "smartware-clean-full",
 "qid": "09ba9854",
 "category": "multi-session",
 "question": "How much will I save by taking the train from the airport to my hotel instead of a taxi?",
@@ -4848,7 +4848,7 @@
 "tokens": 978
 },
 "qa00606": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "aae3761f",
 "category": "multi-session",
 "question": "How many hours in total did I spend driving to my three road trip destinations combined?",
@@ -4872,7 +4872,7 @@
 "tokens": 972
 },
 "qa00609": {
-"system": "orp",
+"system": "smartware",
 "qid": "gpt4_2ba83207",
 "category": "multi-session",
 "question": "Which grocery store did I spend the most money at in the past month?",
@@ -4880,7 +4880,7 @@
 "tokens": 994
 },
 "qa00610": {
-"system": "orp-clean",
+"system": "smartware-clean",
 "qid": "b86304ba",
 "category": "single-session-user",
 "question": "How much is the painting of a sunset worth in terms of the amount I paid for it?",
@@ -4888,7 +4888,7 @@
 "tokens": 977
 },
 "qa00611": {
-"system": "orp-clean-nodates",
+"system": "smartware-clean-nodates",
 "qid": "6613b389",
 "category": "temporal-reasoning",
 "question": "How many months before my anniversary did Rachel get engaged?",
@@ -4904,7 +4904,7 @@
 "tokens": 993
 },
 "qa00613": {
-"system": "orp",
+"system": "smartware",
 "qid": "6f9b354f",
 "category": "single-session-user",
 "question": "What color did I repaint my bedroom walls?",
@@ -4912,7 +4912,7 @@
 "tokens": 973
 },
 "qa00614": {
-"system": "orp",
+"system": "smartware",
 "qid": "gpt4_a2d1d1f6",
 "category": "temporal-reasoning",
 "question": "How many days ago did I harvest my first batch of fresh herbs from the herb garden kit?",
@@ -4920,7 +4920,7 @@
 "tokens": 989
 },
 "qa00615": {
-"system": "orp-clean-chrono",
+"system": "smartware-clean-chrono",
 "qid": "gpt4_372c3eed",
 "category": "multi-session",
 "question": "How many years in total did I spend in formal education from high school to the completion of my Bachelor's degree?",

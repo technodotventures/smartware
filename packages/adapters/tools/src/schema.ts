@@ -1,6 +1,6 @@
 // A small JSON Schema subset: enough to describe and check the memory tools' inputs without a dependency.
 // Unknown fields are rejected (unsupported_parameter), wrong types are invalid_parameter, as at the gateway.
-import { OrpError } from "@orp/client";
+import { SmartwareError } from "@technodotventures/smartware-client";
 
 export interface JsonSchema {
   type?: "object" | "string" | "integer" | "number" | "boolean" | "array";
@@ -18,14 +18,14 @@ export interface JsonSchema {
 }
 
 export function validate(value: unknown, s: JsonSchema, where: string): void {
-  const bad = (msg: string) => { throw new OrpError("invalid_parameter", `${where}: ${msg}`); };
+  const bad = (msg: string) => { throw new SmartwareError("invalid_parameter", `${where}: ${msg}`); };
   switch (s.type) {
     case "object": {
       if (value === null || typeof value !== "object" || Array.isArray(value)) bad("expected an object");
       const o = value as Record<string, unknown>;
       const props = s.properties ?? {};
       const extra = Object.keys(o).filter((k) => !(k in props));
-      if (extra.length) throw new OrpError("unsupported_parameter", `${where}: unsupported parameter(s) ${extra.join(", ")}`, 0, { parameters: extra });
+      if (extra.length) throw new SmartwareError("unsupported_parameter", `${where}: unsupported parameter(s) ${extra.join(", ")}`, 0, { parameters: extra });
       for (const k of s.required ?? []) if (o[k] === undefined) bad(`${k} is required`);
       for (const [k, sub] of Object.entries(props)) if (o[k] !== undefined) validate(o[k], sub, `${where}.${k}`);
       return;
@@ -51,7 +51,7 @@ export function validate(value: unknown, s: JsonSchema, where: string): void {
       return;
   }
   if (s.enum && !s.enum.includes(value as string)) {
-    throw new OrpError("unsupported_parameter", `${where}: ${JSON.stringify(value)} is not one of ${s.enum.join(", ")}`);
+    throw new SmartwareError("unsupported_parameter", `${where}: ${JSON.stringify(value)} is not one of ${s.enum.join(", ")}`);
   }
 }
 

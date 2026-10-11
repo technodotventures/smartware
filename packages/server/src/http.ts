@@ -1,9 +1,9 @@
-// HTTP gateway: the ORP HTTP binding (spec §8.2), MCP over Streamable HTTP (spec §8.1) as an OAuth 2.1 resource
+// HTTP gateway: the Smartware HTTP binding (spec §8.2), MCP over Streamable HTTP (spec §8.1) as an OAuth 2.1 resource
 // server, health and metrics. Every request authenticates first; the principal comes from the token only.
 import { createServer, request as httpRequest, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import { request as httpsRequest } from "node:https";
 import { randomBytes, randomUUID } from "node:crypto";
-import { ORPError, type Principal, type Service } from "@orp/core";
+import { SmartwareError, type Principal, type Service } from "@technodotventures/smartware-core";
 import { AuthError, type PrincipalSource } from "./auth.js";
 import { McpSession, PROTOCOLS, type SessionOptions } from "./mcp.js";
 import { Log } from "./log.js";
@@ -79,11 +79,11 @@ class Metrics {
     Metrics.BUCKETS.forEach((b, i) => { if (ms <= b) h![i]!++; });
   }
   render(): string {
-    const out = ["# TYPE orp_requests_total counter"];
-    for (const [k, v] of this.counts) { const [r, s] = k.split("|"); out.push(`orp_requests_total{route="${r}",status="${s}"} ${v}`); }
-    out.push("# TYPE orp_request_ms histogram");
+    const out = ["# TYPE smartware_requests_total counter"];
+    for (const [k, v] of this.counts) { const [r, s] = k.split("|"); out.push(`smartware_requests_total{route="${r}",status="${s}"} ${v}`); }
+    out.push("# TYPE smartware_request_ms histogram");
     for (const [r, h] of this.latency) {
-      Metrics.BUCKETS.forEach((b, i) => out.push(`orp_request_ms_bucket{route="${r}",le="${b === Infinity ? "+Inf" : b}"} ${h[i]}`));
+      Metrics.BUCKETS.forEach((b, i) => out.push(`smartware_request_ms_bucket{route="${r}",le="${b === Infinity ? "+Inf" : b}"} ${h[i]}`));
     }
     return out.join("\n") + "\n";
   }
@@ -156,12 +156,12 @@ export class Gateway {
       let n = 0;
       req.on("data", (c: Buffer) => {
         n += c.length;
-        if (n > limit) { req.pause(); req.removeAllListeners("data"); fail(new ORPError("payload_too_large", `body over ${limit} bytes`)); return; }
+        if (n > limit) { req.pause(); req.removeAllListeners("data"); fail(new SmartwareError("payload_too_large", `body over ${limit} bytes`)); return; }
         chunks.push(c);
       });
       req.on("end", () => {
         if (!n) return ok({});
-        try { ok(JSON.parse(Buffer.concat(chunks).toString("utf8"))); } catch { fail(new ORPError("invalid_parameter", "body is not valid JSON")); }
+        try { ok(JSON.parse(Buffer.concat(chunks).toString("utf8"))); } catch { fail(new SmartwareError("invalid_parameter", "body is not valid JSON")); }
       });
       req.on("error", fail);
     });
@@ -238,7 +238,7 @@ export class Gateway {
       if (url.pathname === "/.well-known/oauth-protected-resource" || url.pathname === "/.well-known/oauth-protected-resource/mcp") {
         status = 200;
         return this.send(res, 200, { resource: `${this.url}/mcp`, authorization_servers: this.opt.authorizationServers ?? [],
-          bearer_methods_supported: ["header"], scopes_supported: ["orp:read", "orp:write"], resource_name: "ORP memory" });
+          bearer_methods_supported: ["header"], scopes_supported: ["smartware:read", "smartware:write"], resource_name: "Smartware memory" });
       }
       const write = req.method === "POST" || req.method === "DELETE" || req.method === "PUT";
       let authz = req.headers.authorization;
@@ -273,7 +273,7 @@ export class Gateway {
       status = 404;
       this.send(res, 404, { error: { code: "not_found", message: url.pathname, details: {} } });
     } catch (e) {
-      if (e instanceof ORPError) {
+      if (e instanceof SmartwareError) {
         status = ERR_STATUS[e.code] ?? 400;
         if (e.code === "payload_too_large") { // answer, then drop the connection instead of reading the rest
           res.setHeader("connection", "close");
@@ -300,7 +300,7 @@ export class Gateway {
       this.send(res, 503, { error: { code: "unavailable", message: why, details: {} } }, { "retry-after": "1" });
       return Promise.resolve(503);
     };
-    if (req.headers["x-orp-forwarded"]) return busy("tenant is moving between nodes; retry");
+    if (req.headers["x-smartware-forwarded"]) return busy("tenant is moving between nodes; retry");
     if (!url) return busy("tenant is served by another node; retry (or route by tenant)");
     let target: URL;
     try {
@@ -319,7 +319,7 @@ export class Gateway {
       if (v === undefined || HOP_BY_HOP.has(k)) continue;
       headers[k] = v;
     }
-    Object.assign(headers, { host: target.host, "x-orp-forwarded": node, "x-request-id": rid,
+    Object.assign(headers, { host: target.host, "x-smartware-forwarded": node, "x-request-id": rid,
       "x-forwarded-for": [req.headers["x-forwarded-for"], req.socket.remoteAddress].filter(Boolean).join(", ") });
     return new Promise<number>((ok) => {
       const up = (target.protocol === "https:" ? httpsRequest : httpRequest)(target, { method: req.method, headers }, (ur) => {
@@ -340,20 +340,20 @@ export class Gateway {
     });
   }
 
-  // ------------------------------------------------------------ ORP HTTP binding
+  // ------------------------------------------------------------ Smartware HTTP binding
   private async v1(req: IncomingMessage, res: ServerResponse, url: URL, parts: string[], pr: Principal): Promise<number> {
     if (req.method === "GET" && parts.length === 2 && parts[1] === "whoami") { // tenant-free: lets a client discover its tenant
       this.send(res, 200, { id: pr.id, tenant: pr.tenant, groups: [...pr.groups].sort(), tokens: [...pr.tokens()].sort(),
         write_scopes: pr.writeScopes });
       return 200;
     }
-    if (parts.length < 3) throw new ORPError("not_found", url.pathname);
-    if (parts[1] !== pr.tenant) throw new ORPError("forbidden", "tenant mismatch");
+    if (parts.length < 3) throw new SmartwareError("not_found", url.pathname);
+    if (parts[1] !== pr.tenant) throw new SmartwareError("forbidden", "tenant mismatch");
     const s = this.svc, verb = parts[2]!, m = req.method, q = Object.fromEntries(url.searchParams);
     const ok = (body: Json, headers: Record<string, string> = {}) => { this.send(res, 200, body, headers); return 200; };
     const intQ = (k: string, d: number) => {
       if (q[k] === undefined) return d;
-      if (!/^-?\d+$/.test(q[k]!)) throw new ORPError("invalid_parameter", `${k} must be an integer`);
+      if (!/^-?\d+$/.test(q[k]!)) throw new SmartwareError("invalid_parameter", `${k} must be an integer`);
       return parseInt(q[k]!, 10);
     };
     if (m === "GET" && verb === "capabilities" && parts.length === 3) return ok(await s.capabilities(pr));
@@ -364,7 +364,7 @@ export class Gateway {
       const body = await this.body(req, verb === "import" ? 64 << 20 : this.opt.maxBody ?? 1 << 20);
       if (req.headers["if-match"] !== undefined && verb === "remember" && body.if_version === undefined) {
         const v = String(req.headers["if-match"]).replace(/^W\//, "").replace(/"/g, "");
-        if (!/^\d+$/.test(v)) throw new ORPError("invalid_parameter", "If-Match must carry a version number");
+        if (!/^\d+$/.test(v)) throw new SmartwareError("invalid_parameter", "If-Match must carry a version number");
         body.if_version = parseInt(v, 10);
       }
       const out = verb === "import" ? await s.import(body, pr) : await (s as any)[verb](body, pr);
@@ -376,17 +376,17 @@ export class Gateway {
           ...(q.scope ? { scope: q.scope } : {}), limit: intQ("limit", 100), cursor: intQ("cursor", 0) }, pr));
       }
       const id = parts[3];
-      if (id === undefined) throw new ORPError("not_found", url.pathname);
+      if (id === undefined) throw new SmartwareError("not_found", url.pathname);
       if (m === "GET" && parts.length === 4) {
         const r = await s.get([id], pr);
-        if (!r.memories.length) throw new ORPError("not_found", id);
+        if (!r.memories.length) throw new SmartwareError("not_found", id);
         return ok(r.memories[0], { etag: `"${r.memories[0].version}"` });
       }
       if (m === "GET" && parts[4] === "neighbours") return ok(await s.neighbours(id, intQ("before", 2), intQ("after", 2), pr));
       if (m === "GET" && parts[4] === "edges") return ok({ edges: await s.edges(id, pr) });
       if (m === "GET" && parts[4] === "history") {
         const r = await s.get([id], pr);
-        if (!r.memories.length || !r.memories[0].claim) throw new ORPError("not_found", id);
+        if (!r.memories.length || !r.memories[0].claim) throw new SmartwareError("not_found", id);
         return ok(await s.history(r.memories[0].claim.subject, r.memories[0].claim.predicate, pr));
       }
       if (m === "POST" && parts[4] === "approve") return ok(await s.approve(id, pr));
@@ -394,7 +394,7 @@ export class Gateway {
         let ifVersion: number | undefined;
         if (req.headers["if-match"] !== undefined) {
           const v = String(req.headers["if-match"]).replace(/^W\//, "").replace(/"/g, "");
-          if (!/^\d+$/.test(v)) throw new ORPError("invalid_parameter", "If-Match must carry a version number");
+          if (!/^\d+$/.test(v)) throw new SmartwareError("invalid_parameter", "If-Match must carry a version number");
           ifVersion = parseInt(v, 10);
         }
         // the version check and the forget run under one lock, so nothing can change the record in between
@@ -402,7 +402,7 @@ export class Gateway {
       }
     }
     if (m === "GET" && verb === "history" && parts.length === 3) {
-      if (typeof q.subject !== "string" || typeof q.predicate !== "string") throw new ORPError("invalid_parameter", "subject and predicate are required");
+      if (typeof q.subject !== "string" || typeof q.predicate !== "string") throw new SmartwareError("invalid_parameter", "subject and predicate are required");
       return ok(await s.history(q.subject, q.predicate, pr));
     }
     if (m === "GET" && verb === "threads" && parts.length === 5 && parts[4] === "neighbours") return ok(await s.thread(parts[3], pr));
@@ -411,7 +411,7 @@ export class Gateway {
     if (m === "GET" && verb === "jobs" && parts.length === 4) return ok(await s.job(parts[3], pr));
     if (m === "GET" && verb === "export" && parts.length === 3) return ok(await s.export(pr));
     if (m === "DELETE" && verb === "edges" && parts.length === 4) return ok(await s.unlink(parts[3], pr));
-    throw new ORPError("not_found", url.pathname);
+    throw new SmartwareError("not_found", url.pathname);
   }
 
   // ------------------------------------------------------------ MCP Streamable HTTP

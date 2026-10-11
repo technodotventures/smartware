@@ -20,7 +20,7 @@ test("validators match the schema pack", () => {
 });
 
 test("store round trip: a fresh process sees the same state, and tenants load lazily", async () => {
-  const path = join(mkdtempSync(join(tmpdir(), "orp-core-")), "orp.db");
+  const path = join(mkdtempSync(join(tmpdir(), "smartware-core-")), "smartware.db");
   const enc = new HashingEncoder();
   const p = chooseRanker("auto", enc.name).params;
   const s = new Service(enc, { params: p, store: new SqliteStore(path) });
@@ -47,7 +47,7 @@ test("store round trip: a fresh process sees the same state, and tenants load la
 });
 
 test("a failed write leaves the store unchanged (batches are atomic)", async () => {
-  const path = join(mkdtempSync(join(tmpdir(), "orp-core-")), "orp.db");
+  const path = join(mkdtempSync(join(tmpdir(), "smartware-core-")), "smartware.db");
   const s = new Service(new HashingEncoder(), { store: new SqliteStore(path) });
   await s.remember({ memories: [{ id: "a", content: "first" }] }, A);
   await assert.rejects(s.remember({ memories: [{ id: "b", content: "second" }, { id: "a", content: "dup" }] }, A), /exists/);
@@ -70,7 +70,7 @@ test("secret scan labels credentials", async () => {
 });
 
 test("preload warms tenants in the background and a concurrent write is never lost", async () => {
-  const path = join(mkdtempSync(join(tmpdir(), "orp-core-")), "orp.db");
+  const path = join(mkdtempSync(join(tmpdir(), "smartware-core-")), "smartware.db");
   const enc = new HashingEncoder();
   const a = new Service(enc, { store: new SqliteStore(path) });
   const B = new Principal("bob", [], "beta");

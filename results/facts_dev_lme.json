@@ -240,7 +240,7 @@
    },
    "reused": "baseline_tuning.json"
   },
-  "orp+facts": {
+  "smartware+facts": {
    "J": 0.7821837943717929,
    "dev": {
     "recall@500": 0.8028409090909091,
@@ -255,7 +255,7 @@
     "n": 88
    }
   },
-  "orp": {
+  "smartware": {
    "J": 0.775630843826119,
    "dev": {
     "recall@500": 0.7933712121212121,
@@ -360,7 +360,7 @@
     "n": 88
    }
   },
-  "orp+evidence": {
+  "smartware+evidence": {
    "J": 0.7572552487200612,
    "dev": {
     "recall@500": 0.7867424242424242,
@@ -572,7 +572,7 @@
   }
  },
  "choice": {
-  "orp": "orp+facts",
+  "smartware": "smartware+facts",
   "bm25": "bm25+facts",
   "dense": "dense+facts",
   "graphiti@tuned": "graphiti@tuned+facts",

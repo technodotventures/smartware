@@ -12,7 +12,7 @@ import urllib.error
 import urllib.request
 from http.server import ThreadingHTTPServer
 
-from orp import http_server
+from smartware import http_server
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -81,8 +81,8 @@ class HTTPBinding(unittest.TestCase):
 class MCPBinding(unittest.TestCase):
     def test_stdio_session(self):
         store = os.path.join(tempfile.mkdtemp(), "s.json")
-        env = dict(os.environ, ORP_PRINCIPAL="stevie", ORP_TENANT="tv", PYTHONPATH=ROOT)
-        p = subprocess.Popen([sys.executable, "-m", "orp.mcp_server", "--store", store], cwd=ROOT, env=env,
+        env = dict(os.environ, SMARTWARE_PRINCIPAL="stevie", SMARTWARE_TENANT="tv", PYTHONPATH=ROOT)
+        p = subprocess.Popen([sys.executable, "-m", "smartware.mcp_server", "--store", store], cwd=ROOT, env=env,
                              stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True)
 
         def rpc(i, method, params=None):
@@ -97,29 +97,29 @@ class MCPBinding(unittest.TestCase):
             p.stdin.write(json.dumps({"jsonrpc": "2.0", "method": "notifications/initialized"}) + "\n")
             tools = rpc(2, "tools/list")["result"]["tools"]
             names = {t["name"] for t in tools}
-            self.assertTrue({"orp_recall", "orp_remember", "orp_forget"} <= names)
-            forget = [t for t in tools if t["name"] == "orp_forget"][0]
+            self.assertTrue({"smartware_recall", "smartware_remember", "smartware_forget"} <= names)
+            forget = [t for t in tools if t["name"] == "smartware_forget"][0]
             self.assertTrue(forget["annotations"]["destructiveHint"])
-            r = rpc(3, "tools/call", {"name": "orp_remember", "arguments": {"memories": [
+            r = rpc(3, "tools/call", {"name": "smartware_remember", "arguments": {"memories": [
                 {"kind": "fact", "content": "Stevie prefers British spelling",
                  "claim": {"subject": "Stevie", "predicate": "spelling", "object": "British"}, "load": "always"}]}})
             mid = r["result"]["structuredContent"]["ids"][0]
-            r = rpc(4, "tools/call", {"name": "orp_recall", "arguments": {"query": "What spelling does Stevie prefer?"}})
+            r = rpc(4, "tools/call", {"name": "smartware_recall", "arguments": {"query": "What spelling does Stevie prefer?"}})
             self.assertIn("British", r["result"]["content"][0]["text"])
-            r = rpc(5, "resources/read", {"uri": f"orp://tv/mem/{mid}"})
+            r = rpc(5, "resources/read", {"uri": f"smartware://tv/mem/{mid}"})
             self.assertIn("British", r["result"]["contents"][0]["text"])
-            sub = rpc(7, "resources/subscribe", {"uri": "orp://tv/thread/prefs"})
+            sub = rpc(7, "resources/subscribe", {"uri": "smartware://tv/thread/prefs"})
             self.assertEqual(sub["result"], {})
             p.stdin.write(json.dumps({"jsonrpc": "2.0", "id": 8, "method": "tools/call", "params": {
-                "name": "orp_remember", "arguments": {"memories": [{"content": "Stevie likes flat whites",
+                "name": "smartware_remember", "arguments": {"memories": [{"content": "Stevie likes flat whites",
                                                                     "thread": "prefs"}]}}}) + "\n")
             p.stdin.flush()
             first = json.loads(p.stdout.readline())
             second = json.loads(p.stdout.readline())
             note = first if first.get("method") else second
             self.assertEqual(note["method"], "notifications/resources/updated")
-            self.assertEqual(note["params"]["uri"], "orp://tv/thread/prefs")
-            r = rpc(6, "tools/call", {"name": "orp_recall", "arguments": {"query": "x", "who_am_i": "admin"}})
+            self.assertEqual(note["params"]["uri"], "smartware://tv/thread/prefs")
+            r = rpc(6, "tools/call", {"name": "smartware_recall", "arguments": {"query": "x", "who_am_i": "admin"}})
             self.assertIn("error", r)  # identity cannot be asserted through arguments
             self.assertTrue(os.path.exists(store))
         finally:

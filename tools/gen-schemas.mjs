@@ -1,14 +1,14 @@
 // Generate the schema pack from packages/core/src/schema.ts (the single source) and the MCP tool definitions.
-//   node tools/gen-schemas.mjs        writes schema/orp-0.1/*.schema.json, schema/openapi.json, schema/mcp-tools.json
+//   node tools/gen-schemas.mjs        writes schema/smartware-0.1/*.schema.json, schema/openapi.json, schema/mcp-tools.json
 //   node tools/gen-schemas.mjs --check   fails if the committed files differ (CI)
 import { mkdirSync, readFileSync, writeFileSync, existsSync } from "node:fs";
 import { schema } from "../packages/core/dist/index.js";
 import { TOOLS } from "../packages/server/dist/mcp.js";
 
-const BASE = "https://orp.dev/schema/0.1/"; // placeholder host, renamed with the project
+const BASE = "https://smartware.software/schema/0.1/";
 const out = {};
 for (const [name, s] of Object.entries(schema.SCHEMAS)) {
-  out[`schema/orp-0.1/${name}.schema.json`] = { $schema: "https://json-schema.org/draft/2020-12/schema", $id: BASE + name, title: name, ...s };
+  out[`schema/smartware-0.1/${name}.schema.json`] = { $schema: "https://json-schema.org/draft/2020-12/schema", $id: BASE + name, title: name, ...s };
 }
 const ref = (n) => ({ $ref: `#/components/schemas/${n}` });
 const json = (n) => ({ content: { "application/json": { schema: ref(n) } } });
@@ -20,9 +20,9 @@ const q = (name, type = "string") => ({ name, in: "query", schema: { type } });
 const generic = { type: "object" };
 const openapi = {
   openapi: "3.1.0",
-  info: { title: "ORP HTTP binding", version: "0.1", description: "Open Recall Protocol (working name) HTTP binding, spec §8.2. The principal always comes from the bearer token." },
+  info: { title: "Smartware HTTP binding", version: "0.1", description: "Smartware protocol HTTP binding, spec §8.2. The principal always comes from the bearer token." },
   servers: [{ url: "http://127.0.0.1:8787" }],
-  components: { securitySchemes: { bearer: { type: "http", scheme: "bearer", description: "API key (orp_...) or an OAuth 2.1 / OIDC access token" } },
+  components: { securitySchemes: { bearer: { type: "http", scheme: "bearer", description: "API key (smartware_...) or an OAuth 2.1 / OIDC access token" } },
     schemas: { ...schema.SCHEMAS, Generic: generic } },
   paths: {
     "/v1/whoami": p("The principal and tenant this token resolves to (extension x-whoami)", "get", null, "Generic"),
@@ -53,7 +53,7 @@ const openapi = {
   },
 };
 out["schema/openapi.json"] = openapi;
-out["schema/mcp-tools.json"] = { note: "MCP tool definitions by toolset (orp serve --tools safe|full|mcp-memory)", tools: TOOLS };
+out["schema/mcp-tools.json"] = { note: "MCP tool definitions by toolset (smartware serve --tools safe|full|mcp-memory)", tools: TOOLS };
 
 let drift = 0;
 for (const [path, obj] of Object.entries(out)) {

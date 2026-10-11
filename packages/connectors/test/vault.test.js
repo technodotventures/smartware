@@ -1,4 +1,4 @@
-// Markdown vault connector end to end: ingest, edit, ACL change via .orp-acl.json, move, delete, render back.
+// Markdown vault connector end to end: ingest, edit, ACL change via .smartware-acl.json, move, delete, render back.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { mkdirSync, mkdtempSync, readFileSync, renameSync, rmSync, writeFileSync, statSync } from "node:fs";
@@ -36,7 +36,7 @@ test("vault: ingest, edit, ACL change, move, delete, render back", async (t) => 
   writeFileSync(join(vault, ".obsidian", "secret.md"), "app config, never ingested");
   writeFileSync(join(vault, "plan.md"), "---\ntitle: Plan\nreaders: [alice]\n---\n# Plan\nIntro to the launch.\n\n## Budget\nThe offsite budget is 40k euros.\n\n## Risks\nThe venue may cancel.\n");
   writeFileSync(join(vault, "team", "standup.md"), "## Monday\nBob fixed the flaky deploy pipeline.\n\n## Tuesday\nAlice reviewed the pricing page copy.\n");
-  writeFileSync(join(vault, "team", ".orp-acl.json"), JSON.stringify({ readers: ["alice", "bob"] }));
+  writeFileSync(join(vault, "team", ".smartware-acl.json"), JSON.stringify({ readers: ["alice", "bob"] }));
   writeFileSync(join(vault, "private.md"), "Carol has a dentist appointment on Friday.\n");
   const conn = vaultConnector({ dir: vault, defaultReaders: ["principal:carol"] });
   const opts = { url: srv.url, token: srv.tokens.connector, tenant: srv.tenant, statePath: state };
@@ -91,7 +91,7 @@ test("vault: ingest, edit, ACL change, move, delete, render back", async (t) => 
   assert.ok(await getRec(srv, "bob", summary), "bob can read the summary while he can read its sources");
 
   // ACL change through the folder file: readers-only upserts, then bob loses the items and the summary (M57, M59)
-  writeFileSync(join(vault, "team", ".orp-acl.json"), JSON.stringify({ readers: ["alice"] }));
+  writeFileSync(join(vault, "team", ".smartware-acl.json"), JSON.stringify({ readers: ["alice"] }));
   const r4 = await sync(conn, opts);
   assert.equal(r4.aclUpdated, 2);
   assert.equal(r4.updated, 0);
@@ -136,12 +136,12 @@ test("vault: ingest, edit, ACL change, move, delete, render back", async (t) => 
   assert.ok(!rr.files.includes("archive/private.md"), "alice cannot read carol's note, so it is not rendered");
   const rendered = parseNote(readFileSync(join(out, "team", "standup.md"), "utf8"));
   assert.deepEqual(rendered.frontmatter.readers, ["principal:alice", "principal:connector-bot"]);
-  assert.equal(rendered.frontmatter.orp_thread, "team/standup.md");
-  assert.deepEqual(rendered.frontmatter.orp_ids, [standupMon, id("team/standup.md#tuesday")]);
+  assert.equal(rendered.frontmatter.smartware_thread, "team/standup.md");
+  assert.deepEqual(rendered.frontmatter.smartware_ids, [standupMon, id("team/standup.md#tuesday")]);
   const src = splitSections(parseNote(readFileSync(join(vault, "team", "standup.md"), "utf8")).body);
   assert.deepEqual(splitSections(rendered.body), src, "sections survive the round trip");
 
-  assert.ok(rr.files.some((f) => f.startsWith(".orp/derived/")), "derived records render apart from the evidence");
+  assert.ok(rr.files.some((f) => f.startsWith(".smartware/derived/")), "derived records render apart from the evidence");
   assert.ok(!readFileSync(join(out, "team", "standup.md"), "utf8").includes(sumA.content));
 
   // two-way: ingesting the rendered vault into a fresh server reproduces the same records

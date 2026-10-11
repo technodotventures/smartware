@@ -1,32 +1,32 @@
-# ORP-Bench results, v0.1.2
+# Smartware Bench results, v0.1.2
 
-Held-out test splits only. The 15 projects are **LLM-free re-implementations of each project's recall path** (see `reports/` and `baselines/`), run with the same shared encoders as ORP, each with its best dev-tuned configuration; they are not the products themselves. Methodology, tuning budgets and limitations: `results/METHODOLOGY.md`.
+Held-out test splits only. The 15 projects are **LLM-free re-implementations of each project's recall path** (see `reports/` and `baselines/`), run with the same shared encoders as Smartware, each with its best dev-tuned configuration; they are not the products themselves. Methodology, tuning budgets and limitations: `results/METHODOLOGY.md`.
 
 **R@B**: share of gold evidence turns inside the first B tokens of the returned context (characters/4 tokens, greedy packing). **E@B**: the same, but a turn counts only if the context carries at least half of its content words. **Ans@B**: share of the gold answer's content words in the context. **SessAll@5**: LongMemEval's session metric. Verdicts use a paired bootstrap 95% CI against the best of the 15 on that metric (chosen after the fact, which favours the baselines).
 
-**Overall: on 18 benchmark-metric comparisons against the best of the 15, ORP is better on 7, not significantly different on 6 and worse on 5.**
+**Overall: on 18 benchmark-metric comparisons against the best of the 15, Smartware is better on 7, not significantly different on 6 and worse on 5.**
 
 ## LoCoMo-10 test (7 conversations, categories 1-4), n=1152
 
-ORP against the best of the 15 on each metric: **7 better, 0 no significant difference, 0 worse**.
+Smartware against the best of the 15 on each metric: **7 better, 0 no significant difference, 0 worse**.
 
-| Metric | ORP | Best of the 15 (tuned) | Difference [95% CI] | Verdict |
+| Metric | Smartware | Best of the 15 (tuned) | Difference [95% CI] | Verdict |
 |---|---|---|---|---|
-| R@500 | 74.3 | 64.0 (Supermemory Company Brain) | +10.3 [+8.0, +12.5] | ORP better |
-| R@1000 | 79.7 | 74.8 (Supermemory Company Brain) | +4.9 [+3.0, +6.8] | ORP better |
-| R@2000 | 85.7 | 80.9 (Supermemory Company Brain) | +4.8 [+3.1, +6.5] | ORP better |
-| E@1000 | 79.7 | 74.8 (Supermemory Company Brain) | +4.9 [+3.0, +6.8] | ORP better |
-| Ans@500 | 73.3 | 63.2 (Supermemory Company Brain) | +10.1 [+8.2, +11.9] | ORP better |
-| Ans@1000 | 78.8 | 71.5 (Supermemory Company Brain) | +7.3 [+5.7, +9.0] | ORP better |
-| Ans@2000 | 84.2 | 76.4 (Supermemory Company Brain) | +7.8 [+6.3, +9.3] | ORP better |
+| R@500 | 74.3 | 64.0 (Supermemory Company Brain) | +10.3 [+8.0, +12.5] | Smartware better |
+| R@1000 | 79.7 | 74.8 (Supermemory Company Brain) | +4.9 [+3.0, +6.8] | Smartware better |
+| R@2000 | 85.7 | 80.9 (Supermemory Company Brain) | +4.8 [+3.1, +6.5] | Smartware better |
+| E@1000 | 79.7 | 74.8 (Supermemory Company Brain) | +4.9 [+3.0, +6.8] | Smartware better |
+| Ans@500 | 73.3 | 63.2 (Supermemory Company Brain) | +10.1 [+8.2, +11.9] | Smartware better |
+| Ans@1000 | 78.8 | 71.5 (Supermemory Company Brain) | +7.3 [+5.7, +9.0] | Smartware better |
+| Ans@2000 | 84.2 | 76.4 (Supermemory Company Brain) | +7.8 [+6.3, +9.3] | Smartware better |
 
 All systems (baselines dev-tuned):
 
 | System | R@500 | R@1000 | R@2000 | E@1000 | Ans@500 | Ans@1000 | Ans@2000 | SessAll@5 | MRR |
 |---|---|---|---|---|---|---|---|---|---|
-| **ORP reference engine** | 74.3 | 79.7 | 85.7 | 79.7 | 73.3 | 78.8 | 84.2 | 80.2 | 59.3 |
-| ORP, hand-tuned RRF (no learned model) | 67.9 | 76.7 | 83.5 | 76.7 | 69.5 | 77.0 | 82.8 | 75.7 | 55.1 |
-| ORP, learned ranker with position/length features (not shipped) | 74.7 | 80.8 | 86.5 | 80.8 | 74.0 | 79.7 | 84.7 | 80.8 | 60.8 |
+| **Smartware reference engine** | 74.3 | 79.7 | 85.7 | 79.7 | 73.3 | 78.8 | 84.2 | 80.2 | 59.3 |
+| Smartware, hand-tuned RRF (no learned model) | 67.9 | 76.7 | 83.5 | 76.7 | 69.5 | 77.0 | 82.8 | 75.7 | 55.1 |
+| Smartware, learned ranker with position/length features (not shipped) | 74.7 | 80.8 | 86.5 | 80.8 | 74.0 | 79.7 | 84.7 | 80.8 | 60.8 |
 | Supermemory Company Brain | 64.0 | 74.8 | 80.9 | 74.8 | 63.2 | 71.5 | 76.4 | 79.0 | 58.9 |
 | Cognee | 62.1 | 71.8 | 77.1 | 68.8 | 62.7 | 69.0 | 71.3 | 75.6 | 46.8 |
 | mem0 | 62.0 | 69.0 | 74.3 | 64.8 | 60.1 | 66.6 | 72.1 | 76.6 | 45.6 |
@@ -65,13 +65,13 @@ Baselines with their default settings (v0.1.1 run; E@B was added later):
 | LangMem | 27.0 | 34.9 | 43.6 | 34.5 | 42.7 | 51.4 | 57.1 | 23.4 |
 | GBrain | 4.9 | 29.1 | 51.3 | 30.3 | 40.5 | 59.7 | 59.0 | 58.0 |
 
-ORP v0.1.1 and v0.1.2 test results are identical on this benchmark.
+Smartware v0.1.1 and v0.1.2 test results are identical on this benchmark.
 
 Recall@1000 by question category:
 
 | System | multi-hop | open-domain | single-hop | temporal |
 |---|---|---|---|---|
-| **ORP reference engine** | 54.6 | 44.4 | 90.3 | 83.8 |
+| **Smartware reference engine** | 54.6 | 44.4 | 90.3 | 83.8 |
 | Supermemory Company Brain | 44.3 | 42.6 | 88.6 | 73.9 |
 | Cognee | 44.7 | 41.0 | 84.4 | 71.1 |
 | mem0 | 45.5 | 40.2 | 78.2 | 74.0 |
@@ -83,25 +83,25 @@ Recall@1000 by question category:
 
 ## LME-R test (LongMemEval oracle questions, recombined 40-session haystacks), n=382
 
-ORP against the best of the 15 on each metric: **0 better, 2 no significant difference, 5 worse**.
+Smartware against the best of the 15 on each metric: **0 better, 2 no significant difference, 5 worse**.
 
-| Metric | ORP | Best of the 15 (tuned) | Difference [95% CI] | Verdict |
+| Metric | Smartware | Best of the 15 (tuned) | Difference [95% CI] | Verdict |
 |---|---|---|---|---|
 | R@500 | 73.9 | 71.7 (mem0) | +2.2 [-1.4, +5.8] | no significant difference |
 | R@1000 | 81.6 | 83.2 (Hindsight) | -1.7 [-5.4, +2.0] | no significant difference |
-| R@2000 | 84.9 | 88.6 (Hindsight) | -3.7 [-6.7, -0.8] | ORP worse |
-| E@1000 | 72.5 | 83.2 (Hindsight) | -10.7 [-14.7, -6.6] | ORP worse |
-| Ans@500 | 57.1 | 63.5 (Supermemory Company Brain) | -6.4 [-10.4, -2.7] | ORP worse |
-| Ans@1000 | 63.9 | 71.4 (Supermemory Company Brain) | -7.5 [-11.6, -3.8] | ORP worse |
-| Ans@2000 | 70.6 | 78.0 (mem0) | -7.4 [-10.6, -4.4] | ORP worse |
+| R@2000 | 84.9 | 88.6 (Hindsight) | -3.7 [-6.7, -0.8] | Smartware worse |
+| E@1000 | 72.5 | 83.2 (Hindsight) | -10.7 [-14.7, -6.6] | Smartware worse |
+| Ans@500 | 57.1 | 63.5 (Supermemory Company Brain) | -6.4 [-10.4, -2.7] | Smartware worse |
+| Ans@1000 | 63.9 | 71.4 (Supermemory Company Brain) | -7.5 [-11.6, -3.8] | Smartware worse |
+| Ans@2000 | 70.6 | 78.0 (mem0) | -7.4 [-10.6, -4.4] | Smartware worse |
 
 All systems (baselines dev-tuned):
 
 | System | R@500 | R@1000 | R@2000 | E@1000 | Ans@500 | Ans@1000 | Ans@2000 | SessAll@5 | MRR |
 |---|---|---|---|---|---|---|---|---|---|
-| **ORP reference engine** | 73.9 | 81.6 | 84.9 | 72.5 | 57.1 | 63.9 | 70.6 | 78.5 | 71.5 |
-| ORP, hand-tuned RRF (no learned model) | 73.6 | 81.6 | 86.9 | 73.3 | 55.6 | 62.6 | 71.6 | 80.4 | 68.8 |
-| ORP, learned ranker with position/length features (not shipped) | 72.3 | 80.3 | 85.3 | 71.3 | 57.1 | 64.0 | 72.2 | 78.0 | 69.4 |
+| **Smartware reference engine** | 73.9 | 81.6 | 84.9 | 72.5 | 57.1 | 63.9 | 70.6 | 78.5 | 71.5 |
+| Smartware, hand-tuned RRF (no learned model) | 73.6 | 81.6 | 86.9 | 73.3 | 55.6 | 62.6 | 71.6 | 80.4 | 68.8 |
+| Smartware, learned ranker with position/length features (not shipped) | 72.3 | 80.3 | 85.3 | 71.3 | 57.1 | 64.0 | 72.2 | 78.0 | 69.4 |
 | Hindsight | 71.3 | 83.2 | 88.6 | 83.2 | 54.0 | 67.1 | 77.4 | 87.4 | 67.4 |
 | mem0 | 71.7 | 79.8 | 86.5 | 66.0 | 60.7 | 70.0 | 78.0 | 81.9 | 58.7 |
 | Graphiti (Zep) | 68.0 | 78.6 | 86.2 | 50.1 | 58.5 | 68.3 | 76.7 | 81.7 | 50.3 |
@@ -140,13 +140,13 @@ Baselines with their default settings (v0.1.1 run; E@B was added later):
 | Sylph | 9.9 | 12.7 | 22.4 | 24.8 | 28.1 | 41.7 | 38.2 | 23.5 |
 | GBrain | 4.4 | 5.2 | 11.9 | 22.6 | 27.7 | 40.9 | 74.9 | 78.0 |
 
-ORP v0.1.1 and v0.1.2 test results are identical on this benchmark.
+Smartware v0.1.1 and v0.1.2 test results are identical on this benchmark.
 
 Without the 45 test questions affected by LME-R construction quirks (`results/lme_quirks.json`):
 
 | System | R@500 | R@1000 | R@2000 | E@1000 | Ans@500 | Ans@1000 | Ans@2000 |
 |---|---|---|---|---|---|---|---|
-| **ORP reference engine** | 77.7 | 86.1 | 89.7 | 75.8 | 59.4 | 66.4 | 72.7 |
+| **Smartware reference engine** | 77.7 | 86.1 | 89.7 | 75.8 | 59.4 | 66.4 | 72.7 |
 | Hindsight | 70.2 | 82.5 | 87.9 | 82.5 | 53.2 | 67.3 | 77.5 |
 | mem0 | 71.1 | 79.0 | 86.0 | 65.6 | 60.7 | 70.0 | 78.1 |
 | Graphiti (Zep) | 67.8 | 78.0 | 85.6 | 49.4 | 58.5 | 68.4 | 76.7 |
@@ -156,21 +156,21 @@ Without the 45 test questions affected by LME-R construction quirks (`results/lm
 
 Verdicts on this subset: 2 better, 1 no significant difference, 4 worse.
 
-| Metric | ORP | Best of the 15 (tuned) | Difference [95% CI] | Verdict |
+| Metric | Smartware | Best of the 15 (tuned) | Difference [95% CI] | Verdict |
 |---|---|---|---|---|
-| R@500 | 77.7 | 71.1 (mem0) | +6.7 [+3.2, +10.2] | ORP better |
-| R@1000 | 86.1 | 82.5 (Hindsight) | +3.6 [+0.3, +6.8] | ORP better |
+| R@500 | 77.7 | 71.1 (mem0) | +6.7 [+3.2, +10.2] | Smartware better |
+| R@1000 | 86.1 | 82.5 (Hindsight) | +3.6 [+0.3, +6.8] | Smartware better |
 | R@2000 | 89.7 | 87.9 (Hindsight) | +1.8 [-0.7, +4.2] | no significant difference |
-| E@1000 | 75.8 | 82.5 (Hindsight) | -6.7 [-10.9, -2.8] | ORP worse |
-| Ans@500 | 59.4 | 64.0 (Supermemory Company Brain) | -4.6 [-8.7, -0.6] | ORP worse |
-| Ans@1000 | 66.4 | 71.6 (Supermemory Company Brain) | -5.2 [-9.3, -1.3] | ORP worse |
-| Ans@2000 | 72.7 | 78.1 (mem0) | -5.4 [-9.0, -2.1] | ORP worse |
+| E@1000 | 75.8 | 82.5 (Hindsight) | -6.7 [-10.9, -2.8] | Smartware worse |
+| Ans@500 | 59.4 | 64.0 (Supermemory Company Brain) | -4.6 [-8.7, -0.6] | Smartware worse |
+| Ans@1000 | 66.4 | 71.6 (Supermemory Company Brain) | -5.2 [-9.3, -1.3] | Smartware worse |
+| Ans@2000 | 72.7 | 78.1 (mem0) | -5.4 [-9.0, -2.1] | Smartware worse |
 
 Recall@1000 by question category:
 
 | System | knowledge-update | multi-session | single-session-assistant | single-session-preference | single-session-user | temporal-reasoning |
 |---|---|---|---|---|---|---|
-| **ORP reference engine** | 94.1 | 81.0 | 95.7 | 45.5 | 100.0 | 66.2 |
+| **Smartware reference engine** | 94.1 | 81.0 | 95.7 | 45.5 | 100.0 | 66.2 |
 | Hindsight | 87.4 | 80.3 | 73.9 | 67.9 | 95.4 | 85.5 |
 | mem0 | 93.0 | 62.2 | 93.5 | 55.8 | 96.3 | 80.5 |
 | Graphiti (Zep) | 90.1 | 62.2 | 93.5 | 56.4 | 98.1 | 76.4 |
@@ -184,9 +184,9 @@ Recall@1000 by question category:
 
 Cognee's evaluation set: 500 Wikipedia paragraphs, 50 multi-hop questions. Added after the v0.1.1 freeze; nothing was tuned on it. Only answer recall can be scored.
 
-ORP against the best of the 15: 0 better, 4 no significant difference, 0 worse.
+Smartware against the best of the 15: 0 better, 4 no significant difference, 0 worse.
 
-| Metric | ORP | Best of the 15 (tuned) | Difference [95% CI] | Verdict |
+| Metric | Smartware | Best of the 15 (tuned) | Difference [95% CI] | Verdict |
 |---|---|---|---|---|
 | Ans@500 | 79.5 | 84.3 (Cognee) | -4.8 [-13.0, +2.7] | no significant difference |
 | Ans@1000 | 88.2 | 90.0 (Onyx) | -1.8 [-5.8, +1.3] | no significant difference |
@@ -195,8 +195,8 @@ ORP against the best of the 15: 0 better, 4 no significant difference, 0 worse.
 
 | System | Ans@500 | Ans@1000 | Ans@2000 | Ans@4000 |
 |---|---|---|---|---|
-| **ORP reference engine** | 79.5 | 88.2 | 93.2 | 93.2 |
-| ORP, hand-tuned RRF (no learned model) | 74.2 | 88.2 | 93.2 | 93.2 |
+| **Smartware reference engine** | 79.5 | 88.2 | 93.2 | 93.2 |
+| Smartware, hand-tuned RRF (no learned model) | 74.2 | 88.2 | 93.2 | 93.2 |
 | Graphiti (Zep) | 71.0 | 81.2 | 87.2 | 88.2 |
 | Hindsight | 64.8 | 75.8 | 86.7 | 89.2 |
 | mem0 | 74.2 | 87.5 | 91.0 | 92.0 |
@@ -232,26 +232,26 @@ ORP against the best of the 15: 0 better, 4 no significant difference, 0 worse.
 
 ## Official LongMemEval-S (frozen configurations, scored once), n=382
 
-The official `longmemeval_s_cleaned.json` haystacks (38-62 sessions, about 490 turns and 115k tokens per question; LME-R used 40 rebuilt sessions), the same 382 test questions. Nothing was tuned on it: ORP's shipped ranker and every baseline's raw-turn dev-tuned configuration. Raw turns only.
+The official `longmemeval_s_cleaned.json` haystacks (38-62 sessions, about 490 turns and 115k tokens per question; LME-R used 40 rebuilt sessions), the same 382 test questions. Nothing was tuned on it: Smartware's shipped ranker and every baseline's raw-turn dev-tuned configuration. Raw turns only.
 
-ORP against the best of the 15: **0 better, 3 no significant difference, 6 worse**.
+Smartware against the best of the 15: **0 better, 3 no significant difference, 6 worse**.
 
-| Metric | ORP | Best of the 15 (tuned) | Difference [95% CI] | Verdict |
+| Metric | Smartware | Best of the 15 (tuned) | Difference [95% CI] | Verdict |
 |---|---|---|---|---|
 | R@500 | 75.7 | 74.0 (mem0) | +1.7 [-1.8, +5.2] | no significant difference |
 | R@1000 | 82.8 | 82.0 (mem0) | +0.9 [-2.3, +3.8] | no significant difference |
 | R@2000 | 86.2 | 87.1 (mem0) | -0.9 [-4.1, +2.1] | no significant difference |
-| E@1000 | 73.8 | 79.9 (Hindsight) | -6.2 [-10.0, -2.3] | ORP worse |
-| Ans@500 | 58.4 | 62.4 (Supermemory Company Brain) | -4.0 [-7.8, -0.1] | ORP worse |
-| Ans@1000 | 65.8 | 70.0 (mem0) | -4.1 [-7.5, -1.0] | ORP worse |
-| Ans@2000 | 73.8 | 78.7 (Graphiti (Zep)) | -4.9 [-8.2, -1.8] | ORP worse |
-| Ans@4000 | 78.1 | 82.3 (Supermemory Company Brain) | -4.1 [-7.2, -1.1] | ORP worse |
-| SessAll@5 | 80.6 | 88.2 (Onyx) | -7.6 [-11.0, -4.5] | ORP worse |
+| E@1000 | 73.8 | 79.9 (Hindsight) | -6.2 [-10.0, -2.3] | Smartware worse |
+| Ans@500 | 58.4 | 62.4 (Supermemory Company Brain) | -4.0 [-7.8, -0.1] | Smartware worse |
+| Ans@1000 | 65.8 | 70.0 (mem0) | -4.1 [-7.5, -1.0] | Smartware worse |
+| Ans@2000 | 73.8 | 78.7 (Graphiti (Zep)) | -4.9 [-8.2, -1.8] | Smartware worse |
+| Ans@4000 | 78.1 | 82.3 (Supermemory Company Brain) | -4.1 [-7.2, -1.1] | Smartware worse |
+| SessAll@5 | 80.6 | 88.2 (Onyx) | -7.6 [-11.0, -4.5] | Smartware worse |
 
 | System | R@500 | R@1000 | R@2000 | E@1000 | Ans@500 | Ans@1000 | Ans@2000 | Ans@4000 | SessAll@5 |
 |---|---|---|---|---|---|---|---|---|---|
-| **ORP reference engine** | 75.7 | 82.8 | 86.2 | 73.8 | 58.4 | 65.8 | 73.8 | 78.1 | 80.6 |
-| ORP, hand-tuned RRF (no learned model) | 75.3 | 82.6 | 87.3 | 74.0 | 57.0 | 63.7 | 70.9 | 78.3 | 82.2 |
+| **Smartware reference engine** | 75.7 | 82.8 | 86.2 | 73.8 | 58.4 | 65.8 | 73.8 | 78.1 | 80.6 |
+| Smartware, hand-tuned RRF (no learned model) | 75.3 | 82.6 | 87.3 | 74.0 | 57.0 | 63.7 | 70.9 | 78.3 | 82.2 |
 | mem0 | 74.0 | 82.0 | 87.1 | 67.5 | 60.0 | 70.0 | 77.1 | 79.2 | 85.3 |
 | Graphiti (Zep) | 70.4 | 80.1 | 86.8 | 51.6 | 57.6 | 68.9 | 78.7 | 80.3 | 86.1 |
 | Hindsight | 70.8 | 79.9 | 86.3 | 79.9 | 52.4 | 64.0 | 76.5 | 79.1 | 86.6 |
@@ -272,25 +272,25 @@ ORP against the best of the 15: **0 better, 3 no significant difference, 6 worse
 
 Without the 29 test questions with gold evidence dated after the question (inadmissible to an engine that honours `as_of`) in the official data (`results/lmes_quirks.json`): **3 better, 5 no significant difference, 1 worse**.
 
-| Metric | ORP | Best of the 15 (tuned) | Difference [95% CI] | Verdict |
+| Metric | Smartware | Best of the 15 (tuned) | Difference [95% CI] | Verdict |
 |---|---|---|---|---|
-| R@500 | 80.2 | 73.6 (mem0) | +6.6 [+3.4, +9.8] | ORP better |
-| R@1000 | 87.6 | 81.3 (mem0) | +6.3 [+3.9, +8.7] | ORP better |
-| R@2000 | 91.1 | 86.6 (mem0) | +4.6 [+2.1, +7.0] | ORP better |
+| R@500 | 80.2 | 73.6 (mem0) | +6.6 [+3.4, +9.8] | Smartware better |
+| R@1000 | 87.6 | 81.3 (mem0) | +6.3 [+3.9, +8.7] | Smartware better |
+| R@2000 | 91.1 | 86.6 (mem0) | +4.6 [+2.1, +7.0] | Smartware better |
 | E@1000 | 77.8 | 78.7 (Hindsight) | -0.9 [-4.4, +2.6] | no significant difference |
 | Ans@500 | 59.3 | 61.2 (Supermemory Company Brain) | -1.9 [-5.8, +2.1] | no significant difference |
 | Ans@1000 | 66.8 | 69.3 (mem0) | -2.5 [-5.7, +0.6] | no significant difference |
-| Ans@2000 | 75.0 | 78.2 (Graphiti (Zep)) | -3.1 [-6.3, -0.2] | ORP worse |
+| Ans@2000 | 75.0 | 78.2 (Graphiti (Zep)) | -3.1 [-6.3, -0.2] | Smartware worse |
 | Ans@4000 | 79.6 | 82.1 (Supermemory Company Brain) | -2.4 [-5.5, +0.6] | no significant difference |
 | SessAll@5 | 87.3 | 87.8 (Onyx) | -0.6 [-2.8, +1.4] | no significant difference |
 
 Without the 54 test questions with any haystack session dated after the question in the official data (`results/lmes_quirks.json`): **3 better, 6 no significant difference, 0 worse**.
 
-| Metric | ORP | Best of the 15 (tuned) | Difference [95% CI] | Verdict |
+| Metric | Smartware | Best of the 15 (tuned) | Difference [95% CI] | Verdict |
 |---|---|---|---|---|
-| R@500 | 79.1 | 72.5 (mem0) | +6.6 [+3.2, +9.9] | ORP better |
-| R@1000 | 86.8 | 80.3 (mem0) | +6.5 [+3.9, +8.9] | ORP better |
-| R@2000 | 90.5 | 86.0 (mem0) | +4.5 [+1.7, +7.1] | ORP better |
+| R@500 | 79.1 | 72.5 (mem0) | +6.6 [+3.2, +9.9] | Smartware better |
+| R@1000 | 86.8 | 80.3 (mem0) | +6.5 [+3.9, +8.9] | Smartware better |
+| R@2000 | 90.5 | 86.0 (mem0) | +4.5 [+1.7, +7.1] | Smartware better |
 | E@1000 | 76.3 | 78.2 (Hindsight) | -1.9 [-5.6, +1.8] | no significant difference |
 | Ans@500 | 58.0 | 60.7 (Supermemory Company Brain) | -2.7 [-6.9, +1.5] | no significant difference |
 | Ans@1000 | 65.8 | 68.9 (Supermemory Company Brain) | -3.1 [-7.0, +0.9] | no significant difference |
@@ -302,7 +302,7 @@ Recall@1000 by question category:
 
 | System | knowledge-update | multi-session | single-session-assistant | single-session-preference | single-session-user | temporal-reasoning |
 |---|---|---|---|---|---|---|
-| **ORP reference engine** | 97.0 | 83.3 | 95.7 | 49.4 | 100.0 | 65.8 |
+| **Smartware reference engine** | 97.0 | 83.3 | 95.7 | 49.4 | 100.0 | 65.8 |
 | mem0 | 93.0 | 67.3 | 93.5 | 60.9 | 94.4 | 83.5 |
 | Graphiti (Zep) | 90.1 | 63.5 | 95.7 | 60.3 | 98.1 | 78.7 |
 | Hindsight | 85.5 | 77.9 | 54.3 | 66.0 | 91.7 | 88.2 |
@@ -314,26 +314,26 @@ Recall@1000 by question category:
 
 ## Official LongMemEval-M (frozen configurations, scored once), n=382
 
-The official `longmemeval_m_cleaned.json` haystacks (about 475 sessions, 4,900 turns and 1.2M tokens per question; LME-R used 40 rebuilt sessions), the same 382 test questions. Nothing was tuned on it: ORP's shipped ranker and every baseline's raw-turn dev-tuned configuration. Raw turns only.
+The official `longmemeval_m_cleaned.json` haystacks (about 475 sessions, 4,900 turns and 1.2M tokens per question; LME-R used 40 rebuilt sessions), the same 382 test questions. Nothing was tuned on it: Smartware's shipped ranker and every baseline's raw-turn dev-tuned configuration. Raw turns only.
 
-ORP against the best of the 15: **2 better, 5 no significant difference, 2 worse**.
+Smartware against the best of the 15: **2 better, 5 no significant difference, 2 worse**.
 
-| Metric | ORP | Best of the 15 (tuned) | Difference [95% CI] | Verdict |
+| Metric | Smartware | Best of the 15 (tuned) | Difference [95% CI] | Verdict |
 |---|---|---|---|---|
-| R@500 | 67.3 | 60.4 (mem0) | +6.9 [+3.2, +10.7] | ORP better |
-| R@1000 | 73.6 | 68.8 (mem0) | +4.8 [+1.3, +8.3] | ORP better |
+| R@500 | 67.3 | 60.4 (mem0) | +6.9 [+3.2, +10.7] | Smartware better |
+| R@1000 | 73.6 | 68.8 (mem0) | +4.8 [+1.3, +8.3] | Smartware better |
 | R@2000 | 79.6 | 76.7 (mem0) | +2.9 [-0.6, +6.2] | no significant difference |
 | E@1000 | 65.0 | 65.4 (Hindsight) | -0.4 [-3.9, +3.1] | no significant difference |
-| Ans@500 | 57.0 | 60.9 (Supermemory Company Brain) | -3.9 [-7.7, -0.1] | ORP worse |
+| Ans@500 | 57.0 | 60.9 (Supermemory Company Brain) | -3.9 [-7.7, -0.1] | Smartware worse |
 | Ans@1000 | 64.4 | 67.7 (Supermemory Company Brain) | -3.3 [-7.1, +0.5] | no significant difference |
 | Ans@2000 | 73.6 | 75.7 (Graphiti (Zep)) | -2.1 [-5.6, +1.4] | no significant difference |
 | Ans@4000 | 79.0 | 80.4 (Supermemory Company Brain) | -1.4 [-4.4, +1.4] | no significant difference |
-| SessAll@5 | 68.6 | 72.0 (Onyx) | -3.4 [-6.8, -0.3] | ORP worse |
+| SessAll@5 | 68.6 | 72.0 (Onyx) | -3.4 [-6.8, -0.3] | Smartware worse |
 
 | System | R@500 | R@1000 | R@2000 | E@1000 | Ans@500 | Ans@1000 | Ans@2000 | Ans@4000 | SessAll@5 |
 |---|---|---|---|---|---|---|---|---|---|
-| **ORP reference engine** | 67.3 | 73.6 | 79.6 | 65.0 | 57.0 | 64.4 | 73.6 | 79.0 | 68.6 |
-| ORP, hand-tuned RRF (no learned model) | 64.0 | 72.2 | 77.1 | 64.2 | 53.8 | 64.1 | 72.0 | 79.8 | 68.6 |
+| **Smartware reference engine** | 67.3 | 73.6 | 79.6 | 65.0 | 57.0 | 64.4 | 73.6 | 79.0 | 68.6 |
+| Smartware, hand-tuned RRF (no learned model) | 64.0 | 72.2 | 77.1 | 64.2 | 53.8 | 64.1 | 72.0 | 79.8 | 68.6 |
 | mem0 | 60.4 | 68.8 | 76.7 | 55.4 | 58.2 | 66.3 | 74.5 | 78.5 | 67.5 |
 | Graphiti (Zep) | 56.8 | 67.3 | 73.9 | 41.5 | 55.8 | 65.3 | 75.7 | 76.8 | 66.2 |
 | Hindsight | 56.0 | 65.4 | 74.3 | 65.4 | 47.2 | 57.1 | 70.4 | 73.0 | 65.7 |
@@ -354,12 +354,12 @@ ORP against the best of the 15: **2 better, 5 no significant difference, 2 worse
 
 Without the 29 test questions with gold evidence dated after the question (inadmissible to an engine that honours `as_of`) in the official data (`results/lmem_quirks.json`): **4 better, 5 no significant difference, 0 worse**.
 
-| Metric | ORP | Best of the 15 (tuned) | Difference [95% CI] | Verdict |
+| Metric | Smartware | Best of the 15 (tuned) | Difference [95% CI] | Verdict |
 |---|---|---|---|---|
-| R@500 | 71.5 | 59.9 (mem0) | +11.5 [+8.1, +15.0] | ORP better |
-| R@1000 | 77.8 | 68.2 (mem0) | +9.6 [+6.5, +12.7] | ORP better |
-| R@2000 | 84.1 | 76.3 (mem0) | +7.8 [+4.7, +10.8] | ORP better |
-| E@1000 | 68.5 | 64.6 (Hindsight) | +4.0 [+0.6, +7.2] | ORP better |
+| R@500 | 71.5 | 59.9 (mem0) | +11.5 [+8.1, +15.0] | Smartware better |
+| R@1000 | 77.8 | 68.2 (mem0) | +9.6 [+6.5, +12.7] | Smartware better |
+| R@2000 | 84.1 | 76.3 (mem0) | +7.8 [+4.7, +10.8] | Smartware better |
+| E@1000 | 68.5 | 64.6 (Hindsight) | +4.0 [+0.6, +7.2] | Smartware better |
 | Ans@500 | 57.7 | 60.7 (Supermemory Company Brain) | -3.0 [-7.1, +1.0] | no significant difference |
 | Ans@1000 | 64.8 | 67.6 (Supermemory Company Brain) | -2.8 [-6.8, +1.2] | no significant difference |
 | Ans@2000 | 74.0 | 75.0 (Graphiti (Zep)) | -1.0 [-4.5, +2.7] | no significant difference |
@@ -368,14 +368,14 @@ Without the 29 test questions with gold evidence dated after the question (inadm
 
 Without the 85 test questions with any haystack session dated after the question in the official data (`results/lmem_quirks.json`): **3 better, 4 no significant difference, 2 worse**.
 
-| Metric | ORP | Best of the 15 (tuned) | Difference [95% CI] | Verdict |
+| Metric | Smartware | Best of the 15 (tuned) | Difference [95% CI] | Verdict |
 |---|---|---|---|---|
-| R@500 | 68.0 | 57.3 (mem0) | +10.7 [+7.0, +14.5] | ORP better |
-| R@1000 | 74.5 | 65.9 (mem0) | +8.6 [+5.2, +12.0] | ORP better |
-| R@2000 | 81.5 | 73.3 (mem0) | +8.2 [+4.8, +11.8] | ORP better |
+| R@500 | 68.0 | 57.3 (mem0) | +10.7 [+7.0, +14.5] | Smartware better |
+| R@1000 | 74.5 | 65.9 (mem0) | +8.6 [+5.2, +12.0] | Smartware better |
+| R@2000 | 81.5 | 73.3 (mem0) | +8.2 [+4.8, +11.8] | Smartware better |
 | E@1000 | 63.4 | 61.9 (Hindsight) | +1.6 [-2.2, +5.2] | no significant difference |
-| Ans@500 | 53.5 | 58.8 (Supermemory Company Brain) | -5.3 [-9.6, -1.0] | ORP worse |
-| Ans@1000 | 61.0 | 65.6 (Supermemory Company Brain) | -4.5 [-8.9, -0.5] | ORP worse |
+| Ans@500 | 53.5 | 58.8 (Supermemory Company Brain) | -5.3 [-9.6, -1.0] | Smartware worse |
+| Ans@1000 | 61.0 | 65.6 (Supermemory Company Brain) | -4.5 [-8.9, -0.5] | Smartware worse |
 | Ans@2000 | 71.5 | 72.8 (Graphiti (Zep)) | -1.3 [-5.6, +2.7] | no significant difference |
 | Ans@4000 | 77.0 | 79.1 (Supermemory Company Brain) | -2.1 [-5.8, +1.3] | no significant difference |
 | SessAll@5 | 70.7 | 69.0 (Onyx) | +1.7 [-1.3, +4.7] | no significant difference |
@@ -384,7 +384,7 @@ Recall@1000 by question category:
 
 | System | knowledge-update | multi-session | single-session-assistant | single-session-preference | single-session-user | temporal-reasoning |
 |---|---|---|---|---|---|---|
-| **ORP reference engine** | 94.9 | 67.6 | 93.5 | 32.1 | 93.5 | 56.2 |
+| **Smartware reference engine** | 94.9 | 67.6 | 93.5 | 32.1 | 93.5 | 56.2 |
 | mem0 | 81.2 | 47.8 | 91.3 | 35.9 | 90.7 | 68.7 |
 | Graphiti (Zep) | 86.8 | 45.9 | 91.3 | 25.6 | 92.6 | 62.8 |
 | Hindsight | 75.5 | 67.8 | 28.3 | 30.1 | 85.2 | 72.8 |
@@ -396,31 +396,31 @@ Recall@1000 by question category:
 
 ## Official LongMemEval-S, day-precision question times (frozen configurations, post hoc), n=382
 
-The official `longmemeval_s_cleaned.json` haystacks (38-62 sessions, about 490 turns and 115k tokens per question; LME-R used 40 rebuilt sessions), the same 382 test questions. Nothing was tuned on it: ORP's shipped ranker and every baseline's raw-turn dev-tuned configuration. Raw turns only.
+The official `longmemeval_s_cleaned.json` haystacks (38-62 sessions, about 490 turns and 115k tokens per question; LME-R used 40 rebuilt sessions), the same 382 test questions. Nothing was tuned on it: Smartware's shipped ranker and every baseline's raw-turn dev-tuned configuration. Raw turns only.
 
 Every system is given the end of the question's day as the question time: in the official data every gold session dated after its question falls on that same day. Found by a dev-only diagnosis after the strict-time results above had been seen (`results/dev_diag/PLAN.md`). **AnsW@B** (post hoc) counts answer words that are not bare numbers, which numbered lists, scores and ids otherwise match by chance.
 
-ORP against the best of the 15: **5 better, 7 no significant difference, 0 worse**.
+Smartware against the best of the 15: **5 better, 7 no significant difference, 0 worse**.
 
-| Metric | ORP | Best of the 15 (tuned) | Difference [95% CI] | Verdict |
+| Metric | Smartware | Best of the 15 (tuned) | Difference [95% CI] | Verdict |
 |---|---|---|---|---|
-| R@500 | 80.2 | 74.0 (mem0) | +6.2 [+3.2, +9.3] | ORP better |
-| R@1000 | 88.0 | 82.0 (mem0) | +6.1 [+3.9, +8.3] | ORP better |
-| R@2000 | 91.7 | 87.1 (mem0) | +4.6 [+2.3, +6.9] | ORP better |
+| R@500 | 80.2 | 74.0 (mem0) | +6.2 [+3.2, +9.3] | Smartware better |
+| R@1000 | 88.0 | 82.0 (mem0) | +6.1 [+3.9, +8.3] | Smartware better |
+| R@2000 | 91.7 | 87.1 (mem0) | +4.6 [+2.3, +6.9] | Smartware better |
 | E@1000 | 79.0 | 79.9 (Hindsight) | -1.0 [-4.3, +2.3] | no significant difference |
 | Ans@500 | 60.1 | 62.4 (Supermemory Company Brain) | -2.3 [-6.0, +1.5] | no significant difference |
 | Ans@1000 | 67.9 | 70.0 (mem0) | -2.1 [-5.1, +0.9] | no significant difference |
 | Ans@2000 | 76.0 | 78.7 (Graphiti (Zep)) | -2.7 [-5.7, +0.1] | no significant difference |
 | Ans@4000 | 80.6 | 82.3 (Supermemory Company Brain) | -1.6 [-4.6, +1.2] | no significant difference |
 | SessAll@5 | 87.4 | 88.2 (Onyx) | -0.8 [-2.9, +1.3] | no significant difference |
-| AnsW@500 | 71.8 | 68.0 (mem0) | +3.8 [+0.8, +6.7] | ORP better |
-| AnsW@1000 | 78.2 | 75.1 (mem0) | +3.1 [+0.3, +6.1] | ORP better |
+| AnsW@500 | 71.8 | 68.0 (mem0) | +3.8 [+0.8, +6.7] | Smartware better |
+| AnsW@1000 | 78.2 | 75.1 (mem0) | +3.1 [+0.3, +6.1] | Smartware better |
 | AnsW@2000 | 83.2 | 81.2 (mem0) | +2.0 [-0.5, +4.6] | no significant difference |
 
 | System | R@500 | R@1000 | R@2000 | E@1000 | Ans@500 | Ans@1000 | Ans@2000 | Ans@4000 | SessAll@5 | AnsW@500 | AnsW@1000 | AnsW@2000 |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| **ORP reference engine** | 80.2 | 88.0 | 91.7 | 79.0 | 60.1 | 67.9 | 76.0 | 80.6 | 87.4 | 71.8 | 78.2 | 83.2 |
-| ORP, hand-tuned RRF (no learned model) | 79.9 | 87.5 | 92.6 | 78.9 | 58.9 | 66.0 | 73.5 | 80.9 | 88.7 | 71.7 | 76.2 | 82.1 |
+| **Smartware reference engine** | 80.2 | 88.0 | 91.7 | 79.0 | 60.1 | 67.9 | 76.0 | 80.6 | 87.4 | 71.8 | 78.2 | 83.2 |
+| Smartware, hand-tuned RRF (no learned model) | 79.9 | 87.5 | 92.6 | 78.9 | 58.9 | 66.0 | 73.5 | 80.9 | 88.7 | 71.7 | 76.2 | 82.1 |
 | mem0 | 74.0 | 82.0 | 87.1 | 67.5 | 60.0 | 70.0 | 77.1 | 79.2 | 85.3 | 68.0 | 75.1 | 81.2 |
 | Graphiti (Zep) | 70.4 | 80.1 | 86.8 | 51.6 | 57.6 | 68.9 | 78.7 | 80.3 | 86.1 | 65.1 | 74.4 | 80.1 |
 | Hindsight | 70.8 | 79.9 | 86.3 | 79.9 | 52.4 | 64.0 | 76.5 | 79.1 | 86.6 | 64.4 | 72.9 | 81.0 |
@@ -443,7 +443,7 @@ Recall@1000 by question category:
 
 | System | knowledge-update | multi-session | single-session-assistant | single-session-preference | single-session-user | temporal-reasoning |
 |---|---|---|---|---|---|---|
-| **ORP reference engine** | 97.8 | 83.6 | 95.7 | 49.4 | 100.0 | 86.4 |
+| **Smartware reference engine** | 97.8 | 83.6 | 95.7 | 49.4 | 100.0 | 86.4 |
 | mem0 | 93.0 | 67.3 | 93.5 | 60.9 | 94.4 | 83.5 |
 | Graphiti (Zep) | 90.1 | 63.5 | 95.7 | 60.3 | 98.1 | 78.7 |
 | Hindsight | 85.5 | 77.9 | 54.3 | 66.0 | 91.7 | 88.2 |
@@ -455,18 +455,18 @@ Recall@1000 by question category:
 
 ## Official LongMemEval-M, day-precision question times (frozen configurations, post hoc), n=382
 
-The official `longmemeval_m_cleaned.json` haystacks (about 475 sessions, 4,900 turns and 1.2M tokens per question; LME-R used 40 rebuilt sessions), the same 382 test questions. Nothing was tuned on it: ORP's shipped ranker and every baseline's raw-turn dev-tuned configuration. Raw turns only.
+The official `longmemeval_m_cleaned.json` haystacks (about 475 sessions, 4,900 turns and 1.2M tokens per question; LME-R used 40 rebuilt sessions), the same 382 test questions. Nothing was tuned on it: Smartware's shipped ranker and every baseline's raw-turn dev-tuned configuration. Raw turns only.
 
 Every system is given the end of the question's day as the question time: in the official data every gold session dated after its question falls on that same day. Found by a dev-only diagnosis after the strict-time results above had been seen (`results/dev_diag/PLAN.md`). **AnsW@B** (post hoc) counts answer words that are not bare numbers, which numbered lists, scores and ids otherwise match by chance.
 
-ORP against the best of the 15: **4 better, 5 no significant difference, 0 worse**.
+Smartware against the best of the 15: **4 better, 5 no significant difference, 0 worse**.
 
-| Metric | ORP | Best of the 15 (tuned) | Difference [95% CI] | Verdict |
+| Metric | Smartware | Best of the 15 (tuned) | Difference [95% CI] | Verdict |
 |---|---|---|---|---|
-| R@500 | 71.2 | 60.4 (mem0) | +10.8 [+7.4, +14.2] | ORP better |
-| R@1000 | 77.5 | 68.8 (mem0) | +8.7 [+5.7, +11.8] | ORP better |
-| R@2000 | 84.4 | 76.7 (mem0) | +7.6 [+4.8, +10.6] | ORP better |
-| E@1000 | 69.0 | 65.4 (Hindsight) | +3.5 [+0.4, +6.7] | ORP better |
+| R@500 | 71.2 | 60.4 (mem0) | +10.8 [+7.4, +14.2] | Smartware better |
+| R@1000 | 77.5 | 68.8 (mem0) | +8.7 [+5.7, +11.8] | Smartware better |
+| R@2000 | 84.4 | 76.7 (mem0) | +7.6 [+4.8, +10.6] | Smartware better |
+| E@1000 | 69.0 | 65.4 (Hindsight) | +3.5 [+0.4, +6.7] | Smartware better |
 | Ans@500 | 58.2 | 60.9 (Supermemory Company Brain) | -2.7 [-6.6, +0.9] | no significant difference |
 | Ans@1000 | 65.4 | 67.7 (Supermemory Company Brain) | -2.3 [-6.1, +1.4] | no significant difference |
 | Ans@2000 | 74.5 | 75.7 (Graphiti (Zep)) | -1.2 [-4.7, +2.2] | no significant difference |
@@ -475,8 +475,8 @@ ORP against the best of the 15: **4 better, 5 no significant difference, 0 worse
 
 | System | R@500 | R@1000 | R@2000 | E@1000 | Ans@500 | Ans@1000 | Ans@2000 | Ans@4000 | SessAll@5 |
 |---|---|---|---|---|---|---|---|---|---|
-| **ORP reference engine** | 71.2 | 77.5 | 84.4 | 69.0 | 58.2 | 65.4 | 74.5 | 79.7 | 73.6 |
-| ORP, hand-tuned RRF (no learned model) | 67.5 | 76.6 | 82.0 | 68.6 | 55.3 | 65.8 | 73.2 | 80.5 | 73.8 |
+| **Smartware reference engine** | 71.2 | 77.5 | 84.4 | 69.0 | 58.2 | 65.4 | 74.5 | 79.7 | 73.6 |
+| Smartware, hand-tuned RRF (no learned model) | 67.5 | 76.6 | 82.0 | 68.6 | 55.3 | 65.8 | 73.2 | 80.5 | 73.8 |
 | mem0 | 60.4 | 68.8 | 76.7 | 55.4 | 58.2 | 66.3 | 74.5 | 78.5 | 67.5 |
 | Graphiti (Zep) | 56.8 | 67.3 | 73.9 | 41.5 | 55.8 | 65.3 | 75.7 | 76.8 | 66.2 |
 | Hindsight | 56.0 | 65.4 | 74.3 | 65.4 | 47.2 | 57.1 | 70.4 | 73.0 | 65.7 |
@@ -499,7 +499,7 @@ Recall@1000 by question category:
 
 | System | knowledge-update | multi-session | single-session-assistant | single-session-preference | single-session-user | temporal-reasoning |
 |---|---|---|---|---|---|---|
-| **ORP reference engine** | 96.5 | 67.6 | 93.5 | 32.1 | 93.5 | 71.2 |
+| **Smartware reference engine** | 96.5 | 67.6 | 93.5 | 32.1 | 93.5 | 71.2 |
 | mem0 | 81.2 | 47.8 | 91.3 | 35.9 | 90.7 | 68.7 |
 | Graphiti (Zep) | 86.8 | 45.9 | 91.3 | 25.6 | 92.6 | 62.8 |
 | Hindsight | 75.5 | 67.8 | 28.3 | 30.1 | 85.2 | 72.8 |
@@ -511,25 +511,25 @@ Recall@1000 by question category:
 
 ## LLM-extraction track
 
-Facts extracted once by Claude Haiku sub-agents with a mem0-style brief (`bench/extraction/EXTRACT.md`), frozen in `results/extraction/` and shared by every system, like the encoders. Each system's store (raw turns or extracted facts; for ORP also raw turns as evidence plus facts as derived memories) was chosen on that benchmark's dev split only.
+Facts extracted once by Claude Haiku sub-agents with a mem0-style brief (`bench/extraction/EXTRACT.md`), frozen in `results/extraction/` and shared by every system, like the encoders. Each system's store (raw turns or extracted facts; for Smartware also raw turns as evidence plus facts as derived memories) was chosen on that benchmark's dev split only.
 
 ### LoCoMo-10 test, n=1152
 
-ORP's dev choice: `orp+evidence`. Against the best of the 15: **5 better, 1 no significant difference, 0 worse**.
+Smartware's dev choice: `smartware+evidence`. Against the best of the 15: **5 better, 1 no significant difference, 0 worse**.
 
-| Metric | ORP | Best of the 15 | Difference [95% CI] | Verdict |
+| Metric | Smartware | Best of the 15 | Difference [95% CI] | Verdict |
 |---|---|---|---|---|
 | R@500 | 76.2 | 74.5 (mem0, facts) | +1.6 [-0.2, +3.5] | no significant difference |
-| R@1000 | 82.4 | 79.8 (mem0, facts) | +2.6 [+1.0, +4.3] | ORP better |
-| R@2000 | 87.3 | 85.5 (mem0, facts) | +1.8 [+0.3, +3.4] | ORP better |
-| Ans@500 | 75.2 | 70.6 (mem0, facts) | +4.6 [+2.9, +6.3] | ORP better |
-| Ans@1000 | 80.6 | 76.4 (mem0, facts) | +4.2 [+2.8, +5.6] | ORP better |
-| Ans@2000 | 84.6 | 81.3 (mem0, facts) | +3.3 [+2.0, +4.5] | ORP better |
+| R@1000 | 82.4 | 79.8 (mem0, facts) | +2.6 [+1.0, +4.3] | Smartware better |
+| R@2000 | 87.3 | 85.5 (mem0, facts) | +1.8 [+0.3, +3.4] | Smartware better |
+| Ans@500 | 75.2 | 70.6 (mem0, facts) | +4.6 [+2.9, +6.3] | Smartware better |
+| Ans@1000 | 80.6 | 76.4 (mem0, facts) | +4.2 [+2.8, +5.6] | Smartware better |
+| Ans@2000 | 84.6 | 81.3 (mem0, facts) | +3.3 [+2.0, +4.5] | Smartware better |
 
 | System (store) | R@500 | R@1000 | R@2000 | Ans@500 | Ans@1000 | Ans@2000 | SessAll@5 | MRR |
 |---|---|---|---|---|---|---|---|---|
-| **ORP (turns as evidence + facts)** | 76.2 | 82.4 | 87.3 | 75.2 | 80.6 | 84.6 | 80.6 | 61.7 |
-| ORP (facts only) | 78.5 | 84.8 | 89.5 | 72.7 | 78.9 | 83.1 | 79.1 | 63.9 |
+| **Smartware (turns as evidence + facts)** | 76.2 | 82.4 | 87.3 | 75.2 | 80.6 | 84.6 | 80.6 | 61.7 |
+| Smartware (facts only) | 78.5 | 84.8 | 89.5 | 72.7 | 78.9 | 83.1 | 79.1 | 63.9 |
 | mem0 (facts) | 74.5 | 79.8 | 85.5 | 70.6 | 76.4 | 81.3 | 77.9 | 59.3 |
 | Supermemory Company Brain (facts) | 73.1 | 79.6 | 84.1 | 69.3 | 75.2 | 79.3 | 78.2 | 69.0 |
 | Graphiti (Zep) (facts) | 69.8 | 76.7 | 83.4 | 66.9 | 73.4 | 79.3 | 77.0 | 54.6 |
@@ -550,21 +550,21 @@ ORP's dev choice: `orp+evidence`. Against the best of the 15: **5 better, 1 no s
 
 ### LME-R test, n=382
 
-ORP's dev choice: `orp+facts`. Against the best of the 15: **0 better, 0 no significant difference, 6 worse**.
+Smartware's dev choice: `smartware+facts`. Against the best of the 15: **0 better, 0 no significant difference, 6 worse**.
 
-| Metric | ORP | Best of the 15 | Difference [95% CI] | Verdict |
+| Metric | Smartware | Best of the 15 | Difference [95% CI] | Verdict |
 |---|---|---|---|---|
-| R@500 | 79.7 | 83.5 (Hindsight, facts) | -3.8 [-7.2, -0.5] | ORP worse |
-| R@1000 | 84.1 | 90.7 (Hindsight, facts) | -6.6 [-9.5, -4.0] | ORP worse |
-| R@2000 | 87.5 | 93.8 (Hindsight, facts) | -6.3 [-8.9, -3.9] | ORP worse |
-| Ans@500 | 61.0 | 65.3 (Letta, facts) | -4.3 [-8.1, -0.6] | ORP worse |
-| Ans@1000 | 67.5 | 74.1 (Letta, facts) | -6.6 [-9.9, -3.4] | ORP worse |
-| Ans@2000 | 74.6 | 78.9 (Supermemory Company Brain, facts) | -4.3 [-7.4, -1.4] | ORP worse |
+| R@500 | 79.7 | 83.5 (Hindsight, facts) | -3.8 [-7.2, -0.5] | Smartware worse |
+| R@1000 | 84.1 | 90.7 (Hindsight, facts) | -6.6 [-9.5, -4.0] | Smartware worse |
+| R@2000 | 87.5 | 93.8 (Hindsight, facts) | -6.3 [-8.9, -3.9] | Smartware worse |
+| Ans@500 | 61.0 | 65.3 (Letta, facts) | -4.3 [-8.1, -0.6] | Smartware worse |
+| Ans@1000 | 67.5 | 74.1 (Letta, facts) | -6.6 [-9.9, -3.4] | Smartware worse |
+| Ans@2000 | 74.6 | 78.9 (Supermemory Company Brain, facts) | -4.3 [-7.4, -1.4] | Smartware worse |
 
 | System (store) | R@500 | R@1000 | R@2000 | Ans@500 | Ans@1000 | Ans@2000 | SessAll@5 | MRR |
 |---|---|---|---|---|---|---|---|---|
-| ORP (turns as evidence + facts) | 71.1 | 81.3 | 85.2 | 56.5 | 63.9 | 72.4 | 78.8 | 69.7 |
-| **ORP (facts only)** | 79.7 | 84.1 | 87.5 | 61.0 | 67.5 | 74.6 | 76.4 | 72.8 |
+| Smartware (turns as evidence + facts) | 71.1 | 81.3 | 85.2 | 56.5 | 63.9 | 72.4 | 78.8 | 69.7 |
+| **Smartware (facts only)** | 79.7 | 84.1 | 87.5 | 61.0 | 67.5 | 74.6 | 76.4 | 72.8 |
 | Hindsight (facts) | 83.5 | 90.7 | 93.8 | 63.5 | 69.8 | 78.2 | 88.0 | 70.6 |
 | mem0 (facts) | 82.0 | 87.7 | 92.0 | 63.2 | 69.8 | 78.1 | 82.7 | 69.6 |
 | Graphiti (Zep) (facts) | 80.8 | 87.5 | 93.0 | 63.2 | 70.1 | 76.5 | 84.0 | 72.7 |
@@ -583,28 +583,28 @@ ORP's dev choice: `orp+facts`. Against the best of the 15: **0 better, 0 no sign
 | _BM25 (facts)_ | 78.5 | 85.5 | 90.1 | 61.4 | 69.3 | 77.3 | 79.8 | 69.5 |
 | _Dense (facts)_ | 74.8 | 84.3 | 92.4 | 61.4 | 70.9 | 77.5 | 80.6 | 65.5 |
 
-Extraction lifts almost every system, and plain BM25 over the facts is competitive with the best baselines, so much of the gain comes from the facts themselves. On LME-R the strongest fact stores (Hindsight's and mem0's recall paths) beat ORP.
+Extraction lifts almost every system, and plain BM25 over the facts is competitive with the best baselines, so much of the gain comes from the facts themselves. On LME-R the strongest fact stores (Hindsight's and mem0's recall paths) beat Smartware.
 
 ## Re-tuned LLM-extraction track
 
-Same shared facts; every baseline's knobs re-tuned on dev fact stores and ORP's ranker refitted on them; each system's configuration (raw turns, facts, facts re-tuned; ORP also evidence plus facts) chosen on dev. HotpotQA-50 has no dev split, so it uses each system's best mean dev configuration; it is the only benchmark whose test results had not been seen.
+Same shared facts; every baseline's knobs re-tuned on dev fact stores and Smartware's ranker refitted on them; each system's configuration (raw turns, facts, facts re-tuned; Smartware also evidence plus facts) chosen on dev. HotpotQA-50 has no dev split, so it uses each system's best mean dev configuration; it is the only benchmark whose test results had not been seen.
 
 ### LoCoMo-10 test, n=1152
 
-ORP configuration chosen on dev: `orp-ft+facts`. Against the best of the 15: **6 better, 0 no significant difference, 0 worse**.
+Smartware configuration chosen on dev: `smartware-ft+facts`. Against the best of the 15: **6 better, 0 no significant difference, 0 worse**.
 
-| Metric | ORP | Best of the 15 (tuned) | Difference [95% CI] | Verdict |
+| Metric | Smartware | Best of the 15 (tuned) | Difference [95% CI] | Verdict |
 |---|---|---|---|---|
-| R@500 | 80.2 | 74.4 (mem0@ftuned+facts) | +5.8 [+4.4, +7.3] | ORP better |
-| R@1000 | 85.6 | 79.7 (mem0@ftuned+facts) | +5.8 [+4.5, +7.3] | ORP better |
-| R@2000 | 90.4 | 85.3 (mem0@ftuned+facts) | +5.1 [+3.8, +6.5] | ORP better |
-| Ans@500 | 73.9 | 70.7 (mem0@ftuned+facts) | +3.2 [+2.0, +4.5] | ORP better |
-| Ans@1000 | 79.2 | 76.3 (mem0@ftuned+facts) | +2.9 [+1.7, +4.0] | ORP better |
-| Ans@2000 | 83.6 | 81.2 (mem0@ftuned+facts) | +2.4 [+1.5, +3.3] | ORP better |
+| R@500 | 80.2 | 74.4 (mem0@ftuned+facts) | +5.8 [+4.4, +7.3] | Smartware better |
+| R@1000 | 85.6 | 79.7 (mem0@ftuned+facts) | +5.8 [+4.5, +7.3] | Smartware better |
+| R@2000 | 90.4 | 85.3 (mem0@ftuned+facts) | +5.1 [+3.8, +6.5] | Smartware better |
+| Ans@500 | 73.9 | 70.7 (mem0@ftuned+facts) | +3.2 [+2.0, +4.5] | Smartware better |
+| Ans@1000 | 79.2 | 76.3 (mem0@ftuned+facts) | +2.9 [+1.7, +4.0] | Smartware better |
+| Ans@2000 | 83.6 | 81.2 (mem0@ftuned+facts) | +2.4 [+1.5, +3.3] | Smartware better |
 
 | System (configuration) | R@500 | R@1000 | R@2000 | Ans@500 | Ans@1000 | Ans@2000 |
 |---|---|---|---|---|---|---|
-| **ORP** `orp-ft+facts` | 80.2 | 85.6 | 90.4 | 73.9 | 79.2 | 83.6 |
+| **Smartware** `smartware-ft+facts` | 80.2 | 85.6 | 90.4 | 73.9 | 79.2 | 83.6 |
 | mem0 `mem0@ftuned+facts` | 74.4 | 79.7 | 85.3 | 70.7 | 76.3 | 81.2 |
 | Supermemory Company Brain `supermemory-company-brain@tuned+facts` | 73.1 | 79.6 | 84.1 | 69.3 | 75.2 | 79.3 |
 | Graphiti (Zep) `graphiti@tuned+facts` | 69.8 | 76.7 | 83.4 | 66.9 | 73.4 | 79.3 |
@@ -624,20 +624,20 @@ ORP configuration chosen on dev: `orp-ft+facts`. Against the best of the 15: **6
 
 ### LME-R test, n=382
 
-ORP configuration chosen on dev: `orp-ft+facts`. Against the best of the 15: **0 better, 1 no significant difference, 5 worse**.
+Smartware configuration chosen on dev: `smartware-ft+facts`. Against the best of the 15: **0 better, 1 no significant difference, 5 worse**.
 
-| Metric | ORP | Best of the 15 (tuned) | Difference [95% CI] | Verdict |
+| Metric | Smartware | Best of the 15 (tuned) | Difference [95% CI] | Verdict |
 |---|---|---|---|---|
 | R@500 | 80.4 | 83.5 (hindsight@tuned+facts) | -3.1 [-6.4, +0.1] | no significant difference |
-| R@1000 | 85.1 | 90.7 (hindsight@tuned+facts) | -5.7 [-8.3, -3.2] | ORP worse |
-| R@2000 | 88.0 | 93.8 (hindsight@tuned+facts) | -5.7 [-8.3, -3.3] | ORP worse |
-| Ans@500 | 60.6 | 65.6 (letta@ftuned+facts) | -5.0 [-8.8, -1.4] | ORP worse |
-| Ans@1000 | 68.3 | 74.4 (letta@ftuned+facts) | -6.1 [-9.4, -2.7] | ORP worse |
-| Ans@2000 | 75.2 | 79.4 (letta@ftuned+facts) | -4.2 [-7.1, -1.3] | ORP worse |
+| R@1000 | 85.1 | 90.7 (hindsight@tuned+facts) | -5.7 [-8.3, -3.2] | Smartware worse |
+| R@2000 | 88.0 | 93.8 (hindsight@tuned+facts) | -5.7 [-8.3, -3.3] | Smartware worse |
+| Ans@500 | 60.6 | 65.6 (letta@ftuned+facts) | -5.0 [-8.8, -1.4] | Smartware worse |
+| Ans@1000 | 68.3 | 74.4 (letta@ftuned+facts) | -6.1 [-9.4, -2.7] | Smartware worse |
+| Ans@2000 | 75.2 | 79.4 (letta@ftuned+facts) | -4.2 [-7.1, -1.3] | Smartware worse |
 
 | System (configuration) | R@500 | R@1000 | R@2000 | Ans@500 | Ans@1000 | Ans@2000 |
 |---|---|---|---|---|---|---|
-| **ORP** `orp-ft+facts` | 80.4 | 85.1 | 88.0 | 60.6 | 68.3 | 75.2 |
+| **Smartware** `smartware-ft+facts` | 80.4 | 85.1 | 88.0 | 60.6 | 68.3 | 75.2 |
 | Hindsight `hindsight@tuned+facts` | 83.5 | 90.7 | 93.8 | 63.5 | 69.8 | 78.2 |
 | mem0 `mem0@ftuned+facts` | 82.4 | 87.9 | 92.5 | 63.3 | 69.7 | 77.6 |
 | Graphiti (Zep) `graphiti@tuned+facts` | 80.8 | 87.5 | 93.0 | 63.2 | 70.1 | 76.5 |
@@ -657,9 +657,9 @@ ORP configuration chosen on dev: `orp-ft+facts`. Against the best of the 15: **0
 
 ### HotpotQA-50 (held out), n=50
 
-ORP configuration chosen on dev: `orp-ft+facts`. Against the best of the 15: **0 better, 4 no significant difference, 0 worse**.
+Smartware configuration chosen on dev: `smartware-ft+facts`. Against the best of the 15: **0 better, 4 no significant difference, 0 worse**.
 
-| Metric | ORP | Best of the 15 (tuned) | Difference [95% CI] | Verdict |
+| Metric | Smartware | Best of the 15 (tuned) | Difference [95% CI] | Verdict |
 |---|---|---|---|---|
 | Ans@500 | 81.7 | 83.5 (cognee@tuned+facts) | -1.9 [-9.3, +4.8] | no significant difference |
 | Ans@1000 | 93.3 | 92.0 (graphiti@tuned+facts) | +1.3 [-2.0, +6.0] | no significant difference |
@@ -668,7 +668,7 @@ ORP configuration chosen on dev: `orp-ft+facts`. Against the best of the 15: **0
 
 | System (configuration) | Ans@500 | Ans@1000 | Ans@2000 | Ans@4000 |
 |---|---|---|---|---|
-| **ORP** `orp-ft+facts` | 81.7 | 93.3 | 94.0 | 94.0 |
+| **Smartware** `smartware-ft+facts` | 81.7 | 93.3 | 94.0 | 94.0 |
 | Graphiti (Zep) `graphiti@tuned+facts` | 81.5 | 92.0 | 94.0 | 94.0 |
 | Hindsight `hindsight@ftuned+facts` | 73.9 | 88.2 | 92.2 | 92.2 |
 | MCP memory server `mcp-memory@ftuned+facts` | 78.8 | 87.5 | 89.5 | 89.9 |
@@ -686,39 +686,39 @@ ORP configuration chosen on dev: `orp-ft+facts`. Against the best of the 15: **0
 | MemoryOS `memoryos@tuned` | 0.0 | 0.0 | 0.0 | 0.0 |
 | _BM25 (facts)_ `bm25+facts` | 84.0 | 94.0 | 94.0 | 94.0 |
 
-## ORP-Gov v2, 50% channel visibility (same ranker; access control differs)
+## Smartware Gov v2, 50% channel visibility (same ranker; access control differs)
 
 | Strategy | Recall@1000 (permitted) | Questions with unreadable text in context | Forbidden askers shown gold evidence | Rankings changed by unreadable memories |
 |---|---|---|---|---|
-| ORP: admissible-set ranking + provenance closure | 89.7 | 0.0 | 0.0 | 0.0 |
+| Smartware: admissible-set ranking + provenance closure | 89.7 | 0.0 | 0.0 | 0.0 |
 | Pre-filter, but statistics and neighbour features over all memories | 89.7 | 0.0 | 0.0 | 100.0 |
 | Filter after top-10 | 80.2 | 0.0 | 0.0 | – |
 | Filter after top-50 | 89.7 | 0.0 | 0.0 | – |
 | Workspace scope only (no per-item ACL) | 84.2 | 100.0 | 87.1 | – |
 | Per-item ACL on raw units, summaries workspace-scoped | 89.1 | 30.9 | 18.9 | – |
 
-## ORP-Gov v2, 15% channel visibility (same ranker; access control differs)
+## Smartware Gov v2, 15% channel visibility (same ranker; access control differs)
 
 | Strategy | Recall@1000 (permitted) | Questions with unreadable text in context | Forbidden askers shown gold evidence | Rankings changed by unreadable memories |
 |---|---|---|---|---|
-| ORP: admissible-set ranking + provenance closure | 97.7 | 0.0 | 0.0 | 0.0 |
+| Smartware: admissible-set ranking + provenance closure | 97.7 | 0.0 | 0.0 | 0.0 |
 | Pre-filter, but statistics and neighbour features over all memories | 97.3 | 0.0 | 0.0 | 100.0 |
 | Filter after top-10 | 81.0 | 0.0 | 0.0 | – |
 | Filter after top-50 | 89.9 | 0.0 | 0.0 | – |
 | Workspace scope only (no per-item ACL) | 84.4 | 100.0 | 87.3 | – |
 | Per-item ACL on raw units, summaries workspace-scoped | 96.4 | 79.7 | 28.1 | – |
 
-## Final blind QA: ORP v0.1.3 on held-out LongMemEval-S questions (pre-registered)
+## Final blind QA: Smartware v0.1.3 on held-out LongMemEval-S questions (pre-registered)
 
-232 official test questions never used in an earlier QA test; every one of the 15 baselines, BM25, the gold-evidence oracle, ORP v0.1.2 rendering and ORP v0.1.3 (`orp-clean`: every line carries its own date, chosen on dev by both readers, `results/qa4dev/`). 1,000-token contexts, day-precision times. Two independent reader-and-judge pairs: Claude Sonnet and DeepSeek V3. Protocol: `results/qa5test/PREREGISTRATION.md`.
+232 official test questions never used in an earlier QA test; every one of the 15 baselines, BM25, the gold-evidence oracle, Smartware v0.1.2 rendering and Smartware v0.1.3 (`smartware-clean`: every line carries its own date, chosen on dev by both readers, `results/qa4dev/`). 1,000-token contexts, day-precision times. Two independent reader-and-judge pairs: Claude Sonnet and DeepSeek V3. Protocol: `results/qa5test/PREREGISTRATION.md`.
 
 | System | Claude: correct | v0.1.3 minus system [95% CI], Holm p | DeepSeek: correct | v0.1.3 minus system [95% CI], Holm p |
 |---|---|---|---|---|
 | Oracle (gold evidence only) | 94.8 | – | 61.6 | – |
-| **ORP v0.1.3** | 82.3 | – | 58.6 | – |
+| **Smartware v0.1.3** | 82.3 | – | 58.6 | – |
 | Hindsight | 80.2 | +2.2 [-2.6, +6.9], 0.804 | 58.6 | +0.0 [-5.6, +5.2], 1.000 |
 | mem0 | 75.9 | +6.5 [+1.3, +11.6], 0.039 | 58.2 | +0.4 [-5.6, +6.5], 1.000 |
-| ORP v0.1.2 rendering | 81.5 | +0.9 [-2.6, +4.3], 0.804 | 51.7 | +6.9 [+2.6, +11.2], 0.014 |
+| Smartware v0.1.2 rendering | 81.5 | +0.9 [-2.6, +4.3], 0.804 | 51.7 | +6.9 [+2.6, +11.2], 0.014 |
 | _BM25 over turns (reference)_ | 73.3 | +9.1 [+3.4, +14.7], 0.005 | 55.2 | +3.4 [-1.7, +8.6], 0.785 |
 | Graphiti (Zep) | 72.0 | +10.3 [+4.7, +15.9], 0.001 | 54.3 | +4.3 [-1.3, +9.9], 0.785 |
 | Letta | 70.7 | +11.6 [+5.6, +17.2], 0.000 | 53.9 | +4.7 [-1.3, +10.8], 0.785 |
@@ -738,10 +738,10 @@ ORP configuration chosen on dev: `orp-ft+facts`. Against the best of the 15: **0
 
 150 stratified test questions, 1,000-token contexts, day-precision question times for every system. Claude Sonnet readers answered from each context without knowing the system; separate Sonnet judges graded with LongMemEval's official per-type rules, also blind. A second judge pass on 540 items agreed on 99.8% (Cohen's kappa 0.996). Protocol: `results/qa3/PREREGISTRATION.md`.
 
-| System | Accuracy | ORP minus system [95% CI] | Holm p | knowledge-update | multi-session | single-session-assistant | single-session-preference | single-session-user | temporal-reasoning |
+| System | Accuracy | Smartware minus system [95% CI] | Holm p | knowledge-update | multi-session | single-session-assistant | single-session-preference | single-session-user | temporal-reasoning |
 |---|---|---|---|---|---|---|---|---|---|
 | Oracle (gold evidence only) | 95.3 | – | – | 95.8 | 95.0 | 94.4 | 100.0 | 100.0 | 91.9 |
-| **ORP reference engine** | 80.7 | – | – | 91.7 | 65.0 | 77.8 | 80.0 | 100.0 | 81.1 |
+| **Smartware reference engine** | 80.7 | – | – | 91.7 | 65.0 | 77.8 | 80.0 | 100.0 | 81.1 |
 | Graphiti (Zep) | 72.7 | +8.0 [+2.0, +14.7] | 0.031 | 87.5 | 47.5 | 83.3 | 90.0 | 100.0 | 64.9 |
 | mem0 | 72.7 | +8.0 [+2.0, +14.0] | 0.031 | 91.7 | 45.0 | 72.2 | 90.0 | 95.2 | 73.0 |
 | Hindsight | 72.0 | +8.7 [+2.7, +15.3] | 0.026 | 75.0 | 62.5 | 55.6 | 80.0 | 81.0 | 81.1 |
@@ -762,9 +762,9 @@ ORP configuration chosen on dev: `orp-ft+facts`. Against the best of the 15: **0
 
 ### The same blind items, read and judged by a non-Claude model (deepseek-chat, deepseek API)
 
-Pre-registered as an addendum before any output existed; run on the user's machine (this workspace cannot reach other model APIs). Same contexts, briefs and statistics. **It does not confirm ORP's lead.** The gold-evidence ceiling falls from 95.3% to 61.3%: this reader often answers "I don't know" when an answer needs combining several facts (multi-session, preference and temporal questions), and it did so most often on ORP's contexts.
+Pre-registered as an addendum before any output existed; run on the user's machine (this workspace cannot reach other model APIs). Same contexts, briefs and statistics. **It does not confirm Smartware's lead.** The gold-evidence ceiling falls from 95.3% to 61.3%: this reader often answers "I don't know" when an answer needs combining several facts (multi-session, preference and temporal questions), and it did so most often on Smartware's contexts.
 
-| System | Accuracy (non-Claude) | ORP minus system [95% CI] | Holm p | Accuracy (Claude) |
+| System | Accuracy (non-Claude) | Smartware minus system [95% CI] | Holm p | Accuracy (Claude) |
 |---|---|---|---|---|
 | Oracle (gold evidence only) | 61.3 | – | – | 95.3 |
 | mem0 | 56.0 | -10.0 [-18.0, -2.0] | 0.133 | 72.7 |
@@ -773,7 +773,7 @@ Pre-registered as an addendum before any output existed; run on the user's machi
 | Graphiti (Zep) | 52.7 | -6.7 [-14.0, +0.7] | 0.378 | 72.7 |
 | Letta | 51.3 | -5.3 [-12.7, +2.0] | 0.383 | 68.0 |
 | Supermemory Company Brain | 51.3 | -5.3 [-13.3, +2.7] | 0.383 | 62.7 |
-| **ORP reference engine** | 46.0 | – | – | 80.7 |
+| **Smartware reference engine** | 46.0 | – | – | 80.7 |
 | LangMem | 39.3 | +6.7 [-1.3, +14.7] | 0.383 | 62.0 |
 | MCP memory server | 34.0 | +12.0 [+3.3, +20.7] | 0.096 | 48.0 |
 | Basic Memory | 32.7 | +13.3 [+6.0, +20.7] | 0.016 | 42.0 |
@@ -792,11 +792,11 @@ Pre-registered as an addendum before any output existed; run on the user's machi
 | _BM25 over turns (reference)_ | 64.7 | 70.6 |
 | Hindsight | 64.0 | 75.6 |
 | mem0 | 60.7 | 71.4 |
-| **ORP reference engine** | 67.3 | 75.6 |
+| **Smartware reference engine** | 67.3 | 75.6 |
 | Supermemory Company Brain | 62.7 | 64.7 |
 
-locomo: ORP minus _BM25 over turns (reference)_ +2.7 [-3.3, +9.3]; Hindsight +3.3 [-2.0, +8.7]; mem0 +6.7 [+1.3, +12.7]; Supermemory Company Brain +4.7 [-1.3, +10.7]
-lme: ORP minus _BM25 over turns (reference)_ +5.0 [-3.4, +14.3]; Hindsight +0.0 [-8.4, +9.2]; mem0 +4.2 [-3.4, +12.6]; Supermemory Company Brain +10.9 [+3.4, +19.3]
+locomo: Smartware minus _BM25 over turns (reference)_ +2.7 [-3.3, +9.3]; Hindsight +3.3 [-2.0, +8.7]; mem0 +6.7 [+1.3, +12.7]; Supermemory Company Brain +4.7 [-1.3, +10.7]
+lme: Smartware minus _BM25 over turns (reference)_ +5.0 [-3.4, +14.3]; Hindsight +0.0 [-8.4, +9.2]; mem0 +4.2 [-3.4, +12.6]; Supermemory Company Brain +10.9 [+3.4, +19.3]
 
 ## Latency (single process, one core, LoCoMo test, cold caches)
 
@@ -819,5 +819,5 @@ lme: ORP minus _BM25 over turns (reference)_ +5.0 [-3.4, +14.3]; Hindsight +0.0 
 | Hindsight | 5.2 | 7.7 | 238 |
 | Supermemory | 6.4 | 8.8 | 289 |
 | Supermemory Company Brain | 6.8 | 9.1 | 123 |
-| ORP, hand-tuned RRF (no learned model) | 12.8 | 18.1 | 252 |
-| **ORP reference engine** | 18.1 | 28.1 | 218 |
+| Smartware, hand-tuned RRF (no learned model) | 12.8 | 18.1 | 252 |
+| **Smartware reference engine** | 18.1 | 28.1 | 218 |

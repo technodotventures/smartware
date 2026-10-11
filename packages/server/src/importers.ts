@@ -1,5 +1,5 @@
 // Importers from other memory projects' formats (the "migration in" half of bundles). Each reads a file as data,
-// maps it onto ORP records exactly as the matching compatibility adapter would have written them, and writes through
+// maps it onto Smartware records exactly as the matching compatibility adapter would have written them, and writes through
 // the ordinary verbs (validation, secret scan, de-duplication, closure). Writes carry idempotency keys derived from
 // their content, so importing the same file twice writes nothing new.
 //
@@ -11,7 +11,7 @@
 //   letta       a Letta agent file (.af): core memory blocks become always-loaded profile records, messages become
 //               events in order, archival passages become documents (same mapping as the Python client's importer)
 import { createHash } from "node:crypto";
-import { ORPError, type Principal, type Service } from "@orp/core";
+import { SmartwareError, type Principal, type Service } from "@technodotventures/smartware-core";
 import { McpSession } from "./mcp.js";
 import { scopeOf } from "./mem0.js";
 
@@ -46,7 +46,7 @@ function parseJson(text: string, what: string): any {
   try {
     return JSON.parse(text);
   } catch (e) {
-    throw new ORPError("invalid_parameter", `${what} is not valid JSON: ${(e as Error).message}`);
+    throw new SmartwareError("invalid_parameter", `${what} is not valid JSON: ${(e as Error).message}`);
   }
 }
 
@@ -55,12 +55,12 @@ export async function importMcpMemory(svc: Service, pr: Principal, text: string,
   const entities: Json[] = [], relations: Json[] = [];
   const trimmed = text.trim();
   const add = (x: any, line?: number) => {
-    if (!x || typeof x !== "object") throw new ORPError("invalid_parameter", `memory.json${line ? ` line ${line}` : ""}: expected an object`);
+    if (!x || typeof x !== "object") throw new SmartwareError("invalid_parameter", `memory.json${line ? ` line ${line}` : ""}: expected an object`);
     if (x.type === "entity" || (x.type === undefined && "entityType" in x)) {
-      if (typeof x.name !== "string" || !x.name) throw new ORPError("invalid_parameter", "an entity needs a name");
+      if (typeof x.name !== "string" || !x.name) throw new SmartwareError("invalid_parameter", "an entity needs a name");
       entities.push({ name: x.name, entityType: String(x.entityType ?? ""), observations: (Array.isArray(x.observations) ? x.observations : []).filter((o: unknown) => typeof o === "string" && o.trim()) });
     } else if (x.type === "relation" || (x.type === undefined && "relationType" in x)) {
-      if (typeof x.from !== "string" || typeof x.to !== "string" || typeof x.relationType !== "string") throw new ORPError("invalid_parameter", "a relation needs from, to and relationType");
+      if (typeof x.from !== "string" || typeof x.to !== "string" || typeof x.relationType !== "string") throw new SmartwareError("invalid_parameter", "a relation needs from, to and relationType");
       relations.push({ from: x.from, to: x.to, relationType: x.relationType });
     }
   };
@@ -102,7 +102,7 @@ export async function importMcpMemory(svc: Service, pr: Principal, text: string,
         await svc.remember({ memories: [{ kind: "observation", content: o, readers: obsReaders, thread: `entity:${e.name}`, meta: { entity: e.name } }] }, pr);
         addedObservations++;
       } catch (err) {
-        if (err instanceof ORPError && err.code === "forbidden") skipped.push({ entity: e.name, observation: o, reason: "previously forgotten" });
+        if (err instanceof SmartwareError && err.code === "forbidden") skipped.push({ entity: e.name, observation: o, reason: "previously forgotten" });
         else throw err;
       }
     }
@@ -112,7 +112,7 @@ export async function importMcpMemory(svc: Service, pr: Principal, text: string,
       const r = await session.call("create_relations", { relations: [rel] });
       createdRelations += r.structuredContent.relations.length;
     } catch (e) {
-      if (e instanceof ORPError && e.code === "not_found") skipped.push({ relation: rel, reason: "endpoint entity not found" });
+      if (e instanceof SmartwareError && e.code === "not_found") skipped.push({ relation: rel, reason: "endpoint entity not found" });
       else throw e;
     }
   }
@@ -124,7 +124,7 @@ export async function importMcpMemory(svc: Service, pr: Principal, text: string,
 export async function importMem0(svc: Service, pr: Principal, text: string, opts: ImportOptions = {}): Promise<Json> {
   const o = parseJson(text, "mem0 export");
   const rows: any[] = Array.isArray(o) ? o : Array.isArray(o?.results) ? o.results : Array.isArray(o?.memories) ? o.memories : null;
-  if (!rows) throw new ORPError("invalid_parameter", "a mem0 export is a list of memories, or an object with results[] or memories[]");
+  if (!rows) throw new SmartwareError("invalid_parameter", "a mem0 export is a list of memories, or an object with results[] or memories[]");
   const readers = opts.readers === undefined ? [`principal:${pr.id}`] : opts.readers;
   const mems: Json[] = [];
   const skipped: Json[] = [];
@@ -191,7 +191,7 @@ function lettaMessage(m: Json, reasoning: boolean): [string | null, string, stri
 
 export async function importLetta(svc: Service, pr: Principal, text: string, opts: ImportOptions = {}): Promise<Json> {
   const data = parseJson(text, "agent file");
-  if (!data || typeof data !== "object" || Array.isArray(data)) throw new ORPError("invalid_parameter", "an agent file is a JSON object");
+  if (!data || typeof data !== "object" || Array.isArray(data)) throw new SmartwareError("invalid_parameter", "an agent file is a JSON object");
   let fmt: string;
   let agents: Array<[Json, Json[]]>;
   if (Array.isArray(data.agents)) {
@@ -204,7 +204,7 @@ export async function importLetta(svc: Service, pr: Principal, text: string, opt
   } else if ("core_memory" in data || "messages" in data) {
     agents = [[data, (data.core_memory ?? []).filter((b: any) => b && typeof b === "object")]];
     fmt = "agent";
-  } else throw new ORPError("invalid_parameter", "not a Letta agent file: expected core_memory/messages or agents/blocks");
+  } else throw new SmartwareError("invalid_parameter", "not a Letta agent file: expected core_memory/messages or agents/blocks");
   const readers = opts.readers === undefined ? [`principal:${pr.id}`] : opts.readers;
   const batch = opts.batchSize ?? 100;
   const summaries: Json[] = [];
@@ -261,5 +261,5 @@ export async function importFrom(format: string, svc: Service, pr: Principal, te
   if (format === "mcp-memory") return importMcpMemory(svc, pr, text, opts);
   if (format === "mem0") return importMem0(svc, pr, text, opts);
   if (format === "letta") return importLetta(svc, pr, text, opts);
-  throw new ORPError("invalid_parameter", `format must be one of ${IMPORT_FORMATS.join(", ")}`);
+  throw new SmartwareError("invalid_parameter", `format must be one of ${IMPORT_FORMATS.join(", ")}`);
 }

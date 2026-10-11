@@ -1,0 +1,25 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "https://smartware.software/schema/0.1/ReflectRequest",
+ "title": "ReflectRequest",
+ "type": "object",
+ "properties": {
+  "scope": {
+   "type": "string"
+  },
+  "threads": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  },
+  "kinds": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  }
+ },
+ "required": [],
+ "additionalProperties": false
+}

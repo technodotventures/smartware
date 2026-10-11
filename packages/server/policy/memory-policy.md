@@ -1,6 +1,6 @@
-# Memory policy for agents (ORP)
+# Memory policy for agents (Smartware)
 
-Paste this into an agent's instructions, or let the MCP client load it: `orp serve` offers it as the prompt `memory_policy`.
+Paste this into an agent's instructions, or let the MCP client load it: `smartware serve` offers it as the prompt `memory_policy`.
 
 ## When to recall
 - Before answering anything that may depend on earlier conversations, the user's preferences, decisions, commitments, project facts or people. Pass the user's question as the query, in their words.

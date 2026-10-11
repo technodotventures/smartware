@@ -1,16 +1,16 @@
-// ORP bundles on disk (spec §8.3): a directory or a `.orp` zip holding manifest.json, memories.jsonl, edges.jsonl,
+// Smartware bundles on disk (spec §8.3): a directory or a `.smartware` zip holding manifest.json, memories.jsonl, edges.jsonl,
 // audit.jsonl and an optional render/ of Markdown. Bundles are data: nothing in one is evaluated, paths inside a zip
 // are checked, and sizes are capped. The zip reader and writer are small and dependency-free (deflate from node:zlib).
 import { createHash } from "node:crypto";
 import { lstatSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, relative, resolve, sep } from "node:path";
 import { crc32, deflateRawSync, inflateRawSync } from "node:zlib";
-import { Principal, type Service } from "@orp/core";
+import { Principal, type Service } from "@technodotventures/smartware-core";
 
 type Json = Record<string, any>;
 export type BundleFiles = Map<string, Buffer>;
 
-/** Largest bundle read, uncompressed (all entries together). Larger tenants move with `orp backup` or store tools. */
+/** Largest bundle read, uncompressed (all entries together). Larger tenants move with `smartware backup` or store tools. */
 export const MAX_BUNDLE_BYTES = 512 * 2 ** 20;
 const MAX_ENTRIES = 1_000_000;
 
@@ -99,7 +99,7 @@ export function readZip(buf: Buffer, maxBytes = MAX_BUNDLE_BYTES): BundleFiles {
 // ------------------------------------------------------------ directory or zip
 export function writeBundleFiles(out: string, files: BundleFiles): string {
   const path = resolve(out);
-  if (/\.(orp|zip)$/i.test(path)) {
+  if (/\.(smartware|zip)$/i.test(path)) {
     mkdirSync(dirname(path), { recursive: true });
     writeFileSync(path, writeZip(files), { mode: 0o600 });
     return path;
@@ -163,7 +163,7 @@ export async function exportBundle(svc: Service, tenant: string, opts: ExportOpt
   const { request_id: _r, degraded: _d, ...capsClean } = caps;
   const manifest = {
     ...ex.manifest,
-    format: "orp-bundle-1",
+    format: "smartware-bundle-1",
     counts: { memories: ex.manifest.count, edges: ex["edges.jsonl"] ? ex["edges.jsonl"].split("\n").length : 0, audit: auditCount,
       tombstones: ex.manifest.tombstones.length },
     files: Object.fromEntries([...files].sort(([a], [b]) => (a < b ? -1 : 1)).map(([n, b]) => [n, { sha256: sha256(b), bytes: b.length }])),

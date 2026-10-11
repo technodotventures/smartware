@@ -1,4 +1,4 @@
-// BM25 (Okapi, k1 = 1.2, b = 0.75, idf = ln(1 + (N - df + 0.5) / (df + 0.5))), port of orp/index.py.
+// BM25 (Okapi, k1 = 1.2, b = 0.75, idf = ln(1 + (N - df + 0.5) / (df + 0.5))), port of smartware/index.py.
 // Scores are always computed over an admissibility mask: N, document frequency and average length come from
 // admissible documents only, so a store and the same store with inadmissible documents removed score identically
 // (M33, M67). Incremental: documents are appended; postings stay in ascending document order.

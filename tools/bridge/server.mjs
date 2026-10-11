@@ -4,11 +4,11 @@
 import { createHash } from "node:crypto";
 import { createInterface } from "node:readline";
 import { Service, SqliteStore, PgStore, Principal, HashingEncoder, defaultParams, withParams, memoryFromJson, memoryToJson, recallRequest,
-  parseTime, isoformat, ORPError } from "../../packages/core/dist/index.js";
+  parseTime, isoformat, SmartwareError } from "../../packages/core/dist/index.js";
 import { randomBytes } from "node:crypto";
 
-// ORP_BRIDGE_PG=postgres://...: run every service on the Postgres store (a fresh schema each)
-const PG = process.env.ORP_BRIDGE_PG;
+// SMARTWARE_BRIDGE_PG=postgres://...: run every service on the Postgres store (a fresh schema each)
+const PG = process.env.SMARTWARE_BRIDGE_PG;
 const pgStore = () => { const u = new URL(PG); u.searchParams.set("schema", "bridge_" + randomBytes(5).toString("hex")); return new PgStore(u.toString(), { nodeId: "bridge", poolSize: 1, poolIdleMs: 200 }); };
 
 class Md5Bag { // tests' HashEmbedder: md5 bag of words, 128 dims
@@ -89,7 +89,7 @@ for await (const line of rl) {
     }
     send({ id: m.id, ok: out ?? null });
   } catch (e) {
-    if (e instanceof ORPError) send({ id: m.id, err: e.toJSON().error });
+    if (e instanceof SmartwareError) send({ id: m.id, err: e.toJSON().error });
     else send({ id: m.id, crash: String(e && e.stack || e) });
   }
   busy = false;

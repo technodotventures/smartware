@@ -2,22 +2,22 @@
 //
 // Ingest: every .md file under the vault is a `document`, or (by default) one record per "## " section, all in one
 // thread named after the file path. Readers come from the file's frontmatter `readers:`, else the nearest
-// `.orp-acl.json` folder file ({"readers": [...]}), else the connector's configured default. Moves (same content at a
+// `.smartware-acl.json` folder file ({"readers": [...]}), else the connector's configured default. Moves (same content at a
 // new path) keep their record ids; deletions are forgotten.
 //
 // Render: renderVault writes the bundle's Markdown rendering (spec §8.3 render/): one file per thread, frontmatter
-// carrying the record fields, so a vault can be rebuilt from ORP. "Two-way" is at the file level: see the README.
+// carrying the record fields, so a vault can be rebuilt from Smartware. "Two-way" is at the file level: see the README.
 import { createHash } from "node:crypto";
 import { existsSync, lstatSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join, relative, resolve, sep } from "node:path";
-import { OrpHttp, type Json } from "./http.js";
+import { SmartwareHttp, type Json } from "./http.js";
 import { formatFrontmatter, parseNote, type FrontValue, type Frontmatter } from "./frontmatter.js";
 import { defineConnector, type Connector, type SourceItem } from "./sdk.js";
 
 export interface VaultOptions {
   /** Vault root directory. */
   dir: string;
-  /** Readers when neither frontmatter nor a .orp-acl.json says otherwise. Required, so nothing defaults to the tenant. */
+  /** Readers when neither frontmatter nor a .smartware-acl.json says otherwise. Required, so nothing defaults to the tenant. */
   defaultReaders: string[];
   name?: string; // default "vault"
   scopePrefix?: string; // default "vault"
@@ -32,10 +32,10 @@ export interface VaultOptions {
   maxFileBytes?: number;
 }
 
-const ACL_FILE = ".orp-acl.json";
+const ACL_FILE = ".smartware-acl.json";
 /** Frontmatter keys that renderVault writes from record fields; on ingest they are not copied into meta. */
 const RECORD_KEYS = new Set(["readers", "scope", "kind"]);
-const MARKER = /^<!-- orp \{.*\} -->[ \t]*(\r?\n|$)/gm;
+const MARKER = /^<!-- smartware \{.*\} -->[ \t]*(\r?\n|$)/gm;
 const sha = (s: string) => createHash("sha256").update(s).digest("hex");
 
 export function slug(s: string): string {
@@ -45,7 +45,7 @@ export function slug(s: string): string {
 
 export interface Section { key: string; content: string }
 
-/** Split a note body into its preamble and "## " sections. Each section keeps its heading line. ORP's own record
+/** Split a note body into its preamble and "## " sections. Each section keeps its heading line. Smartware's own record
  * markers (written by renderVault) are removed first, so a rendered vault re-ingests to the same records. */
 export function splitSections(body: string): Section[] {
   const text = body.replace(MARKER, "");
@@ -153,7 +153,7 @@ export function vaultConnector(opt: VaultOptions): Connector {
         const folder = folderAcl(relDir);
         const acl = readersFrom(frontmatter.readers) ?? folder.readers ?? opt.defaultReaders;
         const fm: Frontmatter = {};
-        for (const [k, v] of Object.entries(frontmatter)) if (!RECORD_KEYS.has(k) && !k.startsWith("orp_")) fm[k] = v;
+        for (const [k, v] of Object.entries(frontmatter)) if (!RECORD_KEYS.has(k) && !k.startsWith("smartware_")) fm[k] = v;
         const sections = split === "file" ? [{ key: "", content: body.replace(MARKER, "").trim() }].filter((s) => s.content) : splitSections(body);
         const hash = sha(body.replace(MARKER, ""));
         const movedFrom = prev.files[path] ? undefined : byHash.get(hash);
@@ -207,10 +207,10 @@ function uniform<T>(xs: T[]): T | undefined {
 
 /** Write the Markdown rendering of everything the token's principal can read: one file per thread of evidence
  * (documents and events; records without a thread get one file each), frontmatter = record fields, and one marker
- * comment per record. Derived records (summaries, facts, observations) go under .orp/derived/, a dot folder the vault
+ * comment per record. Derived records (summaries, facts, observations) go under .smartware/derived/, a dot folder the vault
  * connector never ingests, so re-ingesting a rendered vault does not turn derived memories into evidence. */
 export async function renderVault(url: string, token: string, outDir: string, opt: RenderOptions = {}): Promise<RenderResult> {
-  const http = new OrpHttp({ url, token, tenant: opt.tenant });
+  const http = new SmartwareHttp({ url, token, tenant: opt.tenant });
   const bundle = await http.export();
   const statuses = new Set(opt.statuses ?? ["active"]);
   const recs: Json[] = String(bundle["memories.jsonl"] ?? "").split("\n").filter((l) => l.trim()).map((l) => JSON.parse(l))
@@ -230,7 +230,7 @@ export async function renderVault(url: string, token: string, outDir: string, op
   for (const [k, rs] of [...groups].sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))) {
     rs.sort((a, b) => (a.seq ?? 0) - (b.seq ?? 0) || String(a.observed_at).localeCompare(String(b.observed_at)) || String(a.id).localeCompare(String(b.id)));
     const thread = k.startsWith("t:") ? k.slice(2) : null;
-    let rel = k.startsWith("d:") ? `.orp/derived/${slug(k.slice(2))}.md`
+    let rel = k.startsWith("d:") ? `.smartware/derived/${slug(k.slice(2))}.md`
       : thread ? safeRelPath(thread) ?? `threads/${slug(thread)}.md` : `records/${slug(String(rs[0]!.id))}.md`;
     for (let n = 2; used.has(rel.toLowerCase()); n++) rel = rel.replace(/(-\d+)?\.md$/i, `-${n}.md`);
     used.add(rel.toLowerCase());
@@ -243,22 +243,22 @@ export async function renderVault(url: string, token: string, outDir: string, op
         if (v === null || ["string", "number", "boolean"].includes(typeof v) || (Array.isArray(v) && v.every((x) => typeof x === "string"))) fm[kk] = v as FrontValue;
       }
     }
-    if (thread) fm.orp_thread = thread;
-    else if (k.startsWith("d:") && rs[0]!.thread) fm.orp_thread = rs[0]!.thread;
-    fm.orp_ids = rs.map((r) => String(r.id));
-    fm.orp_versions = rs.map((r) => String(r.version));
+    if (thread) fm.smartware_thread = thread;
+    else if (k.startsWith("d:") && rs[0]!.thread) fm.smartware_thread = rs[0]!.thread;
+    fm.smartware_ids = rs.map((r) => String(r.id));
+    fm.smartware_versions = rs.map((r) => String(r.version));
     const sc = uniform(rs.map((r) => r.scope ?? ""));
     if (sc) fm.scope = sc;
     const kind = uniform(rs.map((r) => r.kind));
     if (kind) fm.kind = kind;
     const readers = uniform(rs.map((r) => (r.readers === null ? null : [...r.readers].sort())));
     if (readers !== undefined) fm.readers = readers === null ? ["public"] : readers;
-    else fm.orp_readers = "mixed";
+    else fm.smartware_readers = "mixed";
     const parts = rs.map((r) => {
       const mk = { id: r.id, version: r.version, kind: r.kind, status: r.status, readers: r.readers, actor: r.actor || undefined,
         origin: r.origin, observed_at: r.observed_at, event_time: r.event_time ?? undefined,
         sources: (r.sources ?? []).map((s: Json) => s.uri), derived_from: r.derived_from?.length ? r.derived_from : undefined };
-      return `<!-- orp ${markerJson(mk)} -->\n${String(r.content).trimEnd()}`;
+      return `<!-- smartware ${markerJson(mk)} -->\n${String(r.content).trimEnd()}`;
     });
     mkdirSync(resolve(target, ".."), { recursive: true });
     if (existsSync(target) && lstatSync(target).isSymbolicLink()) throw new Error(`refusing to write through a symlink: ${rel}`);

@@ -1,4 +1,4 @@
-"""One test per MUST in spec/ORP-0.1.md (ids as in spec/MUSTS.md).
+"""One test per MUST in spec/Smartware-0.1.md (ids as in spec/MUSTS.md).
 
 Test names start with the MUST id(s) they check, e.g. test_M33_ranking_invariant_to_inadmissible.
 bench/../tools/musts.py builds spec/MUSTS.md from these names.
@@ -11,9 +11,9 @@ from datetime import datetime, timedelta
 
 import numpy as np
 
-from orp.api import ORPError, Service
-from orp.model import Memory, Principal
-from tests.conformance.test_orp import ADMIN, ALICE, BOB, EVE, HashEmbedder, RandomEmbedder, ev, make_service, texts
+from smartware.api import SmartwareError, Service
+from smartware.model import Memory, Principal
+from tests.conformance.test_smartware import ADMIN, ALICE, BOB, EVE, HashEmbedder, RandomEmbedder, ev, make_service, texts
 
 EXEC = Principal("erin", frozenset({"exec"}), tenant="acme")
 ACME_ROOT = ADMIN
@@ -38,7 +38,7 @@ class Records(unittest.TestCase):
         self.assertEqual(b, ["shared-id"])
         self.assertEqual(self.s.get(["shared-id"], ACME_ROOT)["memories"][0]["content"], "acme note")
         self.assertEqual(self.s.get(["shared-id"], OTHER_ROOT)["memories"][0]["content"], "other note")
-        with self.assertRaises(ORPError) as e:  # same tenant, same id: a conflict, not a silent overwrite
+        with self.assertRaises(SmartwareError) as e:  # same tenant, same id: a conflict, not a silent overwrite
             self.s.remember({"memories": [ev("acme again", id="shared-id")]}, ACME_ROOT)
         self.assertEqual(e.exception.code, "version_conflict")
 
@@ -46,7 +46,7 @@ class Records(unittest.TestCase):
         ids = self.s.remember({"memories": [ev("acme secret roadmap", thread="general")]}, ACME_ROOT)["ids"]
         self.s.remember({"memories": [ev("other tenant chatter", thread="general")]}, OTHER_ROOT)
         self.assertEqual(self.s.get(ids, OTHER_ROOT)["memories"], [])
-        with self.assertRaises(ORPError):
+        with self.assertRaises(SmartwareError):
             self.s.forget({"ids": ids}, OTHER_ROOT)
         self.assertNotIn("roadmap", texts(recall(self.s, OTHER_ROOT, "roadmap chatter", granularity="span")))
 
@@ -80,7 +80,7 @@ class Records(unittest.TestCase):
         self.assertGreater(self.s.engine.mem[a].version, v1)
 
     def test_M12_M13_sources_and_lineage_for_non_observed(self):
-        with self.assertRaises(ORPError):
+        with self.assertRaises(SmartwareError):
             self.s.remember({"memories": [{"kind": "observation", "origin": "inferred", "content": "x"}]}, ALICE)
         a = self.s.remember({"memories": [ev("raw evidence", thread="t")]}, ALICE)["ids"][0]
         d = self.s.remember({"memories": [{"kind": "observation", "origin": "inferred", "content": "y",
@@ -118,7 +118,7 @@ class Writes(unittest.TestCase):
         for bad in ({"memories": [ev("x")], "nope": 1}, {"memories": [ev("x")], "wait": "eventually"},
                     {"memories": [ev("x", role="robot")]}, {"memories": [ev("x", load="sometimes")]},
                     {"memories": [ev("x", kind="thought")]}, {"memories": [ev("x", origin="dreamed")]}):
-            with self.assertRaises(ORPError) as e:
+            with self.assertRaises(SmartwareError) as e:
                 self.s.remember(bad, ALICE)
             self.assertEqual(e.exception.code, "unsupported_parameter")
 
@@ -132,15 +132,15 @@ class Writes(unittest.TestCase):
 
     def test_M36_evidence_cannot_be_superseded(self):
         a = self.s.remember({"memories": [ev("raw turn", thread="t")]}, ALICE)["ids"][0]
-        with self.assertRaises(ORPError):
+        with self.assertRaises(SmartwareError):
             self.s.remember({"memories": [{"kind": "fact", "content": "new", "supersedes": [a]}],
                              "mode": "supersede"}, ALICE)
-        with self.assertRaises(ORPError):
+        with self.assertRaises(SmartwareError):
             self.s.remember({"memories": [ev("replacement turn", supersedes=[a])], "mode": "supersede"}, ALICE)
 
     def test_S41_upsert_requires_if_version(self):
         self.s.remember({"memories": [ev("doc v1", id="d1")]}, ALICE)
-        with self.assertRaises(ORPError):
+        with self.assertRaises(SmartwareError):
             self.s.remember({"memories": [ev("doc v2", id="d1")], "mode": "upsert"}, ALICE)
         self.s.remember({"memories": [ev("doc v2", id="d1")], "mode": "upsert", "if_version": 1}, ALICE)
 
@@ -186,7 +186,7 @@ class RecallSemantics(unittest.TestCase):
         self.assertIn("deep", c["modes"])  # M25: deep mode behaviour declared
 
     def test_M26_profile_requires_budget(self):
-        with self.assertRaises(ORPError):
+        with self.assertRaises(SmartwareError):
             self.s.profile({}, ALICE)
 
     def test_M32_M33_M54_ranking_invariant_to_inadmissible_content(self):
@@ -336,7 +336,7 @@ class Governance(unittest.TestCase):
         self.s = make_service()
 
     def test_M56_identity_not_assertable_in_body(self):
-        with self.assertRaises(ORPError):
+        with self.assertRaises(SmartwareError):
             self.s.recall({"query": "x", "principal": "root"}, ALICE)
 
     def test_M58_get_neighbours_history_check_readers(self):
@@ -344,7 +344,7 @@ class Governance(unittest.TestCase):
                                            "claim": {"subject": "bonus", "predicate": "pool", "object": "2M"}}]},
                             ADMIN)["ids"][0]
         self.assertEqual(self.s.get([a], ALICE)["memories"], [])
-        with self.assertRaises(ORPError):
+        with self.assertRaises(SmartwareError):
             self.s.neighbours(a, 1, 1, ALICE)
         self.assertEqual(self.s.history("bonus", "pool", ALICE)["versions"], [])
 
@@ -396,7 +396,7 @@ class Governance(unittest.TestCase):
 
     def test_audit_only_for_auditors(self):  # §6.5
         self.s.remember({"memories": [ev("x", thread="t")]}, ALICE)
-        with self.assertRaises(ORPError):
+        with self.assertRaises(SmartwareError):
             self.s.audit_log(ALICE)
         aud = Principal("aud", frozenset({"auditor"}), tenant="acme")
         self.assertTrue(self.s.audit_log(aud)["entries"])

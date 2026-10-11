@@ -5,7 +5,7 @@ import html
 import json
 import os
 
-from .report import BASE, HEAD, METRICS, ORP, RES, label, load, load_tuned, mean_excl, paired, verdict
+from .report import BASE, HEAD, METRICS, Smartware, RES, label, load, load_tuned, mean_excl, paired, verdict
 
 OUT = os.path.join(RES, "site")
 SPEC_URL = "https://claude.ai/code/artifact/85592f49-799b-4a21-b16b-f5f433fcbd8b"
@@ -35,8 +35,8 @@ def bars(summ, names, metric, title):
                    f'<text x="{x}" y="12" class="tick" text-anchor="middle">{t}</text>')
     for i, (lab, v, n) in enumerate(rows):
         y = 22 + 22 * i
-        cls = "bar orp" if n == "orp" else "bar ref" if n in ("bm25", "dense") else "bar"
-        out.append(f'<text x="212" y="{y + 12}" class="lab{" strong" if n == "orp" else ""}" text-anchor="end">'
+        cls = "bar smartware" if n == "smartware" else "bar ref" if n in ("bm25", "dense") else "bar"
+        out.append(f'<text x="212" y="{y + 12}" class="lab{" strong" if n == "smartware" else ""}" text-anchor="end">'
                    f'{esc(lab[:34])}</text><rect x="220" y="{y + 2}" width="{max(1, 3.6 * v * 100):.1f}" height="14" '
                    f'class="{cls}"/><text x="{224 + 3.6 * v * 100:.1f}" y="{y + 13}" class="val">{v * 100:.1f}</text>')
     out.append("</svg></figure>")
@@ -50,31 +50,31 @@ def table(summ, names, metrics):
         if n not in summ:
             continue
         tds = "".join(f"<td>{pct(summ[n].get(k))}</td>" for k, _ in metrics)
-        body.append(f'<tr class="{"orp" if n == "orp" else "ref" if n in ("bm25", "dense") else ""}">'
+        body.append(f'<tr class="{"smartware" if n == "smartware" else "ref" if n in ("bm25", "dense") else ""}">'
                     f"<th scope=\"row\">{esc(plain(n))}</th>{tds}</tr>")
     return (f'<div class="tw"><table><thead><tr><th scope="col">System</th>{th}</tr></thead>'
             f'<tbody>{"".join(body)}</tbody></table></div>')
 
 
-def verdict_rows(bench, summ, tnames, metrics, exclude=(), orp="orp"):
+def verdict_rows(bench, summ, tnames, metrics, exclude=(), smartware="smartware"):
     out = []
     for k, h in metrics:
-        if summ.get("orp", {}).get(k) is None:
+        if summ.get("smartware", {}).get(k) is None:
             continue
         c = [(summ[n].get(k), n) for n in tnames if n in summ and summ[n].get(k) is not None]
         if not c:
             continue
         bv, bn = max(c)
-        r = paired(bench, orp, bn, k, exclude)
+        r = paired(bench, smartware, bn, k, exclude)
         if r is None:
             continue
         state = "win" if r[1] > 0 else "loss" if r[2] < 0 else "tie"
-        word = {"win": "ORP better", "loss": "ORP worse", "tie": "No significant difference"}[state]
-        out.append(f'<tr><th scope="row">{esc(h)}</th><td>{pct(summ["orp"][k])}</td><td>{pct(bv)} '
+        word = {"win": "Smartware better", "loss": "Smartware worse", "tie": "No significant difference"}[state]
+        out.append(f'<tr><th scope="row">{esc(h)}</th><td>{pct(summ["smartware"][k])}</td><td>{pct(bv)} '
                    f'<span class="muted">{esc(plain(bn))}</span></td><td class="num">{r[0] * 100:+.1f} '
                    f'<span class="muted">[{r[1] * 100:+.1f}, {r[2] * 100:+.1f}]</span></td>'
                    f'<td><span class="pill {state}">{word}</span></td></tr>')
-    return ('<div class="tw"><table class="verdict"><thead><tr><th>Metric</th><th>ORP</th><th>Best of the 15</th>'
+    return ('<div class="tw"><table class="verdict"><thead><tr><th>Metric</th><th>Smartware</th><th>Best of the 15</th>'
             '<th>Difference [95% CI]</th><th>Verdict</th></tr></thead><tbody>' + "".join(out) + "</tbody></table></div>")
 
 
@@ -85,23 +85,23 @@ def main():
         hot.update(load(fn).get("hotpot", {}).get("test", {}))
     quirks = set(load("lme_quirks.json").get("excluded", []))
     sections, tallies = [], {}
-    C5 = {src: load(f"qa5test/score_{src}_orp-clean.json") for src in ("claude", "external")}
+    C5 = {src: load(f"qa5test/score_{src}_smartware-clean.json") for src in ("claude", "external")}
     if all(C5.values()):
         rows5, tl5 = "", {}
         for src in ("claude", "external"):
             cm = C5[src]["ref_minus"]
-            base = [x for x in cm if x not in ("orp",)]
+            base = [x for x in cm if x not in ("smartware",)]
             tl5[src] = (sum(1 for x in base if cm[x]["diff"] > 0 and cm[x]["p_holm"] < .05),
                         sum(1 for x in base if not cm[x]["p_holm"] < .05),
                         sum(1 for x in base if cm[x]["diff"] < 0 and cm[x]["p_holm"] < .05))
         ac, ax = C5["claude"]["accuracy"], C5["external"]["accuracy"]
         for n in sorted(ac, key=lambda x: -(ac[x] + ax[x])):
-            nm = {"oracle": "Oracle (gold evidence only)", "orp-clean": "ORP v0.1.3", "orp": "ORP v0.1.2 rendering"}.get(
+            nm = {"oracle": "Oracle (gold evidence only)", "smartware-clean": "Smartware v0.1.3", "smartware": "Smartware v0.1.2 rendering"}.get(
                 n, plain(n))
-            rows5 += (f'<tr class="{"orp" if n == "orp-clean" else "ref" if n in ("oracle", "bm25") else ""}">'
+            rows5 += (f'<tr class="{"smartware" if n == "smartware-clean" else "ref" if n in ("oracle", "bm25") else ""}">'
                       f'<th scope="row">{esc(nm)}</th><td>{pct(ac[n])}</td><td>{pct(ax[n])}</td></tr>')
-        qc = {("orp" if n == "orp-clean" else n): {"acc": v} for n, v in ac.items() if n != "orp"}
-        qxx = {("orp" if n == "orp-clean" else n): {"acc": v} for n, v in ax.items() if n != "orp"}
+        qc = {("smartware" if n == "smartware-clean" else n): {"acc": v} for n, v in ac.items() if n != "smartware"}
+        qxx = {("smartware" if n == "smartware-clean" else n): {"acc": v} for n, v in ax.items() if n != "smartware"}
         for k, (w, t_, l_) in (("Final QA, Claude reader", tl5["claude"]), ("Final QA, DeepSeek reader", tl5["external"])):
             tallies[k] = {"win": w, "tie": t_, "loss": l_}
         sections.append(f"""
@@ -109,7 +109,7 @@ def main():
   <h2 id="h-final">Final test: blind question answering, two independent readers <span class="tag">pre-registered</span></h2>
   <p class="lede">{C5['claude']['n_questions']} official LongMemEval-S test questions never used in an earlier answer
   test. Every one of the 15 systems, BM25 and the gold-evidence ceiling, 1,000 tokens of context each. One reader and
-  judge was Claude Sonnet, the other DeepSeek V3; neither knew which system produced a context. ORP v0.1.3 writes a date
+  judge was Claude Sonnet, the other DeepSeek V3; neither knew which system produced a context. Smartware v0.1.3 writes a date
   on every line, a change chosen on separate dev questions with both readers.</p>
   <p class="tally"><span class="pill win">Claude: better than {tl5['claude'][0]} of 16, level with {tl5['claude'][1]},
   worse than {tl5['claude'][2]}</span><span class="pill win">DeepSeek: better than {tl5['external'][0]} of 16, level with
@@ -117,19 +117,19 @@ def main():
   <div class="charts">{bars(qc, list(qc), 'acc', 'Claude Sonnet reader: correct (%)')}
   {bars(qxx, list(qxx), 'acc', 'DeepSeek V3 reader: correct (%)')}</div>
   <p class="note">With DeepSeek the gold evidence alone scores only {pct(ax['oracle'])}%, so all the leading systems are
-  squeezed into the few points below that ceiling; ORP v0.1.3 ties for the top there. The v0.1.3 change itself lifted
-  DeepSeek accuracy from {pct(ax['orp'])}% to {pct(ax['orp-clean'])}% without costing anything with Claude.</p>
+  squeezed into the few points below that ceiling; Smartware v0.1.3 ties for the top there. The v0.1.3 change itself lifted
+  DeepSeek accuracy from {pct(ax['smartware'])}% to {pct(ax['smartware-clean'])}% without costing anything with Claude.</p>
   <details><summary>Every system, both readers</summary><div class="tw"><table><thead><tr><th>System</th>
   <th>Claude: correct</th><th>DeepSeek: correct</th></tr></thead><tbody>{rows5}</tbody></table></div></details>
 </section>""")
     Q3 = load("qa3_blind.json")
     if Q3:
-        acc, cmp_ = Q3["accuracy"], Q3["orp_minus"]
+        acc, cmp_ = Q3["accuracy"], Q3["smartware_minus"]
         qs = {n: {"acc": v} for n, v in acc.items()}
-        best = max((n for n in acc if n not in ("orp", "oracle")), key=lambda n: acc[n])
+        best = max((n for n in acc if n not in ("smartware", "oracle")), key=lambda n: acc[n])
         wins = sum(1 for c in cmp_.values() if c["ci95"][0] > 0 and c["p_holm"] < 0.05)
         rows = "".join(
-            f'<tr class="{"orp" if n == "orp" else "ref" if n in ("oracle", "bm25") else ""}"><th scope="row">'
+            f'<tr class="{"smartware" if n == "smartware" else "ref" if n in ("oracle", "bm25") else ""}"><th scope="row">'
             f'{"Oracle (gold evidence only)" if n == "oracle" else esc(plain(n))}</th><td>{pct(acc[n])}</td><td>'
             + (f'{cmp_[n]["diff"] * 100:+.1f} <span class="muted">[{cmp_[n]["ci95"][0] * 100:+.1f}, '
                f'{cmp_[n]["ci95"][1] * 100:+.1f}]</span></td><td>{cmp_[n]["p_holm"]:.3f}' if n in cmp_ else "–</td><td>–")
@@ -139,30 +139,30 @@ def main():
         qx = {n: {"acc": v} for n, v in QX.get("accuracy", {}).items()}
         xnote = ""
         if qx:
-            bx = max((n for n in qx if n not in ("orp", "oracle")), key=lambda n: qx[n]["acc"])
-            cx = QX["orp_minus"][bx]
+            bx = max((n for n in qx if n not in ("smartware", "oracle")), key=lambda n: qx[n]["acc"])
+            cx = QX["smartware_minus"][bx]
             xnote = (f'<p class="note"><b>A non-Claude reader does not confirm the lead.</b> The same blind items read '
-                     f'and judged by DeepSeek V3: ORP {pct(qx["orp"]["acc"])}%, best of the 15 '
-                     f'{pct(qx[bx]["acc"])}% ({esc(plain(bx))}; ORP minus {cx["diff"] * 100:+.1f}, 95% CI '
+                     f'and judged by DeepSeek V3: Smartware {pct(qx["smartware"]["acc"])}%, best of the 15 '
+                     f'{pct(qx[bx]["acc"])}% ({esc(plain(bx))}; Smartware minus {cx["diff"] * 100:+.1f}, 95% CI '
                      f'[{cx["ci95"][0] * 100:+.1f}, {cx["ci95"][1] * 100:+.1f}], Holm p {cx["p_holm"]:.2f}). Gold evidence '
                      f'alone scores only {pct(qx["oracle"]["acc"])}% with this reader: it answers "I don\'t know" on many '
-                     f'questions that need several facts combined, and did so most often on ORP\'s contexts. ORP\'s '
+                     f'questions that need several facts combined, and did so most often on Smartware\'s contexts. Smartware\'s '
                      f'end-to-end advantage depends on a reader that reasons across its contexts.</p>')
         sections.append(f"""
 <section id="qa3" aria-labelledby="h-qa3">
   <h2 id="h-qa3">Blind question answering on official LongMemEval-S <span class="tag">pre-registered</span></h2>
   <p class="lede">The end-to-end test: {Q3['n_questions']} test questions, every one of the 15 systems plus BM25 and
-  ORP, 1,000 tokens of context each. Claude Sonnet readers answered without knowing which system produced the context;
+  Smartware, 1,000 tokens of context each. Claude Sonnet readers answered without knowing which system produced the context;
   separate judges graded with LongMemEval's official rules, also blind. A second judge pass agreed on
   {ja['agreement'] * 100:.1f}% of {ja['n']} items.</p>
-  <p class="tally"><span class="pill win">ORP {pct(acc['orp'])}%</span> against {pct(acc[best])}% for the best of the
+  <p class="tally"><span class="pill win">Smartware {pct(acc['smartware'])}%</span> against {pct(acc[best])}% for the best of the
   15 ({esc(plain(best))}); significantly ahead of {wins} of {len(cmp_)} systems after Holm correction. Gold evidence
   alone scores {pct(acc['oracle'])}%.</p>
   <div class="charts">{bars(qs, list(acc), 'acc', 'Claude Sonnet reader and judge: correct (%)')}
   {bars(qx, list(qx), 'acc', 'DeepSeek V3 reader and judge: correct (%)') if qx else ''}</div>
   {xnote}
-  <details><summary>Every system, with ORP's lead and 95% interval</summary><div class="tw"><table><thead><tr>
-  <th>System</th><th>Accuracy</th><th>ORP minus system [95% CI]</th><th>Holm p</th></tr></thead><tbody>{rows}
+  <details><summary>Every system, with Smartware's lead and 95% interval</summary><div class="tw"><table><thead><tr>
+  <th>System</th><th>Accuracy</th><th>Smartware minus system [95% CI]</th><th>Holm p</th></tr></thead><tbody>{rows}
   </tbody></table></div></details>
 </section>""")
     for b, title, blurb in (
@@ -177,13 +177,13 @@ def main():
         tn = [f"{n}@tuned" for n in BASE if f"{n}@tuned" in summ]
         _, t = verdict(b, summ, tn, [(k, h) for k, h in METRICS if k in HEAD])
         tallies[title] = t
-        names = ["orp", "orp-rrf"] + sorted(tn, key=lambda x: -(summ[x].get("recall@1000") or 0)) + ["bm25", "dense"]
+        names = ["smartware", "smartware-rrf"] + sorted(tn, key=lambda x: -(summ[x].get("recall@1000") or 0)) + ["bm25", "dense"]
         extra = ""
         if b == "lme" and quirks:
-            sub = {k: {m: mean_excl(b, k, m, quirks) for m, _ in METRICS[:7]} for k in ["orp"] + tn}
+            sub = {k: {m: mean_excl(b, k, m, quirks) for m, _ in METRICS[:7]} for k in ["smartware"] + tn}
             _, tq = verdict(b, sub, tn, METRICS[:7], quirks)
             extra = (f'<p class="note">Without the {len(quirks)} questions affected by LME-R construction quirks '
-                     f'(gold turns timestamped after the question, or distractors dated after it): ORP is better on '
+                     f'(gold turns timestamped after the question, or distractors dated after it): Smartware is better on '
                      f'{tq["win"]}, level on {tq["tie"]} and worse on {tq["loss"]} of 7 metrics.</p>')
         sections.append(f"""
 <section id="{b}" aria-labelledby="h-{b}">
@@ -202,7 +202,7 @@ def main():
         hm = [("ans@500", "Ans@500"), ("ans@1000", "Ans@1000"), ("ans@2000", "Ans@2000"), ("ans@4000", "Ans@4000")]
         _, t = verdict("hotpot", hot, tn, hm)
         tallies["HotpotQA-50"] = t
-        names = ["orp", "orp-rrf"] + sorted(tn, key=lambda x: -(hot[x].get("ans@1000") or 0)) + ["bm25", "dense"]
+        names = ["smartware", "smartware-rrf"] + sorted(tn, key=lambda x: -(hot[x].get("ans@1000") or 0)) + ["bm25", "dense"]
         sections.append(f"""
 <section id="hotpot" aria-labelledby="h-hotpot">
   <h2 id="h-hotpot">HotpotQA-50 <span class="tag">held out</span></h2>
@@ -219,7 +219,7 @@ def main():
     for lb in ("lmesd", "lmemd", "lmes", "lmem"):
         ltitle, lsize, day = f"LongMemEval-{lb[3].upper()}", SZ[lb[3]], lb.endswith("d")
         LM = load(f"summary_{lb}.json").get(lb, {}).get("test", {})
-        if "orp" not in LM:
+        if "smartware" not in LM:
             continue
         tn = [f"{n}@tuned" for n in BASE if f"{n}@tuned" in LM]
         lm = [(k, h) for k, h in METRICS if k in HEAD] + [("ans@4000", "Ans@4000"), ("sess_all@5", "SessAll@5")]
@@ -228,20 +228,20 @@ def main():
         _, t = verdict(lb, LM, tn, lm)
         tallies[f"{ltitle}{', day times' if day else ', strict times'}"] = t
         g = set(load(f"{lb}_quirks.json").get("gold_session_after_question", []))
-        sub = {k: {m: mean_excl(lb, k, m, g) for m, _ in lm} for k in ["orp"] + tn}
+        sub = {k: {m: mean_excl(lb, k, m, g) for m, _ in lm} for k in ["smartware"] + tn}
         _, tg = verdict(lb, sub, tn, lm, g)
-        names = ["orp", "orp-rrf"] + sorted(tn, key=lambda x: -(LM[x].get("recall@1000") or 0)) + ["bm25", "dense"]
+        names = ["smartware", "smartware-rrf"] + sorted(tn, key=lambda x: -(LM[x].get("recall@1000") or 0)) + ["bm25", "dense"]
         sections.append(f"""
 <section id="{lb}" aria-labelledby="h-{lb}">
   <h2 id="h-{lb}">{ltitle}, official haystacks, {'day-precision question times' if day else 'strict question times'}
   <span class="tag">{'post hoc' if day else 'new data'}</span></h2>
-  <p class="lede">The official {ltitle} histories: {lsize} behind every question. Same {LM['orp']['n']} test
+  <p class="lede">The official {ltitle} histories: {lsize} behind every question. Same {LM['smartware']['n']} test
   questions as LME-R. Frozen settings; nothing was tuned on this data.{' Every system gets the end of the question day as its time, because in this data every evidence session dated after its question falls on that same day. Found on dev after the strict-time results were seen. AnsW counts answer words that are not bare numbers (list numbers, scores and ids match bare numbers by chance).' if day else ''}</p>
   <p class="tally"><span class="pill win">{t['win']} better</span><span class="pill tie">{t['tie']} level</span>
   <span class="pill loss">{t['loss']} worse</span> against the best of the 15 on each metric</p>
   {verdict_rows(lb, LM, tn, lm)}
   {'' if not g else f"""<p class="note">In {len(g)} of these questions the official data dates a gold evidence session
-  after the question (always the same day). ORP honours the as-of time and cannot return it. Without them: ORP better
+  after the question (always the same day). Smartware honours the as-of time and cannot return it. Without them: Smartware better
   on {tg['win']}, level on {tg['tie']}, worse on {tg['loss']}.</p>"""}
   <div class="charts">{bars(LM, names, 'recall@1000', 'Evidence recall in 1,000 tokens (R@1000)')}
   {bars(LM, names, 'ans@1000', 'Answer recall in 1,000 tokens (Ans@1000)')}</div>
@@ -255,9 +255,9 @@ def main():
         S = {**tuned.get(bench, {}).get("test", {}), **F[bench]["test"]}
         ch = D["choice"]
         pool = [ch[f"{b}@tuned"] for b in BASE if ch.get(f"{b}@tuned") in S]
-        summ = {**{n: S[n] for n in pool}, "orp": S[ch["orp"]]}
+        summ = {**{n: S[n] for n in pool}, "smartware": S[ch["smartware"]]}
         hm = [m for m in METRICS if m[0] in HEAD and m[0] != "e_recall@1000"]
-        _, t = verdict(bench, summ, pool, hm, orp=ch["orp"])
+        _, t = verdict(bench, summ, pool, hm, smartware=ch["smartware"])
         tallies[f"{ttl}, LLM facts"] = t
         disp = {n.replace("+facts", ""): v for n, v in summ.items()}
         sections.append(f"""
@@ -267,9 +267,9 @@ def main():
   system was allowed to store them. Each system's choice of store was made on dev data only.</p>
   <p class="tally"><span class="pill win">{t['win']} better</span><span class="pill tie">{t['tie']} level</span>
   <span class="pill loss">{t['loss']} worse</span></p>
-  {verdict_rows(bench, summ, pool, hm, orp=ch["orp"])}
-  <div class="charts">{bars(disp, ["orp"] + [n.replace("+facts", "") for n in pool], 'recall@1000', 'Evidence recall in 1,000 tokens, fact stores')}
-  {bars(disp, ["orp"] + [n.replace("+facts", "") for n in pool], 'ans@1000', 'Answer recall in 1,000 tokens, fact stores')}</div>
+  {verdict_rows(bench, summ, pool, hm, smartware=ch["smartware"])}
+  <div class="charts">{bars(disp, ["smartware"] + [n.replace("+facts", "") for n in pool], 'recall@1000', 'Evidence recall in 1,000 tokens, fact stores')}
+  {bars(disp, ["smartware"] + [n.replace("+facts", "") for n in pool], 'ans@1000', 'Answer recall in 1,000 tokens, fact stores')}</div>
 </section>""")
     D2 = load("facts_dev2.json")
     for bench, ttl in (("locomo", "LoCoMo"), ("lme", "LME-R"), ("hotpot", "HotpotQA-50")):
@@ -278,44 +278,44 @@ def main():
             continue
         ch = D2["choice"][bench]
         pool = [ch[b] for b in BASE if ch.get(b) in F]
-        summ = {**{n: F[n] for n in pool}, "orp": F[ch["orp"]]}
+        summ = {**{n: F[n] for n in pool}, "smartware": F[ch["smartware"]]}
         hm = [m for m in METRICS if m[0] in HEAD and m[0] != "e_recall@1000"] if bench != "hotpot" else \
             [("ans@500", "Ans@500"), ("ans@1000", "Ans@1000"), ("ans@2000", "Ans@2000"), ("ans@4000", "Ans@4000")]
-        _, t = verdict(bench, summ, pool, hm, orp=ch["orp"])
+        _, t = verdict(bench, summ, pool, hm, smartware=ch["smartware"])
         tallies[f"{ttl}, facts re-tuned"] = t
         disp = {n.split("@")[0]: v for n, v in summ.items()}
         sections.append(f"""
 <section id="ft-{bench}" aria-labelledby="h-ft-{bench}">
   <h2 id="h-ft-{bench}">{ttl}: LLM facts, everything re-tuned</h2>
-  <p class="lede">Every baseline's knobs re-tuned on dev fact stores and ORP's ranker refitted on them; each system's
+  <p class="lede">Every baseline's knobs re-tuned on dev fact stores and Smartware's ranker refitted on them; each system's
   best configuration picked on dev{'' if bench != 'hotpot' else ' (mean of both benchmarks, as HotpotQA has no dev split)'}.</p>
   <p class="tally"><span class="pill win">{t['win']} better</span><span class="pill tie">{t['tie']} level</span>
   <span class="pill loss">{t['loss']} worse</span></p>
-  {verdict_rows(bench, summ, pool, hm, orp=ch["orp"])}
-  <div class="charts">{bars(disp, ["orp"] + [n.split("@")[0] for n in pool], hm[1][0], hm[1][1] + ', re-tuned fact stores')}</div>
+  {verdict_rows(bench, summ, pool, hm, smartware=ch["smartware"])}
+  <div class="charts">{bars(disp, ["smartware"] + [n.split("@")[0] for n in pool], hm[1][0], hm[1][1] + ', re-tuned fact stores')}</div>
 </section>""")
     gov = []
     for vis in ("50", "15"):
         G = load(f"governance_v{vis}.json")
         if not G:
             continue
-        lab = {"orp": "ORP: rank only what the asker may read", "global_stats": "Filter first, shared statistics",
+        lab = {"smartware": "Smartware: rank only what the asker may read", "global_stats": "Filter first, shared statistics",
                "post_filter@10": "Filter after the top 10", "post_filter@50": "Filter after the top 50",
                "scope_only": "Workspace scope only", "derived_bank": "Per-item ACL, shared summaries"}
         rows = "".join(
-            f'<tr class="{"orp" if k == "orp" else ""}"><th scope="row">{esc(lab[k])}</th>'
+            f'<tr class="{"smartware" if k == "smartware" else ""}"><th scope="row">{esc(lab[k])}</th>'
             f'<td>{pct(G[k]["recall@1000"])}</td><td class="{"bad" if G[k]["text_leak"] else "ok"}">'
             f'{pct(G[k]["text_leak"])}</td><td class="{"bad" if G[k]["answer_leak"] else "ok"}">'
             f'{pct(G[k]["answer_leak"])}</td><td class="{"bad" if G[k]["rank_side_channel"] else "ok"}">'
             f'{pct(G[k]["rank_side_channel"])}</td></tr>'
-            for k in ("orp", "global_stats", "post_filter@10", "post_filter@50", "scope_only", "derived_bank") if k in G)
+            for k in ("smartware", "global_stats", "post_filter@10", "post_filter@50", "scope_only", "derived_bank") if k in G)
         gov.append(f"""<h3>{vis}% channel visibility</h3><div class="tw"><table><thead><tr><th>Access control</th>
 <th>Recall@1000 (allowed)</th><th>Answers leaked text</th><th>Forbidden askers shown the answer</th>
 <th>Rankings moved by hidden memories</th></tr></thead><tbody>{rows}</tbody></table></div>""")
     if gov:
         sections.append(f"""
 <section id="governance" aria-labelledby="h-gov">
-  <h2 id="h-gov">Multi-tenant governance (ORP-Gov)</h2>
+  <h2 id="h-gov">Multi-tenant governance (Smartware Gov)</h2>
   <p class="lede">The same ranker under six access-control strategies. Each LoCoMo test conversation becomes a
   workspace with six people, channel membership and private messages inside channels, plus a second tenant that reuses
   the same thread ids. Every question is asked by every person. Lower is better in the last three columns.</p>
@@ -323,7 +323,7 @@ def main():
 </section>""")
     Q = load("qa_blind.json")
     if Q:
-        rows = "".join(f'<tr class="{"orp" if s == "orp" else ""}"><th scope="row">{esc(plain(s))}</th>'
+        rows = "".join(f'<tr class="{"smartware" if s == "smartware" else ""}"><th scope="row">{esc(plain(s))}</th>'
                        f'<td>{pct(Q["accuracy"]["locomo"][s]["acc"])}</td><td>{pct(Q["accuracy"]["lme"][s]["acc"])}</td>'
                        f"</tr>" for s in Q["systems"])
         sections.append(f"""
@@ -336,7 +336,7 @@ def main():
 </section>""")
     L = load("latency.json")
     if L:
-        rows = "".join(f'<tr class="{"orp" if n == "orp" else ""}"><th scope="row">{esc(plain(n))}</th>'
+        rows = "".join(f'<tr class="{"smartware" if n == "smartware" else ""}"><th scope="row">{esc(plain(n))}</th>'
                        f'<td>{v["p50"]:.1f}</td><td>{v["p95"]:.1f}</td><td>{v["build"]:.0f}</td></tr>'
                        for n, v in sorted(L.items(), key=lambda kv: kv[1]["p50"]))
         sections.append(f"""
@@ -357,7 +357,7 @@ def main():
     print("wrote", os.path.join(OUT, "index.html"), f"{tw}/{tt}/{tl}")
 
 
-TEMPLATE = """<title>ORP-Bench Results</title>
+TEMPLATE = """<title>Smartware Bench Results</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
@@ -409,7 +409,7 @@ th, td {{ padding: 7px 10px; text-align: right; border-bottom: 1px solid var(--r
 td {{ font-family: var(--mono); font-size: 13px; }}
 thead th {{ font: 600 12px/1.3 var(--body); color: var(--muted); background: var(--bg); position: sticky; top: 0; }}
 th[scope="row"], thead th:first-child {{ text-align: left; font-family: var(--body); font-weight: 500; }}
-tr.orp th, tr.orp td {{ background: var(--accent-soft); font-weight: 600; }}
+tr.smartware th, tr.smartware td {{ background: var(--accent-soft); font-weight: 600; }}
 tr.ref th {{ color: var(--muted); font-style: italic; }}
 tbody tr:last-child th, tbody tr:last-child td {{ border-bottom: 0; }}
 .verdict td:nth-child(5) {{ font-family: var(--body); }}
@@ -425,7 +425,7 @@ td.ok {{ color: var(--win); }} td.bad {{ color: var(--loss); }}
 .chart .lab {{ fill: var(--ink); font: 11px var(--body); }}
 .chart .lab.strong {{ font-weight: 700; }}
 .chart .val {{ fill: var(--muted); font: 10px var(--mono); }}
-.chart .bar {{ fill: var(--ref); opacity: .55; }} .chart .bar.orp {{ fill: var(--accent); opacity: 1; }}
+.chart .bar {{ fill: var(--ref); opacity: .55; }} .chart .bar.smartware {{ fill: var(--accent); opacity: 1; }}
 .chart .bar.ref {{ fill: var(--ref); opacity: .3; }}
 details {{ background: var(--panel); border: 1px solid var(--rule); border-radius: 6px; padding: 8px 12px; }}
 details summary {{ cursor: pointer; font-weight: 600; font-size: 14px; }}
@@ -442,17 +442,17 @@ footer {{ font-size: 13px; color: var(--muted); border-top: 1px solid var(--rule
 </style>
 <div class="wrap">
 <header>
-  <div class="eyebrow">Open Recall Protocol · ORP-Bench v0.1.2</div>
+  <div class="eyebrow">Smartware protocol · Smartware Bench v0.1.2</div>
   <h1>How well do agent memory systems recall?</h1>
-  <p class="headline">The ORP reference engine against LLM-free re-implementations of the recall paths of 15 open-source
+  <p class="headline">The Smartware reference engine against LLM-free re-implementations of the recall paths of 15 open-source
   memory projects, each given its best dev-tuned settings and the same encoders. Across <b>{n}</b> benchmark-metric
-  comparisons with the best of the 15 on each metric, ORP is <b>better on {tw}</b>, level on <b>{tt}</b> and worse on
+  comparisons with the best of the 15 on each metric, Smartware is <b>better on {tw}</b>, level on <b>{tt}</b> and worse on
   <b>{tl}</b> (paired bootstrap, 95%).</p>
   <div class="strip">{strip}</div>
   <div class="legend">Cards show better · level · worse against the strongest baseline per metric.</div>
 </header>
 <section aria-labelledby="h-what">
-  <h2 id="h-what">What ORP specifies</h2>
+  <h2 id="h-what">What Smartware specifies</h2>
   <div class="protocol">
     <div><b>Rank only what the asker may read</b><p>Access is decided before scoring, statistics come from readable
     memories only, and recall must equal recall over the store with everything unreadable removed.</p></div>
@@ -476,7 +476,7 @@ footer {{ font-size: 13px; color: var(--muted); border-top: 1px solid var(--rule
     the products. Projects that rely on LLM extraction or reranking are represented by deterministic stand-ins.</li>
     <li>Every system uses the same modest encoder (PPMI-SVD word vectors), trained without labels on the benchmark
     text. A strong neural embedder could change the order.</li>
-    <li>ORP had a larger tuning budget than any single baseline. The hand-tuned, model-free ORP variant is shown
+    <li>Smartware had a larger tuning budget than any single baseline. The hand-tuned, model-free Smartware variant is shown
     alongside for a like-for-like comparison of architecture.</li>
     <li>LME-R is a reconstruction of LongMemEval; the LongMemEval-S and -M sections use the official haystacks. Recall
     numbers here are not comparable to published LoCoMo or LongMemEval answer accuracies.</li>
@@ -484,7 +484,7 @@ footer {{ font-size: 13px; color: var(--muted); border-top: 1px solid var(--rule
     are not pristine held-out sets for it. HotpotQA-50 is.</li>
   </ul>
 </section>
-<footer>Specification: <a href="{spec}">ORP 0.1 draft</a>. Methodology, two independent audits and raw per-question
+<footer>Specification: <a href="{spec}">Smartware 0.1 draft</a>. Methodology, two independent audits and raw per-question
 results ship with the repository.</footer>
 </div>
 """

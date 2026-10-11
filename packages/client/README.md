@@ -1,6 +1,6 @@
-# @orp/client
+# @technodotventures/smartware-client
 
-A typed HTTP client for ORP memory. Zero dependencies, Node 22.13 or later (it uses the global `fetch`, so it also
+A typed HTTP client for Smartware memory. Zero dependencies, Node 22.13 or later (it uses the global `fetch`, so it also
 runs in browsers and edge runtimes).
 
 It is built so the safe thing is the easy thing:
@@ -13,7 +13,7 @@ It is built so the safe thing is the easy thing:
 - **One view per run.** `client.run()` pins `as_of` once and derives idempotency keys from the run and step, so a
   long run reasons over one consistent view and a retried or restarted run replays instead of writing twice
   (M17, M20, M52).
-- **Nothing is swallowed.** Every failure is a typed `OrpError`. Any `degraded[]` on a response goes to `onDegraded`
+- **Nothing is swallowed.** Every failure is a typed `SmartwareError`. Any `degraded[]` on a response goes to `onDegraded`
   (by default a `console.warn` once per distinct value, never with memory content).
 - **Retries are safe.** 429, 503 and network errors are retried with jittered backoff, but only for reads and for
   writes that carry an idempotency key. A plain write is never sent twice.
@@ -21,13 +21,13 @@ It is built so the safe thing is the easy thing:
 ## Setup
 
 ```js
-import { OrpClient, OrpError } from "@orp/client";
+import { SmartwareClient, SmartwareError } from "@technodotventures/smartware-client";
 
-const memory = new OrpClient({
+const memory = new SmartwareClient({
   url: "http://127.0.0.1:7477",
-  token: process.env.ORP_TOKEN,      // or getToken: async () => currentAccessToken()
+  token: process.env.SMARTWARE_TOKEN,      // or getToken: async () => currentAccessToken()
   // tenant: "acme",                 // optional: asked of the gateway once and cached
-  // onDegraded: (values, { source }) => metrics.increment("orp.degraded", { source }),
+  // onDegraded: (values, { source }) => metrics.increment("smartware.degraded", { source }),
   // retries: 2, retryDelayMs: 200, timeoutMs: 30000, fetch: customFetch,
 });
 ```
@@ -107,7 +107,7 @@ for await (const change of memory.advanced.changes({ cursor: saved, follow: true
 
 ## Errors
 
-`OrpError` has `code` (`unsupported_parameter`, `invalid_parameter`, `version_conflict`, `forbidden`,
+`SmartwareError` has `code` (`unsupported_parameter`, `invalid_parameter`, `version_conflict`, `forbidden`,
 `not_found`, `budget_too_small`, `rate_limited`, `unauthorized`, `payload_too_large`, plus `unavailable` and
 `network` from the transport), `status` (0 when no response arrived), `details` and `requestId`.
 
@@ -121,7 +121,7 @@ both.
 ## Types
 
 The request and response types (`MemoryInput`, `Memory`, `ContextPack`, `ContextItem`, `RecallOptions`, and so on)
-are written by hand to match `schema/orp-0.1`. A test sends every option the client supports and checks that each
+are written by hand to match `schema/smartware-0.1`. A test sends every option the client supports and checks that each
 key in the `MemoryInput`, `RememberRequest`, `RecallRequest`, `ForgetRequest` and `ProfileRequest` bodies is a
 property of the schema.
 

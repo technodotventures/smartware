@@ -1,6 +1,6 @@
-# @orp/langgraph
+# @technodotventures/smartware-langgraph
 
-A LangGraph JS `BaseStore`-compatible store backed by ORP, for long-term memory in LangGraph graphs.
+A LangGraph JS `BaseStore`-compatible store backed by Smartware, for long-term memory in LangGraph graphs.
 
 ## Host interface targeted
 
@@ -13,7 +13,7 @@ put(namespace, key, value, index?) · delete(namespace, key) · listNamespaces({
 start() · stop()
 ```
 
-`OrpStore` implements these structurally and does not extend LangGraph's class. If your release checks
+`SmartwareStore` implements these structurally and does not extend LangGraph's class. If your release checks
 `instanceof BaseStore`, wrap it:
 
 ```js
@@ -27,11 +27,11 @@ class MemoryStore extends BaseStore {
 ## Setup
 
 ```js
-import { OrpClient } from "@orp/client";
-import { OrpStore } from "@orp/langgraph";
+import { SmartwareClient } from "@technodotventures/smartware-client";
+import { SmartwareStore } from "@technodotventures/smartware-langgraph";
 
-const memory = new OrpClient({ url: process.env.ORP_URL, token: process.env.ORP_TOKEN });
-const store = new OrpStore(memory, { prefix: "langgraph", budgetTokens: 4000 /*, asOf, audience, index */ });
+const memory = new SmartwareClient({ url: process.env.SMARTWARE_URL, token: process.env.SMARTWARE_TOKEN });
+const store = new SmartwareStore(memory, { prefix: "langgraph", budgetTokens: 4000 /*, asOf, audience, index */ });
 const graph = builder.compile({ checkpointer, store });
 
 // inside a node
@@ -41,7 +41,7 @@ const hits = await store.search(["users", userId], { query: "what does the user 
 
 ## Mapping
 
-| LangGraph | ORP |
+| LangGraph | Smartware |
 |---|---|
 | namespace `["users", "u1", "prefs"]` | scope `langgraph/users/u1/prefs` (each segment percent-encoded) |
 | key | client id `kv:<owner>:<prefix>:<namespace...>:<key>`; the owner is your principal (or `_tenant` with `audience: "tenant"`), so keys never collide across principals |
@@ -55,7 +55,7 @@ const hits = await store.search(["users", userId], { query: "what does the user 
 A host `user_id` belongs in the namespace, where it becomes a scope segment. It never becomes the principal: the
 principal is the client's credentials, and the audience is the store's `audience` (`"self"` by default).
 
-## ORP level and what it loses
+## Smartware level and what it loses
 
 **L2.** The `BaseStore` interface has no place for `as_of`, budgets or principals, so:
 
@@ -70,5 +70,5 @@ principal is the client's credentials, and the audience is the store's `audience
 - Values that look like credentials are labelled secret by the engine and then read back as missing. Do not keep
   secrets in the store.
 
-`OrpStore.capabilities` lists the same, and `conformance.json` lists the `orp doctor` checks this interface can
+`SmartwareStore.capabilities` lists the same, and `conformance.json` lists the `smartware doctor` checks this interface can
 exercise.

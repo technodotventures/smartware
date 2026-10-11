@@ -1,6 +1,6 @@
-# Product engine parity (TypeScript @orp/core against the Python oracle)
+# Product engine parity (TypeScript @technodotventures/smartware-core against the Python oracle)
 
-The product engine (packages/core) is a port of the reference engine (orp/engine.py), restructured for production:
+The product engine (packages/core) is a port of the reference engine (smartware/engine.py), restructured for production:
 per-tenant partitions, an incremental index, a SQLite store. The oracle is its specification. Three checks, all
 reproducible from this repository.
 
@@ -15,13 +15,13 @@ ties by rounding artefacts; the product engine scores identical text identically
 | Set | Config | Questions | Packs identical (ids, order, text) | Same top item |
 |---|---|---|---|---|
 | LoCoMo-10 test | fast (no PRF, RRF) | 1,152 | 100.00% | 100.00% |
-| LoCoMo-10 test | orp-rrf-1 | 1,152 | 100.00% | 100.00% |
-| LoCoMo-10 test | orp-linear-1 (shipped) | 1,152 | 100.00% | 100.00% |
-| LongMemEval-S test, first 60 | orp-linear-1 | 60 | 100.00% | 100.00% |
+| LoCoMo-10 test | smartware-rrf-1 | 1,152 | 100.00% | 100.00% |
+| LoCoMo-10 test | smartware-linear-1 (shipped) | 1,152 | 100.00% | 100.00% |
+| LongMemEval-S test, first 60 | smartware-linear-1 | 60 | 100.00% | 100.00% |
 
-Against the oracle as benchmarked (BLAS dense scores, `ORP_PARITY_BLAS=1`): 99.6 to 99.9% identical, 100% same top item.
+Against the oracle as benchmarked (BLAS dense scores, `SMARTWARE_PARITY_BLAS=1`): 99.6 to 99.9% identical, 100% same top item.
 
-    python3 tools/parity/dump.py locomo test orp-linear-1 out/ && node tools/parity/compare.mjs out/locomo_test_orp-linear-1.jsonl.gz orp-linear-1
+    python3 tools/parity/dump.py locomo test smartware-linear-1 out/ && node tools/parity/compare.mjs out/locomo_test_smartware-linear-1.jsonl.gz smartware-linear-1
 
 ## 2. The oracle's own conformance suite against the product engine (tools/bridge)
 
@@ -30,9 +30,9 @@ Service replaced by the TypeScript service (plus schema validation of its respon
 shared by both engines: `tests/test_interop.py` writes with each and reads with the other; exports are byte-identical,
 manifest hash included.
 
-## 3. Benchmark reproduction with orp eval
+## 3. Benchmark reproduction with smartware eval
 
-`orp eval` (TypeScript, metrics ported from bench/metrics.py) on the published ORP-Bench test sets, SIF encoder,
+`smartware eval` (TypeScript, metrics ported from bench/metrics.py) on the published Smartware Bench test sets, SIF encoder,
 shipped ranker. Published numbers are the oracle's (RESULTS.md).
 
 | Set | Metric | Published (oracle) | Product engine |
@@ -49,5 +49,5 @@ Every difference is under 0.5 points and well inside the 95% intervals (about pl
 from the BLAS tie artefacts described above. The product engine therefore inherits the published results, within this
 tolerance, on these two sets.
 
-    python3 tools/eval/export_bench.py locomo test locomo_test.orpbench.jsonl
-    orp eval --data locomo_test.orpbench.jsonl --encoder sif:results/cache/sif-ppmi-256.orpenc --systems orp,bm25,dense
+    python3 tools/eval/export_bench.py locomo test locomo_test.swbench.jsonl
+    smartware eval --data locomo_test.swbench.jsonl --encoder sif:results/cache/sif-ppmi-256.swenc --systems smartware,bm25,dense

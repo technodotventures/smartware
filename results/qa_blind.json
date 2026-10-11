@@ -3,7 +3,7 @@
   "bm25",
   "hindsight@tuned",
   "mem0@tuned",
-  "orp",
+  "smartware",
   "supermemory-company-brain@tuned"
  ],
  "accuracy": {
@@ -20,7 +20,7 @@
     "acc": 0.6066666666666667,
     "n": 150
    },
-   "orp": {
+   "smartware": {
     "acc": 0.6733333333333333,
     "n": 150
    },
@@ -42,7 +42,7 @@
     "acc": 0.7142857142857143,
     "n": 119
    },
-   "orp": {
+   "smartware": {
     "acc": 0.7563025210084033,
     "n": 119
    },
@@ -52,7 +52,7 @@
    }
   }
  },
- "orp_minus": {
+ "smartware_minus": {
   "locomo": {
    "bm25": {
     "diff": 0.02666666666666667,
@@ -116,7 +116,7 @@
  },
  "by_category": {
   "locomo:multi-hop": {
-   "orp": {
+   "smartware": {
     "acc": 0.3333333333333333,
     "n": 27
    },
@@ -138,7 +138,7 @@
    }
   },
   "locomo:open-domain": {
-   "orp": {
+   "smartware": {
     "acc": 0.3,
     "n": 10
    },
@@ -160,7 +160,7 @@
    }
   },
   "locomo:single-hop": {
-   "orp": {
+   "smartware": {
     "acc": 0.7831325301204819,
     "n": 83
    },
@@ -182,7 +182,7 @@
    }
   },
   "locomo:temporal": {
-   "orp": {
+   "smartware": {
     "acc": 0.8,
     "n": 30
    },
@@ -204,7 +204,7 @@
    }
   },
   "lme:knowledge-update": {
-   "orp": {
+   "smartware": {
     "acc": 0.9473684210526315,
     "n": 19
    },
@@ -226,7 +226,7 @@
    }
   },
   "lme:multi-session": {
-   "orp": {
+   "smartware": {
     "acc": 0.59375,
     "n": 32
    },
@@ -248,7 +248,7 @@
    }
   },
   "lme:single-session-assistant": {
-   "orp": {
+   "smartware": {
     "acc": 0.9285714285714286,
     "n": 14
    },
@@ -270,7 +270,7 @@
    }
   },
   "lme:single-session-preference": {
-   "orp": {
+   "smartware": {
     "acc": 0.875,
     "n": 8
    },
@@ -292,7 +292,7 @@
    }
   },
   "lme:single-session-user": {
-   "orp": {
+   "smartware": {
     "acc": 1.0,
     "n": 17
    },
@@ -314,7 +314,7 @@
    }
   },
   "lme:temporal-reasoning": {
-   "orp": {
+   "smartware": {
     "acc": 0.5517241379310345,
     "n": 29
    },

@@ -1,7 +1,7 @@
-// Tests for @orp/ai-sdk: the middleware is driven the way wrapLanguageModel drives it, with a stand-in model.
+// Tests for @technodotventures/smartware-ai-sdk: the middleware is driven the way wrapLanguageModel drives it, with a stand-in model.
 import { test, before, after } from "node:test";
 import assert from "node:assert/strict";
-import { OrpClient } from "@orp/client";
+import { SmartwareClient } from "@technodotventures/smartware-client";
 import { memoryMiddleware, recallContext, recordTurn, openAIAgentsTools, claudeAgentTools, claudeAgentHooks } from "../dist/index.js";
 import { startServer } from "../../../client/test/server.js";
 
@@ -9,8 +9,8 @@ let srv, alice, bob, degraded;
 before(async () => {
   srv = await startServer();
   degraded = [];
-  alice = new OrpClient({ url: srv.url, token: srv.tokens.alice, onDegraded: (v) => degraded.push(...v) });
-  bob = new OrpClient({ url: srv.url, token: srv.tokens.bob, onDegraded: () => {} });
+  alice = new SmartwareClient({ url: srv.url, token: srv.tokens.alice, onDegraded: (v) => degraded.push(...v) });
+  bob = new SmartwareClient({ url: srv.url, token: srv.tokens.bob, onDegraded: () => {} });
   await alice.remember("Alice's daughter Zara starts swimming lessons on Saturday mornings");
 });
 after(async () => { await srv.close(); });
@@ -85,7 +85,7 @@ test("identity cannot ride in providerOptions; a failed recall is reported, not 
     await assert.rejects(mw.transformParams({ type: "generate", params: userPrompt("hi", { providerOptions: { memory: bad } }) }),
       (e) => e.code === "unsupported_parameter");
   }
-  const down = new OrpClient({ url: "http://127.0.0.1:1", token: "t", tenant: "acme", retries: 0, onDegraded: (v) => degraded.push(...v) });
+  const down = new SmartwareClient({ url: "http://127.0.0.1:1", token: "t", tenant: "acme", retries: 0, onDegraded: (v) => degraded.push(...v) });
   const p = await memoryMiddleware(down).transformParams({ type: "generate", params: userPrompt("anything") });
   assert.equal(p.prompt.length, 2);
   assert.ok(degraded.includes("ai-sdk:recall-failed"));

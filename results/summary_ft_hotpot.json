@@ -519,7 +519,7 @@
     "latency_p95_ms": 3.908900999931575,
     "build_ms_per_corpus": 230.01082099995074
    },
-   "orp-ft+facts": {
+   "smartware-ft+facts": {
     "n": 50,
     "ans@500": 0.8166666666666668,
     "tokens@500": 490.0,

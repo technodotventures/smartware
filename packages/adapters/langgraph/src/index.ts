@@ -1,11 +1,11 @@
-// A LangGraph JS BaseStore-compatible store backed by ORP. Structural types only: nothing imports LangGraph.
+// A LangGraph JS BaseStore-compatible store backed by Smartware. Structural types only: nothing imports LangGraph.
 //   namespace ["users", "u1", "prefs"]  ->  scope "<prefix>/users/u1/prefs"
 //   key                                 ->  client id (with the namespace and owner, so keys never collide)
 //   value                               ->  meta.kv.value (round-trips exactly); content is a text rendering for recall
 //   search(query)                       ->  recall within the namespace scope
 // The BaseStore interface has no place for as_of, budgets or principals: as_of and budget come from this store's
 // config, the principal from the client's credentials, and the store reports what it cannot carry as degraded[].
-import { OrpError, type OrpClient, type Memory, type MemoryInput, type Time } from "@orp/client";
+import { SmartwareError, type SmartwareClient, type Memory, type MemoryInput, type Time } from "@technodotventures/smartware-client";
 
 export interface Item {
   value: Record<string, any>;
@@ -24,7 +24,7 @@ export interface ListNamespacesOperation { matchConditions?: MatchCondition[]; m
 export type Operation = GetOperation | PutOperation | SearchOperation | ListNamespacesOperation;
 export type OperationResult = Item | null | SearchItem[] | string[][] | void;
 
-export interface OrpStoreConfig {
+export interface SmartwareStoreConfig {
   /** Root scope for every namespace. Default "langgraph". */
   prefix?: string;
   /** Who can read what the graph writes: "self" (default, the client's principal) or "tenant". */
@@ -43,7 +43,7 @@ const enc = (s: string) => encodeURIComponent(s).replace(/~/g, "%7E");
 
 interface KvMeta { namespace: string[]; key: string; value: Record<string, any>; updated_at: string }
 
-export class OrpStore {
+export class SmartwareStore {
   /** What this adapter can and cannot carry, for doctor and for humans. */
   static readonly capabilities = {
     level: "L2",
@@ -55,9 +55,9 @@ export class OrpStore {
   private readonly prefix: string;
   private reported = new Set<string>();
 
-  constructor(readonly client: OrpClient, readonly config: OrpStoreConfig = {}) {
+  constructor(readonly client: SmartwareClient, readonly config: SmartwareStoreConfig = {}) {
     this.prefix = (config.prefix ?? "langgraph").replace(/^\/+|\/+$/g, "");
-    if (!this.prefix) throw new OrpError("invalid_parameter", "prefix must not be empty");
+    if (!this.prefix) throw new SmartwareError("invalid_parameter", "prefix must not be empty");
   }
 
   start(): void {}
@@ -75,7 +75,7 @@ export class OrpStore {
 
   private checkNs(ns: unknown, allowEmpty: boolean): string[] {
     if (!Array.isArray(ns) || !ns.every((s) => typeof s === "string" && s.length > 0) || (!allowEmpty && ns.length === 0)) {
-      throw new OrpError("invalid_parameter", "namespace must be an array of non-empty strings");
+      throw new SmartwareError("invalid_parameter", "namespace must be an array of non-empty strings");
     }
     return ns as string[];
   }
@@ -98,9 +98,9 @@ export class OrpStore {
   private async record(ns: string[], key: string): Promise<Memory | null> {
     try {
       const m = await this.client.advanced.get(await this.idOf(ns, key));
-      return m.status === "active" && OrpStore.kv(m) ? m : null;
+      return m.status === "active" && SmartwareStore.kv(m) ? m : null;
     } catch (e) {
-      if (e instanceof OrpError && e.code === "not_found") return null;
+      if (e instanceof SmartwareError && e.code === "not_found") return null;
       throw e;
     }
   }
@@ -108,14 +108,14 @@ export class OrpStore {
   // ------------------------------------------------------------ BaseStore
   async get(namespace: string[], key: string): Promise<Item | null> {
     const m = await this.record(this.checkNs(namespace, false), key);
-    return m ? OrpStore.item(m, OrpStore.kv(m)!) : null;
+    return m ? SmartwareStore.item(m, SmartwareStore.kv(m)!) : null;
   }
 
   async put(namespace: string[], key: string, value: Record<string, any> | null, index?: false | string[]): Promise<void> {
     const ns = this.checkNs(namespace, false);
-    if (typeof key !== "string" || !key) throw new OrpError("invalid_parameter", "key must be a non-empty string");
+    if (typeof key !== "string" || !key) throw new SmartwareError("invalid_parameter", "key must be a non-empty string");
     if (value === null) return this.delete(ns, key);
-    if (typeof value !== "object" || Array.isArray(value)) throw new OrpError("invalid_parameter", "value must be an object");
+    if (typeof value !== "object" || Array.isArray(value)) throw new SmartwareError("invalid_parameter", "value must be an object");
     const id = await this.idOf(ns, key);
     const fields = index === false ? null : index ?? this.config.index;
     const input: MemoryInput = {
@@ -130,7 +130,7 @@ export class OrpStore {
       try {
         existing = await this.client.advanced.get(id);
       } catch (e) {
-        if (!(e instanceof OrpError && e.code === "not_found")) throw e;
+        if (!(e instanceof SmartwareError && e.code === "not_found")) throw e;
       }
       try {
         if (existing) await this.client.remember(input, { mode: "upsert", ifVersion: existing.version, allowReingest: true, ...audience });
@@ -138,7 +138,7 @@ export class OrpStore {
         return;
       } catch (e) {
         // a concurrent put won the race: read again and retry against the new version
-        if (e instanceof OrpError && e.code === "version_conflict" && attempt < 3) continue;
+        if (e instanceof SmartwareError && e.code === "version_conflict" && attempt < 3) continue;
         throw e;
       }
     }
@@ -149,7 +149,7 @@ export class OrpStore {
     try {
       await this.client.forget(id, { mode: "purge", allowReingest: true, reason: "langgraph store delete" });
     } catch (e) {
-      if (e instanceof OrpError && e.code === "not_found") return;
+      if (e instanceof SmartwareError && e.code === "not_found") return;
       throw e;
     }
   }
@@ -173,8 +173,8 @@ export class OrpStore {
       const { memories } = await this.client.advanced.getMany(order);
       const out: SearchItem[] = [];
       for (const m of memories) {
-        const kv = OrpStore.kv(m);
-        if (kv && m.status === "active" && keep(kv)) out.push({ ...OrpStore.item(m, kv), score: score.get(m.id) });
+        const kv = SmartwareStore.kv(m);
+        if (kv && m.status === "active" && keep(kv)) out.push({ ...SmartwareStore.item(m, kv), score: score.get(m.id) });
       }
       return out.slice(offset, offset + limit);
     }
@@ -182,10 +182,10 @@ export class OrpStore {
     const out: SearchItem[] = [];
     let skipped = 0;
     for await (const m of this.client.advanced.all({ scope, kinds: [KIND, KIND_NOINDEX], limit: 200 })) {
-      const kv = OrpStore.kv(m);
+      const kv = SmartwareStore.kv(m);
       if (!kv || !keep(kv)) continue;
       if (skipped < offset) { skipped++; continue; }
-      out.push(OrpStore.item(m, kv));
+      out.push(SmartwareStore.item(m, kv));
       if (out.length >= limit) break;
     }
     return out;
@@ -203,7 +203,7 @@ export class OrpStore {
     const pre = op.matchConditions?.find((c) => c.matchType === "prefix")?.path ?? [];
     const literal = pre.every((s) => s !== "*") ? pre : [];
     for await (const m of this.client.advanced.all({ scope: this.scopeOf(literal), kinds: [KIND, KIND_NOINDEX], limit: 200 })) {
-      const kv = OrpStore.kv(m);
+      const kv = SmartwareStore.kv(m);
       if (!kv) continue;
       if (!(op.matchConditions ?? []).every((c) => matchNs(kv.namespace, c))) continue;
       const ns = op.maxDepth !== undefined ? kv.namespace.slice(0, op.maxDepth) : kv.namespace;
@@ -255,7 +255,7 @@ function matches(value: Record<string, any>, filter: Record<string, any>): boole
           case "$gte": return got >= w;
           case "$lt": return got < w;
           case "$lte": return got <= w;
-          default: throw new OrpError("unsupported_parameter", `filter operator ${op}`);
+          default: throw new SmartwareError("unsupported_parameter", `filter operator ${op}`);
         }
       });
     }

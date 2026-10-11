@@ -51,13 +51,13 @@ dependencies from a pinned `requirements-dev.txt` with binary wheels only.
 | Oracle conformance suite | 134 pass |
 | Oracle suite against the product engine (bridge) | 123 pass |
 | Python client | 48 pass |
-| `orp doctor --self` | L4 |
+| `smartware doctor --self` | L4 |
 | Persistence fuzz, 6 seeds x 120 steps | 0 failing checks |
 | Differential fuzz, oracle vs product, 25 seeds x 120 steps, client ids, frozen clock | 0 divergences in 2,900 calls |
 | Same, saving and reopening the product engine from SQLite every 25 steps, 12 seeds | 0 divergences in 1,376 calls |
 | Strict parity, LoCoMo test, shipped linear ranker and fast mode | 100% identical packs (1,152 questions each) |
 | Strict parity, LongMemEval-S, 60 haystacks | 100% identical packs |
-| `orp eval` on LoCoMo test | R@500 74.2, R@2000 85.4, MRR 59.3: unchanged |
+| `smartware eval` on LoCoMo test | R@500 74.2, R@2000 85.4, MRR 59.3: unchanged |
 | Release gate, schema pack check | Pass |
 
 With engine-assigned (random) ids the differential fuzz shows a handful of near-tie orderings that differ between the

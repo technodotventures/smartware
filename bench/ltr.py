@@ -16,7 +16,7 @@ from dataclasses import asdict, replace
 import numpy as np
 from sklearn.linear_model import LogisticRegression
 
-from orp.engine import Engine, ORPSystem, Params
+from smartware.engine import Engine, SmartwareSystem, Params
 
 from .devtune import tasks
 from .encoders import DenseEncoder, Encoders
@@ -35,7 +35,7 @@ def collect(base: dict, enc):
     runs = []  # (bench, corpus_id, system, query, cand_turn_ids, X, y)
     for b in ("locomo", "lme"):
         for task in tasks(b):
-            s = ORPSystem(**base)
+            s = SmartwareSystem(**base)
             s.build(task.corpus, enc)
             s.eng.collect = True
             for q in task.queries:
@@ -71,7 +71,7 @@ def fit_gbdt(runs, cfg):
                       "l": nd["left"].astype(int).tolist(), "r": nd["right"].astype(int).tolist(),
                       "v": nd["value"].astype(float).tolist(), "leaf": nd["is_leaf"].astype(int).tolist()})
     model = {"base": float(np.ravel(m._baseline_prediction)[0]), "trees": trees}
-    from orp.engine import _gbdt_predict
+    from smartware.engine import _gbdt_predict
     chk = _gbdt_predict(model, X[:2000])
     ref = m.decision_function(X[:2000])
     assert np.allclose(chk, ref, atol=1e-4), float(np.abs(chk - ref).max())

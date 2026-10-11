@@ -78,17 +78,17 @@ def score():
         acc[(k["bench"], k["system"])].append(c)
         cat[(k["bench"], k["category"], k["system"])].append(c)
         per_q[(k["bench"], k["qid"])][k["system"]] = c
-    out = {"systems": systems, "accuracy": {}, "orp_minus": {}, "by_category": {}}
+    out = {"systems": systems, "accuracy": {}, "smartware_minus": {}, "by_category": {}}
     for b in ("locomo", "lme"):
         out["accuracy"][b] = {s: {"acc": float(np.mean(acc[(b, s)])), "n": len(acc[(b, s)])} for s in systems}
         qs = [q for (bb, q) in per_q if bb == b]
         for s in systems:
-            if s == "orp":
+            if s == "smartware":
                 continue
-            d = np.array([per_q[(b, q)]["orp"] - per_q[(b, q)][s] for q in qs])
+            d = np.array([per_q[(b, q)]["smartware"] - per_q[(b, q)][s] for q in qs])
             rng = np.random.default_rng(0)
             bs = [d[rng.integers(0, len(d), len(d))].mean() for _ in range(5000)]
-            out["orp_minus"].setdefault(b, {})[s] = {"diff": float(d.mean()), "ci95": [float(np.percentile(bs, 2.5)),
+            out["smartware_minus"].setdefault(b, {})[s] = {"diff": float(d.mean()), "ci95": [float(np.percentile(bs, 2.5)),
                                                                                       float(np.percentile(bs, 97.5))]}
     for (b, c, s), xs in cat.items():
         out["by_category"].setdefault(f"{b}:{c}", {})[s] = {"acc": float(np.mean(xs)), "n": len(xs)}

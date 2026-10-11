@@ -1,10 +1,10 @@
-# orp eval
+# smartware eval
 
 Re-measure recall on your own data, with the reader you will actually use. Nothing leaves your machine except calls
 to the reader endpoint you configure; keys come only from environment variables and are never logged or written.
 
 ## Data
-One haystack per line (`orp-bench-1`):
+One haystack per line (`smartware-bench-1`):
 
 ```json
 {"id": "h1", "memories": [{"id": "u1", "content": "I adopted a beagle called Biscuit", "actor": "user", "role": "user",
@@ -20,9 +20,9 @@ and, with a reader, for grading. The published sets: `python3 tools/eval/export_
 ## Run
 
 ```bash
-orp eval --data locomo.jsonl --encoder sif:sif-ppmi-256.orpenc --systems orp,bm25,dense --out results/
-ORP_EVAL_KEY=... orp eval --data mine.jsonl --reader openai:gpt-4o-mini --judge anthropic:claude-haiku-... --judge-key-env ANTHROPIC_API_KEY
-orp eval --data mine.jsonl --reader openai:llama3.1@http://127.0.0.1:11434/v1      # a local model
+smartware eval --data locomo.jsonl --encoder sif:sif-ppmi-256.swenc --systems smartware,bm25,dense --out results/
+SMARTWARE_EVAL_KEY=... smartware eval --data mine.jsonl --reader openai:gpt-4o-mini --judge anthropic:claude-haiku-... --judge-key-env ANTHROPIC_API_KEY
+smartware eval --data mine.jsonl --reader openai:llama3.1@http://127.0.0.1:11434/v1      # a local model
 ```
 
 ## What you get

@@ -2,10 +2,10 @@
 
 ```ts
 import { createTool } from "@mastra/core/tools";
-import { OrpClient } from "@orp/client";
-import { mastraTools, memoryProcessors } from "@orp/mastra";
+import { SmartwareClient } from "@technodotventures/smartware-client";
+import { mastraTools, memoryProcessors } from "@technodotventures/smartware-mastra";
 
-const memory = new OrpClient({ url: process.env.ORP_URL!, getToken: () => process.env.ORP_TOKEN! });
+const memory = new SmartwareClient({ url: process.env.SMARTWARE_URL!, getToken: () => process.env.SMARTWARE_TOKEN! });
 const { input, output } = memoryProcessors(memory, { budgetTokens: 1500 });
 const agent = new Agent({
   name: "coffee",

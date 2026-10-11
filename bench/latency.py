@@ -1,7 +1,7 @@
 """Single-process latency on LoCoMo test (2 conversations), run with nothing else on the machine. Each system
 starts with a cold encoder cache, so build times include its own embedding work.
 
-python -m bench.latency orp,orp-rrf,mem0,...
+python -m bench.latency smartware,smartware-rrf,mem0,...
 """
 from __future__ import annotations
 

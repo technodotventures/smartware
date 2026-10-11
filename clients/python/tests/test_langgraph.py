@@ -6,14 +6,14 @@ import datetime as dt
 import time
 import unittest
 
-from orp_client.langgraph import GetOp, OrpStore, PutOp, SearchOp
+from smartware_client.langgraph import GetOp, SmartwareStore, PutOp, SearchOp
 
 from ._server import ServerTestCase
 
 
 class LangGraphStoreTests(ServerTestCase):
     def setUp(self) -> None:
-        self.store = OrpStore(self.client("alice"))
+        self.store = SmartwareStore(self.client("alice"))
 
     def test_put_get_round_trip(self) -> None:
         value = {"text": "Prefers oat milk flat whites", "tags": ["coffee", "diet"], "nested": {"n": 3, "ok": True},
@@ -74,18 +74,18 @@ class LangGraphStoreTests(ServerTestCase):
 
     def test_other_principals_cannot_see_items(self) -> None:
         self.store.put(("shared",), "plan", {"text": "Quarterly plan draft for the Falcon launch"})
-        bob = OrpStore(self.client("bob"))
+        bob = SmartwareStore(self.client("bob"))
         self.assertIsNone(bob.get(("shared",), "plan"))
         self.assertEqual(bob.search(("shared",), query="Falcon quarterly plan"), [])
         bob.put(("shared",), "plan", {"text": "Bob's own plan"})  # his own key space: no collision
         self.assertEqual(self.store.get(("shared",), "plan").value["text"], "Quarterly plan draft for the Falcon launch")
-        open_store = OrpStore(self.client("alice"), audience="tenant", per_principal_keys=False, scope_root="lg-open")
+        open_store = SmartwareStore(self.client("alice"), audience="tenant", per_principal_keys=False, scope_root="lg-open")
         open_store.put(("wiki",), "wifi", {"text": "Guest wifi password is on the fridge"})
-        bob_open = OrpStore(self.client("bob"), per_principal_keys=False, scope_root="lg-open")
+        bob_open = SmartwareStore(self.client("bob"), per_principal_keys=False, scope_root="lg-open")
         self.assertEqual(bob_open.get(("wiki",), "wifi").value["text"], "Guest wifi password is on the fridge")
 
     def test_list_namespaces(self) -> None:
-        s = OrpStore(self.client("alice"), scope_root="lg-ns")
+        s = SmartwareStore(self.client("alice"), scope_root="lg-ns")
         for ns in [("a", "x", "1"), ("a", "y"), ("b", "x")]:
             s.put(ns, "k", {"text": "v"})
         self.assertEqual(s.list_namespaces(), [("a", "x", "1"), ("a", "y"), ("b", "x")])

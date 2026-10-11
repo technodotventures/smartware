@@ -1,6 +1,6 @@
 // Differential parity, product side: rebuild each haystack in the TypeScript engine from the oracle's own records,
 // recall every question, and compare packs with the oracle's.
-//   node tools/parity/compare.mjs <dump.jsonl.gz> <config: orp-linear-1 | orp-rrf-1 | fast> [--verbose]
+//   node tools/parity/compare.mjs <dump.jsonl.gz> <config: smartware-linear-1 | smartware-rrf-1 | fast> [--verbose]
 import { createReadStream } from "node:fs";
 import { createGunzip } from "node:zlib";
 import { createInterface } from "node:readline";
@@ -8,8 +8,8 @@ import { Engine, SifEncoder, memoryFromJson, rankerParams, recallRequest, parseT
 
 const [file, config, ...flags] = process.argv.slice(2);
 const verbose = flags.includes("--verbose");
-const enc = new SifEncoder(new URL("../../results/cache/sif-ppmi-256.orpenc", import.meta.url).pathname);
-let params = rankerParams(config === "fast" ? "orp-rrf-1" : config);
+const enc = new SifEncoder(new URL("../../results/cache/sif-ppmi-256.swenc", import.meta.url).pathname);
+let params = rankerParams(config === "fast" ? "smartware-rrf-1" : config);
 if (config === "fast") params = { ...params, w_prf: 0, ranker: "rrf" };
 
 const st = { q: 0, idsExact: 0, textExact: 0, top1: 0, setOverlap: 0, scoreMaxDiff: 0, covDiff: 0, firstDiv: [] };
