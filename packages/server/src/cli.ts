@@ -111,7 +111,18 @@ async function serveHttp(svc: Service, f: Flags, log: Log) {
   }
   if (!keys.size && !jwt && !dev) throw new Error("no way to authenticate: pass --keys <file>, --oidc-issuer <url>, or --dev on localhost");
   const rate = s(f, "rate", "50:100")!.split(":").map(Number);
-  const gw = new Gateway(svc, new Authenticator(keys, jwt, dev), {
+  let auth: import("./auth.js").PrincipalSource = new Authenticator(keys, jwt, dev);
+  const membership = s(f, "membership");
+  if (membership) {
+    // optional: groups from a connector's membership file (e.g. Slack channel:<id> per channel). Only namespaced
+    // groups the file may grant are added; never "*" or admin.
+    let mod: any;
+    try { mod = await import("@orp/connectors" as string); } catch { throw new Error("--membership needs the @orp/connectors package installed"); }
+    auth = mod.withMembership(auth, mod.slackPrincipalResolver({ membershipPath: resolve(membership), connector: s(f, "membership-connector", "slack"),
+      tenant: s(f, "membership-tenant") }));
+    log.info("membership groups enabled", { file: resolve(membership) });
+  }
+  const gw = new Gateway(svc, auth, {
     host, port, publicUrl, authorizationServers: issuer ? [issuer] : [], rate: { rps: rate[0]!, burst: rate[1]! },
     allowedOrigins: list(f, "allowed-origin"), metricsToken: process.env[s(f, "metrics-token-env", "ORP_METRICS_TOKEN")!],
     mcp: { toolsets: list(f, "tools").length ? list(f, "tools") : ["safe"],
@@ -132,9 +143,10 @@ const HELP = `orp ${VERSION}: the ORP memory kit
 
   orp serve --http <port> [--host 127.0.0.1] [--keys <keys.json>] [--oidc-issuer <url> --oidc-audience <aud> --jwks <url|file>]
             [--public-url <url>] [--allowed-origin <origin>] [--rate rps:burst] [--dev]
+            [--membership <connector-membership.json> [--membership-connector slack] [--membership-tenant <t>]]
       ORP HTTP binding at /v1/<tenant>/... and MCP Streamable HTTP at /mcp, on one port.
 
-  orp keys add --keys <keys.json> --id <principal> --tenant <tenant> [--groups a,b] [--label <name>]
+  orp keys add --keys <keys.json> --id <principal> --tenant <tenant> [--groups a,b] [--write-scope <prefix>] [--label <name>]
   orp keys list|revoke|migrate --keys <keys.json> [--id <principal>]
   orp backup [--store <db>] --out <file>
   orp doctor <url> --token-env <ENV> [--level L1..L4] [--principals <file.json>]
@@ -161,7 +173,7 @@ export async function main(argv: string[]) {
     if (sub === "add") {
       const id = s(f, "id");
       if (!id) throw new Error("--id is required");
-      const token = ks.add({ id, tenant: s(f, "tenant", "default"), groups: list(f, "groups"), label: s(f, "label") });
+      const token = ks.add({ id, tenant: s(f, "tenant", "default"), groups: list(f, "groups"), scopes: list(f, "write-scope"), label: s(f, "label") });
       process.stdout.write(`${token}\n`);
       process.stderr.write("This token is shown once. Only its hash is stored. Keep it in a secret manager, not in code.\n");
     } else if (sub === "list") {

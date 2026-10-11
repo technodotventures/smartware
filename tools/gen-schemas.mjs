@@ -25,6 +25,7 @@ const openapi = {
   components: { securitySchemes: { bearer: { type: "http", scheme: "bearer", description: "API key (orp_...) or an OAuth 2.1 / OIDC access token" } },
     schemas: { ...schema.SCHEMAS, Generic: generic } },
   paths: {
+    "/v1/whoami": p("The principal and tenant this token resolves to (extension x-whoami)", "get", null, "Generic"),
     "/v1/{tenant}/capabilities": { parameters: [tenant], ...p("Engine capabilities", "get", null, "Generic") },
     "/v1/{tenant}/whoami": { parameters: [tenant], ...p("The principal this token resolves to (extension x-whoami)", "get", null, "Generic") },
     "/v1/{tenant}/remember": { parameters: [tenant], ...p("Write memories", "post", "RememberRequest", "RememberResponse", { parameters: [{ name: "If-Match", in: "header", schema: { type: "string" } }] }) },

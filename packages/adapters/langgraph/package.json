@@ -1,0 +1,13 @@
+{
+  "name": "@orp/langgraph",
+  "version": "0.2.0",
+  "description": "A LangGraph JS BaseStore-compatible store backed by ORP: namespaces are scopes, keys are client ids, search is recall.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": { ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" } },
+  "files": ["dist", "README.md", "conformance.json"],
+  "dependencies": { "@orp/client": "0.2.0" },
+  "engines": { "node": ">=22.13" }
+}

@@ -1940,6 +1940,38 @@
   }
  },
  "paths": {
+  "/v1/whoami": {
+   "get": {
+    "summary": "The principal and tenant this token resolves to (extension x-whoami)",
+    "security": [
+     {
+      "bearer": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Generic"
+        }
+       }
+      }
+     },
+     "default": {
+      "description": "error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
   "/v1/{tenant}/capabilities": {
    "parameters": [
     {

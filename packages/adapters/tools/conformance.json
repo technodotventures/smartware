@@ -1,0 +1,27 @@
+{
+  "adapter": "@orp/tools",
+  "host_interface": "framework-neutral tool objects { name, description, inputSchema, execute } and before/after hooks",
+  "level": "L3",
+  "level_note": "Identity is the client's credentials and readers are enforced by the gateway, so governed recall holds for what the tools expose. The tools cannot set readers, ids or derivations, so checks that need those are run against the client or the gateway directly.",
+  "checks": ["reject-unknown", "empty-query", "idempotency", "dedup-scoped", "budget-hard-cap", "pack-shape", "determinism", "profile-budget", "identity-bound", "as-of", "supersession"],
+  "not_exercised": {
+    "capabilities": "no capabilities tool",
+    "client-ids": "remember takes no id",
+    "known-at": "recall exposes as_of but not known_at",
+    "evidence-immutable": "the model cannot write events",
+    "acl": "readers come from config (audience), not from the model",
+    "removal-equivalence": "needs explicit readers on setup writes",
+    "tenant-isolation": "needs a second tenant's client",
+    "closure": "needs derived_from",
+    "secret-label": "needs include.labels",
+    "forget": "cascade needs derived memories",
+    "forget-needs-write": "needs explicit readers",
+    "supersede-needs-write": "needs explicit readers and writers",
+    "changes-feed": "no changes tool",
+    "audit-role": "no audit tool",
+    "import-admin": "no import tool",
+    "reflect": "no reflect tool",
+    "feedback-rules": "no feedback tool",
+    "export-round-trip": "no export tool"
+  }
+}

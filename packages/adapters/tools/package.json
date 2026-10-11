@@ -1,0 +1,13 @@
+{
+  "name": "@orp/tools",
+  "version": "0.2.0",
+  "description": "Framework-neutral ORP memory tools (recall, remember, forget, profile) and recall-before / remember-after hooks for any agent framework.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": { ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" } },
+  "files": ["dist", "README.md", "conformance.json"],
+  "dependencies": { "@orp/client": "0.2.0" },
+  "engines": { "node": ">=22.13" }
+}

@@ -1,0 +1,12 @@
+{
+  "name": "@orp/client",
+  "version": "0.2.0",
+  "description": "Typed HTTP client for ORP memory: identity bound at construction, fail-closed writes, run-pinned as_of and safe retries.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": { ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" } },
+  "files": ["dist", "README.md"],
+  "engines": { "node": ">=22.13" }
+}

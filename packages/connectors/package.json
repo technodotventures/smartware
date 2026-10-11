@@ -1,0 +1,13 @@
+{
+  "name": "@orp/connectors",
+  "version": "0.2.0",
+  "description": "ORP connector SDK, Markdown vault and Slack connectors, and the connector ACL replay test kit. Zero third-party dependencies.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": { ".": "./dist/index.js" },
+  "files": ["dist", "README.md"],
+  "dependencies": { "@orp/core": "0.2.0" },
+  "engines": { "node": ">=22.13" }
+}

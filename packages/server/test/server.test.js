@@ -248,3 +248,17 @@ test("orp doctor --principals: removal equivalence on real principals", async ()
   assert.equal(code, 0, lines.join(""));
   assert.equal(lines.filter((l) => l.includes("PASS")).length, 6);
 });
+
+test("tenant-free whoami and server-enforced write scopes for connector keys", async () => {
+  const w = await call("GET", "/v1/whoami", tokA);
+  assert.equal(w.body.tenant, "acme");
+  const ks = new KeyStore(keysPath);
+  const tokConn = ks.add({ id: "conn-slack", tenant: "acme", groups: [], scopes: ["connectors/slack"] });
+  await new Promise((r) => setTimeout(r, 2100)); // the gateway reloads the key file when it changes
+  const ok = await call("POST", "/v1/acme/remember", tokConn, { memories: [{ content: "from slack", scope: "connectors/slack/C1" }] });
+  assert.equal(ok.status, 200);
+  const bad = await call("POST", "/v1/acme/remember", tokConn, { memories: [{ content: "elsewhere", scope: "hr/salaries" }] });
+  assert.equal(bad.status, 403);
+  const tricky = await call("POST", "/v1/acme/remember", tokConn, { memories: [{ content: "prefix trick", scope: "connectors/slack-evil" }] });
+  assert.equal(tricky.status, 403);
+});

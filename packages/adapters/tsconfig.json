@@ -1,0 +1,4 @@
+{
+  "files": [],
+  "references": [{ "path": "./tools" }, { "path": "./mastra" }, { "path": "./langgraph" }, { "path": "./ai-sdk" }]
+}

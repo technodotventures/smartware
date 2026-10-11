@@ -507,6 +507,9 @@ export class Service {
         meta._secret_scan = hits;
       }
     }
+    if (!pr.mayWriteScope(raw.scope ?? "")) {
+      throw new ORPError("forbidden", `this credential may only write under ${JSON.stringify(pr.writeScopes)}`);
+    }
     const m = makeMemory({
       content: raw.content, kind, tenant: t, scope: raw.scope ?? "",
       readers: readers !== null ? new Set(readers) : null, writers: writers !== null ? new Set(writers) : null,
@@ -606,7 +609,7 @@ export class Service {
           this.log("supersede", oi, pr);
         }
       }
-      const ids = E.remember(m, pr);
+      const ids = E.remember(m, pr, false, raw.id === undefined || raw.id === null);
       if (existing) E.reclose(m.id);
       out.push(...ids);
       this.log("remember", ids[0]!, pr);

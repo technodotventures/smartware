@@ -3,7 +3,7 @@
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import { randomBytes, randomUUID } from "node:crypto";
 import { ORPError, type Principal, type Service } from "@orp/core";
-import { AuthError, type Authenticator } from "./auth.js";
+import { AuthError, type PrincipalSource } from "./auth.js";
 import { McpSession, PROTOCOLS, type SessionOptions } from "./mcp.js";
 import { Log } from "./log.js";
 
@@ -71,7 +71,7 @@ export class Gateway {
   private inflight = 0;
   private closing = false;
 
-  constructor(readonly svc: Service, readonly auth: Authenticator, readonly opt: HttpOptions, readonly log: Log) {
+  constructor(readonly svc: Service, readonly auth: PrincipalSource, readonly opt: HttpOptions, readonly log: Log) {
     this.server = createServer((req, res) => void this.handle(req, res));
     this.server.headersTimeout = 30_000;
     this.server.requestTimeout = 120_000;
@@ -217,6 +217,11 @@ export class Gateway {
 
   // ------------------------------------------------------------ ORP HTTP binding
   private async v1(req: IncomingMessage, res: ServerResponse, url: URL, parts: string[], pr: Principal): Promise<number> {
+    if (req.method === "GET" && parts.length === 2 && parts[1] === "whoami") { // tenant-free: lets a client discover its tenant
+      this.send(res, 200, { id: pr.id, tenant: pr.tenant, groups: [...pr.groups].sort(), tokens: [...pr.tokens()].sort(),
+        write_scopes: pr.writeScopes });
+      return 200;
+    }
     if (parts.length < 3) throw new ORPError("not_found", url.pathname);
     if (parts[1] !== pr.tenant) throw new ORPError("forbidden", "tenant mismatch");
     const s = this.svc, verb = parts[2]!, m = req.method, q = Object.fromEntries(url.searchParams);
@@ -228,7 +233,7 @@ export class Gateway {
     };
     if (m === "GET" && verb === "capabilities" && parts.length === 3) return ok(await s.capabilities(pr));
     if (m === "GET" && verb === "whoami" && parts.length === 3) { // extension x-whoami: who the token resolves to
-      return ok({ id: pr.id, tenant: pr.tenant, groups: [...pr.groups].sort(), tokens: [...pr.tokens()].sort() });
+      return ok({ id: pr.id, tenant: pr.tenant, groups: [...pr.groups].sort(), tokens: [...pr.tokens()].sort(), write_scopes: pr.writeScopes });
     }
     if (m === "POST" && parts.length === 3 && ["recall", "remember", "forget", "feedback", "reflect", "profile", "link", "import"].includes(verb)) {
       const body = await this.body(req, verb === "import" ? 64 << 20 : this.opt.maxBody ?? 1 << 20);

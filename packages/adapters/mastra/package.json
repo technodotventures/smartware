@@ -1,0 +1,13 @@
+{
+  "name": "@orp/mastra",
+  "version": "0.2.0",
+  "description": "ORP memory for Mastra agents: tools built with your createTool, and input/output processors that recall before and record after.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": { ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" } },
+  "files": ["dist", "README.md", "conformance.json"],
+  "dependencies": { "@orp/client": "0.2.0", "@orp/tools": "0.2.0" },
+  "engines": { "node": ">=22.13" }
+}

@@ -145,9 +145,10 @@ class Engine:
         self._dirty = True
 
     def remember(self, items: Memory | list[Memory], principal: Principal = SYSTEM,
-                 chain_only: bool = False) -> list[str]:
+                 chain_only: bool = False, dedup_content: bool = True) -> list[str]:
         """Store memories. chain_only (import): register claim chains without adding supersession permissions,
-        which the bundle carries; the caller resolves chains afterwards."""
+        which the bundle carries; the caller resolves chains afterwards. dedup_content=False (a record with a
+        client-supplied id): the id is the record's identity, so identical content elsewhere never absorbs it."""
         if isinstance(items, Memory):
             items = [items]
         ids, touched = [], set()
@@ -161,8 +162,8 @@ class Engine:
             # de-duplication is scoped to tenant, writer and audience (M17): never resolves to another
             # principal's record, never crosses tenants
             ik = m.meta.get("idempotency_key")
-            h = ("key", m.tenant, writer, ik) if ik else m.dedup_key(writer)
-            if h in self._hash and self._hash[h] in self.mem:
+            h = ("key", m.tenant, writer, ik) if ik else (m.dedup_key(writer) if dedup_content else None)
+            if h is not None and h in self._hash and self._hash[h] in self.mem:
                 ids.append(self._hash[h])
                 continue
             if m.observed_at is None:
@@ -181,8 +182,9 @@ class Engine:
             self.order.append(m.id)
             self.tcount[m.tenant] += 1
             self._has_expiry |= m.expires_at is not None
-            self._hash[h] = m.id
-            if ik:
+            if h is not None:
+                self._hash[h] = m.id
+            if ik or h is None:
                 self._hash.setdefault(m.dedup_key(writer), m.id)
             if m.claim is not None and m.kind not in ("event", "document"):
                 if chain_only:

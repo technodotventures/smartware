@@ -385,7 +385,7 @@ class Service:
                     om.version += 1
                     m.supersedes.append(oi)
                     self._log("supersede", oi, principal)
-            ids = self.engine.remember(m, principal)
+            ids = self.engine.remember(m, principal, dedup_content=raw.get("id") is None)
             if existing is not None:
                 self.engine.reclose(m.id)
             out += ids

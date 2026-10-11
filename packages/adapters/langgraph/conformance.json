@@ -1,0 +1,39 @@
+{
+  "adapter": "@orp/langgraph",
+  "host_interface": "LangGraph JS BaseStore: batch, get, search, put, delete, listNamespaces",
+  "level": "L2",
+  "level_note": "BaseStore has no place for as_of, budgets or principals. as_of and budget come from the store's config and are reported as degraded on search; the principal is the client's credentials; the audience is config. Per-call temporal and governance checks cannot be expressed through this interface.",
+  "checks": ["client-ids", "identity-bound", "as-of"],
+  "check_notes": {
+    "client-ids": "keys become client ids and values round-trip through meta",
+    "as-of": "only as a store-wide config value, applied to searches with a query"
+  },
+  "not_exercised": {
+    "capabilities": "not in the interface",
+    "reject-unknown": "values are free-form objects",
+    "empty-query": "an empty query means list, as LangGraph defines it",
+    "idempotency": "put is keyed by namespace and key, not by an idempotency key",
+    "dedup-scoped": "not in the interface",
+    "budget-hard-cap": "budget is config, not per call",
+    "pack-shape": "search returns items, not a pack",
+    "determinism": "no snapshot in SearchItem",
+    "profile-budget": "no profile",
+    "supersession": "put upserts in place; no claims",
+    "known-at": "not in the interface",
+    "evidence-immutable": "no events",
+    "acl": "readers come from config",
+    "removal-equivalence": "needs explicit readers",
+    "tenant-isolation": "needs a second tenant's client",
+    "closure": "no derivations",
+    "secret-label": "no labels",
+    "forget": "delete is a purge with no cascade preview",
+    "forget-needs-write": "needs explicit readers",
+    "supersede-needs-write": "no claims",
+    "changes-feed": "not in the interface",
+    "audit-role": "not in the interface",
+    "import-admin": "not in the interface",
+    "reflect": "not in the interface",
+    "feedback-rules": "not in the interface",
+    "export-round-trip": "not in the interface"
+  }
+}

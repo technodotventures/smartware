@@ -20,10 +20,15 @@ export class Principal {
   readonly tenant: string;
   private _tokens?: ReadonlySet<string>;
 
-  constructor(id: string, groups: Iterable<string> = [], tenant = "default") {
+  /** Scope prefixes this principal may write under (null = anywhere in its tenant). Set by the gateway from the
+   * credential, for connector keys: a connector can then only create records inside its own scope. */
+  readonly writeScopes: readonly string[] | null;
+
+  constructor(id: string, groups: Iterable<string> = [], tenant = "default", writeScopes: readonly string[] | null = null) {
     this.id = id;
     this.groups = new Set(groups);
     this.tenant = tenant;
+    this.writeScopes = writeScopes;
   }
 
   /** Access tokens (spec §6.1): principal:<id>, public, group:<g> for every group, and a group that already carries
@@ -46,7 +51,13 @@ export class Principal {
   }
 
   withTenant(tenant: string): Principal {
-    return new Principal(this.id, this.groups, tenant);
+    return new Principal(this.id, this.groups, tenant, this.writeScopes);
+  }
+
+  mayWriteScope(scope: string): boolean {
+    if (this.writeScopes === null) return true;
+    const sc = scope.replace(/\/+$/, "");
+    return this.writeScopes.some((p0) => { const p = p0.replace(/\/+$/, ""); return sc === p || sc.startsWith(p + "/"); });
   }
 }
 

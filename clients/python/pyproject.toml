@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "orp-client"
+version = "0.1.0"
+description = "Python client for the ORP memory protocol, with LangGraph, mem0 and Letta compatibility shims"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+dependencies = []
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "License :: OSI Approved :: Apache Software License",
+  "Typing :: Typed",
+]
+
+[tool.setuptools]
+packages = ["orp_client"]
+
+[tool.setuptools.package-data]
+orp_client = ["py.typed"]

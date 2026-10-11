@@ -3,7 +3,7 @@
 //   - OIDC / OAuth 2.1 access tokens (JWT): verified against the issuer's JWKS; claims map to a principal.
 // MCP over Streamable HTTP acts as an OAuth resource server (RFC 9728 protected-resource metadata).
 import { createHash, createPublicKey, randomBytes, timingSafeEqual, verify as cverify, type KeyObject } from "node:crypto";
-import { readFileSync, writeFileSync, existsSync, renameSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync, renameSync, statSync } from "node:fs";
 import { Principal } from "@orp/core";
 
 export class AuthError extends Error {
@@ -12,7 +12,7 @@ export class AuthError extends Error {
   }
 }
 
-export interface PrincipalSpec { id: string; groups?: string[]; tenant?: string }
+export interface PrincipalSpec { id: string; groups?: string[]; tenant?: string; scopes?: string[] }
 
 // ------------------------------------------------------------ API keys
 export interface KeyEntry extends PrincipalSpec { hash: string; label?: string; created?: string }
@@ -28,12 +28,39 @@ export function newToken(): string {
 export class KeyStore {
   private byHash = new Map<string, KeyEntry>();
   readonly warnings: string[] = [];
+  private stamp = "";
+  private checkedAt = 0;
 
   constructor(readonly path: string | null) {
     if (path && existsSync(path)) this.load(path);
   }
 
+  /** Pick up added and revoked keys without a restart (checked at most every 2 seconds). */
+  private maybeReload() {
+    if (!this.path || Date.now() - this.checkedAt < 2000) return;
+    this.checkedAt = Date.now();
+    try {
+      const st = statSync(this.path);
+      const s = `${st.ino}:${st.mtimeMs}:${st.size}`;
+      if (s !== this.stamp) this.load(this.path);
+    } catch { /* keep the last good set */ }
+  }
+
   private load(path: string) {
+    const st = statSync(path);
+    this.stamp = `${st.ino}:${st.mtimeMs}:${st.size}`;
+    const next = new Map<string, KeyEntry>();
+    const prev = this.byHash;
+    this.byHash = next;
+    try {
+      this.parse(path);
+    } catch (e) {
+      this.byHash = prev; // a half-written or broken file never empties the key set
+      throw e;
+    }
+  }
+
+  private parse(path: string) {
     const raw = JSON.parse(readFileSync(path, "utf8"));
     if (Array.isArray(raw.keys)) {
       for (const k of raw.keys as KeyEntry[]) {
@@ -53,10 +80,11 @@ export class KeyStore {
   }
 
   resolve(token: string): Principal | null {
+    this.maybeReload();
     const h = hashToken(token);
     for (const [k, v] of this.byHash) {
       // constant-time comparison over the hash text
-      if (k.length === h.length && timingSafeEqual(Buffer.from(k), Buffer.from(h))) return new Principal(v.id, v.groups ?? [], v.tenant ?? "default");
+      if (k.length === h.length && timingSafeEqual(Buffer.from(k), Buffer.from(h))) return new Principal(v.id, v.groups ?? [], v.tenant ?? "default", v.scopes ?? null);
     }
     return null;
   }
@@ -65,7 +93,7 @@ export class KeyStore {
   add(spec: PrincipalSpec & { label?: string }): string {
     const token = newToken();
     const e: KeyEntry = { hash: hashToken(token), id: spec.id, groups: spec.groups ?? [], tenant: spec.tenant ?? "default",
-      label: spec.label, created: new Date().toISOString() };
+      ...(spec.scopes?.length ? { scopes: spec.scopes } : {}), label: spec.label, created: new Date().toISOString() };
     this.byHash.set(e.hash, e);
     this.save();
     return token;
@@ -87,6 +115,8 @@ export class KeyStore {
     const tmp = this.path + ".tmp";
     writeFileSync(tmp, JSON.stringify({ keys: this.list() }, null, 1) + "\n", { mode: 0o600 });
     renameSync(tmp, this.path);
+    const st = statSync(this.path);
+    this.stamp = `${st.ino}:${st.mtimeMs}:${st.size}`;
   }
 }
 
@@ -98,6 +128,7 @@ export interface OidcConfig {
   principalClaim?: string; // default "sub"
   groupsClaim?: string; // default "groups"
   tenantClaim?: string; // default "tenant"; falls back to defaultTenant
+  writeScopesClaim?: string; // default "orp_write_scopes": scope prefixes the token may write under
   defaultTenant?: string;
   algorithms?: string[];
   leewaySeconds?: number;
@@ -184,7 +215,9 @@ export class JwtVerifier {
     const groups = (Array.isArray(g) ? g : typeof g === "string" ? g.split(/[\s,]+/) : []).filter((x: unknown) => typeof x === "string" && x && x !== "*");
     const tenant = claims[this.cfg.tenantClaim ?? "tenant"] ?? this.cfg.defaultTenant ?? "default";
     const scopes = new Set<string>(typeof claims.scope === "string" ? claims.scope.split(" ") : Array.isArray(claims.scp) ? claims.scp : []);
-    return { principal: new Principal(id, groups, String(tenant)), scopes, claims };
+    const ws = claims[this.cfg.writeScopesClaim ?? "orp_write_scopes"];
+    const writeScopes = Array.isArray(ws) ? ws.filter((x: unknown) => typeof x === "string") : null;
+    return { principal: new Principal(id, groups, String(tenant), writeScopes), scopes, claims };
   }
 }
 
@@ -211,3 +244,6 @@ export class Authenticator {
     throw new AuthError("unknown token");
   }
 }
+
+/** Anything that turns an Authorization header into a principal (the Authenticator, or a wrapper adding groups). */
+export interface PrincipalSource { resolve(authorization: string | undefined, write: boolean): Promise<Principal> }

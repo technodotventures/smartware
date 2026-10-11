@@ -1,0 +1,27 @@
+{
+  "adapter": "@orp/mastra",
+  "host_interface": "Mastra createTool tools and Agent input/output processors",
+  "level": "L3",
+  "level_note": "The tools are @orp/tools, so they exercise the same checks. The processors add recall-before and record-after with the client's identity; Mastra's resourceId is only ever a scope segment.",
+  "checks": ["reject-unknown", "empty-query", "idempotency", "dedup-scoped", "budget-hard-cap", "pack-shape", "determinism", "profile-budget", "identity-bound", "as-of", "supersession"],
+  "not_exercised": {
+    "capabilities": "no capabilities tool",
+    "client-ids": "remember takes no id",
+    "known-at": "not exposed",
+    "evidence-immutable": "the model cannot write events",
+    "acl": "readers come from config",
+    "removal-equivalence": "needs explicit readers on setup writes",
+    "tenant-isolation": "needs a second tenant's client",
+    "closure": "needs derived_from",
+    "secret-label": "needs include.labels",
+    "forget": "cascade needs derived memories",
+    "forget-needs-write": "needs explicit readers",
+    "supersede-needs-write": "needs explicit readers and writers",
+    "changes-feed": "not exposed",
+    "audit-role": "not exposed",
+    "import-admin": "not exposed",
+    "reflect": "not exposed",
+    "feedback-rules": "not exposed",
+    "export-round-trip": "not exposed"
+  }
+}

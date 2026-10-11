@@ -441,5 +441,25 @@ class Lifecycle(unittest.TestCase):
         self.assertEqual(before, [i["memory_ids"] for i in recall(self.s, ALICE, "churn report")["items"]])
 
 
+class ClientIdsAreIdentity(unittest.TestCase):
+    """A record with a client-supplied id is never absorbed by identical content elsewhere (M17 dedup applies to
+    id-less writes only), so an edit that matches another record, or two identical messages, keep both records."""
+
+    def test_M17_M02_client_ids_never_deduplicated_away(self):
+        s = make_service()
+        s.remember({"memories": [{"id": "m1", "content": "ok", "thread": "c1"}, {"id": "m2", "content": "ok", "thread": "c1"}]}, ALICE)
+        self.assertEqual(len(s.get(["m1", "m2"], ALICE)["memories"]), 2)
+        s.remember({"memories": [{"id": "m3", "content": "draft text", "thread": "c1"}]}, ALICE)
+        s.remember({"memories": [{"id": "m3", "content": "ok", "thread": "c1"}], "mode": "upsert", "if_version": 1}, ALICE)
+        got = s.get(["m1", "m3"], ALICE)["memories"]
+        self.assertEqual([m["id"] for m in got], ["m1", "m3"])
+        self.assertEqual(got[1]["content"], "ok")
+        # id-less writes still de-duplicate on content
+        a = s.remember({"memories": [{"content": "same words", "thread": "c2"}]}, ALICE)["ids"]
+        b = s.remember({"memories": [{"content": "same words", "thread": "c2"}]}, ALICE)["ids"]
+        self.assertEqual(a, b)
+
+
+
 if __name__ == "__main__":
     unittest.main()

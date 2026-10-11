@@ -270,7 +270,9 @@ export class Engine {
     this.invalidate(tenant);
   }
 
-  remember(items: Memory | Memory[], principal: Principal = SYSTEM, chainOnly = false): string[] {
+  /** dedupContent=false (a record with a client-supplied id): the id is the record's identity, so identical content
+   * elsewhere never absorbs it. */
+  remember(items: Memory | Memory[], principal: Principal = SYSTEM, chainOnly = false, dedupContent = true): string[] {
     const list = Array.isArray(items) ? items : [items];
     const ids: string[] = [];
     const touched = new Set<string>();
@@ -283,8 +285,8 @@ export class Engine {
         m.labels = [...new Set([...m.labels, ...labels])].sort();
       }
       const ik = m.meta.idempotency_key as string | undefined;
-      const h = ik ? idemDedupKey(m.tenant, writer, ik) : dedupKey(m, writer);
-      const prev = this.hash.get(h);
+      const h = ik ? idemDedupKey(m.tenant, writer, ik) : dedupContent ? dedupKey(m, writer) : null;
+      const prev = h === null ? undefined : this.hash.get(h);
       if (prev !== undefined && this.mem.has(prev)) {
         ids.push(prev);
         continue;
@@ -303,8 +305,8 @@ export class Engine {
       this.appendOrder(m);
       this.tcount.set(m.tenant, (this.tcount.get(m.tenant) ?? 0) + 1);
       this.hasExpiry ||= m.expires_at !== null;
-      this.hashSet(h, m.id);
-      if (ik && !this.hash.has(dedupKey(m, writer))) this.hashSet(dedupKey(m, writer), m.id);
+      if (h !== null) this.hashSet(h, m.id);
+      if ((ik || h === null) && !this.hash.has(dedupKey(m, writer))) this.hashSet(dedupKey(m, writer), m.id);
       this.dirty(m.id);
       const part = this.parts.get(m.tenant);
       if (part && !this.dirtyParts.has(m.tenant)) {

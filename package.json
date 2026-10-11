@@ -5,11 +5,18 @@
   "description": "ORP (working name): the memory and context protocol kit. Engine, server, clients, adapters, doctor and eval.",
   "license": "Apache-2.0",
   "type": "module",
-  "workspaces": ["packages/*"],
-  "engines": { "node": ">=22.13" },
+  "workspaces": [
+    "packages/*",
+    "packages/adapters/*"
+  ],
+  "engines": {
+    "node": ">=22.13"
+  },
   "scripts": {
-    "build": "tsc -b packages/core packages/server packages/client packages/adapters",
-    "test": "node --test --test-reporter=dot packages/*/test/*.test.js",
+    "build": "tsc -b packages/core packages/server packages/client packages/adapters packages/connectors",
+    "test": "node --test --test-reporter=dot packages/*/test/*.test.js packages/adapters/*/test/*.test.js",
+    "test:py": "python3 -m unittest discover -s tests -t . && python3 tools/bridge/run_suite.py -q && cd clients/python && python3 -m unittest discover -s tests -t .",
+    "check:schemas": "node tools/gen-schemas.mjs --check",
     "check:release": "node tools/release-check.mjs"
   },
   "devDependencies": {
