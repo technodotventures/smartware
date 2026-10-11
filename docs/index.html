@@ -476,7 +476,7 @@ footer .base{display:flex;justify-content:space-between;align-items:center;borde
       <a class="cyclechip" href="#evolve"><i></i><span>Cycle 14 · <span class="js-day">day 2 of 7</span> · 8 improvements in flight</span><b>Watch it improve</b></a>
       <div style="margin-top:16px"><a class="lbadge" href="https://loopy.systems" aria-label="Autonomously improving with Loopy"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMjIiIGhlaWdodD0iMjgiIHZpZXdCb3g9IjAgMCAyMjIgMjgiIHJvbGU9ImltZyIgYXJpYS1sYWJlbD0iQXV0b25vbW91c2x5IGltcHJvdmluZyB3aXRoIExvb3B5Ij48dGl0bGU+QXV0b25vbW91c2x5IGltcHJvdmluZyB3aXRoIExvb3B5PC90aXRsZT48cmVjdCB4PSIuNSIgeT0iLjUiIHdpZHRoPSIyMjEiIGhlaWdodD0iMjciIHJ4PSI0IiBmaWxsPSIjRUZFQUY0IiBzdHJva2U9IiMyQjFBMzMiLz48dGV4dCB4PSIxMCIgeT0iMTguNSIgZmlsbD0iIzJCMUEzMyIgZm9udC1mYW1pbHk9IidJQk0gUGxleCBTYW5zJyxIZWx2ZXRpY2EsQXJpYWwsc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMiI+QXV0b25vbW91c2x5IGltcHJvdmluZyB3aXRoPC90ZXh0PjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE2OS4xMSwwLjMpIHNjYWxlKDAuMTMpIj48cGF0aCBkPSJNMjAgNTAgSDM0IFYxMjYgUTM0IDE0MCA0OCAxNDAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzJCMUEzMyIgc3Ryb2tlLXdpZHRoPSIxMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PHBhdGggZD0iTTIwOSA5MCBWMTc2IiBmaWxsPSJub25lIiBzdHJva2U9IiMyQjFBMzMiIHN0cm9rZS13aWR0aD0iMTIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjxwYXRoIGQ9Ik0yMDkgMTE1IEEyNSAyNSAwIDEgMSAyMDkgMTE1LjEiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzJCMUEzMyIgc3Ryb2tlLXdpZHRoPSIxMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PHBhdGggZD0iTTI3NiA5MCBMMjk4IDE0MCBNMzIwIDkwIEwyOTAgMTc2IiBmaWxsPSJub25lIiBzdHJva2U9IiMyQjFBMzMiIHN0cm9rZS13aWR0aD0iMTIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjxwYXRoIGNsYXNzPSJpbmYiIGQ9Ik0xMDguMDEgMTAzLjM2IEwxMDcuNjQgMTAzLjAzIE0xMzUuODAgMTI4LjI1IEwxNDAuNjUgMTMyLjYwIEEyOSAyOSAwIDEgMCAxMzYuMDUgOTQuNjUiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI0Q5ODUyQSIgc3Ryb2tlLXdpZHRoPSIxMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PHBhdGggY2xhc3M9ImluZiIgZD0iTTEzNi4wNSA5NC42NSBMMTExLjM0IDEzMC44NCBBMjEgMjEgMCAxIDEgMTA4LjAxIDEwMy4zNiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjRDk4NTJBIiBzdHJva2Utd2lkdGg9IjEyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48L2c+PC9zdmc+" alt="Autonomously improving with Loopy" height="28"></a></div>
     </div>
-    <button class="grid8" id="hero" aria-label="Replay: the Smartware mark resolves itself, one pass at a time"></button>
+    <button class="grid8" id="hero" aria-label="Replay: the Smartware mark refines itself, tile by tile"></button>
   </div>
 </header>
 
@@ -828,67 +828,66 @@ prompt = pack.<span class="f">render</span>()  <span class="c"># drop into conte
 <script>
 (function(){
   var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  // ===== hero: the S resolves itself, pass by pass =====
+  // ===== hero: the S refines itself, tile by tile =====
   (function(){
     var hero=document.getElementById('hero'), cv=document.createElement('canvas'); hero.appendChild(cv);
     var ctx=cv.getContext('2d'), N=32, W=0, px=0;
-    var SIG=[250,80,46], TINT=[253,180,165];
-    var RECTS=[[2,0,6,2],[0,2,2,1],[2,3,4,2],[6,5,2,1],[0,6,6,2]], T=new Float32Array(N*N);
+    var SIG='#FA502E', BG=[14,33,37], SIGc=[250,80,46], TINTc=[253,180,165];
+    var RECTS=[[2,0,6,2],[0,2,2,1],[2,3,4,2],[6,5,2,1],[0,6,6,2]], T=new Uint8Array(N*N);
     RECTS.forEach(function(r){for(var y=r[1]*4;y<(r[1]+r[3])*4;y++)for(var x=r[0]*4;x<(r[0]+r[2])*4;x++)T[y*N+x]=1;});
-    var seed=11; function rnd(){seed=(seed*16807)%2147483647;return (seed-1)/2147483646;}
-    var shade=new Float32Array(N*N); for(var i=0;i<N*N;i++) shade[i]=.84+rnd()*.16;
-    // coverage of the mark for a block of size b at block (bx,by)
-    function cover(bx,by,b){var s=0;for(var y=by*b;y<(by+1)*b;y++)for(var x=bx*b;x<(bx+1)*b;x++)s+=T[y*N+x];return s/(b*b);}
-    var COV={}; [1,2,4,8].forEach(function(b){var r=N/b,a=new Float32Array(r*r);for(var y=0;y<r;y++)for(var x=0;x<r;x++)a[y*r+x]=cover(x,y,b);COV[b]=a;});
-    var noise={}; function reseed(){[1,2,4,8].forEach(function(b){var r=N/b,a=new Float32Array(r*r);for(var k=0;k<r*r;k++)a[k]=rnd()-.5;noise[b]=a;});}
-    reseed();
-    // one loop: coarse and noisy -> three refining passes -> crisp -> pixelate back down
-    var STEPS=[ // [block size, noise, duration ms, sweep]
-      [8,.95,700,false],[4,.65,900,true],[2,.32,900,true],[1,0,900,true],[1,0,2600,false],
-      [2,.18,180,false],[4,.45,200,false],[8,.85,240,false]
-    ];
-    var LOOP=STEPS.reduce(function(a,s){return a+s[2];},0);
+    function lit(b,bx,by){var s=0;for(var y=by*b;y<(by+1)*b;y++)for(var x=bx*b;x<(bx+1)*b;x++)s+=T[y*N+x];return s/(b*b)>=.5;}
+    var LV=[16,8,4,2,1], ON={};
+    LV.forEach(function(b){var r=N/b,a=[];for(var y=0;y<r;y++)for(var x=0;x<r;x++)a.push(lit(b,x,y));ON[b]=a;});
+    // the loop: refine 16 -> 1 with a wave from top-left, hold, then merge back with a wave from bottom-right
+    var SEQ=[], t=0;
+    function hold(b,d){SEQ.push({b:b,from:b,dir:0,t0:t,d:d});t+=d;}
+    function wave(from,to,dir,d){SEQ.push({b:to,from:from,dir:dir,t0:t,d:d});t+=d;}
+    hold(16,650);
+    wave(16,8,1,620); hold(8,520);
+    wave(8,4,1,620);  hold(4,900);
+    wave(4,2,1,620);  hold(2,520);
+    wave(2,1,1,620);  hold(1,1500);
+    wave(1,2,-1,360); wave(2,4,-1,360); hold(4,280); wave(4,8,-1,380); wave(8,16,-1,420);
+    var LOOP=t;
     function resize(){var r=hero.getBoundingClientRect(),d=window.devicePixelRatio||1;W=Math.round(r.width*d);cv.width=cv.height=W;px=W/N;}
-    function col(c,a){return 'rgba('+c[0]+','+c[1]+','+c[2]+','+a+')';}
-    var BG=[14,33,37]; function mix(c,a){return 'rgb('+Math.round(BG[0]+(c[0]-BG[0])*a)+','+Math.round(BG[1]+(c[1]-BG[1])*a)+','+Math.round(BG[2]+(c[2]-BG[2])*a)+')';}
-    function cell(x,y){var x0=Math.round(x*px),y0=Math.round(y*px);ctx.fillRect(x0,y0,Math.round((x+1)*px)-x0,Math.round((y+1)*px)-y0);}
-    function on(b,nz,x,y){ // is block-pixel (x,y in 32-grid) lit at block size b with noise nz
-      var r=N/b,bx=(x/b)|0,by=(y/b)|0,k=by*r+bx; return COV[b][k]+noise[b][k]*nz*1.6>.5;
+    function mix(c,a){return 'rgb('+Math.round(BG[0]+(c[0]-BG[0])*a)+','+Math.round(BG[1]+(c[1]-BG[1])*a)+','+Math.round(BG[2]+(c[2]-BG[2])*a)+')';}
+    function tint(k){return 'rgb('+Math.round(SIGc[0]+(TINTc[0]-SIGc[0])*k)+','+Math.round(SIGc[1]+(TINTc[1]-SIGc[1])*k)+','+Math.round(SIGc[2]+(TINTc[2]-SIGc[2])*k)+')';}
+    function tile(b,bx,by,scale){ // a tile with a hairline gap, so the grid size always reads
+      var size=b*px, g=Math.max(1,size*.07), s=(size-g)*scale, cx=(bx+.5)*size, cy=(by+.5)*size;
+      ctx.fillRect(Math.round(cx-s/2),Math.round(cy-s/2),Math.round(s),Math.round(s));
     }
-    var lastFlick=0, t0=0;
-    function frame(t){
-      if(!t0) t0=t;
-      var lt=(t-t0)%LOOP, i=0, acc=0; while(lt>=acc+STEPS[i][2]){acc+=STEPS[i][2];i++;}
-      var st=STEPS[i], u=(lt-acc)/st[2], prev=STEPS[(i+STEPS.length-1)%STEPS.length];
-      if(st[1]>0 && t-lastFlick>90){ // noisy passes keep "computing"
-        lastFlick=t; [1,2,4,8].forEach(function(b){var a=noise[b];for(var k=0;k<a.length;k++) if(rnd()<.18) a[k]=rnd()-.5;});
-      }
-      var sweepY = st[3] ? Math.floor(u*(N+2))-1 : -9;
+    // wave position: 0 at the start corner, 1 at the opposite corner
+    function front(dir,u){return dir>0?u*1.25-.1:1.15-u*1.25;}
+    function passed(dir,f,cx,cy){var d=(cx+cy)/2; return dir>0? d<f : d>f;}
+    function frame(now){
+      var lt=now%LOOP, st=SEQ[0]; for(var i=0;i<SEQ.length;i++){if(lt>=SEQ[i].t0&&lt<SEQ[i].t0+SEQ[i].d){st=SEQ[i];break;}}
+      var u=(lt-st.t0)/st.d;
       ctx.clearRect(0,0,W,W);
-      // lattice dots
+      // faint lattice at the logo's own 8x8 grid
       ctx.fillStyle='#1D3135';
-      for(var gy=0;gy<=8;gy++)for(var gx=0;gx<=8;gx++)ctx.fillRect(gx*4*px-px*.15,gy*4*px-px*.15,px*.3,px*.3);
-      var glint = (i===4) ? (u*1.6-.3)*N*2 : -99; // diagonal light pass while crisp
-      for(var y=0;y<N;y++){
-        var useNew = !st[3] || y<sweepY, b=useNew?st[0]:prev[0], nz=useNew?st[1]:prev[1];
-        for(var x=0;x<N;x++){
-          if(!on(b,nz,x,y)) continue;
-          var g=0;
-          if(glint>-99){var d=Math.abs((x+y)-glint); if(d<5) g=(1-d/5)*.75;}
-          var c=[SIG[0]+(TINT[0]-SIG[0])*g,SIG[1]+(TINT[1]-SIG[1])*g,SIG[2]+(TINT[2]-SIG[2])*g].map(Math.round);
-          var sh=b===1?shade[y*N+x]:.92;
-          ctx.fillStyle=mix(c,sh+(1-sh)*g);
-          cell(x,y);
+      for(var gy=0;gy<=8;gy++)for(var gx=0;gx<=8;gx++)ctx.fillRect(gx*4*px-px*.12,gy*4*px-px*.12,px*.24,px*.24);
+      if(!st.dir){ draw(st.b,null,0); return; }
+      var f=front(st.dir,u);
+      draw(st.from,function(cx,cy){return !passed(st.dir,f,cx,cy);},0);
+      draw(st.b,function(cx,cy){return passed(st.dir,f,cx,cy);},f,st.dir);
+    }
+    function draw(b,keep,f,dir){
+      var r=N/b,a=ON[b];
+      for(var by=0;by<r;by++)for(var bx=0;bx<r;bx++){
+        if(!a[by*r+bx]) continue;
+        var cx=(bx+.5)/r, cy=(by+.5)/r;
+        if(keep && !keep(cx,cy)) continue;
+        var k=0, sc=1;
+        if(dir){ // just-arrived tiles pop in and flash
+          var age=Math.abs(f-(cx+cy)/2)/.18; if(age<1){k=1-age; sc=.72+.28*Math.min(1,age*1.4);}
         }
-      }
-      if(st[3] && sweepY>=0 && sweepY<N){ // the scanline doing the refining
-        ctx.fillStyle=col(TINT,.9); ctx.fillRect(0,sweepY*px,W,Math.max(1,px*.35));
-        ctx.fillStyle=col(TINT,.12); ctx.fillRect(0,(sweepY-3)*px,W,px*3);
+        ctx.fillStyle=k>0?tint(k*.85):SIG;
+        tile(b,bx,by,sc);
       }
     }
-    function still(){ctx.clearRect(0,0,W,W);for(var y=0;y<N;y++)for(var x=0;x<N;x++)if(T[y*N+x]){ctx.fillStyle=mix(SIG,shade[y*N+x]);cell(x,y);}}
-    var raf=0, visible=true;
-    function loop(t){frame(t);raf=requestAnimationFrame(loop);}
+    function still(){ctx.clearRect(0,0,W,W);ctx.fillStyle=SIG;draw(4,null,0);}
+    var raf=0, visible=true, start=0;
+    function loop(t){if(!start)start=t;frame(t-start);raf=requestAnimationFrame(loop);}
     resize();
     window.addEventListener('resize',function(){resize(); if(reduce) still();});
     if(reduce){ still(); }
@@ -898,7 +897,7 @@ prompt = pack.<span class="f">render</span>()  <span class="c"># drop into conte
         if(e[0].isIntersecting&&!visible){visible=true;raf=requestAnimationFrame(loop);}
         else if(!e[0].isIntersecting&&visible){visible=false;cancelAnimationFrame(raf);}
       }).observe(hero);
-      hero.addEventListener('click',function(){t0=0;});
+      hero.addEventListener('click',function(){start=0;});
     }
   })();
 
