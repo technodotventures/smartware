@@ -843,12 +843,10 @@ prompt = pack.<span class="f">render</span>()  <span class="c"># drop into conte
     var SEQ=[], t=0;
     function hold(b,d){SEQ.push({b:b,from:b,dir:0,t0:t,d:d});t+=d;}
     function wave(from,to,dir,d){SEQ.push({b:to,from:from,dir:dir,t0:t,d:d});t+=d;}
-    hold(16,650);
-    wave(16,8,1,620); hold(8,520);
-    wave(8,4,1,620);  hold(4,900);
-    wave(4,2,1,620);  hold(2,520);
-    wave(2,1,1,620);  hold(1,1500);
-    wave(1,2,-1,360); wave(2,4,-1,360); hold(4,280); wave(4,8,-1,380); wave(8,16,-1,420);
+    // no holds: one wave rolls straight into the next, refining then merging, forever
+    // coarse waves have few tiles, so they run quicker; fine waves have many, so they take longer
+    wave(16,8,1,520); wave(8,4,1,760); wave(4,2,1,1000); wave(2,1,1,1200);
+    wave(1,2,-1,1200); wave(2,4,-1,1000); wave(4,8,-1,760); wave(8,16,-1,520);
     var LOOP=t;
     function resize(){var r=hero.getBoundingClientRect(),d=window.devicePixelRatio||1;W=Math.round(r.width*d);cv.width=cv.height=W;px=W/N;}
     function mix(c,a){return 'rgb('+Math.round(BG[0]+(c[0]-BG[0])*a)+','+Math.round(BG[1]+(c[1]-BG[1])*a)+','+Math.round(BG[2]+(c[2]-BG[2])*a)+')';}
@@ -858,7 +856,7 @@ prompt = pack.<span class="f">render</span>()  <span class="c"># drop into conte
       ctx.fillRect(Math.round(cx-s/2),Math.round(cy-s/2),Math.round(s),Math.round(s));
     }
     // wave position: 0 at the start corner, 1 at the opposite corner
-    function front(dir,u){return dir>0?u*1.25-.1:1.15-u*1.25;}
+    function front(dir,u){return dir>0?u:1-u;}
     function pos(b,k,cx,cy){return (cx+cy)/2*.62+JIT[b][k]*.38;} // diagonal, scattered
     function passed(dir,f,p){return dir>0? p<f : p>f;}
     function frame(now){
@@ -886,7 +884,7 @@ prompt = pack.<span class="f">render</span>()  <span class="c"># drop into conte
         if(keep && !keep(p)) continue;
         var k=0, sc=1;
         if(dir){ // just-arrived tiles pop in and flash
-          var age=Math.abs(f-p)/.14; if(age<1){k=1-age; sc=.7+.3*Math.min(1,age*1.4);}
+          var win=b>=8?.4:b>=4?.24:.14, age=Math.abs(f-p)/win; if(age<1){k=1-age; sc=.7+.3*Math.min(1,age*1.4);}
         }
         var sp=spark[b+':'+idx]; if(sp){var su=(now-sp.t0)/sp.d; if(su<1) k=Math.max(k,Math.sin(Math.PI*su)*sp.p); else delete spark[b+':'+idx];}
         ctx.fillStyle=k>0?tint(k*.85):SIG;
