@@ -3,8 +3,13 @@
 // principal is passed in each call, which no real binding ever allows.
 import { createHash } from "node:crypto";
 import { createInterface } from "node:readline";
-import { Service, SqliteStore, Principal, HashingEncoder, defaultParams, withParams, memoryFromJson, memoryToJson, recallRequest,
+import { Service, SqliteStore, PgStore, Principal, HashingEncoder, defaultParams, withParams, memoryFromJson, memoryToJson, recallRequest,
   parseTime, isoformat, ORPError } from "../../packages/core/dist/index.js";
+import { randomBytes } from "node:crypto";
+
+// ORP_BRIDGE_PG=postgres://...: run every service on the Postgres store (a fresh schema each)
+const PG = process.env.ORP_BRIDGE_PG;
+const pgStore = () => { const u = new URL(PG); u.searchParams.set("schema", "bridge_" + randomBytes(5).toString("hex")); return new PgStore(u.toString(), { nodeId: "bridge", poolSize: 1, poolIdleMs: 200 }); };
 
 class Md5Bag { // tests' HashEmbedder: md5 bag of words, 128 dims
   name = "test-md5-128"; dim = 128;
@@ -49,14 +54,19 @@ const VERBS = { capabilities: (s, a, p) => s.capabilities(p), remember: (s, a, p
   import_: (s, a, p) => s.import(a[0], p) };
 
 const rl = createInterface({ input: process.stdin });
+// when the driver closes stdin, exit once the op in hand is answered (open store connections would otherwise keep
+// the process alive, and readline's iterator does not always end on close)
+let busy = false, closed = false;
+rl.on("close", () => { closed = true; if (!busy) process.exit(0); });
 for await (const line of rl) {
+  busy = true;
   const m = JSON.parse(line);
   try {
     let out;
     if (m.op === "new") {
       const enc = m.encoder === "random" ? new RandomVec() : m.encoder === "broken" ? new Broken() : m.encoder === "hashing" ? new HashingEncoder() : new Md5Bag();
       const params = withParams(defaultParams(), m.params ?? {});
-      const s = new Service(enc, { params, secretScan: false });
+      const s = new Service(enc, { params, secretScan: false, store: PG ? pgStore() : null });
       svcs.set(nextH, s); out = { handle: nextH++ };
     } else {
       const s = svcs.get(m.h);
@@ -82,4 +92,6 @@ for await (const line of rl) {
     if (e instanceof ORPError) send({ id: m.id, err: e.toJSON().error });
     else send({ id: m.id, crash: String(e && e.stack || e) });
   }
+  busy = false;
+  if (closed) process.exit(0);
 }

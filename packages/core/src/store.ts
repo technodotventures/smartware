@@ -132,6 +132,9 @@ export interface Lease { tenant: string; epoch: number }
 export interface TenantLeases {
   /** This process's node id and the URL other nodes can reach it on. */
   readonly node: string;
+  /** Lease length in milliseconds, and how often the holder renews. */
+  readonly ttlMs: number;
+  readonly renewEveryMs: number;
   /** Take the tenant's lease if it is free, expired or already ours; otherwise say who holds it. */
   acquire(t: string): Promise<{ lease: Lease } | { owner: string; url: string | null }>;
   /** Extend our leases; returns the tenants whose lease was lost. */

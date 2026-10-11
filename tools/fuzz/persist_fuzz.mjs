@@ -74,8 +74,8 @@ for (let seed = seed0; seed < seed0 + nSeeds; seed++) {
   const versions = (t, id) => { const m = live.engine.mem.get(`${id}~${t}`); return m ? m.version : null; };
   for (let step = 0; step < nSteps; step++) {
     const op = g.next(versions);
-    for (const t of TENANTS) live.ensureTenant(t); // so internal maps are comparable
-    const before = WRITES.has(op.verb) ? dumpStore(live) : null;
+    for (const t of TENANTS) await live.ensureTenant(t); // so internal maps are comparable
+    const before = WRITES.has(op.verb) ? await dumpStore(live) : null;
     let res;
     try { res = { ok: await call(live, op, state) }; } catch (e) { res = { err: e.code ?? "CRASH:" + String(e?.stack ?? e).slice(0, 400) }; }
     log.push({ step, op, res: res.err ?? "ok" });
@@ -85,15 +85,15 @@ for (let seed = seed0; seed < seed0 + nSeeds; seed++) {
       if (!seen.has(k)) { seen.set(k, { seed, step, op, err: res.err }); console.log("CRASH", seed, step, JSON.stringify(op), res.err); }
     }
     if (res.err && before) {
-      const after = dumpStore(live);
+      const after = await dumpStore(live);
       const d = diff(before, after);
       if (d.length) { failures++; const k = "errstore:" + op.verb + ":" + res.err; if (!seen.has(k)) { seen.set(k, 1); console.log(`STORE CHANGED BY FAILED ${op.verb} (${res.err}) seed=${seed} step=${step}`, JSON.stringify(op), d.slice(0, 5)); } }
     }
     if (step % every !== 0 && step !== nSteps - 1) continue;
-    const fresh = open(db);
-    for (const t of TENANTS) fresh.ensureTenant(t);
+    const fresh = open(db, { releaseLeasesOnClose: false });
+    for (const t of TENANTS) await fresh.ensureTenant(t);
     const A = await observe(live), B = await observe(fresh);
-    fresh.close();
+    await fresh.close();
     const d = diff(A, B);
     if (d.length) {
       failures++;
@@ -106,11 +106,11 @@ for (let seed = seed0; seed < seed0 + nSeeds; seed++) {
         for (const x of [...d.filter((y) => !y.includes(".snapshot:")).slice(0, 8), ...d.filter((y) => y.includes(".snapshot:")).slice(0, 1)]) console.log("  ", x);
       }
       // resync: continue from the reopened state so later steps test fresh ground
-      live.close();
+      await live.close();
       live = open(db);
     }
   }
-  live.close();
+  await live.close();
 }
 const stats = {};
 for (const [k, v] of Object.entries(globalThis.STATS ?? {})) stats[k] = v;

@@ -147,6 +147,8 @@ export interface ServiceOptions {
   store?: Store | null;
   /** With a shared store: release a tenant's lease and unload it after this long without requests (default 10 min). */
   idleTenantMs?: number;
+  /** With a shared store: hand this process's leases back on close (default true), so another node can take over at once. */
+  releaseLeasesOnClose?: boolean;
   /** Label content that looks like a credential as secret (default true). */
   secretScan?: boolean;
   encoderName?: string;
@@ -198,10 +200,11 @@ export class Service {
   private jVecDel: Array<{ encoder: string; sha: string }> = [];
   private initP: Promise<void> | null = null;
   /** Lease epochs of the tenants this process holds (shared stores only). */
-  private held = new Map<string, number>();
+  private held = new Map<string, { epoch: number; until: number }>();
   private lastUsed = new Map<string, number>();
   private leaseTimer: ReturnType<typeof setInterval> | null = null;
   private readonly idleTenantMs: number;
+  private readonly releaseOnClose: boolean;
 
   constructor(readonly enc: Encoder, opts: ServiceOptions = {}) {
     this.engine = new Engine(enc, opts.params);
@@ -212,6 +215,7 @@ export class Service {
     this.rankerName = opts.rankerName ?? `orp-${this.engine.p.ranker}-1`;
     this.notes = opts.notes ?? [];
     this.idleTenantMs = opts.idleTenantMs ?? 10 * 60_000;
+    this.releaseOnClose = opts.releaseLeasesOnClose ?? true;
     if (this.store && opts.cacheVectors !== false && "persist" in enc) {
       const st = this.store;
       // reads and writes of cached vectors go straight to the store; deletions (purge, redact) join the verb's
@@ -253,19 +257,35 @@ export class Service {
   async route(t: string): Promise<{ mine: true } | { mine: false; owner: string; url: string | null }> {
     await this.ready();
     const L = this.store?.leases;
-    if (!L || this.held.has(t)) return { mine: true };
+    if (!L || this.holds(t)) return { mine: true };
     const r = await this.lock.run(() => this.acquire(t));
     return r;
   }
 
+  /** Held, and not past the point where it may have expired without this process noticing. */
+  private holds(t: string): boolean {
+    const h = this.held.get(t);
+    return h !== undefined && Date.now() < h.until;
+  }
+
+  private safeUntil(): number {
+    const L = this.store!.leases!;
+    return Date.now() + Math.max(0, L.ttlMs - L.renewEveryMs); // a renewal is at most one interval late
+  }
+
   private async acquire(t: string): Promise<{ mine: true } | { mine: false; owner: string; url: string | null }> {
     const L = this.store!.leases!;
-    if (this.held.has(t)) return { mine: true };
+    if (this.holds(t)) return { mine: true };
+    const before = this.held.get(t);
     const got = await L.acquire(t);
-    if ("owner" in got) return { mine: false, owner: got.owner, url: got.url };
-    // a new lease: whatever this process held for the tenant before may be stale (another node may have written)
-    if (this.loaded.has(t)) this.unloadTenant(t);
-    this.held.set(t, got.lease.epoch);
+    if ("owner" in got) {
+      this.held.delete(t);
+      if (this.loaded.has(t)) this.unloadTenant(t);
+      return { mine: false, owner: got.owner, url: got.url };
+    }
+    // a lease that changed hands since this process last held it: what is loaded may be stale
+    if (this.loaded.has(t) && before?.epoch !== got.lease.epoch) this.unloadTenant(t);
+    this.held.set(t, { epoch: got.lease.epoch, until: this.safeUntil() });
     return { mine: true };
   }
 
@@ -280,17 +300,23 @@ export class Service {
           for (const t of idle) { this.held.delete(t); this.lastUsed.delete(t); if (this.loaded.has(t)) this.unloadTenant(t); }
           await L.release(idle);
         }
-        const lost = await L.renew([...this.held.keys()]);
-        for (const t of lost) { this.held.delete(t); if (this.loaded.has(t)) this.unloadTenant(t); }
+        const asked = [...this.held.keys()];
+        const until = this.safeUntil();
+        const lost = new Set(await L.renew(asked));
+        for (const t of asked) {
+          if (lost.has(t)) { this.held.delete(t); if (this.loaded.has(t)) this.unloadTenant(t); }
+          else this.held.get(t)!.until = until;
+        }
       }).catch(() => undefined); // a failed renewal is retried next tick; writes stay fenced meanwhile
     };
-    this.leaseTimer = setInterval(() => void tick(), (L as any).renewEveryMs ?? 10_000);
+    this.leaseTimer = setInterval(() => void tick(), L.renewEveryMs);
     this.leaseTimer.unref?.();
   }
 
   // ------------------------------------------------------------ tenancy and persistence
   /** Load a tenant from the store on first use. */
   async ensureTenant(t: string): Promise<void> {
+    await this.ready();
     if (this.store?.leases) {
       this.lastUsed.set(t, Date.now());
       const r = await this.acquire(t);
@@ -367,7 +393,7 @@ export class Service {
   }
 
   /** Write everything the last verb changed, in one transaction. */
-  private async flush() {
+  private async flush(tenant: string) {
     const E = this.engine, J = E.journal;
     if (!this.store) {
       this.clearJournal();
@@ -378,10 +404,13 @@ export class Service {
     d.edgesDel = [...this.jEdgeDel];
     d.vectorsDel = [...this.jVecDel];
     if (this.store.leases) { // fence: the write commits only while this process still holds every tenant it touches
-      const ts = new Set<string>(J.tenants);
+      const ts = new Set<string>([tenant, ...J.tenants]);
       for (const i of J.mem) { const m = E.mem.get(i); if (m) ts.add(m.tenant); }
-      for (const t of this.loaded) ts.add(t);
-      d.fence = [...ts].filter((t) => this.held.has(t)).map((t) => ({ tenant: t, epoch: this.held.get(t)! }));
+      d.fence = [...ts].map((t) => {
+        const h = this.held.get(t);
+        if (!h) throw new ORPError("unavailable", "this node no longer holds the tenant; retry", { tenant: t });
+        return { tenant: t, epoch: h.epoch };
+      });
       d.wseqFloor = E.wseq;
     }
     for (const i of J.mem) {
@@ -436,7 +465,7 @@ export class Service {
         const auditStart = this.engine.audit.length;
       try {
         const out = await fn();
-        if (write) await this.flush();
+        if (write) await this.flush(pr.tenant);
         return out;
       } catch (e) {
         if (write) await this.rollbackJournal(pr.tenant, auditStart);
@@ -1457,7 +1486,7 @@ export class Service {
   async close(): Promise<void> {
     if (this.leaseTimer) { clearInterval(this.leaseTimer); this.leaseTimer = null; }
     const L = this.store?.leases;
-    if (L && this.held.size) {
+    if (L && this.held.size && this.releaseOnClose) {
       const ts = [...this.held.keys()];
       this.held.clear();
       await L.release(ts).catch(() => undefined);

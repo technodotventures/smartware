@@ -13,3 +13,5 @@ export * from "./service.js";
 export * from "./store.js";
 export * from "./secrets.js";
 export * as schema from "./schema.js";
+export { PgStore, PgLeases, PG_SCHEMA, type PgStoreOptions } from "./pgstore.js";
+export { PgConnection, PgPool, PgError, parsePgUrl, redactPgUrl, type PgConfig } from "./pg.js";
