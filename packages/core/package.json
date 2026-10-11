@@ -1,0 +1,12 @@
+{
+  "name": "@orp/core",
+  "version": "0.2.0",
+  "description": "ORP engine: admissibility-first recall over a single SQLite file. Zero runtime dependencies.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": { ".": "./dist/index.js" },
+  "files": ["dist", "rankers", "README.md"],
+  "engines": { "node": ">=22.13" }
+}

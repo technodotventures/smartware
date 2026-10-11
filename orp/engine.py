@@ -100,6 +100,9 @@ class Params:
     gbdt: dict | None = None
     drop_features: tuple = ()  # feature names forced to 0 (ablations)
     admissible_stats: bool = True  # False only for experiments: global statistics (side-channel baseline)
+    exact_dot: bool = False  # True: dense scores accumulate in float64 and round once, so a vector's score never
+    # depends on its row position in the matrix (BLAS sgemv rounds rows differently by position). The product engine
+    # always scores this way; the benchmark results were produced with False.
 
 
 class Engine:
@@ -594,7 +597,7 @@ class Engine:
         s_bm = s_bm_all if smask is None else np.where(mask, s_bm_all, 0.0)
         chans["bm25"] = (p.w_bm25, topranks(s_bm))
         chans["bm25_win"] = (p.w_bm25_win, topranks(s_bm + 0.5 * (nb(s_bm, pm) + nb(s_bm, nm))))
-        s_dense = self.E @ qvec
+        s_dense = self._dot(self.E, qvec)
         chans["dense"] = (p.w_dense, topranks(s_dense + 1.0))
         hp, hn = (pm >= 0).astype(float), (nm >= 0).astype(float)
         Ep, En = self.E[np.maximum(pm, 0)], self.E[np.maximum(nm, 0)]
@@ -609,7 +612,7 @@ class Engine:
         np.maximum.at(ub, self.seg_unit, np.where(segmask, self.bm_seg.score(
             q, mask=segmask if p.admissible_stats else None, exact=True), 0.0))
         ud = np.full(n, -1.0)
-        np.maximum.at(ud, self.seg_unit, self.ES @ qvec)
+        np.maximum.at(ud, self.seg_unit, self._dot(self.ES, qvec))
         chans["bm25_seg"] = (p.w_bm25_seg, topranks(ub))
         chans["dense_seg"] = (p.w_dense_seg, topranks(ud + 1.0))
         th_b = np.zeros(len(self.threads))
@@ -744,6 +747,11 @@ class Engine:
             notes.append(f"time:{ti.window[0].date()}..{ti.window[1].date()}")
         return ContextPack(items, sum(i.tokens for i in items), req.budget_tokens, round(float(cov), 3),
                            self._snapshot(req.principal.tenant), notes)
+
+    def _dot(self, M: np.ndarray, v: np.ndarray) -> np.ndarray:
+        if not self.p.exact_dot:
+            return M @ v
+        return (M.astype(np.float64) @ v.astype(np.float64)).astype(np.float32)
 
     def _admissible_neighbours(self, mask: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         """Previous/next admissible unit in thread order (skipping inadmissible ones, so gaps are invisible)."""

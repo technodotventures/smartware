@@ -55,7 +55,7 @@ TABLES = ("memories", "claims", "dedup", "idem", "blocked", "edges", "tombstones
 
 
 def _j(x) -> str:
-    return json.dumps(x, sort_keys=True, default=str, ensure_ascii=False)
+    return json.dumps(x, sort_keys=True, default=str)  # ensure_ascii: byte-identical to the TypeScript writer
 
 
 def connect(path: str) -> sqlite3.Connection:

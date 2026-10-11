@@ -41,7 +41,10 @@ class HashingEmbedder:
 
 
 class SIFEmbedder:
-    def __init__(self, path: str, a: float = 1e-3):
+    def __init__(self, path: str, a: float = 1e-3, exact: bool = False):
+        # exact: dot products accumulate in float64 and round once to float32 (BLAS sdot's accumulation order is
+        # unspecified), so every engine computes bit-identical vectors. The benchmark was run with exact=False.
+        self.exact = exact
         if path.endswith(".orpenc"):
             from . import encfile
             head, vocab, vecs, pw, pc = encfile.read(path)
@@ -69,8 +72,12 @@ class SIFEmbedder:
             ids = np.array(ids)
             wts = self.a / (self.a + self.pw[ids])
             r = (self.vecs[ids] * wts[:, None]).sum(0) / len(ids)
-            r = r - self.pc * float(r @ self.pc)
-            n = float(np.linalg.norm(r))
+            if self.exact:
+                r = r - self.pc * float(np.float32(r.astype(np.float64) @ self.pc.astype(np.float64)))
+                n = float(np.sqrt(np.float32(r.astype(np.float64) @ r.astype(np.float64))))
+            else:
+                r = r - self.pc * float(r @ self.pc)
+                n = float(np.linalg.norm(r))
             r = r / n if n else r
         if len(self._cache) < 500_000:
             self._cache[text] = r
