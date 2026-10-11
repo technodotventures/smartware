@@ -6,7 +6,8 @@ benchmark used, so the TypeScript engine is measured on exactly the published da
 
 Format, one haystack per line:
     {"format": "orp-bench-1", "id": ..., "memories": [{id, content, kind, actor, role, thread, seq, observed_at,
-     meta}], "questions": [{id, question, as_of, answer, evidence: [memory ids], category}]}
+     meta}], "questions": [{id, question, as_of, answer, evidence: [memory ids], evidence_threads?: [threads],
+     category}]}
 """
 import hashlib
 import json
@@ -40,7 +41,8 @@ with open(out, "w") as f:
                  "meta": {"thread_label": label.get(t.session_id, "")}} for t in c.turns]
         rec = {"format": "orp-bench-1", "id": c.id, "memories": mems,
                "questions": [{"id": q.qid, "question": q.text, "as_of": q.time.isoformat() if q.time else None,
-                              "answer": q.answer, "evidence": sorted(q.gold_turns), "category": q.category}
+                              "answer": q.answer, "evidence": sorted(q.gold_turns),
+                              "evidence_threads": sorted(q.gold_sessions), "category": q.category}
                              for q in qs]}
         line = json.dumps(rec, sort_keys=True)
         h.update(line.encode())

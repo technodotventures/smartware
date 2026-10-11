@@ -21,7 +21,7 @@ import { BM25, chooseRanker, Engine, isoformat, loadEncoder, memoryFromJson, par
 
 type Json = Record<string, any>;
 export interface Item { ids: string[]; text: string }
-export interface Question { id: string; question: string; as_of: string | null; answer: string; evidence: string[]; category?: string }
+export interface Question { id: string; question: string; as_of: string | null; answer: string; evidence: string[]; evidence_threads?: string[]; category?: string }
 export interface Haystack { id: string; memories: Json[]; questions: Question[] }
 export const BUDGETS = [500, 1000, 2000, 4000];
 
@@ -43,7 +43,8 @@ export function pack(items: Item[], budget: number): { covered: Set<string>; use
   return { covered, used, kept };
 }
 
-export function scoreQuery(items: Item[], gold: Set<string>, answer: string, unitText: Map<string, string>, unitThread: Map<string, string>): Json {
+export function scoreQuery(items: Item[], gold: Set<string>, answer: string, unitText: Map<string, string>, unitThread: Map<string, string>,
+  goldThreads?: string[]): Json {
   const out: Json = {};
   const ans = new Set(answer ? terms(answer) : []);
   const answ = new Set([...ans].filter((w) => !/^[0-9]+$/.test(w)));
@@ -71,7 +72,7 @@ export function scoreQuery(items: Item[], gold: Set<string>, answer: string, uni
     }
     out[`tokens@${b}`] = used;
   }
-  const goldSess = new Set([...gold].map((g) => unitThread.get(g)).filter(Boolean) as string[]);
+  const goldSess = new Set(goldThreads ?? ([...gold].map((g) => unitThread.get(g)).filter(Boolean) as string[]));
   const ranked: string[] = [];
   for (const it of items) for (const id of it.ids) { const s = unitThread.get(id); if (s && !ranked.includes(s)) ranked.push(s); }
   for (const k of [5, 10]) {
@@ -240,7 +241,7 @@ export async function runEval(sets: Haystack[], o: EvalOptions): Promise<{ rows:
       s.build(h);
       for (const q of h.questions) {
         const items = s.retrieve(q, o.k);
-        const m = scoreQuery(items, new Set(q.evidence), q.answer, unitText, unitThread);
+        const m = scoreQuery(items, new Set(q.evidence), q.answer, unitText, unitThread, q.evidence_threads);
         const ctx = pack(items, o.qaBudget).kept.map((i) => i.text).join("\n\n");
         rows.push({ system: s.name, haystack: h.id, qid: q.id, category: q.category ?? "", ...m, _q: q, _ctx: ctx });
       }
