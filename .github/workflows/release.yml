@@ -22,10 +22,18 @@ jobs:
       - run: npm ci --ignore-scripts --no-audit --no-fund
       - run: node tools/release-check.mjs
       - run: npm run build && npm test
-      - name: publish every package with provenance
+      - name: pack each package once and record its integrity (the same sha512 npm shows as dist.integrity)
         run: |
+          mkdir -p dist-release/tarballs
           for p in packages/core packages/server packages/client packages/connectors packages/adapters/*; do
-            (cd "$p" && npm publish --provenance --access public --ignore-scripts)
+            [ -f "$p/package.json" ] || continue
+            (cd "$p" && npm pack --ignore-scripts --pack-destination "$GITHUB_WORKSPACE/dist-release/tarballs")
           done
+          node -e 'const fs=require("fs"),c=require("crypto");const d="dist-release/tarballs";
+            fs.writeFileSync("dist-release/INTEGRITY",fs.readdirSync(d).sort().map(f=>"sha512-"+c.createHash("sha512").update(fs.readFileSync(d+"/"+f)).digest("base64")+"  "+f).join("\n")+"\n")'
+          cat dist-release/INTEGRITY
+      - name: publish exactly those tarballs, with provenance
+        run: |
+          for t in dist-release/tarballs/*.tgz; do npm publish "$t" --provenance --access public --ignore-scripts; done
       - uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
         with: { name: sbom-and-checksums, path: dist-release/ }

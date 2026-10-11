@@ -35,7 +35,7 @@ function flatten(f: Json): Json {
   return out;
 }
 
-function scopeOf(i: { user?: string; agent?: string; run?: string }): { full: string; prefix: string; rest: boolean } {
+export function scopeOf(i: { user?: string; agent?: string; run?: string }): { full: string; prefix: string; rest: boolean } {
   const parts: string[] = [ROOT];
   const order: Array<["user" | "agent" | "run", string | undefined]> = [["user", i.user], ["agent", i.agent], ["run", i.run]];
   for (const [k, v] of order) if (v !== undefined) parts.push(k, seg(v));

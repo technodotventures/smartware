@@ -154,6 +154,13 @@ const HELP = `orp ${VERSION}: the ORP memory kit
   orp keys add --keys <keys.json> --id <principal> --tenant <tenant> [--groups a,b] [--write-scope <prefix>] [--label <name>]
   orp keys list|revoke|migrate --keys <keys.json> [--id <principal>]
   orp backup [--store <db>] --out <file>
+  orp export [--store <db>] --tenant <t> --out <bundle.orp|dir> [--render] [--no-audit]
+      A lossless bundle (spec 8.3): manifest.json with hashes, memories.jsonl, edges.jsonl, audit.jsonl, render/ Markdown.
+  orp import <bundle.orp|dir> [--store <db>] --tenant <t>
+      Restores a bundle into a tenant (as its administrator); hashes are checked first; colliding ids are remapped.
+  orp import-from mcp-memory|mem0|letta <file> [--store <db>] --tenant <t> --as <principal> [--readers self|tenant|<tokens>]
+      Reads another project's memory file as data and writes it as ORP records owned by --as (readable by them only,
+      unless --readers says otherwise). Running it twice writes nothing new.
   orp doctor --self                                   run every conformance check against a scratch in-process server
   orp doctor <url> --tenant <t> --token alice=ENV_A --token bob=ENV_B --token admin=ENV_C --token auditor=ENV_D
              [--token other=ENV_E@<other-tenant>] [--only L1,L2,...|<check ids>] [--json report.json]
@@ -206,6 +213,45 @@ export async function main(argv: string[]) {
     await svc.saveTo(resolve(out));
     svc.close();
     process.stdout.write(`backed up ${storePath} to ${resolve(out)}\n`);
+    return;
+  }
+  if (cmd === "export") {
+    const tenant = s(f, "tenant"), out = s(f, "out");
+    if (!tenant || !out) throw new Error("--tenant and --out are required");
+    const svc = buildService(f, log);
+    try {
+      const { exportBundle, writeBundleFiles } = await import("./bundle.js");
+      const files = await exportBundle(svc, tenant, { render: f.render === true, audit: f["no-audit"] !== true });
+      const path = writeBundleFiles(out, files);
+      const man = JSON.parse(files.get("manifest.json")!.toString("utf8"));
+      process.stdout.write(`exported ${man.counts.memories} memories, ${man.counts.edges} edges, ${man.counts.tombstones} tombstones of tenant ${tenant} to ${path}\n`);
+    } finally { svc.close(); }
+    return;
+  }
+  if (cmd === "import") {
+    const tenant = s(f, "tenant"), src = pos[1];
+    if (!tenant || !src) throw new Error("usage: orp import <bundle> --tenant <t>");
+    const svc = buildService(f, log);
+    try {
+      const { importBundle, readBundleFiles } = await import("./bundle.js");
+      const out = await importBundle(svc, tenant, readBundleFiles(src));
+      process.stdout.write(JSON.stringify(out) + "\n");
+    } finally { svc.close(); }
+    return;
+  }
+  if (cmd === "import-from") {
+    const format = pos[1], src = pos[2], tenant = s(f, "tenant"), as = s(f, "as");
+    if (!format || !src || !tenant || !as) throw new Error("usage: orp import-from mcp-memory|mem0|letta <file> --tenant <t> --as <principal>");
+    const { readFileSync, statSync } = await import("node:fs");
+    if (statSync(src).size > 512 << 20) throw new Error("file is over 512 MiB");
+    const rd = s(f, "readers", "self");
+    const readers = rd === "self" ? undefined : rd === "tenant" ? null : list(f, "readers");
+    const svc = buildService(f, log);
+    try {
+      const { importFrom } = await import("./importers.js");
+      const out = await importFrom(format, svc, new Principal(as, [], tenant), readFileSync(src, "utf8"), { readers, includeReasoning: f["include-reasoning"] === true });
+      process.stdout.write(JSON.stringify(out, null, 2) + "\n");
+    } finally { svc.close(); }
     return;
   }
   if (cmd === "doctor") { const { doctor } = await import("./doctor.js"); process.exitCode = await doctor(pos.slice(1), f); return; }

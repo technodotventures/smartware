@@ -24,6 +24,17 @@ What makes it different, in one line each:
 | 3. Govern | 1 day | Turn on [connectors](packages/connectors) so source permissions flow into readers; multi-tenant; audit; `orp doctor --principals` | L3 |
 | 4. Adapt | 1 week | Reflect jobs, feedback, profile budgets, scheduled bundle exports | L4 |
 
+**Install a pinned version and check it** (never a bare `npx`; nothing runs at install time):
+
+```bash
+npm install --global --ignore-scripts --save-exact @orp/server@0.2.0
+npm view @orp/server@0.2.0 dist.integrity   # must equal the line for orp-server-0.2.0.tgz in the release's INTEGRITY file
+npm audit signatures                        # registry signatures and provenance: built by this repo's release workflow
+```
+
+Each release publishes `INTEGRITY` (the sha512 of every package tarball, as npm records it), `SHA256SUMS` of every
+published file and a CycloneDX SBOM. The packages have no third-party runtime dependencies.
+
 **MCP (Claude, Cursor, Hermes, OpenClaw, any MCP client), local:**
 
 ```json
@@ -50,6 +61,8 @@ const pack = await memory.recall("What coffee does Alice like?", { budgetTokens:
 Already on another memory API? Keep your code: the [MCP memory server tools](policy/claude.md) (`--tools mcp-memory`),
 a [mem0-compatible REST API](docs/OPERATIONS.md#mem0-compatible-rest) at `/mem0`, the mem0 Python class, a LangGraph
 store (JS and Python), Vercel AI SDK middleware, Mastra tools and processors, and a Letta `.af` importer.
+Moving in: `orp import-from mcp-memory|mem0|letta <file> --tenant <t> --as <user>` reads the other project's file as
+data. Moving out: `orp export --tenant <t> --out acme.orp` writes a lossless bundle any ORP engine can import.
 
 ## The kit
 
@@ -58,7 +71,7 @@ store (JS and Python), Vercel AI SDK middleware, Mastra tools and processors, an
 | Spec | [spec/ORP-0.1.md](spec/ORP-0.1.md), [spec/MUSTS.md](spec/MUSTS.md) | The protocol; every MUST has a stable id |
 | Schema pack | [schema/](schema) | JSON Schemas, OpenAPI 3.1 and MCP tool schemas, generated from one source and drift-tested |
 | Engine | [packages/core](packages/core) | TypeScript product engine on Node's built-in SQLite. Zero runtime dependencies |
-| Server | [packages/server](packages/server) | `orp`: serve, doctor, eval, keys, backup |
+| Server | [packages/server](packages/server) | `orp`: serve, doctor, eval, keys, backup, export, import, import-from |
 | Clients | [packages/client](packages/client), [clients/python](clients/python) | Typed clients; identity is never an argument |
 | Adapters | [packages/adapters](packages/adapters) | tools, mastra, langgraph, ai-sdk; Python: LangGraph, mem0, Letta |
 | Connectors | [packages/connectors](packages/connectors) | SDK, Markdown vault, Slack, ACL replay test kit |

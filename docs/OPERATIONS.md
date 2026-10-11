@@ -45,8 +45,15 @@ orp serve --http 8787 --host 127.0.0.1 --store /var/lib/orp/orp.db \
 
 ## Backups and moving data
 - `orp backup --store orp.db --out orp-2026-10-11.db`: SQLite online backup, consistent while serving.
-- Bundles (`GET /v1/<tenant>/export`, `POST /v1/<tenant>/import` as a tenant admin) move one tenant between engines
-  losslessly (M62). The Python oracle reads and writes the same store file (one writer at a time).
+- Bundles move one tenant between engines losslessly (M62): `orp export --store orp.db --tenant acme --out acme.orp
+  [--render]` writes a zip (or a directory, without the `.orp` suffix) with `manifest.json` (counts, sha256 of every
+  file, capabilities), `memories.jsonl`, `edges.jsonl`, `audit.jsonl` and, with `--render`, a Markdown view per thread
+  and entity. `orp import acme.orp --store other.db --tenant acme` checks the hashes before writing anything. Over
+  HTTP: `GET /v1/<tenant>/export`, `POST /v1/<tenant>/import` as a tenant admin.
+- From other projects: `orp import-from mcp-memory memory.json|mem0 export.json|letta agent.af --tenant acme --as
+  alice [--readers tenant]`. Records belong to `--as` and are readable by them only unless `--readers` widens it;
+  running it again writes nothing new, and anything forgotten since stays forgotten.
+- The Python oracle reads and writes the same store file (one writer at a time).
 
 ## Sizing
 See [results/PERFORMANCE.md](../results/PERFORMANCE.md). Up to about 10,000 units per tenant, recall stays under about
