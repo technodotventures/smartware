@@ -1,5 +1,13 @@
 # Smartware
 
+**The first-ever self-improving memory protocol for agents and apps.**
+
+Memory that stays current, respects permissions and fits the context window. Built by agents, and better every week.
+Website: [smartware.software](https://smartware.software)
+
+<a href="https://smartware.software"><img src="docs/badges/remembers-dark.svg" alt="Remembers with Smartware" height="28"></a>
+<a href="https://loopy.systems"><img src="https://raw.githubusercontent.com/technodotventures/loopy/main/brand/badges/improving-dark.svg" alt="Autonomously improving with Loopy" height="28"></a>
+
 Memory and context for AI agents and SaaS platforms, shipped as a kit: a protocol, a production engine, one server
 binary, typed clients, adapters for the memory APIs projects already call, connectors that carry source permissions
 into memory, and the tools to prove all of it on your own data.
@@ -109,3 +117,6 @@ git config core.hooksPath tools/hooks
 
 Licence: Apache-2.0 (see LICENSE and NOTICE). Status against the implementation design doc:
 [docs/STATUS.md](docs/STATUS.md).
+
+The website lives in [`docs/`](docs/) (`index.html`, served by GitHub Pages); the guides beside it are plain Markdown.
+Built by [Techno Ventures](https://techno.ventures).
