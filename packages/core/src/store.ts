@@ -67,10 +67,19 @@ export interface TenantRows {
   jobs: Array<{ id: string; body: string }>;
   counters: { tmut: number; tcount: number } | null;
   changeCount: number;
+  /** Shared stores: the tenant's highest order and write sequence. */
+  maxOrd?: number;
+  maxWseq?: number;
 }
 
 export interface StoreDelta {
   meta: Record<string, string>;
+  /** Shared stores: commit only while these leases are still held (fencing). */
+  fence?: Array<{ tenant: string; epoch: number }>;
+  /** Shared stores: this node's write sequence, kept per tenant as a floor for the next owner. */
+  wseqFloor?: number;
+  edgesDel: string[];
+  vectorsDel: Array<{ encoder: string; sha: string }>;
   memories: Array<{ iid: string; tenant: string; ord: number; record: string }>;
   deleted: string[];
   claims: Array<{ tenant: string; key: string; iids: string[] }>;
@@ -88,12 +97,54 @@ export interface StoreDelta {
 }
 
 export function emptyDelta(): StoreDelta {
-  return { meta: {}, memories: [], deleted: [], claims: [], dedupAdd: [], dedupDel: [], idem: [], blocked: [],
-    edges: [], tombstones: [], changes: [], audit: [], jobs: [], feedback: [], counters: [] };
+  return { meta: {}, edgesDel: [], vectorsDel: [], memories: [], deleted: [], claims: [], dedupAdd: [], dedupDel: [], idem: [],
+    blocked: [], edges: [], tombstones: [], changes: [], audit: [], jobs: [], feedback: [], counters: [] };
 }
 
-export class SqliteStore {
+/** The engine's Store port. Every method is async so a networked store (Postgres) fits the same service code; the
+ * SQLite store answers synchronously underneath. A store that can be shared by several server processes also
+ * implements tenant leases (one writer per tenant at a time, fenced on every write). */
+export interface Store {
+  readonly kind: string;
+  /** Where it is, for logs (never includes a password). */
+  readonly location: string;
+  /** Global metadata: schema, the snapshot secret, counters (max_ord included). */
+  meta(): Promise<Record<string, string>>;
+  loadTenant(t: string): Promise<TenantRows>;
+  /** Write one verb's changes atomically. */
+  flush(d: StoreDelta): Promise<void>;
+  changes(t: string, cursor: number, limit: number): Promise<Row[]>;
+  audit(t: string): Promise<Row[]>;
+  /** Tenants, most recently written first (for background warm-up). */
+  tenantsByRecency(): Promise<string[]>;
+  /** Whether a row with this key exists under another tenant. */
+  otherTenant(table: "memories" | "edges" | "tombstones", key: string, t: string): Promise<boolean>;
+  getVector(encoder: string, sha: string): Promise<Float32Array | null>;
+  putVector(encoder: string, sha: string, v: Float32Array): Promise<void>;
+  /** A consistent copy of the whole store into a new SQLite file. */
+  backupTo?(path: string): Promise<void>;
+  /** Tenant leases, for stores shared by several processes. */
+  leases?: TenantLeases;
+  close(): Promise<void> | void;
+}
+
+export interface Lease { tenant: string; epoch: number }
+export interface TenantLeases {
+  /** This process's node id and the URL other nodes can reach it on. */
+  readonly node: string;
+  /** Take the tenant's lease if it is free, expired or already ours; otherwise say who holds it. */
+  acquire(t: string): Promise<{ lease: Lease } | { owner: string; url: string | null }>;
+  /** Extend our leases; returns the tenants whose lease was lost. */
+  renew(tenants: string[]): Promise<string[]>;
+  release(tenants: string[]): Promise<void>;
+}
+
+const COL: Record<string, string> = { memories: "iid", edges: "id", tombstones: "iid" };
+
+export class SqliteStore implements Store {
+  readonly kind = "sqlite";
   readonly db: any;
+  get location(): string { return this.path; }
   private st = new Map<string, any>();
 
   constructor(readonly path: string) {
@@ -113,7 +164,11 @@ export class SqliteStore {
     return s;
   }
 
-  meta(): Record<string, string> {
+  async meta(): Promise<Record<string, string>> {
+    return this.metaSync();
+  }
+
+  metaSync(): Record<string, string> {
     const out: Record<string, string> = {};
     for (const r of this.q("SELECT key, value FROM orp_meta").all() as Row[]) out[r.key] = r.value;
     const mx = this.q("SELECT MAX(ord) AS m FROM memories").get() as Row;
@@ -125,7 +180,25 @@ export class SqliteStore {
     return (this.q("SELECT DISTINCT tenant FROM memories UNION SELECT tenant FROM counters").all() as Row[]).map((r) => r.tenant);
   }
 
-  loadTenant(t: string): TenantRows {
+  async loadTenant(t: string): Promise<TenantRows> {
+    return this.loadTenantSync(t);
+  }
+
+  async tenantsByRecency(): Promise<string[]> {
+    return (this.q("SELECT tenant, MAX(ord) AS o FROM memories GROUP BY tenant ORDER BY o DESC").all() as Row[]).map((r) => r.tenant);
+  }
+
+  async otherTenant(table: "memories" | "edges" | "tombstones", key: string, t: string): Promise<boolean> {
+    const r = this.q(`SELECT tenant FROM ${table} WHERE ${COL[table]} = ?`).get(key) as Row | undefined;
+    return Boolean(r && r.tenant !== t);
+  }
+
+  async backupTo(path: string): Promise<void> {
+    const { backup } = sqlite();
+    await backup(this.db, path);
+  }
+
+  loadTenantSync(t: string): TenantRows {
     const all = (sql: string) => this.q(sql).all(t) as Row[];
     const c = this.q("SELECT tmut, tcount FROM counters WHERE tenant = ?").get(t) as Row | undefined;
     const cc = this.q("SELECT MAX(cursor) AS m FROM changes WHERE tenant = ?").get(t) as Row;
@@ -143,34 +216,36 @@ export class SqliteStore {
     };
   }
 
-  changes(t: string, cursor: number, limit: number): Row[] {
+  async changes(t: string, cursor: number, limit: number): Promise<Row[]> {
     return (this.q("SELECT body FROM changes WHERE tenant = ? AND cursor > ? ORDER BY cursor LIMIT ?")
       .all(t, cursor, limit) as Row[]).map((r) => JSON.parse(r.body));
   }
 
-  audit(t: string): Row[] {
+  async audit(t: string): Promise<Row[]> {
     return (this.q("SELECT body FROM audit WHERE tenant = ? ORDER BY seq").all(t) as Row[]).map((r) => JSON.parse(r.body));
   }
 
-  getVector(encoder: string, sha: string): Float32Array | null {
+  async getVector(encoder: string, sha: string): Promise<Float32Array | null> {
     const r = this.q("SELECT vec FROM vectors WHERE encoder = ? AND text_sha = ?").get(encoder, sha) as Row | undefined;
     if (!r) return null;
     const b = r.vec as Uint8Array;
     return new Float32Array(b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength));
   }
 
-  deleteVector(encoder: string, sha: string) {
-    this.q("DELETE FROM vectors WHERE encoder = ? AND text_sha = ?").run(encoder, sha);
-  }
-
-  putVector(encoder: string, sha: string, v: Float32Array) {
+  async putVector(encoder: string, sha: string, v: Float32Array): Promise<void> {
     this.q("INSERT OR REPLACE INTO vectors VALUES (?, ?, ?)").run(encoder, sha, new Uint8Array(v.buffer, v.byteOffset, v.byteLength));
   }
 
-  flush(d: StoreDelta) {
+  async flush(d: StoreDelta): Promise<void> {
+    this.flushSync(d);
+  }
+
+  flushSync(d: StoreDelta) {
     this.db.exec("BEGIN IMMEDIATE");
     try {
       for (const [k, v] of Object.entries(d.meta)) this.q("INSERT OR REPLACE INTO orp_meta VALUES (?, ?)").run(k, v);
+      for (const id of d.edgesDel ?? []) this.q("DELETE FROM edges WHERE id = ?").run(id);
+      for (const v of d.vectorsDel ?? []) this.q("DELETE FROM vectors WHERE encoder = ? AND text_sha = ?").run(v.encoder, v.sha);
       // deletes before inserts, so an id purged and then re-used inside one verb ends up present
       for (const i of d.deleted) this.q("DELETE FROM memories WHERE iid = ?").run(i);
       for (const m of d.memories) this.q("INSERT OR REPLACE INTO memories VALUES (?, ?, ?, ?)").run(m.iid, m.tenant, m.ord, m.record);

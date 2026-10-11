@@ -89,8 +89,8 @@ async function serveStdio(svc: Service, f: Flags, log: Log) {
     queue.push(msg);
     void pump();
   });
-  rl.on("close", () => { svc.close(); process.exit(0); });
-  log.info("orp mcp stdio ready", { tenant: pr.tenant, principal: pr.id, store: svc.store?.path ?? "(memory)" });
+  rl.on("close", () => { void svc.close().finally(() => process.exit(0)); });
+  log.info("orp mcp stdio ready", { tenant: pr.tenant, principal: pr.id, store: svc.store?.location ?? "(memory)" });
 }
 
 async function serveHttp(svc: Service, f: Flags, log: Log) {
@@ -133,8 +133,8 @@ async function serveHttp(svc: Service, f: Flags, log: Log) {
     // warm every tenant's index in the background so the first recall after a restart is fast
     void svc.preload((t, ms) => log.info("tenant warmed", { tenant: t, ms })).catch((e) => log.warn("preload failed", { err: String(e) }));
   }
-  log.info("orp http ready", { url: gw.url, mcp: `${gw.url}/mcp`, store: svc.store?.path ?? "(memory)", auth: [keys.size ? "keys" : "", jwt ? "oidc" : "", dev ? "dev" : ""].filter(Boolean) });
-  const stop = async () => { log.info("shutting down"); await gw.close(); svc.close(); process.exit(0); };
+  log.info("orp http ready", { url: gw.url, mcp: `${gw.url}/mcp`, store: svc.store?.location ?? "(memory)", auth: [keys.size ? "keys" : "", jwt ? "oidc" : "", dev ? "dev" : ""].filter(Boolean) });
+  const stop = async () => { log.info("shutting down"); await gw.close(); await svc.close(); process.exit(0); };
   process.on("SIGTERM", stop);
   process.on("SIGINT", stop);
 }
@@ -211,7 +211,7 @@ export async function main(argv: string[]) {
     if (!existsSync(storePath)) throw new Error(`${storePath} does not exist`);
     const svc = new Service(loadEncoder("hashing"), { store: new SqliteStore(storePath) });
     await svc.saveTo(resolve(out));
-    svc.close();
+    await svc.close();
     process.stdout.write(`backed up ${storePath} to ${resolve(out)}\n`);
     return;
   }
@@ -225,7 +225,7 @@ export async function main(argv: string[]) {
       const path = writeBundleFiles(out, files);
       const man = JSON.parse(files.get("manifest.json")!.toString("utf8"));
       process.stdout.write(`exported ${man.counts.memories} memories, ${man.counts.edges} edges, ${man.counts.tombstones} tombstones of tenant ${tenant} to ${path}\n`);
-    } finally { svc.close(); }
+    } finally { await svc.close(); }
     return;
   }
   if (cmd === "import") {
@@ -236,7 +236,7 @@ export async function main(argv: string[]) {
       const { importBundle, readBundleFiles } = await import("./bundle.js");
       const out = await importBundle(svc, tenant, readBundleFiles(src));
       process.stdout.write(JSON.stringify(out) + "\n");
-    } finally { svc.close(); }
+    } finally { await svc.close(); }
     return;
   }
   if (cmd === "import-from") {
@@ -251,7 +251,7 @@ export async function main(argv: string[]) {
       const { importFrom } = await import("./importers.js");
       const out = await importFrom(format, svc, new Principal(as, [], tenant), readFileSync(src, "utf8"), { readers, includeReasoning: f["include-reasoning"] === true });
       process.stdout.write(JSON.stringify(out, null, 2) + "\n");
-    } finally { svc.close(); }
+    } finally { await svc.close(); }
     return;
   }
   if (cmd === "doctor") { const { doctor } = await import("./doctor.js"); process.exitCode = await doctor(pos.slice(1), f); return; }

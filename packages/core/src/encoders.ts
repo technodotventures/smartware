@@ -26,8 +26,8 @@ export interface Encoder {
 
 /** Optional persistent vector cache (the store's vectors table), so restarts do not re-embed. */
 export interface VectorCache {
-  get(encoder: string, sha: string): Float32Array | null;
-  put(encoder: string, sha: string, v: Float32Array): void;
+  get(encoder: string, sha: string): Float32Array | null | Promise<Float32Array | null>;
+  put(encoder: string, sha: string, v: Float32Array): void | Promise<void>;
   delete?(encoder: string, sha: string): void;
 }
 
@@ -195,11 +195,13 @@ export class ApiEncoder implements Encoder {
     let need = [...new Set(texts.filter((t) => !this.cache.has(t)))];
     if (this.cache.size > 200_000) this.cache.clear(); // indexes hold their own copies; keep this bounded
     if (this.persist && need.length) {
-      need = need.filter((t) => {
-        const v = this.persist!.get(this.name, sha(t));
+      const still: string[] = [];
+      for (const t of need) {
+        const v = await this.persist.get(this.name, sha(t));
         if (v) this.cache.set(t, v);
-        return !v;
-      });
+        else still.push(t);
+      }
+      need = still;
     }
     const key = process.env[this.keyEnv];
     for (let i = 0; i < need.length; i += 128) {
@@ -218,7 +220,7 @@ export class ApiEncoder implements Encoder {
         const n = Math.sqrt(ss);
         if (n) for (let j = 0; j < v.length; j++) v[j] = v[j]! / n;
         this.cache.set(batch[row.index]!, v);
-        this.persist?.put(this.name, sha(batch[row.index]!), v);
+        await this.persist?.put(this.name, sha(batch[row.index]!), v);
       }
     }
   }

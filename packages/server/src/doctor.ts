@@ -437,7 +437,7 @@ export async function selfTest(f: Record<string, any>): Promise<DoctorResult> {
     return await runChecks(gw.url, "doctor", tokens, "elsewhere");
   } finally {
     await gw.close();
-    svc.close();
+    await svc.close();
   }
 }
 

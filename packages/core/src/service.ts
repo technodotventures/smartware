@@ -13,7 +13,7 @@ import type { Params } from "./params.js";
 import { FEATURES } from "./params.js";
 import { pyDumps } from "./pyjson.js";
 import { scanSecrets } from "./secrets.js";
-import { emptyDelta, SqliteStore } from "./store.js";
+import { emptyDelta, SqliteStore, type Store, type StoreDelta } from "./store.js";
 import { countTokens, sentences, terms } from "./text.js";
 import { epochSeconds, isoformat, MIN_TIME, nowMicros, parseTime, type Micros } from "./time.js";
 
@@ -144,7 +144,9 @@ const env = (out: Json): Json => {
 export interface ServiceOptions {
   params?: Params;
   tokenizer?: string;
-  store?: SqliteStore | null;
+  store?: Store | null;
+  /** With a shared store: release a tenant's lease and unload it after this long without requests (default 10 min). */
+  idleTenantMs?: number;
   /** Label content that looks like a credential as secret (default true). */
   secretScan?: boolean;
   encoderName?: string;
@@ -169,7 +171,7 @@ class Mutex {
 export class Service {
   readonly engine: Engine;
   readonly tokenizer: string;
-  readonly store: SqliteStore | null;
+  readonly store: Store | null;
   readonly secretScan: boolean;
   encoderName: string;
   rankerName: string;
@@ -192,6 +194,14 @@ export class Service {
   private jBlocked = new Set<string>();
   private jChanges: ChangeEntry[] = [];
   private jFeedback: Json[] = [];
+  private jEdgeDel = new Set<string>();
+  private jVecDel: Array<{ encoder: string; sha: string }> = [];
+  private initP: Promise<void> | null = null;
+  /** Lease epochs of the tenants this process holds (shared stores only). */
+  private held = new Map<string, number>();
+  private lastUsed = new Map<string, number>();
+  private leaseTimer: ReturnType<typeof setInterval> | null = null;
+  private readonly idleTenantMs: number;
 
   constructor(readonly enc: Encoder, opts: ServiceOptions = {}) {
     this.engine = new Engine(enc, opts.params);
@@ -201,29 +211,95 @@ export class Service {
     this.encoderName = opts.encoderName ?? enc.name;
     this.rankerName = opts.rankerName ?? `orp-${this.engine.p.ranker}-1`;
     this.notes = opts.notes ?? [];
+    this.idleTenantMs = opts.idleTenantMs ?? 10 * 60_000;
     if (this.store && opts.cacheVectors !== false && "persist" in enc) {
       const st = this.store;
+      // reads and writes of cached vectors go straight to the store; deletions (purge, redact) join the verb's
+      // transaction, so an erased text's vector is gone exactly when the record is
       (enc as any).persist = { get: (e: string, h: string) => st.getVector(e, h), put: (e: string, h: string, v: Float32Array) => st.putVector(e, h, v),
-        delete: (e: string, h: string) => st.deleteVector(e, h) };
+        delete: (e: string, h: string) => { this.jVecDel.push({ encoder: e, sha: h }); } };
     }
-    if (this.store) {
-      const meta = this.store.meta();
-      if (meta.secret) this.engine.secret = Buffer.from(meta.secret, "hex");
-      else this.store.flush({ ...emptyDelta(), meta: { secret: this.engine.secret.toString("hex") } });
-      this.engine.epoch = Number(meta.epoch ?? 0);
-      this.engine.wseq = Number(meta.wseq ?? 0);
-      this.engine.mutations = Number(meta.mutations ?? 0);
-      this.engine.ordSeq = Number(meta.max_ord ?? 0);
+    if (this.store instanceof SqliteStore) this.applyMeta(this.store.metaSync(), (d) => (this.store as SqliteStore).flushSync(d));
+  }
+
+  /** Read the store's global metadata once (the snapshot secret and counters); creates the secret on a new store. */
+  ready(): Promise<void> {
+    if (!this.store) return Promise.resolve();
+    if (!this.initP) {
+      this.initP = (async () => {
+        if (!(this.store instanceof SqliteStore)) {
+          const pending: StoreDelta[] = [];
+          this.applyMeta(await this.store!.meta(), (d) => pending.push(d));
+          for (const d of pending) await this.store!.flush(d);
+        }
+        if (this.store!.leases) this.startLeaseTimer();
+      })();
+      this.initP.catch(() => { this.initP = null; });
     }
+    return this.initP;
+  }
+
+  private applyMeta(meta: Record<string, string>, write: (d: StoreDelta) => void) {
+    if (meta.secret) this.engine.secret = Buffer.from(meta.secret, "hex");
+    else write({ ...emptyDelta(), meta: { secret: this.engine.secret.toString("hex") } });
+    this.engine.epoch = Number(meta.epoch ?? 0);
+    this.engine.wseq = Math.max(this.engine.wseq, Number(meta.wseq ?? 0));
+    this.engine.mutations = Number(meta.mutations ?? 0);
+    this.engine.ordSeq = Math.max(this.engine.ordSeq, Number(meta.max_ord ?? 0));
+  }
+
+  // ------------------------------------------------------------ tenant leases (shared stores)
+  /** Which process serves a tenant: this one (taking the lease if it is free), or another node at `url`. */
+  async route(t: string): Promise<{ mine: true } | { mine: false; owner: string; url: string | null }> {
+    await this.ready();
+    const L = this.store?.leases;
+    if (!L || this.held.has(t)) return { mine: true };
+    const r = await this.lock.run(() => this.acquire(t));
+    return r;
+  }
+
+  private async acquire(t: string): Promise<{ mine: true } | { mine: false; owner: string; url: string | null }> {
+    const L = this.store!.leases!;
+    if (this.held.has(t)) return { mine: true };
+    const got = await L.acquire(t);
+    if ("owner" in got) return { mine: false, owner: got.owner, url: got.url };
+    // a new lease: whatever this process held for the tenant before may be stale (another node may have written)
+    if (this.loaded.has(t)) this.unloadTenant(t);
+    this.held.set(t, got.lease.epoch);
+    return { mine: true };
+  }
+
+  private startLeaseTimer() {
+    if (this.leaseTimer) return;
+    const L = this.store!.leases!;
+    const tick = async () => {
+      const now = Date.now();
+      const idle = [...this.held.keys()].filter((t) => now - (this.lastUsed.get(t) ?? 0) > this.idleTenantMs);
+      await this.lock.run(async () => {
+        if (idle.length) {
+          for (const t of idle) { this.held.delete(t); this.lastUsed.delete(t); if (this.loaded.has(t)) this.unloadTenant(t); }
+          await L.release(idle);
+        }
+        const lost = await L.renew([...this.held.keys()]);
+        for (const t of lost) { this.held.delete(t); if (this.loaded.has(t)) this.unloadTenant(t); }
+      }).catch(() => undefined); // a failed renewal is retried next tick; writes stay fenced meanwhile
+    };
+    this.leaseTimer = setInterval(() => void tick(), (L as any).renewEveryMs ?? 10_000);
+    this.leaseTimer.unref?.();
   }
 
   // ------------------------------------------------------------ tenancy and persistence
   /** Load a tenant from the store on first use. */
-  ensureTenant(t: string) {
+  async ensureTenant(t: string): Promise<void> {
+    if (this.store?.leases) {
+      this.lastUsed.set(t, Date.now());
+      const r = await this.acquire(t);
+      if (!r.mine) throw new ORPError("unavailable", "this tenant is served by another node; retry there", { node: r.owner, url: r.url });
+    }
     if (this.loaded.has(t)) return;
     if (!this.store) { this.loaded.add(t); return; }
     try {
-      this.loadTenantRows(t);
+      await this.loadTenantRows(t);
       this.loaded.add(t); // only once every row is in, so a failed load is retried rather than half-used
     } catch (e) {
       this.unloadTenant(t);
@@ -231,8 +307,8 @@ export class Service {
     }
   }
 
-  private loadTenantRows(t: string) {
-    const rows = this.store!.loadTenant(t);
+  private async loadTenantRows(t: string) {
+    const rows = await this.store!.loadTenant(t);
     const E = this.engine;
     for (const r of rows.memories) {
       const m = memoryFromJson(JSON.parse(r.record));
@@ -264,6 +340,10 @@ export class Service {
       E.tmut.set(t, rows.counters.tmut);
       E.tcount.set(t, rows.counters.tcount);
     }
+    // a shared store reports the tenant's highest order and write sequence, so numbering continues past what
+    // another node wrote
+    if (rows.maxOrd !== undefined) E.ordSeq = Math.max(E.ordSeq, rows.maxOrd);
+    if (rows.maxWseq !== undefined) E.wseq = Math.max(E.wseq, rows.maxWseq);
     this.changeCount.set(t, rows.changeCount);
     E.invalidate(t);
   }
@@ -280,17 +360,30 @@ export class Service {
     }
   }
 
+  private clearJournal() {
+    this.engine.journal = newJournal();
+    this.jIdem.clear(); this.jJobs.clear(); this.jEdges.clear(); this.jTomb.clear(); this.jBlocked.clear(); this.jEdgeDel.clear();
+    this.jChanges = []; this.jFeedback = []; this.jVecDel = [];
+  }
+
   /** Write everything the last verb changed, in one transaction. */
-  private flush() {
+  private async flush() {
     const E = this.engine, J = E.journal;
     if (!this.store) {
-      E.journal = newJournal();
-      this.jIdem.clear(); this.jJobs.clear(); this.jEdges.clear(); this.jTomb.clear(); this.jBlocked.clear();
-      this.jChanges = []; this.jFeedback = [];
+      this.clearJournal();
       return;
     }
     const d = emptyDelta();
     d.meta = { epoch: String(E.epoch), wseq: String(E.wseq), mutations: String(E.mutations) };
+    d.edgesDel = [...this.jEdgeDel];
+    d.vectorsDel = [...this.jVecDel];
+    if (this.store.leases) { // fence: the write commits only while this process still holds every tenant it touches
+      const ts = new Set<string>(J.tenants);
+      for (const i of J.mem) { const m = E.mem.get(i); if (m) ts.add(m.tenant); }
+      for (const t of this.loaded) ts.add(t);
+      d.fence = [...ts].filter((t) => this.held.has(t)).map((t) => ({ tenant: t, epoch: this.held.get(t)! }));
+      d.wseqFloor = E.wseq;
+    }
     for (const i of J.mem) {
       const m = E.mem.get(i);
       if (!m) continue;
@@ -318,19 +411,18 @@ export class Service {
     for (const id of this.jJobs) { const j = this.jobs.get(id)!; d.jobs.push({ id, tenant: j.tenant, body: pyDumps(j, { sortKeys: true }) }); }
     for (const f of this.jFeedback) d.feedback.push({ tenant: f._tenant ?? "", body: pyDumps(stripUnderscore(f), { sortKeys: true }) });
     for (const t of J.tenants) d.counters.push({ tenant: t, tmut: E.tmut.get(t) ?? 0, tcount: E.tcount.get(t) ?? 0 });
-    this.store.flush(d);
+    await this.store.flush(d);
     E.audit = [];
     E.auditTenant = [];
-    E.journal = newJournal();
-    this.jIdem.clear(); this.jJobs.clear(); this.jEdges.clear(); this.jTomb.clear(); this.jBlocked.clear();
-    this.jChanges = []; this.jFeedback = [];
+    this.clearJournal();
     for (const t of this.changeFeed.keys()) this.changeFeed.set(t, []);
   }
 
   /** Run a verb under the lock, loading the caller's tenant and persisting what changed (or nothing, on error). */
   private async verb<T>(pr: Principal, write: boolean, fn: () => T | Promise<T>, extra: string[] = []): Promise<T> {
     return this.lock.run(async () => {
-      this.ensureTenant(pr.tenant);
+      await this.ready();
+      await this.ensureTenant(pr.tenant);
       await this.warm(this.engine.pendingTexts(pr.tenant)); // records must be embedded to be indexed
       if (extra.length) {
         try {
@@ -344,10 +436,10 @@ export class Service {
         const auditStart = this.engine.audit.length;
       try {
         const out = await fn();
-        if (write) this.flush();
+        if (write) await this.flush();
         return out;
       } catch (e) {
-        if (write) this.rollbackJournal(pr.tenant, auditStart);
+        if (write) await this.rollbackJournal(pr.tenant, auditStart);
         throw e;
       }
     });
@@ -356,21 +448,19 @@ export class Service {
   /** On an error mid-verb, put memory back to what was committed: drop this verb's audit entries and, with a store,
    * reload the tenants the verb touched (and only those). Validation runs before any mutation, so this path is for
    * internal errors such as a store or encoder failure part way through. */
-  private rollbackJournal(tenant: string, auditStart: number) {
+  private async rollbackJournal(tenant: string, auditStart: number) {
     const E = this.engine, J = E.journal;
     const dirty = J.mem.size + J.deleted.size + J.claims.size + J.dedupAdd.size + J.dedupDel.size + J.tenants.size +
       this.jIdem.size + this.jJobs.size + this.jEdges.size + this.jTomb.size + this.jBlocked.size +
-      this.jChanges.length + this.jFeedback.length > 0;
+      this.jChanges.length + this.jFeedback.length + this.jEdgeDel.size + this.jVecDel.length > 0;
     const touched = new Set<string>([tenant, ...J.tenants]);
     for (const i of J.mem) { const m = E.mem.get(i); if (m) touched.add(m.tenant); }
-    E.journal = newJournal();
-    this.jIdem.clear(); this.jJobs.clear(); this.jEdges.clear(); this.jTomb.clear(); this.jBlocked.clear();
-    this.jChanges = []; this.jFeedback = [];
+    this.clearJournal();
     E.audit.length = Math.min(E.audit.length, auditStart);
     E.auditTenant.length = Math.min(E.auditTenant.length, auditStart);
     if (dirty && this.store) {
       for (const t of touched) this.unloadTenant(t);
-      const meta = this.store.meta();
+      const meta = await this.store.meta();
       E.epoch = Number(meta.epoch ?? 0);
       E.wseq = Number(meta.wseq ?? 0);
       E.mutations = Number(meta.mutations ?? 0);
@@ -929,7 +1019,8 @@ export class Service {
         throw new ORPError("forbidden", "no write access to this edge");
       }
       this.edgesMap.delete(String(edgeId));
-      if (this.store) this.store.db.prepare("DELETE FROM edges WHERE id = ?").run(String(edgeId));
+      this.jEdges.delete(String(edgeId));
+      this.jEdgeDel.add(String(edgeId));
       this.log("unlink", e.from, pr, { edge: String(edgeId) });
       return env({ id: String(edgeId), removed: true });
     });
@@ -1124,10 +1215,10 @@ export class Service {
   // ------------------------------------------------------------ changes / audit
   async changes(cursor: unknown, pr: Principal, limit: unknown = 500): Promise<Json> {
     const c = int(cursor, "cursor", 0), l = int(limit, "limit", 1, 100_000);
-    return this.verb(pr, false, () => {
+    return this.verb(pr, false, async () => {
       const t = pr.tenant;
       const total = this.changeCount.get(t) ?? 0;
-      const rows: Json[] = this.store ? this.store.changes(t, c, l)
+      const rows: Json[] = this.store ? await this.store.changes(t, c, l)
         : (this.changeFeed.get(t) ?? []).slice(c, c + l);
       const auditor = pr.groups.has("auditor");
       const out: Json[] = [];
@@ -1142,9 +1233,9 @@ export class Service {
 
   async auditLog(pr: Principal): Promise<Json> {
     if (!pr.groups.has("auditor")) throw new ORPError("forbidden", "audit requires the auditor role");
-    return this.verb(pr, false, () => {
+    return this.verb(pr, false, async () => {
       const t = pr.tenant;
-      if (this.store) return env({ entries: this.store.audit(t).map((a) => ({ ...a, id: this.out(t, a.id) })) });
+      if (this.store) return env({ entries: (await this.store.audit(t)).map((a) => ({ ...a, id: this.out(t, a.id) })) });
       const ids = new Set<string>();
       for (const [i, m] of this.engine.mem) if (m.tenant === t) ids.add(i);
       for (const x of this.tombstones.values()) if (x.tenant === t) ids.add(x._iid);
@@ -1210,16 +1301,28 @@ export class Service {
     if (!Array.isArray(tombRows) || tombRows.some((x: any) => !x || typeof x.id !== "string")) {
       throw new ORPError("invalid_parameter", "manifest.tombstones is a list of objects with a string id");
     }
-    return this.verb(pr, true, () => {
+    return this.verb(pr, true, async () => {
       const E = this.engine;
       // a bundle can name engine ids of tenants not loaded yet; check collisions against the store too
+      const foreign = new Set<string>();
+      if (this.store) {
+        const refs = new Set<string>();
+        for (const d of rows) {
+          for (const x of [d.id, d.superseded_by, ...(d.supersedes ?? []), ...(d.derived_from ?? []), ...(d.meta?._supersedable_by ?? [])]) {
+            if (typeof x === "string" && ENGINE_ID.test(x) && !E.mem.has(x)) refs.add(x);
+          }
+        }
+        for (const e of edgeRows) for (const x of [e.from, e.to]) if (ENGINE_ID.test(x) && !E.mem.has(x)) refs.add(x);
+        for (const x of tombRows as Json[]) if (ENGINE_ID.test(x.id) && !E.mem.has(x.id)) refs.add(x.id);
+        for (const x of refs) if (await this.store.otherTenant("memories", x, t)) foreign.add(x);
+      }
       const idMap = new Map<string, string>();
       const conv = (x: string): string => {
         const hit = idMap.get(x);
         if (hit) return hit;
         if (ENGINE_ID.test(x)) {
           const o = E.mem.get(x);
-          if (o === undefined && !this.storeHasOtherTenant(x, t)) return x;
+          if (o === undefined && !foreign.has(x)) return x;
           if (o !== undefined && o.tenant === t) return x;
           const n = newId();
           idMap.set(x, n);
@@ -1269,7 +1372,7 @@ export class Service {
         const a = E.mem.get(e.from), bb = E.mem.get(e.to);
         if (!(a && bb && a.tenant === t && bb.tenant === t)) throw new ORPError("invalid_parameter", "edge endpoints must exist in this tenant");
         let eid = e.id || "edge_" + randomBytes(8).toString("hex");
-        if ((this.edgesMap.has(eid) && this.edgesMap.get(eid)!.tenant !== t) || this.storeOtherTenant("edges", "id", eid, t)) {
+        if ((this.edgesMap.has(eid) && this.edgesMap.get(eid)!.tenant !== t) || (await this.storeOtherTenant("edges", eid, t))) {
           eid = "edge_" + randomBytes(8).toString("hex");
         }
         this.edgesMap.set(eid, { ...e, id: eid, tenant: t });
@@ -1277,7 +1380,7 @@ export class Service {
       }
       for (const x of tombRows as Json[]) {
         let iid = conv(x.id);
-        if ((this.tombstones.has(iid) && this.tombstones.get(iid)!.tenant !== t) || this.storeOtherTenant("tombstones", "iid", iid, t)) {
+        if ((this.tombstones.has(iid) && this.tombstones.get(iid)!.tenant !== t) || (await this.storeOtherTenant("tombstones", iid, t))) {
           if (!idMap.has(x.id)) idMap.set(x.id, newId());
           iid = idMap.get(x.id)!;
         }
@@ -1289,26 +1392,29 @@ export class Service {
     });
   }
 
-  private storeHasOtherTenant(iid: string, t: string): boolean {
-    return this.storeOtherTenant("memories", "iid", iid, t);
-  }
-
   /** Whether a row with this key exists in the store under another tenant (tenants not loaded yet count too). */
-  private storeOtherTenant(table: "memories" | "edges" | "tombstones", col: "iid" | "id", key: string, t: string): boolean {
-    if (!this.store) return false;
-    const r = this.store.db.prepare(`SELECT tenant FROM ${table} WHERE ${col} = ?`).get(key) as Json | undefined;
-    return Boolean(r && r.tenant !== t);
+  private async storeOtherTenant(table: "memories" | "edges" | "tombstones", key: string, t: string): Promise<boolean> {
+    return this.store ? this.store.otherTenant(table, key, t) : false;
   }
 
   /** Load every tenant in the store and build its index in the background, most recently written first, without
    * holding the lock while building (requests keep being served). Returns the number of tenants warmed. */
   async preload(onTenant?: (t: string, ms: number) => void): Promise<number> {
     if (!this.store) return 0;
-    const tenants = this.store.db.prepare("SELECT tenant, MAX(ord) AS o FROM memories GROUP BY tenant ORDER BY o DESC").all() as Json[];
+    await this.ready();
+    const tenants = await this.store.tenantsByRecency();
     let n = 0;
-    for (const { tenant } of tenants) {
+    for (const tenant of tenants) {
       const t0 = performance.now();
-      await this.lock.run(() => this.ensureTenant(tenant));
+      if (this.store.leases) {
+        const r = await this.route(tenant); // with a shared store, warm only the tenants this node can take
+        if (!r.mine) continue;
+      }
+      try {
+        await this.lock.run(() => this.ensureTenant(tenant));
+      } catch {
+        continue; // a tenant that cannot load (or is taken meanwhile) is left for its first request to report
+      }
       if (this.enc.warm) await this.enc.warm(this.engine.pendingTexts(tenant));
       if (await this.engine.warmPartition(tenant)) n++;
       onTenant?.(tenant, Math.round(performance.now() - t0));
@@ -1321,8 +1427,8 @@ export class Service {
   async saveTo(path: string): Promise<void> {
     return this.lock.run(async () => {
       if (this.store) {
-        const { backup } = (await import("node:sqlite")) as any;
-        await backup(this.store.db, path);
+        if (!this.store.backupTo) throw new ORPError("unsupported_parameter", `a ${this.store.kind} store is backed up with its own tools`);
+        await this.store.backupTo(path);
         return;
       }
       const E = this.engine;
@@ -1342,13 +1448,21 @@ export class Service {
       for (const f of this.feedbackLog) d.feedback.push({ tenant: f._tenant ?? "", body: pyDumps(stripUnderscore(f), { sortKeys: true }) });
       const ts = new Set([...E.tmut.keys(), ...E.tcount.keys()]);
       for (const t of ts) d.counters.push({ tenant: t, tmut: E.tmut.get(t) ?? 0, tcount: E.tcount.get(t) ?? 0 });
-      out.flush(d);
+      out.flushSync(d);
       out.close();
     });
   }
 
-  close() {
-    this.store?.close();
+  /** Stop lease renewal, release this process's tenants and close the store. */
+  async close(): Promise<void> {
+    if (this.leaseTimer) { clearInterval(this.leaseTimer); this.leaseTimer = null; }
+    const L = this.store?.leases;
+    if (L && this.held.size) {
+      const ts = [...this.held.keys()];
+      this.held.clear();
+      await L.release(ts).catch(() => undefined);
+    }
+    await this.store?.close();
   }
 }
 

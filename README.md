@@ -27,7 +27,7 @@ What makes it different, in one line each:
 **Install a pinned version and check it** (never a bare `npx`; nothing runs at install time):
 
 ```bash
-npm install --global --ignore-scripts --save-exact @orp/server@0.2.0
+npm install --global --ignore-scripts @orp/server@0.2.0     # in a project: npm install --save-exact --ignore-scripts ...
 npm view @orp/server@0.2.0 dist.integrity   # must equal the line for orp-server-0.2.0.tgz in the release's INTEGRITY file
 npm audit signatures                        # registry signatures and provenance: built by this repo's release workflow
 ```
