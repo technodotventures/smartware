@@ -220,8 +220,10 @@ footer .base{display:flex;justify-content:space-between;align-items:center;borde
 @media (max-width:760px){footer .cols{grid-template-columns:1fr 1fr}}
 
 /* cycle chip */
-.cyclechip{display:inline-flex;align-items:center;gap:10px;margin-top:20px;font:13px var(--mono);color:var(--haze);text-decoration:none;flex-wrap:wrap}
+.cyclechip{display:inline-grid;grid-template-columns:8px auto;align-items:center;column-gap:10px;row-gap:8px;margin-top:22px;font:13px/1.4 var(--mono);color:var(--haze);text-decoration:none;max-width:100%}
 .cyclechip i{width:8px;height:8px;background:var(--signal);display:block;animation:pulse 1.6s ease-in-out infinite}
+.cyclechip .cc{white-space:nowrap}
+.cyclechip b{grid-column:2;justify-self:start;white-space:nowrap}
 .cyclechip b{font-weight:500;color:var(--frost);border-bottom:1px solid var(--deep2)}
 .cyclechip:hover b{border-color:var(--signal)}
 @keyframes pulse{50%{opacity:.25}}
@@ -359,13 +361,7 @@ footer .base{display:flex;justify-content:space-between;align-items:center;borde
 @media (max-width:560px){.barrow{grid-template-columns:96px 1fr 44px}}
 
 /* mobile polish */
-.cyclechip{flex-wrap:nowrap;align-items:flex-start}
-.cyclechip i{flex:none;margin-top:5px}
-.cyclechip > span{flex:0 1 auto;min-width:0}
 @media (max-width:560px){
-  .cyclechip{flex-wrap:wrap;column-gap:10px;row-gap:6px}
-  .cyclechip > span{flex:1 1 calc(100% - 18px)}
-  .cyclechip b{margin-left:18px}
   .install code{font-size:12px;padding:12px;white-space:normal;line-height:1.5}
   .copy{padding:13px 10px;font-size:12px}
   .code .bar .t{display:none}
@@ -473,7 +469,7 @@ footer .base{display:flex;justify-content:space-between;align-items:center;borde
         <a class="btn btn-secondary" href="#benchmarks">See the benchmarks</a>
       </div>
       <div class="install"><code><b>$</b> pip install smartware &amp;&amp; smartware serve</code><button class="copy" data-copy="pip install smartware && smartware serve">Copy</button></div>
-      <a class="cyclechip" href="#evolve"><i></i><span>Cycle 14 · <span class="js-day">day 2 of 7</span> · 8 improvements in flight</span><b>Watch it improve</b></a>
+      <a class="cyclechip" href="#evolve"><i></i><span class="cc">Cycle 14 · <span class="js-day">day 2 of 7</span> · 8 in flight</span><b>Watch it improve →</b></a>
       <div style="margin-top:16px"><a class="lbadge" href="https://loopy.systems" aria-label="Autonomously improving with Loopy"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMjIiIGhlaWdodD0iMjgiIHZpZXdCb3g9IjAgMCAyMjIgMjgiIHJvbGU9ImltZyIgYXJpYS1sYWJlbD0iQXV0b25vbW91c2x5IGltcHJvdmluZyB3aXRoIExvb3B5Ij48dGl0bGU+QXV0b25vbW91c2x5IGltcHJvdmluZyB3aXRoIExvb3B5PC90aXRsZT48cmVjdCB4PSIuNSIgeT0iLjUiIHdpZHRoPSIyMjEiIGhlaWdodD0iMjciIHJ4PSI0IiBmaWxsPSIjRUZFQUY0IiBzdHJva2U9IiMyQjFBMzMiLz48dGV4dCB4PSIxMCIgeT0iMTguNSIgZmlsbD0iIzJCMUEzMyIgZm9udC1mYW1pbHk9IidJQk0gUGxleCBTYW5zJyxIZWx2ZXRpY2EsQXJpYWwsc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMiI+QXV0b25vbW91c2x5IGltcHJvdmluZyB3aXRoPC90ZXh0PjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE2OS4xMSwwLjMpIHNjYWxlKDAuMTMpIj48cGF0aCBkPSJNMjAgNTAgSDM0IFYxMjYgUTM0IDE0MCA0OCAxNDAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzJCMUEzMyIgc3Ryb2tlLXdpZHRoPSIxMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PHBhdGggZD0iTTIwOSA5MCBWMTc2IiBmaWxsPSJub25lIiBzdHJva2U9IiMyQjFBMzMiIHN0cm9rZS13aWR0aD0iMTIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjxwYXRoIGQ9Ik0yMDkgMTE1IEEyNSAyNSAwIDEgMSAyMDkgMTE1LjEiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzJCMUEzMyIgc3Ryb2tlLXdpZHRoPSIxMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PHBhdGggZD0iTTI3NiA5MCBMMjk4IDE0MCBNMzIwIDkwIEwyOTAgMTc2IiBmaWxsPSJub25lIiBzdHJva2U9IiMyQjFBMzMiIHN0cm9rZS13aWR0aD0iMTIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjxwYXRoIGNsYXNzPSJpbmYiIGQ9Ik0xMDguMDEgMTAzLjM2IEwxMDcuNjQgMTAzLjAzIE0xMzUuODAgMTI4LjI1IEwxNDAuNjUgMTMyLjYwIEEyOSAyOSAwIDEgMCAxMzYuMDUgOTQuNjUiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI0Q5ODUyQSIgc3Ryb2tlLXdpZHRoPSIxMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PHBhdGggY2xhc3M9ImluZiIgZD0iTTEzNi4wNSA5NC42NSBMMTExLjM0IDEzMC44NCBBMjEgMjEgMCAxIDEgMTA4LjAxIDEwMy4zNiIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjRDk4NTJBIiBzdHJva2Utd2lkdGg9IjEyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48L2c+PC9zdmc+" alt="Autonomously improving with Loopy" height="28"></a></div>
     </div>
     <button class="grid8" id="hero" aria-label="Replay: the Smartware mark refines itself, tile by tile"></button>
@@ -835,9 +831,14 @@ prompt = pack.<span class="f">render</span>()  <span class="c"># drop into conte
     var SIG='#FA502E', BG=[14,33,37], SIGc=[250,80,46], TINTc=[253,180,165];
     var RECTS=[[2,0,6,2],[0,2,2,1],[2,3,4,2],[6,5,2,1],[0,6,6,2]], T=new Uint8Array(N*N);
     RECTS.forEach(function(r){for(var y=r[1]*4;y<(r[1]+r[3])*4;y++)for(var x=r[0]*4;x<(r[0]+r[2])*4;x++)T[y*N+x]=1;});
-    function lit(b,bx,by){var s=0;for(var y=by*b;y<(by+1)*b;y++)for(var x=bx*b;x<(bx+1)*b;x++)s+=T[y*N+x];return s/(b*b)>=.5;}
-    var LV=[16,8,4,2,1], ON={};
-    LV.forEach(function(b){var r=N/b,a=[];for(var y=0;y<r;y++)for(var x=0;x<r;x++)a.push(lit(b,x,y));ON[b]=a;});
+    function cov(b,bx,by){var s=0;for(var y=by*b;y<(by+1)*b;y++)for(var x=bx*b;x<(bx+1)*b;x++)s+=T[y*N+x];return s/(b*b);}
+    var LV=[16,8,4,2,1], COV={}, NZ={16:.8,8:.68,4:.58,2:.53,1:.5}, NOISE={}, JIT={};
+    var seed=29; function rnd(){seed=(seed*16807)%2147483647;return (seed-1)/2147483646;}
+    LV.forEach(function(b){var r=N/b,a=[];for(var y=0;y<r;y++)for(var x=0;x<r;x++)a.push(cov(b,x,y));COV[b]=a;});
+    function reroll(){LV.forEach(function(b){var n=COV[b].length,a=new Float32Array(n),j=new Float32Array(n);for(var k=0;k<n;k++){a[k]=rnd()-.5;j[k]=rnd();}NOISE[b]=a;JIT[b]=j;});}
+    reroll();
+    function on(b,k){return COV[b][k]+NOISE[b][k]*NZ[b]*2>.5;}
+    var lastFlick=0, lastLoop=-1, spark={};
     // the loop: refine 16 -> 1 with a wave from top-left, hold, then merge back with a wave from bottom-right
     var SEQ=[], t=0;
     function hold(b,d){SEQ.push({b:b,from:b,dir:0,t0:t,d:d});t+=d;}
@@ -858,34 +859,41 @@ prompt = pack.<span class="f">render</span>()  <span class="c"># drop into conte
     }
     // wave position: 0 at the start corner, 1 at the opposite corner
     function front(dir,u){return dir>0?u*1.25-.1:1.15-u*1.25;}
-    function passed(dir,f,cx,cy){var d=(cx+cy)/2; return dir>0? d<f : d>f;}
+    function pos(b,k,cx,cy){return (cx+cy)/2*.62+JIT[b][k]*.38;} // diagonal, scattered
+    function passed(dir,f,p){return dir>0? p<f : p>f;}
     function frame(now){
-      var lt=now%LOOP, st=SEQ[0]; for(var i=0;i<SEQ.length;i++){if(lt>=SEQ[i].t0&&lt<SEQ[i].t0+SEQ[i].d){st=SEQ[i];break;}}
+      var lt=now%LOOP, st=SEQ[0], loopN=Math.floor(now/LOOP);
+      if(loopN!==lastLoop){lastLoop=loopN; if(loopN>0) reroll();}
+      if(now-lastFlick>120){ // tiles keep flickering while the picture is still rough
+        lastFlick=now; LV.forEach(function(b){if(b===1)return;var a=NOISE[b];for(var k=0;k<a.length;k++) if(rnd()<.07) a[k]=rnd()-.5;});
+        var r1=N; for(var q=0;q<3;q++){var kk=Math.floor(rnd()*r1*r1); if(COV[1][kk]>.5) spark[kk]=now;}
+      } for(var i=0;i<SEQ.length;i++){if(lt>=SEQ[i].t0&&lt<SEQ[i].t0+SEQ[i].d){st=SEQ[i];break;}}
       var u=(lt-st.t0)/st.d;
       ctx.clearRect(0,0,W,W);
       // faint lattice at the logo's own 8x8 grid
       ctx.fillStyle='#1D3135';
       for(var gy=0;gy<=8;gy++)for(var gx=0;gx<=8;gx++)ctx.fillRect(gx*4*px-px*.12,gy*4*px-px*.12,px*.24,px*.24);
-      if(!st.dir){ draw(st.b,null,0); return; }
+      if(!st.dir){ draw(st.b,null,0,0,now); return; }
       var f=front(st.dir,u);
-      draw(st.from,function(cx,cy){return !passed(st.dir,f,cx,cy);},0);
-      draw(st.b,function(cx,cy){return passed(st.dir,f,cx,cy);},f,st.dir);
+      draw(st.from,function(p){return !passed(st.dir,f,p);},0,0,now);
+      draw(st.b,function(p){return passed(st.dir,f,p);},f,st.dir,now);
     }
-    function draw(b,keep,f,dir){
-      var r=N/b,a=ON[b];
+    function draw(b,keep,f,dir,now){
+      var r=N/b;
       for(var by=0;by<r;by++)for(var bx=0;bx<r;bx++){
-        if(!a[by*r+bx]) continue;
-        var cx=(bx+.5)/r, cy=(by+.5)/r;
-        if(keep && !keep(cx,cy)) continue;
+        var idx=by*r+bx; if(!on(b,idx)) continue;
+        var cx=(bx+.5)/r, cy=(by+.5)/r, p=pos(b,idx,cx,cy);
+        if(keep && !keep(p)) continue;
         var k=0, sc=1;
         if(dir){ // just-arrived tiles pop in and flash
-          var age=Math.abs(f-(cx+cy)/2)/.18; if(age<1){k=1-age; sc=.72+.28*Math.min(1,age*1.4);}
+          var age=Math.abs(f-p)/.14; if(age<1){k=1-age; sc=.7+.3*Math.min(1,age*1.4);}
         }
+        if(b===1 && spark[idx]){var sa=(now-spark[idx])/420; if(sa<1) k=Math.max(k,(1-sa)*.8); else delete spark[idx];}
         ctx.fillStyle=k>0?tint(k*.85):SIG;
         tile(b,bx,by,sc);
       }
     }
-    function still(){ctx.clearRect(0,0,W,W);ctx.fillStyle=SIG;draw(4,null,0);}
+    function still(){ctx.clearRect(0,0,W,W);var save=NZ[4];NZ[4]=0;draw(4,null,0,0,0);NZ[4]=save;}
     var raf=0, visible=true, start=0;
     function loop(t){if(!start)start=t;frame(t-start);raf=requestAnimationFrame(loop);}
     resize();
