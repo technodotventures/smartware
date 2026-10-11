@@ -1,0 +1,41 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "https://orp.dev/schema/0.1/RememberResponse",
+ "title": "RememberResponse",
+ "type": "object",
+ "properties": {
+  "ids": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  },
+  "replayed": {
+   "type": "boolean"
+  },
+  "stage": {
+   "enum": [
+    "accepted",
+    "stored",
+    "indexed"
+   ]
+  },
+  "degraded": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  },
+  "request_id": {
+   "type": "string"
+  }
+ },
+ "required": [
+  "ids",
+  "replayed",
+  "stage",
+  "degraded",
+  "request_id"
+ ],
+ "additionalProperties": false
+}

@@ -1,0 +1,57 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "https://orp.dev/schema/0.1/Bundle",
+ "title": "Bundle",
+ "type": "object",
+ "properties": {
+  "manifest": {
+   "type": "object",
+   "properties": {
+    "spec": {
+     "type": "string"
+    },
+    "tenant": {
+     "type": "string"
+    },
+    "count": {
+     "type": "integer"
+    },
+    "sha256": {
+     "type": "string"
+    },
+    "tombstones": {
+     "type": "array"
+    },
+    "id_map": {
+     "type": "object"
+    }
+   },
+   "required": [
+    "spec",
+    "tenant",
+    "count",
+    "sha256"
+   ],
+   "additionalProperties": false
+  },
+  "memories.jsonl": {
+   "type": "string"
+  },
+  "edges.jsonl": {
+   "type": "string"
+  },
+  "degraded": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  },
+  "request_id": {
+   "type": "string"
+  }
+ },
+ "required": [
+  "memories.jsonl"
+ ],
+ "additionalProperties": false
+}

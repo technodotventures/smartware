@@ -1,0 +1,867 @@
+{
+ "note": "MCP tool definitions by toolset (orp serve --tools safe|full|mcp-memory)",
+ "tools": [
+  {
+   "name": "orp_recall",
+   "title": "Recall memory",
+   "set": [
+    "safe",
+    "full"
+   ],
+   "description": "Get budgeted, cited context from memory for a question.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "query": {
+      "type": "string"
+     },
+     "as_of": {
+      "type": "string"
+     },
+     "budget_tokens": {
+      "type": "integer",
+      "minimum": 50,
+      "maximum": 8000,
+      "default": 1500
+     },
+     "include_history": {
+      "type": "boolean"
+     },
+     "kinds": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "min_coverage": {
+      "type": "number"
+     }
+    },
+    "required": [
+     "query"
+    ],
+    "additionalProperties": false
+   },
+   "annotations": {
+    "readOnlyHint": true,
+    "idempotentHint": true,
+    "openWorldHint": false
+   }
+  },
+  {
+   "name": "orp_remember",
+   "title": "Remember",
+   "set": [
+    "safe"
+   ],
+   "description": "Store a durable fact, preference, decision or event. Use kind=fact with a claim when it replaces an earlier fact.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "content": {
+      "type": "string"
+     },
+     "kind": {
+      "type": "string",
+      "enum": [
+       "fact",
+       "preference",
+       "event",
+       "procedure"
+      ]
+     },
+     "claim": {
+      "type": "object",
+      "properties": {
+       "subject": {
+        "type": "string"
+       },
+       "predicate": {
+        "type": "string"
+       },
+       "object": {
+        "type": "string"
+       }
+      },
+      "required": [
+       "subject",
+       "predicate",
+       "object"
+      ],
+      "additionalProperties": false
+     },
+     "event_time": {
+      "type": "string"
+     },
+     "thread": {
+      "type": "string"
+     },
+     "actor": {
+      "type": "string"
+     },
+     "idempotency_key": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "content"
+    ],
+    "additionalProperties": false
+   },
+   "annotations": {
+    "readOnlyHint": false,
+    "idempotentHint": true,
+    "destructiveHint": false
+   }
+  },
+  {
+   "name": "orp_remember",
+   "title": "Remember",
+   "set": [
+    "full"
+   ],
+   "description": "Store one or more memories. Use idempotency_key to make retries safe.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "memories": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "kind": {
+         "type": "string",
+         "enum": [
+          "event",
+          "document",
+          "fact",
+          "preference",
+          "procedure",
+          "observation",
+          "summary",
+          "profile",
+          "entity"
+         ]
+        },
+        "content": {
+         "type": "string"
+        },
+        "actor": {
+         "type": "string"
+        },
+        "role": {
+         "type": "string"
+        },
+        "thread": {
+         "type": "string"
+        },
+        "seq": {
+         "type": "integer"
+        },
+        "claim": {
+         "type": "object",
+         "properties": {
+          "subject": {
+           "type": "string"
+          },
+          "predicate": {
+           "type": "string"
+          },
+          "object": {
+           "type": "string"
+          },
+          "cardinality": {
+           "type": "string",
+           "enum": [
+            "one",
+            "many"
+           ]
+          }
+         },
+         "required": [
+          "subject",
+          "predicate",
+          "object"
+         ],
+         "additionalProperties": false
+        },
+        "event_time": {
+         "type": "string"
+        },
+        "valid_from": {
+         "type": "string"
+        },
+        "valid_to": {
+         "type": "string"
+        },
+        "readers": {
+         "type": [
+          "array",
+          "null"
+         ],
+         "items": {
+          "type": "string"
+         }
+        },
+        "labels": {
+         "type": "array",
+         "items": {
+          "type": "string"
+         }
+        },
+        "load": {
+         "type": "string",
+         "enum": [
+          "always",
+          "on_scope",
+          "on_query"
+         ]
+        },
+        "derived_from": {
+         "type": "array",
+         "items": {
+          "type": "string"
+         }
+        },
+        "origin": {
+         "type": "string"
+        },
+        "scope": {
+         "type": "string"
+        },
+        "id": {
+         "type": "string"
+        }
+       },
+       "required": [
+        "content"
+       ],
+       "additionalProperties": false
+      }
+     },
+     "mode": {
+      "type": "string",
+      "enum": [
+       "append",
+       "upsert",
+       "supersede",
+       "propose"
+      ]
+     },
+     "idempotency_key": {
+      "type": "string"
+     },
+     "if_version": {
+      "type": "integer"
+     }
+    },
+    "required": [
+     "memories"
+    ],
+    "additionalProperties": false
+   },
+   "annotations": {
+    "readOnlyHint": false,
+    "idempotentHint": true,
+    "destructiveHint": false
+   }
+  },
+  {
+   "name": "orp_forget",
+   "title": "Forget",
+   "set": [
+    "safe"
+   ],
+   "description": "Retract memories (and memories derived from them). Use dry_run first and confirm with the user.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "ids": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "dry_run": {
+      "type": "boolean"
+     },
+     "reason": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "ids"
+    ],
+    "additionalProperties": false
+   },
+   "annotations": {
+    "readOnlyHint": false,
+    "destructiveHint": true,
+    "idempotentHint": true
+   }
+  },
+  {
+   "name": "orp_forget",
+   "title": "Forget",
+   "set": [
+    "full"
+   ],
+   "description": "Retract, redact or purge memories (cascades to derived memories). Use dry_run first.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "ids": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "mode": {
+      "type": "string",
+      "enum": [
+       "retract",
+       "redact",
+       "purge"
+      ]
+     },
+     "dry_run": {
+      "type": "boolean"
+     },
+     "reason": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "ids"
+    ],
+    "additionalProperties": false
+   },
+   "annotations": {
+    "readOnlyHint": false,
+    "destructiveHint": true,
+    "idempotentHint": true
+   }
+  },
+  {
+   "name": "orp_profile",
+   "title": "Profile",
+   "set": [
+    "safe",
+    "full"
+   ],
+   "description": "Always-loaded context (rules, preferences, profile facts) within a token budget.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "subject": {
+      "type": "string"
+     },
+     "budget_tokens": {
+      "type": "integer",
+      "minimum": 20,
+      "maximum": 8000
+     }
+    },
+    "required": [
+     "budget_tokens"
+    ],
+    "additionalProperties": false
+   },
+   "annotations": {
+    "readOnlyHint": true,
+    "idempotentHint": true
+   }
+  },
+  {
+   "name": "orp_history",
+   "title": "History",
+   "set": [
+    "safe",
+    "full"
+   ],
+   "description": "Version chain for a claim (subject, predicate).",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "subject": {
+      "type": "string"
+     },
+     "predicate": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "subject",
+     "predicate"
+    ],
+    "additionalProperties": false
+   },
+   "annotations": {
+    "readOnlyHint": true,
+    "idempotentHint": true
+   }
+  },
+  {
+   "name": "orp_get",
+   "title": "Get",
+   "set": [
+    "full"
+   ],
+   "description": "Read memories by id.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "ids": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     }
+    },
+    "required": [
+     "ids"
+    ],
+    "additionalProperties": false
+   },
+   "annotations": {
+    "readOnlyHint": true,
+    "idempotentHint": true
+   }
+  },
+  {
+   "name": "orp_neighbours",
+   "title": "Neighbours",
+   "set": [
+    "full"
+   ],
+   "description": "Units before/after a unit in its thread.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "id": {
+      "type": "string"
+     },
+     "before": {
+      "type": "integer"
+     },
+     "after": {
+      "type": "integer"
+     }
+    },
+    "required": [
+     "id"
+    ],
+    "additionalProperties": false
+   },
+   "annotations": {
+    "readOnlyHint": true,
+    "idempotentHint": true
+   }
+  },
+  {
+   "name": "orp_feedback",
+   "title": "Feedback",
+   "set": [
+    "full"
+   ],
+   "description": "Report a memory as used/helpful/wrong/outdated, or a draft->final edit to learn from.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "target": {
+      "type": "string"
+     },
+     "signal": {
+      "type": "string",
+      "enum": [
+       "used",
+       "helpful",
+       "wrong",
+       "outdated",
+       "draft_final"
+      ]
+     },
+     "draft": {
+      "type": "string"
+     },
+     "final": {
+      "type": "string"
+     },
+     "note": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "target",
+     "signal"
+    ],
+    "additionalProperties": false
+   },
+   "annotations": {
+    "readOnlyHint": false,
+    "idempotentHint": false
+   }
+  },
+  {
+   "name": "orp_reflect",
+   "title": "Reflect",
+   "set": [
+    "full"
+   ],
+   "description": "Consolidate threads into summaries with lineage.",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "threads": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     }
+    },
+    "required": [],
+    "additionalProperties": false
+   },
+   "annotations": {
+    "readOnlyHint": false,
+    "idempotentHint": true
+   }
+  },
+  {
+   "name": "create_entities",
+   "title": "create_entities",
+   "description": "Create multiple new entities in the knowledge graph",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "entities": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "name": {
+         "type": "string"
+        },
+        "entityType": {
+         "type": "string"
+        },
+        "observations": {
+         "type": "array",
+         "items": {
+          "type": "string"
+         }
+        }
+       },
+       "required": [
+        "name",
+        "entityType",
+        "observations"
+       ],
+       "additionalProperties": false
+      }
+     }
+    },
+    "required": [
+     "entities"
+    ],
+    "additionalProperties": false
+   },
+   "set": [
+    "mcp-memory"
+   ],
+   "annotations": {
+    "readOnlyHint": false,
+    "destructiveHint": false,
+    "idempotentHint": false,
+    "openWorldHint": false
+   }
+  },
+  {
+   "name": "create_relations",
+   "title": "create_relations",
+   "description": "Create multiple new relations between entities (active voice)",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "relations": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "from": {
+         "type": "string"
+        },
+        "to": {
+         "type": "string"
+        },
+        "relationType": {
+         "type": "string"
+        }
+       },
+       "required": [
+        "from",
+        "to",
+        "relationType"
+       ],
+       "additionalProperties": false
+      }
+     }
+    },
+    "required": [
+     "relations"
+    ],
+    "additionalProperties": false
+   },
+   "set": [
+    "mcp-memory"
+   ],
+   "annotations": {
+    "readOnlyHint": false,
+    "destructiveHint": false,
+    "idempotentHint": false,
+    "openWorldHint": false
+   }
+  },
+  {
+   "name": "add_observations",
+   "title": "add_observations",
+   "description": "Add new observations to existing entities",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "observations": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "entityName": {
+         "type": "string"
+        },
+        "contents": {
+         "type": "array",
+         "items": {
+          "type": "string"
+         }
+        }
+       },
+       "required": [
+        "entityName",
+        "contents"
+       ],
+       "additionalProperties": false
+      }
+     }
+    },
+    "required": [
+     "observations"
+    ],
+    "additionalProperties": false
+   },
+   "set": [
+    "mcp-memory"
+   ],
+   "annotations": {
+    "readOnlyHint": false,
+    "destructiveHint": false,
+    "idempotentHint": false,
+    "openWorldHint": false
+   }
+  },
+  {
+   "name": "delete_entities",
+   "title": "delete_entities",
+   "description": "Delete entities and their relations",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "entityNames": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     }
+    },
+    "required": [
+     "entityNames"
+    ],
+    "additionalProperties": false
+   },
+   "set": [
+    "mcp-memory"
+   ],
+   "annotations": {
+    "readOnlyHint": false,
+    "destructiveHint": true,
+    "idempotentHint": true,
+    "openWorldHint": false
+   }
+  },
+  {
+   "name": "delete_observations",
+   "title": "delete_observations",
+   "description": "Delete specific observations from entities",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "deletions": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "entityName": {
+         "type": "string"
+        },
+        "observations": {
+         "type": "array",
+         "items": {
+          "type": "string"
+         }
+        }
+       },
+       "required": [
+        "entityName",
+        "observations"
+       ],
+       "additionalProperties": false
+      }
+     }
+    },
+    "required": [
+     "deletions"
+    ],
+    "additionalProperties": false
+   },
+   "set": [
+    "mcp-memory"
+   ],
+   "annotations": {
+    "readOnlyHint": false,
+    "destructiveHint": true,
+    "idempotentHint": true,
+    "openWorldHint": false
+   }
+  },
+  {
+   "name": "delete_relations",
+   "title": "delete_relations",
+   "description": "Delete multiple relations",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "relations": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "from": {
+         "type": "string"
+        },
+        "to": {
+         "type": "string"
+        },
+        "relationType": {
+         "type": "string"
+        }
+       },
+       "required": [
+        "from",
+        "to",
+        "relationType"
+       ],
+       "additionalProperties": false
+      }
+     }
+    },
+    "required": [
+     "relations"
+    ],
+    "additionalProperties": false
+   },
+   "set": [
+    "mcp-memory"
+   ],
+   "annotations": {
+    "readOnlyHint": false,
+    "destructiveHint": true,
+    "idempotentHint": true,
+    "openWorldHint": false
+   }
+  },
+  {
+   "name": "read_graph",
+   "title": "read_graph",
+   "description": "Read the knowledge graph you can see",
+   "inputSchema": {
+    "type": "object",
+    "properties": {},
+    "required": [],
+    "additionalProperties": false
+   },
+   "set": [
+    "mcp-memory"
+   ],
+   "annotations": {
+    "readOnlyHint": true,
+    "destructiveHint": false,
+    "idempotentHint": true,
+    "openWorldHint": false
+   }
+  },
+  {
+   "name": "search_nodes",
+   "title": "search_nodes",
+   "description": "Search for nodes; ranked recall over names, types and observations",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "query": {
+      "type": "string",
+      "maxLength": 2048
+     }
+    },
+    "required": [
+     "query"
+    ],
+    "additionalProperties": false
+   },
+   "set": [
+    "mcp-memory"
+   ],
+   "annotations": {
+    "readOnlyHint": true,
+    "destructiveHint": false,
+    "idempotentHint": true,
+    "openWorldHint": false
+   }
+  },
+  {
+   "name": "open_nodes",
+   "title": "open_nodes",
+   "description": "Open specific nodes by name",
+   "inputSchema": {
+    "type": "object",
+    "properties": {
+     "names": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     }
+    },
+    "required": [
+     "names"
+    ],
+    "additionalProperties": false
+   },
+   "set": [
+    "mcp-memory"
+   ],
+   "annotations": {
+    "readOnlyHint": true,
+    "destructiveHint": false,
+    "idempotentHint": true,
+    "openWorldHint": false
+   }
+  }
+ ]
+}

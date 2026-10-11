@@ -95,13 +95,13 @@ function num(v: unknown, name: string, lo?: number, hi?: number): number {
   return v;
 }
 
-const REMEMBER_KEYS = new Set(["memories", "mode", "idempotency_key", "if_version", "wait", "allow_reingest"]);
-const MEM_KEYS = new Set(["id", "kind", "content", "claim", "scope", "readers", "writers", "actor", "role", "origin",
+export const REMEMBER_KEYS = new Set(["memories", "mode", "idempotency_key", "if_version", "wait", "allow_reingest"]);
+export const MEM_KEYS = new Set(["id", "kind", "content", "claim", "scope", "readers", "writers", "actor", "role", "origin",
   "thread", "seq", "event_time", "valid_from", "valid_to", "expires_at", "sources", "derived_from", "labels", "load",
   "confidence", "support", "meta", "supersedes"]);
 export const RECALL_KEYS = new Set(["query", "queries", "as_of", "known_at", "scope", "kinds", "budget", "granularity",
   "include", "time", "mode", "min_coverage", "cursor"]);
-const FORGET_KEYS = new Set(["ids", "mode", "cascade", "dry_run", "reason", "allow_reingest"]);
+export const FORGET_KEYS = new Set(["ids", "mode", "cascade", "dry_run", "reason", "allow_reingest"]);
 const LINK_TYPES = ["about", "mentions", "part_of", "follows", "causes", "supports", "contradicts", "supersedes",
   "derived_from", "relates"];
 

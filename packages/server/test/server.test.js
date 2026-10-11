@@ -221,3 +221,10 @@ test("MCP stdio: initialize, tools, and elicitation-confirmed forget", async () 
   assert.deepEqual(done.result.structuredContent.affected, [id]);
   p.kill();
 });
+
+test("orp doctor --self reaches L4", async () => {
+  const { selfTest } = await import("../dist/doctor.js");
+  const r = await selfTest({ memory: true });
+  assert.deepEqual(r.checks.filter((c) => c.status !== "pass").map((c) => c.id), []);
+  assert.equal(r.level, "L4");
+});

@@ -209,6 +209,7 @@ class TSService:
 api.Service = TSService
 if __name__ == "__main__":
     suite = unittest.defaultTestLoader.discover(os.path.join(ROOT, "tests", "conformance"), top_level_dir=ROOT)
+    suite.addTests(unittest.defaultTestLoader.loadTestsFromName("tests.test_schema"))  # TS responses vs the schema pack
     r = unittest.TextTestRunner(verbosity=1 if "-q" in sys.argv else 2).run(suite)
     _proc.stdin.close()
     sys.exit(0 if r.wasSuccessful() else 1)

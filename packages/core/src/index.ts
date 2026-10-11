@@ -12,3 +12,4 @@ export { Engine, entities, gbdtPredict, topK, newJournal, SENSITIVE, type Journa
 export * from "./service.js";
 export * from "./store.js";
 export * from "./secrets.js";
+export * as schema from "./schema.js";

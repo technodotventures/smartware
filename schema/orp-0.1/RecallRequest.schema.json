@@ -1,0 +1,186 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "https://orp.dev/schema/0.1/RecallRequest",
+ "title": "RecallRequest",
+ "type": "object",
+ "properties": {
+  "query": {
+   "type": "string",
+   "minLength": 1,
+   "pattern": "\\S"
+  },
+  "queries": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "properties": {
+     "text": {
+      "type": "string"
+     },
+     "weight": {
+      "type": "number"
+     }
+    },
+    "required": [
+     "text"
+    ],
+    "additionalProperties": false
+   },
+   "description": "engines MAY reject (must say so)"
+  },
+  "as_of": {
+   "anyOf": [
+    {
+     "type": "string",
+     "description": "ISO 8601 timestamp; offsets are converted to UTC"
+    },
+    {
+     "type": "null"
+    }
+   ]
+  },
+  "known_at": {
+   "anyOf": [
+    {
+     "type": "string",
+     "description": "ISO 8601 timestamp; offsets are converted to UTC"
+    },
+    {
+     "type": "null"
+    }
+   ]
+  },
+  "scope": {
+   "anyOf": [
+    {
+     "type": "string"
+    },
+    {
+     "type": "object",
+     "properties": {
+      "within": {
+       "type": "string"
+      },
+      "prefer": {
+       "type": "array",
+       "items": {
+        "type": "string"
+       }
+      }
+     },
+     "required": [],
+     "additionalProperties": false
+    }
+   ]
+  },
+  "kinds": {
+   "anyOf": [
+    {
+     "type": "array",
+     "items": {
+      "type": "string"
+     }
+    },
+    {
+     "type": "object",
+     "additionalProperties": {
+      "type": "integer",
+      "minimum": 0
+     }
+    },
+    {
+     "type": "null"
+    }
+   ]
+  },
+  "budget": {
+   "type": "object",
+   "properties": {
+    "tokens": {
+     "type": "integer",
+     "minimum": 50
+    },
+    "items": {
+     "type": "integer",
+     "minimum": 1
+    }
+   },
+   "required": [],
+   "additionalProperties": false
+  },
+  "granularity": {
+   "enum": [
+    "unit",
+    "span",
+    "thread",
+    "auto"
+   ]
+  },
+  "include": {
+   "type": "object",
+   "properties": {
+    "history": {
+     "type": "boolean"
+    },
+    "drafts": {
+     "type": "boolean"
+    },
+    "neighbours": {
+     "anyOf": [
+      {
+       "type": "integer",
+       "minimum": 0,
+       "maximum": 10
+      },
+      {
+       "const": "auto"
+      },
+      {
+       "type": "null"
+      }
+     ]
+    },
+    "explain": {
+     "type": "boolean"
+    },
+    "labels": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     }
+    }
+   },
+   "required": [],
+   "additionalProperties": false
+  },
+  "time": {
+   "description": "engines MAY reject (must say so)"
+  },
+  "mode": {
+   "enum": [
+    "fast",
+    "balanced",
+    "deep"
+   ]
+  },
+  "min_coverage": {
+   "anyOf": [
+    {
+     "type": "number",
+     "minimum": 0,
+     "maximum": 1
+    },
+    {
+     "type": "null"
+    }
+   ]
+  },
+  "cursor": {
+   "description": "engines MAY reject (must say so)"
+  }
+ },
+ "required": [
+  "query"
+ ],
+ "additionalProperties": false
+}

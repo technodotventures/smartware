@@ -1,0 +1,33 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "https://orp.dev/schema/0.1/Claim",
+ "title": "Claim",
+ "type": "object",
+ "properties": {
+  "subject": {
+   "type": "string",
+   "minLength": 1
+  },
+  "predicate": {
+   "type": "string",
+   "minLength": 1
+  },
+  "object": {
+   "type": "string",
+   "minLength": 1
+  },
+  "cardinality": {
+   "enum": [
+    "one",
+    "many"
+   ],
+   "default": "one"
+  }
+ },
+ "required": [
+  "subject",
+  "predicate",
+  "object"
+ ],
+ "additionalProperties": false
+}

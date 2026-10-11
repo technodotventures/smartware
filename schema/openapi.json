@@ -1,0 +1,3150 @@
+{
+ "openapi": "3.1.0",
+ "info": {
+  "title": "ORP HTTP binding",
+  "version": "0.1",
+  "description": "Open Recall Protocol (working name) HTTP binding, spec §8.2. The principal always comes from the bearer token."
+ },
+ "servers": [
+  {
+   "url": "http://127.0.0.1:8787"
+  }
+ ],
+ "components": {
+  "securitySchemes": {
+   "bearer": {
+    "type": "http",
+    "scheme": "bearer",
+    "description": "API key (orp_...) or an OAuth 2.1 / OIDC access token"
+   }
+  },
+  "schemas": {
+   "Memory": {
+    "type": "object",
+    "properties": {
+     "id": {
+      "type": "string"
+     },
+     "tenant": {
+      "type": "string"
+     },
+     "kind": {
+      "type": "string",
+      "description": "event | document | fact | preference | procedure | observation | summary | profile | entity, or x-<name>",
+      "anyOf": [
+       {
+        "enum": [
+         "event",
+         "document",
+         "fact",
+         "preference",
+         "procedure",
+         "observation",
+         "summary",
+         "profile",
+         "entity"
+        ]
+       },
+       {
+        "pattern": "^x-"
+       }
+      ]
+     },
+     "content": {
+      "type": "string"
+     },
+     "claim": {
+      "anyOf": [
+       {
+        "type": "object",
+        "properties": {
+         "subject": {
+          "type": "string",
+          "minLength": 1
+         },
+         "predicate": {
+          "type": "string",
+          "minLength": 1
+         },
+         "object": {
+          "type": "string",
+          "minLength": 1
+         },
+         "cardinality": {
+          "enum": [
+           "one",
+           "many"
+          ],
+          "default": "one"
+         }
+        },
+        "required": [
+         "subject",
+         "predicate",
+         "object"
+        ],
+        "additionalProperties": false
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "scope": {
+      "type": "string"
+     },
+     "readers": {
+      "anyOf": [
+       {
+        "type": "array",
+        "items": {
+         "type": "string"
+        }
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "writers": {
+      "anyOf": [
+       {
+        "type": "array",
+        "items": {
+         "type": "string"
+        }
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "actor": {
+      "type": "string"
+     },
+     "role": {
+      "type": "string"
+     },
+     "origin": {
+      "enum": [
+       "observed",
+       "extracted",
+       "inferred",
+       "human",
+       "imported",
+       "seed"
+      ]
+     },
+     "thread": {
+      "type": "string"
+     },
+     "seq": {
+      "type": "integer"
+     },
+     "observed_at": {
+      "anyOf": [
+       {
+        "type": "string",
+        "description": "ISO 8601 timestamp; offsets are converted to UTC"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "event_time": {
+      "anyOf": [
+       {
+        "type": "string",
+        "description": "ISO 8601 timestamp; offsets are converted to UTC"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "valid_from": {
+      "anyOf": [
+       {
+        "type": "string",
+        "description": "ISO 8601 timestamp; offsets are converted to UTC"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "valid_to": {
+      "anyOf": [
+       {
+        "type": "string",
+        "description": "ISO 8601 timestamp; offsets are converted to UTC"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "expires_at": {
+      "anyOf": [
+       {
+        "type": "string",
+        "description": "ISO 8601 timestamp; offsets are converted to UTC"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "status": {
+      "enum": [
+       "active",
+       "superseded",
+       "retracted",
+       "draft",
+       "expired"
+      ]
+     },
+     "supersedes": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "superseded_by": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "version": {
+      "type": "integer",
+      "minimum": 1
+     },
+     "sources": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "uri": {
+         "type": "string"
+        },
+        "span": {
+         "type": "string"
+        },
+        "hash": {
+         "type": "string"
+        },
+        "observed_at": {
+         "type": "string"
+        }
+       },
+       "required": [
+        "uri"
+       ],
+       "additionalProperties": false
+      }
+     },
+     "derived_from": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "support": {
+      "type": "integer",
+      "minimum": 0
+     },
+     "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+     },
+     "labels": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "load": {
+      "enum": [
+       "always",
+       "on_scope",
+       "on_query"
+      ]
+     },
+     "meta": {
+      "type": "object"
+     },
+     "written_by": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "description": "authenticated writer (actor is asserted)"
+     }
+    },
+    "required": [
+     "id",
+     "tenant",
+     "kind",
+     "content",
+     "readers",
+     "origin",
+     "observed_at",
+     "status",
+     "version"
+    ],
+    "additionalProperties": false
+   },
+   "MemoryInput": {
+    "type": "object",
+    "properties": {
+     "id": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[^~]+$"
+     },
+     "kind": {
+      "type": "string",
+      "description": "event | document | fact | preference | procedure | observation | summary | profile | entity, or x-<name>",
+      "anyOf": [
+       {
+        "enum": [
+         "event",
+         "document",
+         "fact",
+         "preference",
+         "procedure",
+         "observation",
+         "summary",
+         "profile",
+         "entity"
+        ]
+       },
+       {
+        "pattern": "^x-"
+       }
+      ]
+     },
+     "content": {
+      "type": "string",
+      "minLength": 1
+     },
+     "claim": {
+      "anyOf": [
+       {
+        "type": "object",
+        "properties": {
+         "subject": {
+          "type": "string",
+          "minLength": 1
+         },
+         "predicate": {
+          "type": "string",
+          "minLength": 1
+         },
+         "object": {
+          "type": "string",
+          "minLength": 1
+         },
+         "cardinality": {
+          "enum": [
+           "one",
+           "many"
+          ],
+          "default": "one"
+         }
+        },
+        "required": [
+         "subject",
+         "predicate",
+         "object"
+        ],
+        "additionalProperties": false
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "scope": {
+      "type": "string"
+     },
+     "readers": {
+      "anyOf": [
+       {
+        "type": "array",
+        "items": {
+         "type": "string"
+        }
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "writers": {
+      "anyOf": [
+       {
+        "type": "array",
+        "items": {
+         "type": "string"
+        }
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "actor": {
+      "type": "string"
+     },
+     "role": {
+      "anyOf": [
+       {
+        "enum": [
+         "user",
+         "assistant",
+         "system",
+         "tool",
+         "human",
+         "connector"
+        ]
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "origin": {
+      "enum": [
+       "observed",
+       "extracted",
+       "inferred",
+       "human",
+       "imported",
+       "seed"
+      ]
+     },
+     "thread": {
+      "type": "string"
+     },
+     "seq": {
+      "type": "integer"
+     },
+     "event_time": {
+      "anyOf": [
+       {
+        "type": "string",
+        "description": "ISO 8601 timestamp; offsets are converted to UTC"
+       },
+       {
+        "type": "object",
+        "properties": {
+         "start": {
+          "anyOf": [
+           {
+            "type": "string",
+            "description": "ISO 8601 timestamp; offsets are converted to UTC"
+           },
+           {
+            "type": "null"
+           }
+          ]
+         },
+         "end": {
+          "anyOf": [
+           {
+            "type": "string"
+           },
+           {
+            "type": "null"
+           }
+          ]
+         },
+         "granularity": {
+          "anyOf": [
+           {
+            "type": "string"
+           },
+           {
+            "type": "null"
+           }
+          ]
+         }
+        },
+        "required": [],
+        "additionalProperties": false
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "valid_from": {
+      "anyOf": [
+       {
+        "type": "string",
+        "description": "ISO 8601 timestamp; offsets are converted to UTC"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "valid_to": {
+      "anyOf": [
+       {
+        "type": "string",
+        "description": "ISO 8601 timestamp; offsets are converted to UTC"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "expires_at": {
+      "anyOf": [
+       {
+        "type": "string",
+        "description": "ISO 8601 timestamp; offsets are converted to UTC"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "sources": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "uri": {
+         "type": "string"
+        },
+        "span": {
+         "type": "string"
+        },
+        "hash": {
+         "type": "string"
+        },
+        "observed_at": {
+         "type": "string"
+        }
+       },
+       "required": [
+        "uri"
+       ],
+       "additionalProperties": false
+      }
+     },
+     "derived_from": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "labels": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "load": {
+      "enum": [
+       "always",
+       "on_scope",
+       "on_query"
+      ]
+     },
+     "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+     },
+     "support": {
+      "type": "integer",
+      "minimum": 0
+     },
+     "meta": {
+      "type": "object",
+      "description": "free-form; keys starting with _ are reserved for engines"
+     },
+     "supersedes": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     }
+    },
+    "required": [
+     "content"
+    ],
+    "additionalProperties": false
+   },
+   "Claim": {
+    "type": "object",
+    "properties": {
+     "subject": {
+      "type": "string",
+      "minLength": 1
+     },
+     "predicate": {
+      "type": "string",
+      "minLength": 1
+     },
+     "object": {
+      "type": "string",
+      "minLength": 1
+     },
+     "cardinality": {
+      "enum": [
+       "one",
+       "many"
+      ],
+      "default": "one"
+     }
+    },
+    "required": [
+     "subject",
+     "predicate",
+     "object"
+    ],
+    "additionalProperties": false
+   },
+   "Source": {
+    "type": "object",
+    "properties": {
+     "uri": {
+      "type": "string"
+     },
+     "span": {
+      "type": "string"
+     },
+     "hash": {
+      "type": "string"
+     },
+     "observed_at": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "uri"
+    ],
+    "additionalProperties": false
+   },
+   "EventTime": {
+    "type": "object",
+    "properties": {
+     "start": {
+      "anyOf": [
+       {
+        "type": "string",
+        "description": "ISO 8601 timestamp; offsets are converted to UTC"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "end": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "granularity": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     }
+    },
+    "required": [],
+    "additionalProperties": false
+   },
+   "RememberRequest": {
+    "type": "object",
+    "properties": {
+     "memories": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "id": {
+         "type": "string",
+         "minLength": 1,
+         "pattern": "^[^~]+$"
+        },
+        "kind": {
+         "type": "string",
+         "description": "event | document | fact | preference | procedure | observation | summary | profile | entity, or x-<name>",
+         "anyOf": [
+          {
+           "enum": [
+            "event",
+            "document",
+            "fact",
+            "preference",
+            "procedure",
+            "observation",
+            "summary",
+            "profile",
+            "entity"
+           ]
+          },
+          {
+           "pattern": "^x-"
+          }
+         ]
+        },
+        "content": {
+         "type": "string",
+         "minLength": 1
+        },
+        "claim": {
+         "anyOf": [
+          {
+           "type": "object",
+           "properties": {
+            "subject": {
+             "type": "string",
+             "minLength": 1
+            },
+            "predicate": {
+             "type": "string",
+             "minLength": 1
+            },
+            "object": {
+             "type": "string",
+             "minLength": 1
+            },
+            "cardinality": {
+             "enum": [
+              "one",
+              "many"
+             ],
+             "default": "one"
+            }
+           },
+           "required": [
+            "subject",
+            "predicate",
+            "object"
+           ],
+           "additionalProperties": false
+          },
+          {
+           "type": "null"
+          }
+         ]
+        },
+        "scope": {
+         "type": "string"
+        },
+        "readers": {
+         "anyOf": [
+          {
+           "type": "array",
+           "items": {
+            "type": "string"
+           }
+          },
+          {
+           "type": "null"
+          }
+         ]
+        },
+        "writers": {
+         "anyOf": [
+          {
+           "type": "array",
+           "items": {
+            "type": "string"
+           }
+          },
+          {
+           "type": "null"
+          }
+         ]
+        },
+        "actor": {
+         "type": "string"
+        },
+        "role": {
+         "anyOf": [
+          {
+           "enum": [
+            "user",
+            "assistant",
+            "system",
+            "tool",
+            "human",
+            "connector"
+           ]
+          },
+          {
+           "type": "null"
+          }
+         ]
+        },
+        "origin": {
+         "enum": [
+          "observed",
+          "extracted",
+          "inferred",
+          "human",
+          "imported",
+          "seed"
+         ]
+        },
+        "thread": {
+         "type": "string"
+        },
+        "seq": {
+         "type": "integer"
+        },
+        "event_time": {
+         "anyOf": [
+          {
+           "type": "string",
+           "description": "ISO 8601 timestamp; offsets are converted to UTC"
+          },
+          {
+           "type": "object",
+           "properties": {
+            "start": {
+             "anyOf": [
+              {
+               "type": "string",
+               "description": "ISO 8601 timestamp; offsets are converted to UTC"
+              },
+              {
+               "type": "null"
+              }
+             ]
+            },
+            "end": {
+             "anyOf": [
+              {
+               "type": "string"
+              },
+              {
+               "type": "null"
+              }
+             ]
+            },
+            "granularity": {
+             "anyOf": [
+              {
+               "type": "string"
+              },
+              {
+               "type": "null"
+              }
+             ]
+            }
+           },
+           "required": [],
+           "additionalProperties": false
+          },
+          {
+           "type": "null"
+          }
+         ]
+        },
+        "valid_from": {
+         "anyOf": [
+          {
+           "type": "string",
+           "description": "ISO 8601 timestamp; offsets are converted to UTC"
+          },
+          {
+           "type": "null"
+          }
+         ]
+        },
+        "valid_to": {
+         "anyOf": [
+          {
+           "type": "string",
+           "description": "ISO 8601 timestamp; offsets are converted to UTC"
+          },
+          {
+           "type": "null"
+          }
+         ]
+        },
+        "expires_at": {
+         "anyOf": [
+          {
+           "type": "string",
+           "description": "ISO 8601 timestamp; offsets are converted to UTC"
+          },
+          {
+           "type": "null"
+          }
+         ]
+        },
+        "sources": {
+         "type": "array",
+         "items": {
+          "type": "object",
+          "properties": {
+           "uri": {
+            "type": "string"
+           },
+           "span": {
+            "type": "string"
+           },
+           "hash": {
+            "type": "string"
+           },
+           "observed_at": {
+            "type": "string"
+           }
+          },
+          "required": [
+           "uri"
+          ],
+          "additionalProperties": false
+         }
+        },
+        "derived_from": {
+         "type": "array",
+         "items": {
+          "type": "string"
+         }
+        },
+        "labels": {
+         "type": "array",
+         "items": {
+          "type": "string"
+         }
+        },
+        "load": {
+         "enum": [
+          "always",
+          "on_scope",
+          "on_query"
+         ]
+        },
+        "confidence": {
+         "type": "number",
+         "minimum": 0,
+         "maximum": 1
+        },
+        "support": {
+         "type": "integer",
+         "minimum": 0
+        },
+        "meta": {
+         "type": "object",
+         "description": "free-form; keys starting with _ are reserved for engines"
+        },
+        "supersedes": {
+         "type": "array",
+         "items": {
+          "type": "string"
+         }
+        }
+       },
+       "required": [
+        "content"
+       ],
+       "additionalProperties": false
+      }
+     },
+     "mode": {
+      "enum": [
+       "append",
+       "upsert",
+       "supersede",
+       "propose"
+      ],
+      "default": "append"
+     },
+     "idempotency_key": {
+      "type": "string"
+     },
+     "if_version": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "wait": {
+      "enum": [
+       "accepted",
+       "stored",
+       "indexed"
+      ],
+      "default": "indexed"
+     },
+     "allow_reingest": {
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "memories"
+    ],
+    "additionalProperties": false
+   },
+   "RememberResponse": {
+    "type": "object",
+    "properties": {
+     "ids": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "replayed": {
+      "type": "boolean"
+     },
+     "stage": {
+      "enum": [
+       "accepted",
+       "stored",
+       "indexed"
+      ]
+     },
+     "degraded": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "request_id": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "ids",
+     "replayed",
+     "stage",
+     "degraded",
+     "request_id"
+    ],
+    "additionalProperties": false
+   },
+   "RecallRequest": {
+    "type": "object",
+    "properties": {
+     "query": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S"
+     },
+     "queries": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "text": {
+         "type": "string"
+        },
+        "weight": {
+         "type": "number"
+        }
+       },
+       "required": [
+        "text"
+       ],
+       "additionalProperties": false
+      },
+      "description": "engines MAY reject (must say so)"
+     },
+     "as_of": {
+      "anyOf": [
+       {
+        "type": "string",
+        "description": "ISO 8601 timestamp; offsets are converted to UTC"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "known_at": {
+      "anyOf": [
+       {
+        "type": "string",
+        "description": "ISO 8601 timestamp; offsets are converted to UTC"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "scope": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "object",
+        "properties": {
+         "within": {
+          "type": "string"
+         },
+         "prefer": {
+          "type": "array",
+          "items": {
+           "type": "string"
+          }
+         }
+        },
+        "required": [],
+        "additionalProperties": false
+       }
+      ]
+     },
+     "kinds": {
+      "anyOf": [
+       {
+        "type": "array",
+        "items": {
+         "type": "string"
+        }
+       },
+       {
+        "type": "object",
+        "additionalProperties": {
+         "type": "integer",
+         "minimum": 0
+        }
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "budget": {
+      "type": "object",
+      "properties": {
+       "tokens": {
+        "type": "integer",
+        "minimum": 50
+       },
+       "items": {
+        "type": "integer",
+        "minimum": 1
+       }
+      },
+      "required": [],
+      "additionalProperties": false
+     },
+     "granularity": {
+      "enum": [
+       "unit",
+       "span",
+       "thread",
+       "auto"
+      ]
+     },
+     "include": {
+      "type": "object",
+      "properties": {
+       "history": {
+        "type": "boolean"
+       },
+       "drafts": {
+        "type": "boolean"
+       },
+       "neighbours": {
+        "anyOf": [
+         {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10
+         },
+         {
+          "const": "auto"
+         },
+         {
+          "type": "null"
+         }
+        ]
+       },
+       "explain": {
+        "type": "boolean"
+       },
+       "labels": {
+        "type": "array",
+        "items": {
+         "type": "string"
+        }
+       }
+      },
+      "required": [],
+      "additionalProperties": false
+     },
+     "time": {
+      "description": "engines MAY reject (must say so)"
+     },
+     "mode": {
+      "enum": [
+       "fast",
+       "balanced",
+       "deep"
+      ]
+     },
+     "min_coverage": {
+      "anyOf": [
+       {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "cursor": {
+      "description": "engines MAY reject (must say so)"
+     }
+    },
+    "required": [
+     "query"
+    ],
+    "additionalProperties": false
+   },
+   "ContextItem": {
+    "type": "object",
+    "properties": {
+     "ref": {
+      "type": "string"
+     },
+     "memory_ids": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "kind": {
+      "type": "string",
+      "description": "event | document | fact | preference | procedure | observation | summary | profile | entity, or x-<name>",
+      "anyOf": [
+       {
+        "enum": [
+         "event",
+         "document",
+         "fact",
+         "preference",
+         "procedure",
+         "observation",
+         "summary",
+         "profile",
+         "entity"
+        ]
+       },
+       {
+        "pattern": "^x-"
+       }
+      ]
+     },
+     "scope": {
+      "type": "string"
+     },
+     "text": {
+      "type": "string"
+     },
+     "tokens": {
+      "type": "integer"
+     },
+     "score": {
+      "type": "number"
+     },
+     "why": {
+      "type": "object"
+     },
+     "validity": {
+      "enum": [
+       "current",
+       "superseded",
+       "historical"
+      ]
+     },
+     "event_time": {},
+     "citations": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "superseded": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     }
+    },
+    "required": [
+     "memory_ids",
+     "text",
+     "tokens",
+     "score",
+     "why",
+     "validity",
+     "citations"
+    ],
+    "additionalProperties": false
+   },
+   "ContextPack": {
+    "type": "object",
+    "properties": {
+     "items": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "ref": {
+         "type": "string"
+        },
+        "memory_ids": {
+         "type": "array",
+         "items": {
+          "type": "string"
+         }
+        },
+        "kind": {
+         "type": "string",
+         "description": "event | document | fact | preference | procedure | observation | summary | profile | entity, or x-<name>",
+         "anyOf": [
+          {
+           "enum": [
+            "event",
+            "document",
+            "fact",
+            "preference",
+            "procedure",
+            "observation",
+            "summary",
+            "profile",
+            "entity"
+           ]
+          },
+          {
+           "pattern": "^x-"
+          }
+         ]
+        },
+        "scope": {
+         "type": "string"
+        },
+        "text": {
+         "type": "string"
+        },
+        "tokens": {
+         "type": "integer"
+        },
+        "score": {
+         "type": "number"
+        },
+        "why": {
+         "type": "object"
+        },
+        "validity": {
+         "enum": [
+          "current",
+          "superseded",
+          "historical"
+         ]
+        },
+        "event_time": {},
+        "citations": {
+         "type": "array",
+         "items": {
+          "type": "string"
+         }
+        },
+        "superseded": {
+         "type": "array",
+         "items": {
+          "type": "string"
+         }
+        }
+       },
+       "required": [
+        "memory_ids",
+        "text",
+        "tokens",
+        "score",
+        "why",
+        "validity",
+        "citations"
+       ],
+       "additionalProperties": false
+      }
+     },
+     "tokens": {
+      "type": "integer"
+     },
+     "budget": {
+      "type": "object",
+      "properties": {
+       "tokens": {
+        "type": "integer"
+       }
+      },
+      "required": [],
+      "additionalProperties": false
+     },
+     "coverage": {
+      "type": "number"
+     },
+     "abstain_hint": {
+      "type": "boolean"
+     },
+     "snapshot": {
+      "type": "string"
+     },
+     "notes": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "tokenizer": {
+      "type": "string"
+     },
+     "degraded": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "request_id": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "items",
+     "tokens",
+     "budget",
+     "coverage",
+     "snapshot",
+     "degraded",
+     "request_id"
+    ],
+    "additionalProperties": false
+   },
+   "ProfileRequest": {
+    "type": "object",
+    "properties": {
+     "subject": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "budget": {
+      "type": "object",
+      "properties": {
+       "tokens": {
+        "type": "integer",
+        "minimum": 1
+       }
+      },
+      "required": [
+       "tokens"
+      ],
+      "additionalProperties": false
+     },
+     "as_of": {
+      "anyOf": [
+       {
+        "type": "string",
+        "description": "ISO 8601 timestamp; offsets are converted to UTC"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     }
+    },
+    "required": [
+     "budget"
+    ],
+    "additionalProperties": false
+   },
+   "ForgetRequest": {
+    "type": "object",
+    "properties": {
+     "ids": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "mode": {
+      "enum": [
+       "retract",
+       "redact",
+       "purge"
+      ]
+     },
+     "cascade": {
+      "type": "boolean"
+     },
+     "dry_run": {
+      "type": "boolean"
+     },
+     "reason": {
+      "type": "string"
+     },
+     "allow_reingest": {
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "ids"
+    ],
+    "additionalProperties": false
+   },
+   "ForgetResponse": {
+    "type": "object",
+    "properties": {
+     "dry_run": {
+      "type": "boolean"
+     },
+     "affected": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "degraded": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "request_id": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "dry_run",
+     "affected"
+    ],
+    "additionalProperties": false
+   },
+   "FeedbackRequest": {
+    "type": "object",
+    "properties": {
+     "target": {
+      "type": "string"
+     },
+     "signal": {
+      "enum": [
+       "used",
+       "helpful",
+       "wrong",
+       "outdated",
+       "draft_final"
+      ]
+     },
+     "draft": {
+      "type": "string"
+     },
+     "final": {
+      "type": "string"
+     },
+     "note": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "target",
+     "signal"
+    ],
+    "additionalProperties": false
+   },
+   "ReflectRequest": {
+    "type": "object",
+    "properties": {
+     "scope": {
+      "type": "string"
+     },
+     "threads": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "kinds": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     }
+    },
+    "required": [],
+    "additionalProperties": false
+   },
+   "LinkRequest": {
+    "type": "object",
+    "properties": {
+     "type": {
+      "anyOf": [
+       {
+        "enum": [
+         "about",
+         "mentions",
+         "part_of",
+         "follows",
+         "causes",
+         "supports",
+         "contradicts",
+         "supersedes",
+         "derived_from",
+         "relates"
+        ]
+       },
+       {
+        "type": "string",
+        "pattern": "^x-"
+       }
+      ]
+     },
+     "from": {
+      "type": "string"
+     },
+     "to": {
+      "type": "string"
+     },
+     "valid_from": {
+      "anyOf": [
+       {
+        "type": "string",
+        "description": "ISO 8601 timestamp; offsets are converted to UTC"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "valid_to": {
+      "anyOf": [
+       {
+        "type": "string",
+        "description": "ISO 8601 timestamp; offsets are converted to UTC"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "sources": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "uri": {
+         "type": "string"
+        },
+        "span": {
+         "type": "string"
+        },
+        "hash": {
+         "type": "string"
+        },
+        "observed_at": {
+         "type": "string"
+        }
+       },
+       "required": [
+        "uri"
+       ],
+       "additionalProperties": false
+      }
+     }
+    },
+    "required": [
+     "type",
+     "from",
+     "to"
+    ],
+    "additionalProperties": false
+   },
+   "Change": {
+    "type": "object",
+    "properties": {
+     "cursor": {
+      "type": "integer"
+     },
+     "at": {
+      "type": "string",
+      "description": "ISO 8601 timestamp; offsets are converted to UTC"
+     },
+     "op": {
+      "type": "string"
+     },
+     "id": {
+      "type": "string"
+     },
+     "tenant": {
+      "type": "string"
+     },
+     "by": {
+      "type": "string"
+     },
+     "version": {
+      "anyOf": [
+       {
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "status": {
+      "anyOf": [
+       {
+        "enum": [
+         "active",
+         "superseded",
+         "retracted",
+         "draft",
+         "expired"
+        ]
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "reason": {
+      "type": "string"
+     },
+     "edge": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "cursor",
+     "op",
+     "id"
+    ],
+    "additionalProperties": false
+   },
+   "ChangesResponse": {
+    "type": "object",
+    "properties": {
+     "changes": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "properties": {
+        "cursor": {
+         "type": "integer"
+        },
+        "at": {
+         "type": "string",
+         "description": "ISO 8601 timestamp; offsets are converted to UTC"
+        },
+        "op": {
+         "type": "string"
+        },
+        "id": {
+         "type": "string"
+        },
+        "tenant": {
+         "type": "string"
+        },
+        "by": {
+         "type": "string"
+        },
+        "version": {
+         "anyOf": [
+          {
+           "type": "integer"
+          },
+          {
+           "type": "null"
+          }
+         ]
+        },
+        "status": {
+         "anyOf": [
+          {
+           "enum": [
+            "active",
+            "superseded",
+            "retracted",
+            "draft",
+            "expired"
+           ]
+          },
+          {
+           "type": "null"
+          }
+         ]
+        },
+        "reason": {
+         "type": "string"
+        },
+        "edge": {
+         "type": "string"
+        }
+       },
+       "required": [
+        "cursor",
+        "op",
+        "id"
+       ],
+       "additionalProperties": false
+      }
+     },
+     "cursor": {
+      "type": "integer"
+     },
+     "degraded": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "request_id": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "changes",
+     "cursor"
+    ],
+    "additionalProperties": false
+   },
+   "Error": {
+    "type": "object",
+    "properties": {
+     "error": {
+      "type": "object",
+      "properties": {
+       "code": {
+        "enum": [
+         "unsupported_parameter",
+         "invalid_parameter",
+         "version_conflict",
+         "forbidden",
+         "not_found",
+         "budget_too_small",
+         "degraded",
+         "rate_limited",
+         "unauthorized",
+         "payload_too_large",
+         "internal"
+        ]
+       },
+       "message": {
+        "type": "string"
+       },
+       "details": {
+        "type": "object"
+       }
+      },
+      "required": [
+       "code",
+       "message"
+      ],
+      "additionalProperties": false
+     }
+    },
+    "required": [
+     "error"
+    ],
+    "additionalProperties": false
+   },
+   "Bundle": {
+    "type": "object",
+    "properties": {
+     "manifest": {
+      "type": "object",
+      "properties": {
+       "spec": {
+        "type": "string"
+       },
+       "tenant": {
+        "type": "string"
+       },
+       "count": {
+        "type": "integer"
+       },
+       "sha256": {
+        "type": "string"
+       },
+       "tombstones": {
+        "type": "array"
+       },
+       "id_map": {
+        "type": "object"
+       }
+      },
+      "required": [
+       "spec",
+       "tenant",
+       "count",
+       "sha256"
+      ],
+      "additionalProperties": false
+     },
+     "memories.jsonl": {
+      "type": "string"
+     },
+     "edges.jsonl": {
+      "type": "string"
+     },
+     "degraded": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "request_id": {
+      "type": "string"
+     }
+    },
+    "required": [
+     "memories.jsonl"
+    ],
+    "additionalProperties": false
+   },
+   "Generic": {
+    "type": "object"
+   }
+  }
+ },
+ "paths": {
+  "/v1/{tenant}/capabilities": {
+   "parameters": [
+    {
+     "name": "tenant",
+     "in": "path",
+     "required": true,
+     "schema": {
+      "type": "string"
+     },
+     "description": "must equal the token's tenant"
+    }
+   ],
+   "get": {
+    "summary": "Engine capabilities",
+    "security": [
+     {
+      "bearer": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Generic"
+        }
+       }
+      }
+     },
+     "default": {
+      "description": "error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/{tenant}/remember": {
+   "parameters": [
+    {
+     "name": "tenant",
+     "in": "path",
+     "required": true,
+     "schema": {
+      "type": "string"
+     },
+     "description": "must equal the token's tenant"
+    }
+   ],
+   "post": {
+    "summary": "Write memories",
+    "security": [
+     {
+      "bearer": []
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/RememberRequest"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/RememberResponse"
+        }
+       }
+      }
+     },
+     "default": {
+      "description": "error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    },
+    "parameters": [
+     {
+      "name": "If-Match",
+      "in": "header",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ]
+   }
+  },
+  "/v1/{tenant}/recall": {
+   "parameters": [
+    {
+     "name": "tenant",
+     "in": "path",
+     "required": true,
+     "schema": {
+      "type": "string"
+     },
+     "description": "must equal the token's tenant"
+    }
+   ],
+   "post": {
+    "summary": "Recall a context pack",
+    "security": [
+     {
+      "bearer": []
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/RecallRequest"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ContextPack"
+        }
+       }
+      }
+     },
+     "default": {
+      "description": "error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/{tenant}/profile": {
+   "parameters": [
+    {
+     "name": "tenant",
+     "in": "path",
+     "required": true,
+     "schema": {
+      "type": "string"
+     },
+     "description": "must equal the token's tenant"
+    }
+   ],
+   "post": {
+    "summary": "Always-loaded context within a budget",
+    "security": [
+     {
+      "bearer": []
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ProfileRequest"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Generic"
+        }
+       }
+      }
+     },
+     "default": {
+      "description": "error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/{tenant}/forget": {
+   "parameters": [
+    {
+     "name": "tenant",
+     "in": "path",
+     "required": true,
+     "schema": {
+      "type": "string"
+     },
+     "description": "must equal the token's tenant"
+    }
+   ],
+   "post": {
+    "summary": "Retract, redact or purge (cascades)",
+    "security": [
+     {
+      "bearer": []
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ForgetRequest"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ForgetResponse"
+        }
+       }
+      }
+     },
+     "default": {
+      "description": "error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/{tenant}/feedback": {
+   "parameters": [
+    {
+     "name": "tenant",
+     "in": "path",
+     "required": true,
+     "schema": {
+      "type": "string"
+     },
+     "description": "must equal the token's tenant"
+    }
+   ],
+   "post": {
+    "summary": "Usage and draft-to-final feedback",
+    "security": [
+     {
+      "bearer": []
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/FeedbackRequest"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Generic"
+        }
+       }
+      }
+     },
+     "default": {
+      "description": "error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/{tenant}/reflect": {
+   "parameters": [
+    {
+     "name": "tenant",
+     "in": "path",
+     "required": true,
+     "schema": {
+      "type": "string"
+     },
+     "description": "must equal the token's tenant"
+    }
+   ],
+   "post": {
+    "summary": "Consolidate threads into summaries",
+    "security": [
+     {
+      "bearer": []
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/ReflectRequest"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Generic"
+        }
+       }
+      }
+     },
+     "default": {
+      "description": "error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/{tenant}/link": {
+   "parameters": [
+    {
+     "name": "tenant",
+     "in": "path",
+     "required": true,
+     "schema": {
+      "type": "string"
+     },
+     "description": "must equal the token's tenant"
+    }
+   ],
+   "post": {
+    "summary": "Create a typed edge",
+    "security": [
+     {
+      "bearer": []
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/LinkRequest"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Generic"
+        }
+       }
+      }
+     },
+     "default": {
+      "description": "error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/{tenant}/import": {
+   "parameters": [
+    {
+     "name": "tenant",
+     "in": "path",
+     "required": true,
+     "schema": {
+      "type": "string"
+     },
+     "description": "must equal the token's tenant"
+    }
+   ],
+   "post": {
+    "summary": "Import a bundle (tenant admins)",
+    "security": [
+     {
+      "bearer": []
+     }
+    ],
+    "requestBody": {
+     "required": true,
+     "content": {
+      "application/json": {
+       "schema": {
+        "$ref": "#/components/schemas/Bundle"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Generic"
+        }
+       }
+      }
+     },
+     "default": {
+      "description": "error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/{tenant}/export": {
+   "parameters": [
+    {
+     "name": "tenant",
+     "in": "path",
+     "required": true,
+     "schema": {
+      "type": "string"
+     },
+     "description": "must equal the token's tenant"
+    }
+   ],
+   "get": {
+    "summary": "Export a lossless bundle",
+    "security": [
+     {
+      "bearer": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Bundle"
+        }
+       }
+      }
+     },
+     "default": {
+      "description": "error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/{tenant}/memories": {
+   "parameters": [
+    {
+     "name": "tenant",
+     "in": "path",
+     "required": true,
+     "schema": {
+      "type": "string"
+     },
+     "description": "must equal the token's tenant"
+    },
+    {
+     "name": "kind",
+     "in": "query",
+     "schema": {
+      "type": "string"
+     }
+    },
+    {
+     "name": "thread",
+     "in": "query",
+     "schema": {
+      "type": "string"
+     }
+    },
+    {
+     "name": "scope",
+     "in": "query",
+     "schema": {
+      "type": "string"
+     }
+    },
+    {
+     "name": "limit",
+     "in": "query",
+     "schema": {
+      "type": "integer"
+     }
+    },
+    {
+     "name": "cursor",
+     "in": "query",
+     "schema": {
+      "type": "integer"
+     }
+    }
+   ],
+   "get": {
+    "summary": "List admissible records (extension x-list)",
+    "security": [
+     {
+      "bearer": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Generic"
+        }
+       }
+      }
+     },
+     "default": {
+      "description": "error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/{tenant}/memories/{id}": {
+   "parameters": [
+    {
+     "name": "tenant",
+     "in": "path",
+     "required": true,
+     "schema": {
+      "type": "string"
+     },
+     "description": "must equal the token's tenant"
+    },
+    {
+     "name": "id",
+     "in": "path",
+     "required": true,
+     "schema": {
+      "type": "string"
+     }
+    }
+   ],
+   "get": {
+    "summary": "Get a record (ETag carries the version)",
+    "security": [
+     {
+      "bearer": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Memory"
+        }
+       }
+      }
+     },
+     "default": {
+      "description": "error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   },
+   "delete": {
+    "summary": "Retract a record (If-Match guards the version)",
+    "security": [
+     {
+      "bearer": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ForgetResponse"
+        }
+       }
+      }
+     },
+     "default": {
+      "description": "error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/{tenant}/memories/{id}/neighbours": {
+   "parameters": [
+    {
+     "name": "tenant",
+     "in": "path",
+     "required": true,
+     "schema": {
+      "type": "string"
+     },
+     "description": "must equal the token's tenant"
+    },
+    {
+     "name": "id",
+     "in": "path",
+     "required": true,
+     "schema": {
+      "type": "string"
+     }
+    },
+    {
+     "name": "before",
+     "in": "query",
+     "schema": {
+      "type": "integer"
+     }
+    },
+    {
+     "name": "after",
+     "in": "query",
+     "schema": {
+      "type": "integer"
+     }
+    }
+   ],
+   "get": {
+    "summary": "Units before and after in the thread",
+    "security": [
+     {
+      "bearer": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Generic"
+        }
+       }
+      }
+     },
+     "default": {
+      "description": "error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/{tenant}/memories/{id}/history": {
+   "parameters": [
+    {
+     "name": "tenant",
+     "in": "path",
+     "required": true,
+     "schema": {
+      "type": "string"
+     },
+     "description": "must equal the token's tenant"
+    },
+    {
+     "name": "id",
+     "in": "path",
+     "required": true,
+     "schema": {
+      "type": "string"
+     }
+    }
+   ],
+   "get": {
+    "summary": "Version chain of this record's claim",
+    "security": [
+     {
+      "bearer": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Generic"
+        }
+       }
+      }
+     },
+     "default": {
+      "description": "error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/{tenant}/memories/{id}/edges": {
+   "parameters": [
+    {
+     "name": "tenant",
+     "in": "path",
+     "required": true,
+     "schema": {
+      "type": "string"
+     },
+     "description": "must equal the token's tenant"
+    },
+    {
+     "name": "id",
+     "in": "path",
+     "required": true,
+     "schema": {
+      "type": "string"
+     }
+    }
+   ],
+   "get": {
+    "summary": "Edges touching this record",
+    "security": [
+     {
+      "bearer": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Generic"
+        }
+       }
+      }
+     },
+     "default": {
+      "description": "error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/{tenant}/memories/{id}/approve": {
+   "parameters": [
+    {
+     "name": "tenant",
+     "in": "path",
+     "required": true,
+     "schema": {
+      "type": "string"
+     },
+     "description": "must equal the token's tenant"
+    },
+    {
+     "name": "id",
+     "in": "path",
+     "required": true,
+     "schema": {
+      "type": "string"
+     }
+    }
+   ],
+   "post": {
+    "summary": "Approve a draft",
+    "security": [
+     {
+      "bearer": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Generic"
+        }
+       }
+      }
+     },
+     "default": {
+      "description": "error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/{tenant}/history": {
+   "parameters": [
+    {
+     "name": "tenant",
+     "in": "path",
+     "required": true,
+     "schema": {
+      "type": "string"
+     },
+     "description": "must equal the token's tenant"
+    },
+    {
+     "name": "subject",
+     "in": "query",
+     "schema": {
+      "type": "string"
+     }
+    },
+    {
+     "name": "predicate",
+     "in": "query",
+     "schema": {
+      "type": "string"
+     }
+    }
+   ],
+   "get": {
+    "summary": "Version chain of a claim key",
+    "security": [
+     {
+      "bearer": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Generic"
+        }
+       }
+      }
+     },
+     "default": {
+      "description": "error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/{tenant}/threads/{thread}/neighbours": {
+   "parameters": [
+    {
+     "name": "tenant",
+     "in": "path",
+     "required": true,
+     "schema": {
+      "type": "string"
+     },
+     "description": "must equal the token's tenant"
+    },
+    {
+     "name": "thread",
+     "in": "path",
+     "required": true,
+     "schema": {
+      "type": "string"
+     }
+    }
+   ],
+   "get": {
+    "summary": "A whole thread, admissible units only",
+    "security": [
+     {
+      "bearer": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Generic"
+        }
+       }
+      }
+     },
+     "default": {
+      "description": "error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/{tenant}/changes": {
+   "parameters": [
+    {
+     "name": "tenant",
+     "in": "path",
+     "required": true,
+     "schema": {
+      "type": "string"
+     },
+     "description": "must equal the token's tenant"
+    },
+    {
+     "name": "cursor",
+     "in": "query",
+     "schema": {
+      "type": "integer"
+     }
+    },
+    {
+     "name": "limit",
+     "in": "query",
+     "schema": {
+      "type": "integer"
+     }
+    }
+   ],
+   "get": {
+    "summary": "Change feed after a cursor",
+    "security": [
+     {
+      "bearer": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ChangesResponse"
+        }
+       }
+      }
+     },
+     "default": {
+      "description": "error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/{tenant}/audit": {
+   "parameters": [
+    {
+     "name": "tenant",
+     "in": "path",
+     "required": true,
+     "schema": {
+      "type": "string"
+     },
+     "description": "must equal the token's tenant"
+    }
+   ],
+   "get": {
+    "summary": "Audit log (auditor role)",
+    "security": [
+     {
+      "bearer": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Generic"
+        }
+       }
+      }
+     },
+     "default": {
+      "description": "error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/{tenant}/jobs/{id}": {
+   "parameters": [
+    {
+     "name": "tenant",
+     "in": "path",
+     "required": true,
+     "schema": {
+      "type": "string"
+     },
+     "description": "must equal the token's tenant"
+    },
+    {
+     "name": "id",
+     "in": "path",
+     "required": true,
+     "schema": {
+      "type": "string"
+     }
+    }
+   ],
+   "get": {
+    "summary": "Job status",
+    "security": [
+     {
+      "bearer": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Generic"
+        }
+       }
+      }
+     },
+     "default": {
+      "description": "error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/v1/{tenant}/edges/{id}": {
+   "parameters": [
+    {
+     "name": "tenant",
+     "in": "path",
+     "required": true,
+     "schema": {
+      "type": "string"
+     },
+     "description": "must equal the token's tenant"
+    },
+    {
+     "name": "id",
+     "in": "path",
+     "required": true,
+     "schema": {
+      "type": "string"
+     }
+    }
+   ],
+   "delete": {
+    "summary": "Remove an edge (extension x-unlink)",
+    "security": [
+     {
+      "bearer": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Generic"
+        }
+       }
+      }
+     },
+     "default": {
+      "description": "error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
+  }
+ }
+}

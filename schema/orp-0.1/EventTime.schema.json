@@ -1,0 +1,41 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "https://orp.dev/schema/0.1/EventTime",
+ "title": "EventTime",
+ "type": "object",
+ "properties": {
+  "start": {
+   "anyOf": [
+    {
+     "type": "string",
+     "description": "ISO 8601 timestamp; offsets are converted to UTC"
+    },
+    {
+     "type": "null"
+    }
+   ]
+  },
+  "end": {
+   "anyOf": [
+    {
+     "type": "string"
+    },
+    {
+     "type": "null"
+    }
+   ]
+  },
+  "granularity": {
+   "anyOf": [
+    {
+     "type": "string"
+    },
+    {
+     "type": "null"
+    }
+   ]
+  }
+ },
+ "required": [],
+ "additionalProperties": false
+}

@@ -1,0 +1,84 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "https://orp.dev/schema/0.1/ContextItem",
+ "title": "ContextItem",
+ "type": "object",
+ "properties": {
+  "ref": {
+   "type": "string"
+  },
+  "memory_ids": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  },
+  "kind": {
+   "type": "string",
+   "description": "event | document | fact | preference | procedure | observation | summary | profile | entity, or x-<name>",
+   "anyOf": [
+    {
+     "enum": [
+      "event",
+      "document",
+      "fact",
+      "preference",
+      "procedure",
+      "observation",
+      "summary",
+      "profile",
+      "entity"
+     ]
+    },
+    {
+     "pattern": "^x-"
+    }
+   ]
+  },
+  "scope": {
+   "type": "string"
+  },
+  "text": {
+   "type": "string"
+  },
+  "tokens": {
+   "type": "integer"
+  },
+  "score": {
+   "type": "number"
+  },
+  "why": {
+   "type": "object"
+  },
+  "validity": {
+   "enum": [
+    "current",
+    "superseded",
+    "historical"
+   ]
+  },
+  "event_time": {},
+  "citations": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  },
+  "superseded": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  }
+ },
+ "required": [
+  "memory_ids",
+  "text",
+  "tokens",
+  "score",
+  "why",
+  "validity",
+  "citations"
+ ],
+ "additionalProperties": false
+}

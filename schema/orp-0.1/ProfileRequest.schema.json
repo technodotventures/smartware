@@ -1,0 +1,46 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "https://orp.dev/schema/0.1/ProfileRequest",
+ "title": "ProfileRequest",
+ "type": "object",
+ "properties": {
+  "subject": {
+   "anyOf": [
+    {
+     "type": "string"
+    },
+    {
+     "type": "null"
+    }
+   ]
+  },
+  "budget": {
+   "type": "object",
+   "properties": {
+    "tokens": {
+     "type": "integer",
+     "minimum": 1
+    }
+   },
+   "required": [
+    "tokens"
+   ],
+   "additionalProperties": false
+  },
+  "as_of": {
+   "anyOf": [
+    {
+     "type": "string",
+     "description": "ISO 8601 timestamp; offsets are converted to UTC"
+    },
+    {
+     "type": "null"
+    }
+   ]
+  }
+ },
+ "required": [
+  "budget"
+ ],
+ "additionalProperties": false
+}
