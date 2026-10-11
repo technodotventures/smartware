@@ -274,3 +274,16 @@ class ForUserTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class AsOfPrecision(unittest.TestCase):
+    def test_coarse_as_of_is_end_of_period(self):
+        from orp_client import as_of_time
+        self.assertEqual(as_of_time("2024"), "2024-12-31T23:59:59.999999Z")
+        self.assertEqual(as_of_time("2024-02"), "2024-02-29T23:59:59.999999Z")
+        self.assertEqual(as_of_time("2024-05-12"), "2024-05-12T23:59:59.999999Z")
+        self.assertEqual(as_of_time("2024-05-12T08:00:00Z"), "2024-05-12T08:00:00Z")
+        import datetime as dt
+        self.assertEqual(as_of_time(dt.date(2024, 5, 12)), "2024-05-12T23:59:59.999999Z")
+        with self.assertRaises(ValueError):
+            as_of_time("2024-13")

@@ -295,3 +295,14 @@ test("getToken is called per request and tokens never appear in errors", async (
   await assert.rejects(leaky.recall("x"), (e) => e.code === "network" && !String(e.message).includes("supersecret") && !JSON.stringify(e).includes("supersecret"));
   assert.throws(() => new OrpClient({ url: srv.url }), (e) => e.code === "invalid_parameter");
 });
+
+test("coarse as_of means the end of the stated period", async () => {
+  const { asOfTime } = await import("../dist/index.js");
+  assert.equal(asOfTime("2024"), "2024-12-31T23:59:59.999999Z");
+  assert.equal(asOfTime("2024-02"), "2024-02-29T23:59:59.999999Z");
+  assert.equal(asOfTime("2023-02"), "2023-02-28T23:59:59.999999Z");
+  assert.equal(asOfTime("2024-05-12"), "2024-05-12T23:59:59.999999Z");
+  assert.equal(asOfTime("2024-05-12T08:00:00Z"), "2024-05-12T08:00:00Z");
+  assert.equal(asOfTime(new Date("2024-05-12T08:00:00Z")), "2024-05-12T08:00:00.000Z");
+  assert.throws(() => asOfTime("2024-13"), OrpError);
+});

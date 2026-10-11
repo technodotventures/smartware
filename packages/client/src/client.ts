@@ -79,7 +79,25 @@ const sleep = (ms: number, signal?: AbortSignal) => new Promise<void>((ok, fail)
   const onAbort = () => { clearTimeout(t); fail(signal!.reason); };
   signal?.addEventListener("abort", onAbort, { once: true });
 });
-const iso = (t: Time): string => (t instanceof Date ? t.toISOString() : t);
+
+/** A point in time for as_of / known_at. A coarse date means "as of the end of that period": "2024" is the end of
+ * 2024, "2024-05" the end of May 2024 and "2024-05-12" the end of that day, so events later in the stated period
+ * are not hidden by a midnight cut-off. Full timestamps and Date objects are sent unchanged. */
+export function asOfTime(t: Time): string {
+  if (t instanceof Date) return t.toISOString();
+  const s = String(t).trim();
+  let m = /^(\d{4})$/.exec(s);
+  if (m) return `${m[1]}-12-31T23:59:59.999999Z`;
+  m = /^(\d{4})-(\d{2})$/.exec(s);
+  if (m) {
+    const y = +m[1]!, mo = +m[2]!;
+    if (mo < 1 || mo > 12) throw new OrpError("invalid_parameter", `bad month in ${JSON.stringify(s)}`);
+    const last = new Date(Date.UTC(y, mo, 0)).getUTCDate();
+    return `${m[1]}-${m[2]}-${String(last).padStart(2, "0")}T23:59:59.999999Z`;
+  }
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return `${s}T23:59:59.999999Z`;
+  return s;
+}
 
 function defaultOnDegraded(): (values: string[], info: DegradedInfo) => void {
   const seen = new Set<string>();
@@ -250,8 +268,8 @@ export class OrpClient implements MemoryApi {
     if (typeof query !== "string" || !query.trim()) throw new OrpError("invalid_parameter", "query is required (an empty query never means 'everything')");
     const body: Json = { query, budget: { tokens: opts.budgetTokens ?? DEFAULT_RECALL_BUDGET } };
     if (opts.maxItems !== undefined) body.budget.items = opts.maxItems;
-    if (opts.asOf !== undefined) body.as_of = iso(opts.asOf);
-    if (opts.knownAt !== undefined) body.known_at = iso(opts.knownAt);
+    if (opts.asOf !== undefined) body.as_of = asOfTime(opts.asOf);
+    if (opts.knownAt !== undefined) body.known_at = asOfTime(opts.knownAt);
     if (opts.scope !== undefined || opts.prefer !== undefined) {
       body.scope = opts.prefer ? { ...(opts.scope !== undefined ? { within: opts.scope } : {}), prefer: opts.prefer } : opts.scope;
     }
@@ -328,7 +346,7 @@ export class OrpClient implements MemoryApi {
     }
     const body: Json = { budget: { tokens: Math.trunc(opts.budgetTokens) } };
     if (opts.subject !== undefined) body.subject = opts.subject;
-    if (opts.asOf !== undefined) body.as_of = iso(opts.asOf);
+    if (opts.asOf !== undefined) body.as_of = asOfTime(opts.asOf);
     return this.request<ProfilePack>("POST", "profile", { body, retry: true, verb: "profile" });
   }
 
@@ -363,7 +381,7 @@ export class OrpClient implements MemoryApi {
    * profile, and writes carry idempotency keys run:<runId>:<step>, so a retried or restarted run replays
    * instead of writing twice (M17, M20, M52). */
   run(opts: { runId?: string; asOf?: Time } = {}): RunClient {
-    return new RunClient(this, opts.runId ?? globalThis.crypto.randomUUID(), iso(opts.asOf ?? new Date()));
+    return new RunClient(this, opts.runId ?? globalThis.crypto.randomUUID(), asOfTime(opts.asOf ?? new Date()));
   }
 
   /** A client acting as one user, authenticated by that user's bearer (an OIDC token the gateway verifies).
@@ -410,7 +428,7 @@ export class RunClient implements MemoryApi {
   }
 
   private pinned<T extends { asOf?: Time }>(opts: T): T {
-    if (opts.asOf !== undefined && iso(opts.asOf) !== this.asOf) {
+    if (opts.asOf !== undefined && asOfTime(opts.asOf) !== this.asOf) {
       throw new OrpError("invalid_parameter", "a run pins as_of once; start another run for a different time");
     }
     return { ...opts, asOf: this.asOf };

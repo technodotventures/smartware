@@ -15,9 +15,11 @@ Safe by construction:
 """
 from __future__ import annotations
 
+import calendar
 import copy
 import datetime as _dt
 import logging
+import re
 import threading
 import urllib.parse
 import uuid
@@ -57,6 +59,28 @@ def _iso(t: TimeLike) -> Optional[str]:
     if isinstance(t, str) and t.strip():
         return t
     raise TypeError("times are ISO 8601 strings or datetime objects")
+
+
+def as_of_time(t: TimeLike) -> Optional[str]:
+    """A point in time for ``as_of`` / ``known_at``. A coarse date means "as of the end of that period": ``"2024"``
+    is the end of 2024, ``"2024-05"`` the end of May 2024 and ``"2024-05-12"`` the end of that day, so events later
+    in the stated period are not hidden by a midnight cut-off. Full timestamps and datetimes are sent unchanged."""
+    if isinstance(t, _dt.date) and not isinstance(t, _dt.datetime):
+        t = t.isoformat()
+    if isinstance(t, str):
+        s = t.strip()
+        if re.fullmatch(r"\d{4}", s):
+            return f"{s}-12-31T23:59:59.999999Z"
+        m = re.fullmatch(r"(\d{4})-(\d{2})", s)
+        if m:
+            y, mo = int(m.group(1)), int(m.group(2))
+            if not 1 <= mo <= 12:
+                raise ValueError(f"bad month in {s!r}")
+            last = calendar.monthrange(y, mo)[1]
+            return f"{s}-{last:02d}T23:59:59.999999Z"
+        if re.fullmatch(r"\d{4}-\d{2}-\d{2}", s):
+            return f"{s}T23:59:59.999999Z"
+    return _iso(t)
 
 
 def utc_now() -> str:
@@ -207,11 +231,11 @@ class OrpClient:
         if budget_items is not None:
             budget["items"] = budget_items
         body: Json = {"query": query, "budget": budget}
-        at = _iso(as_of) if as_of is not None else self._as_of
+        at = as_of_time(as_of) if as_of is not None else self._as_of
         if at is not None:
             body["as_of"] = at
         if known_at is not None:
-            body["known_at"] = _iso(known_at)
+            body["known_at"] = as_of_time(known_at)
         if kinds is not None:
             body["kinds"] = dict(kinds) if isinstance(kinds, dict) else list(kinds)
         if include_history:
@@ -427,7 +451,7 @@ class OrpClient:
         if not isinstance(rid, str) or not rid:
             raise TypeError("run_id must be a non-empty string")
         c = copy.copy(self)
-        c._as_of = _iso(as_of) if as_of is not None else utc_now()
+        c._as_of = as_of_time(as_of) if as_of is not None else utc_now()
         c._run_id = rid
         c._step = 0
         c._step_lock = threading.Lock()

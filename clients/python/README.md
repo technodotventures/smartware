@@ -110,6 +110,10 @@ recalls. That is the point of a consistent view.
 in the last moments before the run started may fall outside the view; pass `as_of` explicitly if that matters.
 `get` and `list` are not pinned: the HTTP binding has no `as_of` on those routes.
 
+A coarse `as_of` or `known_at` means the end of that period: `"2024"` is the end of 2024, `"2024-05"` the end of May
+and `"2024-05-12"` (or a `date`) the end of that day (`as_of_time()` shows the conversion), so a question "as of
+12 May" does not miss what was said later that day.
+
 ### Acting for end users
 
 ```python

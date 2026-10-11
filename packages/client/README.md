@@ -78,6 +78,10 @@ original ids with `replayed: true`. Steps count from 1 per run client; give writ
 explicit `step`. Passing a different `asOf` to a run's recall is an error: start another run instead. `forget` has
 no idempotency key in the protocol, so it is never retried.
 
+**Coarse times.** An `asOf` or `knownAt` given as a date means the end of that period: `"2024"` is the end of 2024,
+`"2024-05"` the end of May and `"2024-05-12"` the end of that day (`asOfTime()` shows the conversion). Without this, a
+question "as of 12 May" would cut off at midnight and miss everything said that day.
+
 ## Acting for users
 
 A platform holds a service credential and makes a per-user client from that user's bearer, typically an OIDC access
