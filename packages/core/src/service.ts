@@ -805,9 +805,45 @@ export class Service {
         e[end] = iid;
       }
       const eid = "edge_" + randomBytes(8).toString("hex");
-      this.edgesMap.set(eid, { ...e, id: eid, tenant: pr.tenant });
+      this.edgesMap.set(eid, { ...e, id: eid, tenant: pr.tenant, _by: pr.id });
       this.jEdges.add(eid);
       return env({ id: eid });
+    });
+  }
+
+  /** Extension (x-unlink): remove an edge. Allowed for its creator, a writer of either endpoint, or an admin. */
+  async unlink(edgeId: unknown, pr: Principal): Promise<Json> {
+    return this.verb(pr, true, () => {
+      const e = this.edgesMap.get(String(edgeId));
+      if (!e || !this.edgeVisible(e, pr)) throw new ORPError("not_found", String(edgeId));
+      const a = this.engine.mem.get(e.from)!, b = this.engine.mem.get(e.to)!;
+      if (!(isAdmin(pr) || e._by === pr.id || this.canWrite(a, pr) || this.canWrite(b, pr))) {
+        throw new ORPError("forbidden", "no write access to this edge");
+      }
+      this.edgesMap.delete(String(edgeId));
+      if (this.store) this.store.db.prepare("DELETE FROM edges WHERE id = ?").run(String(edgeId));
+      this.log("unlink", e.from, pr, { edge: String(edgeId) });
+      return env({ id: String(edgeId), removed: true });
+    });
+  }
+
+  /** Extension (x-list): admissible records, newest first, filtered by kind/thread/scope, with a cursor. Same
+   * admissibility as recall, so it never shows what recall would hide. */
+  async list(q: Json, pr: Principal): Promise<Json> {
+    checkKeys(q, new Set(["kinds", "thread", "scope", "limit", "cursor", "as_of", "include_history"]), "list");
+    const kinds = q.kinds ? strs(q.kinds, "kinds") : null;
+    const limit = int(q.limit ?? 100, "limit", 1, 1000);
+    const cursor = int(q.cursor ?? 0, "cursor", 0);
+    const asOf = ts(q.as_of);
+    return this.verb(pr, false, () => {
+      const req = recallRequest({ query: "", principal: pr, tenant: pr.tenant, as_of: asOf ?? nowMicros(),
+        scope: typeof q.scope === "string" ? q.scope : "", kinds, include_history: Boolean(q.include_history) });
+      let ids = this.engine.admissible(req);
+      if (typeof q.thread === "string") ids = ids.filter((i) => this.engine.mem.get(i)!.thread === q.thread);
+      ids.reverse(); // newest first
+      const page = ids.slice(cursor, cursor + limit);
+      return env({ memories: page.map((i) => this.record(this.engine.mem.get(i)!, pr)),
+        cursor: cursor + page.length < ids.length ? cursor + page.length : null });
     });
   }
 
@@ -821,7 +857,7 @@ export class Service {
       const iid = this.in_(pr.tenant, memId);
       const t = pr.tenant;
       return [...this.edgesMap.values()].filter((e) => (e.from === iid || e.to === iid) && this.edgeVisible(e, pr))
-        .map((e) => ({ ...e, from: this.out(t, e.from), to: this.out(t, e.to) }));
+        .map((e) => ({ ...stripUnderscore(e), from: this.out(t, e.from), to: this.out(t, e.to) }));
     });
   }
 
@@ -1000,7 +1036,7 @@ export class Service {
       mems.sort((a, b) => pyCmp(this.out(t, a.id), this.out(t, b.id)));
       const lines = mems.map((m) => pyDumps(this.record(m, pr, true), { sortKeys: true, floatKeys: FLOATS }));
       const edges = [...this.edgesMap.values()].filter((e) => this.edgeVisible(e, pr))
-        .map((e) => pyDumps({ ...e, from: this.out(t, e.from), to: this.out(t, e.to) }, { sortKeys: true }));
+        .map((e) => pyDumps({ ...stripUnderscore(e), from: this.out(t, e.from), to: this.out(t, e.to) }, { sortKeys: true }));
       const manifest = { spec: SPEC_VERSION, tenant: t, count: lines.length,
         sha256: createHash("sha256").update(lines.join("\n")).digest("hex"),
         tombstones: [...this.tombstones.values()].filter((x) => x.tenant === t).map(stripUnderscore) };

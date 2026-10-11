@@ -745,8 +745,9 @@ class Service:
         mems = [m for m in self.engine.mem.values() if m.tenant == t and self._can_read(m, principal, ("secret",))]
         lines = [json.dumps(self._record(m, principal, internal=True), sort_keys=True, default=str)
                  for m in sorted(mems, key=lambda m: self._out(t, m.id))]
-        edges = [json.dumps(dict(e, **{"from": self._out(t, e["from"]), "to": self._out(t, e["to"])}),
-                            sort_keys=True) for e in self._edges.values() if self._edge_visible(e, principal)]
+        edges = [json.dumps({k: v for k, v in dict(e, **{"from": self._out(t, e["from"]), "to": self._out(t, e["to"])}).items()
+                             if not k.startswith("_")}, sort_keys=True)
+                 for e in self._edges.values() if self._edge_visible(e, principal)]
         manifest = {"spec": SPEC_VERSION, "tenant": t, "count": len(lines),
                     "sha256": hashlib.sha256("\n".join(lines).encode()).hexdigest(),
                     "tombstones": [{k: v for k, v in x.items() if not k.startswith("_")}
