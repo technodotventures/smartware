@@ -6,11 +6,11 @@
 2. **Engine gaps first**: done (tenant partitions, incremental index, SQLite and Postgres stores, Streamable HTTP and
    OAuth).
 3. **Name**: Smartware (Smartware 2.0; packages at 2.0.0). The server and CLI publish as `smartware` on npm (the
-   name the 0.6 library used: consumers pinned to 0.6 are unaffected), the libraries as `@technodotventures/smartware-*`,
-   the Python client as `smartware-client`. The 0.6 code is kept at technodotventures/smartware-legacy.
+   name the earlier library used; 2.0.0 is a new major version, so consumers pinned to the old versions are unaffected), the libraries as `@technodotventures/smartware-*`,
+   the Python client as `smartware-client`. The earlier code (v0.8.1 and before) is kept at technodotventures/smartware-legacy.
 4. **Licence**: Apache-2.0 for everything in this repository; hosted multi-tenant operations stay closed. Copyright
    Social Money Inc. d/b/a Techno Ventures.
-5. **Moving off Smartware 0.6**: not started. The importers below are the pattern a 0.6 importer would follow.
+5. **Moving off the earlier Smartware**: not started. The importers below are the pattern an importer for it would follow.
 
 ## Build order
 | Phase | Exit gate | Status |

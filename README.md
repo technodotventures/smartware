@@ -12,7 +12,7 @@ Memory and context for AI agents and SaaS platforms, shipped as a kit: a protoco
 binary, typed clients, adapters for the memory APIs projects already call, connectors that carry source permissions
 into memory, and the tools to prove all of it on your own data.
 
-Smartware 2.0 is a rebuild from scratch. The 0.6 code lives on at
+Smartware 2.0 is a rebuild from scratch. The earlier code (v0.8.1 and before) lives on at
 [technodotventures/smartware-legacy](https://github.com/technodotventures/smartware-legacy).
 
 What makes it different, in one line each:
