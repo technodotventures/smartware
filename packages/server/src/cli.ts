@@ -9,7 +9,7 @@ import { homedir } from "node:os";
 import { join, resolve } from "node:path";
 import { createInterface } from "node:readline";
 import { existsSync } from "node:fs";
-import { chooseRanker, loadEncoder, Principal, Service, SqliteStore } from "@orp/core";
+import { chooseRanker, loadEncoder, PgStore, Principal, Service, SqliteStore, type Store } from "@orp/core";
 import { Authenticator, JwtVerifier, KeyStore } from "./auth.js";
 import { Gateway } from "./http.js";
 import { McpSession, stdioPrincipal } from "./mcp.js";
@@ -46,9 +46,20 @@ export function buildService(f: Flags, log: Log): Service {
   const enc = loadEncoder(encSpec);
   const { name, params, notes } = chooseRanker(s(f, "ranker", process.env.ORP_RANKER ?? "auto"), enc.name);
   for (const n of notes) log.warn(n);
-  const storePath = f["memory"] === true ? null : resolve(s(f, "store", defaultStore())!);
-  const store = storePath ? new SqliteStore(storePath) : null;
-  return new Service(enc, { params, store, rankerName: name, notes, secretScan: f["no-secret-scan"] !== true });
+  return new Service(enc, { params, store: openStore(f), rankerName: name, notes, secretScan: f["no-secret-scan"] !== true,
+    idleTenantMs: f["idle-tenant-s"] !== undefined ? Number(f["idle-tenant-s"]) * 1000 : undefined });
+}
+
+/** --store is a SQLite file path (default ~/.orp/orp.db) or a postgres:// URL (several nodes may share it). The
+ * password is best given as PGPASSWORD rather than in the URL, so it does not show in process listings. */
+export function openStore(f: Flags): Store | null {
+  if (f["memory"] === true) return null;
+  const spec = s(f, "store", defaultStore())!;
+  if (/^postgres(ql)?:\/\//.test(spec)) {
+    return new PgStore(spec, { nodeId: s(f, "node-id", process.env.ORP_NODE_ID), nodeUrl: s(f, "node-url", process.env.ORP_NODE_URL) ?? null,
+      leaseMs: f["lease-s"] !== undefined ? Number(f["lease-s"]) * 1000 : undefined, poolSize: f["pool"] !== undefined ? Number(f["pool"]) : undefined });
+  }
+  return new SqliteStore(resolve(spec));
 }
 
 async function serveStdio(svc: Service, f: Flags, log: Log) {
@@ -129,7 +140,12 @@ async function serveHttp(svc: Service, f: Flags, log: Log) {
       defaultReaders: (s(f, "default-readers", "self") === "tenant" ? "tenant" : s(f, "default-readers", "self") === "self" ? "self" : list(f, "default-readers")) as any },
   }, log);
   await gw.listen();
-  if (f["no-preload"] !== true) {
+  const shared = svc.store?.leases;
+  if (shared && !shared.url) {
+    log.warn("shared store without --node-url: other nodes answer 503 for tenants this node holds; set --node-url to the URL other nodes can reach this one on, or route requests by tenant");
+  }
+  // with a shared store, tenants are taken on first use, so they spread across nodes instead of all landing on the first
+  if (f["no-preload"] !== true && (!shared || f["preload"] === true)) {
     // warm every tenant's index in the background so the first recall after a restart is fast
     void svc.preload((t, ms) => log.info("tenant warmed", { tenant: t, ms })).catch((e) => log.warn("preload failed", { err: String(e) }));
   }
@@ -149,11 +165,15 @@ const HELP = `orp ${VERSION}: the ORP memory kit
             [--public-url <url>] [--allowed-origin <origin>] [--rate rps:burst] [--dev]
             [--membership <connector-membership.json> [--membership-connector slack] [--membership-tenant <t>]]
             [--no-preload] [--log-level debug|info|warn|error]   (metrics at /metrics with ORP_METRICS_TOKEN)
+      --store is a SQLite file or a postgres:// URL (password in PGPASSWORD; sslmode=verify-full recommended). Several
+      nodes may share one Postgres store: each tenant is served by one node at a time, which holds its lease, and other
+      nodes forward to it. Multi-node flags: --node-url <url other nodes reach this one on> [--node-id <id>]
+      [--lease-s 30] [--idle-tenant-s 600] [--pool 4] [--preload]
       ORP HTTP binding at /v1/<tenant>/... and MCP Streamable HTTP at /mcp, on one port.
 
   orp keys add --keys <keys.json> --id <principal> --tenant <tenant> [--groups a,b] [--write-scope <prefix>] [--label <name>]
   orp keys list|revoke|migrate --keys <keys.json> [--id <principal>]
-  orp backup [--store <db>] --out <file>
+  orp backup [--store <db>|postgres://...] --out <file.db>      a consistent SQLite copy (also from Postgres)
   orp export [--store <db>] --tenant <t> --out <bundle.orp|dir> [--render] [--no-audit]
       A lossless bundle (spec 8.3): manifest.json with hashes, memories.jsonl, edges.jsonl, audit.jsonl, render/ Markdown.
   orp import <bundle.orp|dir> [--store <db>] --tenant <t>
@@ -207,12 +227,14 @@ export async function main(argv: string[]) {
   if (cmd === "backup") {
     const out = s(f, "out");
     if (!out) throw new Error("--out is required");
-    const storePath = resolve(s(f, "store", defaultStore())!);
-    if (!existsSync(storePath)) throw new Error(`${storePath} does not exist`);
-    const svc = new Service(loadEncoder("hashing"), { store: new SqliteStore(storePath) });
-    await svc.saveTo(resolve(out));
-    await svc.close();
-    process.stdout.write(`backed up ${storePath} to ${resolve(out)}\n`);
+    const spec = s(f, "store", defaultStore())!;
+    if (!/^postgres(ql)?:\/\//.test(spec) && !existsSync(resolve(spec))) throw new Error(`${resolve(spec)} does not exist`);
+    if (existsSync(resolve(out))) throw new Error(`${resolve(out)} exists; choose a new file`);
+    const store = openStore(f)!;
+    try {
+      await store.backupTo!(resolve(out));
+    } finally { await store.close(); }
+    process.stdout.write(`backed up ${store.location} to ${resolve(out)} (a SQLite file any orp can open)\n`);
     return;
   }
   if (cmd === "export") {

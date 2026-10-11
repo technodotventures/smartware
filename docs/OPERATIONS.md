@@ -1,7 +1,7 @@
 # Running orp in production
 
 ## Shape
-One process, one SQLite file, any number of tenants. Each tenant's index lives in memory once used (built in the
+One process, one SQLite file, any number of tenants (or several processes on Postgres, below). Each tenant's index lives in memory once used (built in the
 background at start), and writes go to the file incrementally in one transaction per call. Put TLS in front with
 any reverse proxy (Caddy, nginx, a cloud load balancer) and keep `orp` on 127.0.0.1 or a private network.
 
@@ -11,6 +11,32 @@ orp serve --http 8787 --host 127.0.0.1 --store /var/lib/orp/orp.db \
   --oidc-issuer https://idp.example.com --oidc-audience https://memory.example.com/mcp --public-url https://memory.example.com \
   --encoder sif:/var/lib/orp/sif-ppmi-256.orpenc --tools safe --rate 50:100
 ```
+
+## Postgres, and several nodes
+For a hosted service, point `--store` at Postgres (14 or later; tested on 16). The tables (prefix `orp_`, schema
+`public` or `?schema=<name>`) are created on first start. Put the password in `PGPASSWORD`, not the URL, and use
+`sslmode=verify-full` (with `sslrootcert=<ca.pem>` for a private CA) outside a private network.
+
+```bash
+PGPASSWORD=... orp serve --http 8787 --host 0.0.0.0 --keys /etc/orp/keys.json \
+  --store "postgres://orp@db.internal:5432/orp?sslmode=verify-full&sslrootcert=/etc/orp/db-ca.pem" \
+  --node-url http://10.0.1.17:8787       # the address other orp nodes reach this one on
+```
+
+Any number of nodes can share the database. Each tenant is served by one node at a time: the node that first gets a
+request for it takes the tenant's lease (30 s, renewed every 10 s; `--lease-s`), loads it and keeps it in memory;
+another node that gets a request for that tenant forwards it there (`--node-url`) and passes the answer back. Every
+write commits only if the writing node still holds the lease (checked in the same transaction), so a node that
+stalls past its lease cannot overwrite the node that took over; it answers 503 with `retry-after` and lets go. A
+node releases tenants it has not served for 10 minutes (`--idle-tenant-s`), and all of them on shutdown, so
+tenants spread across nodes as traffic comes in. Without `--node-url`, other nodes answer 503 for tenants this node
+holds: route by tenant at the load balancer instead (any stable hash of the tenant). MCP sessions live on one node;
+a client whose session moves gets 404 and starts a new session, as the MCP specification provides. Keys files and
+OIDC settings must be the same on every node: a forwarded request is authenticated again by the node that serves it.
+
+Backups: `orp backup --store postgres://... --out orp-2026-10-11.db` takes a consistent snapshot into a SQLite file
+that any `orp` (or the Python oracle) can open; for large stores use your Postgres backups (`pg_dump`, PITR) as
+well. Restoring one tenant elsewhere: `orp export` / `orp import` (below).
 
 ## Authentication
 - **API keys** (`orp keys add`): the file stores only SHA-256 hashes, is written with mode 0600, and is re-read when

@@ -132,6 +132,7 @@ export interface Lease { tenant: string; epoch: number }
 export interface TenantLeases {
   /** This process's node id and the URL other nodes can reach it on. */
   readonly node: string;
+  url: string | null;
   /** Lease length in milliseconds, and how often the holder renews. */
   readonly ttlMs: number;
   readonly renewEveryMs: number;

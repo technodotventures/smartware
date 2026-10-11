@@ -186,7 +186,12 @@ export class PgStore implements Store {
         max_wseq = GREATEST(${this.t("counters")}.max_wseq, EXCLUDED.max_wseq)`, [c.tenant, c.tmut, c.tcount, wseq]);
     }
     if (Q.length === (d.fence ?? []).length) return; // nothing to write
-    await this.pool.batch(Q); // one round trip, one implicit transaction: all of it or none of it
+    try {
+      await this.pool.batch(Q); // one round trip, one implicit transaction: all of it or none of it
+    } catch (e) {
+      if ((e as any)?.fields?.H === "orp_lease_lost") (e as any).leaseLost = true;
+      throw e;
+    }
   }
 
   async changes(t: string, cursor: number, limit: number): Promise<PgRow[]> {
@@ -270,7 +275,10 @@ export class PgStore implements Store {
  * whenever it changes hands, and writes are fenced on (tenant, node, epoch, not expired). */
 export class PgLeases implements TenantLeases {
   readonly renewEveryMs: number;
-  constructor(private readonly store: PgStore, readonly node: string, readonly url: string | null, readonly ttlMs: number) {
+  /** The URL other nodes forward this node's tenants to; set once the server is listening. */
+  url: string | null;
+  constructor(private readonly store: PgStore, readonly node: string, url: string | null, readonly ttlMs: number) {
+    this.url = url;
     this.renewEveryMs = Math.max(1000, Math.floor(ttlMs / 3));
   }
 

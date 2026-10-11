@@ -23,7 +23,7 @@ jobs:
         with: { python-version: "${{ matrix.python }}" }
       # explicit flag for this install, never repo-level config (the project has no native modules to build)
       - run: npm ci --ignore-scripts --no-audit --no-fund || npm install --ignore-scripts --no-audit --no-fund
-      - run: pip install --only-binary=:all: -r requirements-dev.txt
+      - run: "pip install --only-binary=:all: -r requirements-dev.txt"
       - name: release gate (lifecycle scripts, dependency allowlist, payload signatures, credentials)
         run: node tools/release-check.mjs
       - run: npm run build
@@ -35,3 +35,35 @@ jobs:
         run: node packages/server/bin/orp.js doctor --self
       - name: persistence and differential fuzz (short; run longer locally with npm run fuzz)
         run: node tools/fuzz/persist_fuzz.mjs 3 80 && python3 tools/fuzz/diff_fuzz.py 4 80 1 --frozen-clock --idprob=1
+
+  postgres:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16
+        env: { POSTGRES_PASSWORD: orp-ci }
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 2s --health-timeout 5s --health-retries 30
+    env:
+      PGPASSWORD: orp-ci
+      ORP_TEST_PG: postgres://postgres@127.0.0.1:5432/postgres?sslmode=disable
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with: { persist-credentials: false }
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with: { node-version: "24" }
+      - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
+        with: { python-version: "3.13" }
+      - run: npm ci --ignore-scripts --no-audit --no-fund || npm install --ignore-scripts --no-audit --no-fund
+      - run: "pip install --only-binary=:all: -r requirements-dev.txt"
+      - run: npm run build
+      - name: Postgres store, leases, forwarding, backup
+        run: node --test packages/server/test/pg.test.js
+      - name: oracle conformance suite against the product engine on Postgres
+        run: ORP_BRIDGE_PG="$ORP_TEST_PG" python3 tools/bridge/run_suite.py -q
+      - name: persistence and differential fuzz on Postgres
+        run: |
+          ORP_FUZZ_PG="$ORP_TEST_PG" node tools/fuzz/persist_fuzz.mjs 3 80
+          ORP_FUZZ_PG="$ORP_TEST_PG" python3 tools/fuzz/diff_fuzz.py 4 80 1 --frozen-clock --idprob=1 --reopen

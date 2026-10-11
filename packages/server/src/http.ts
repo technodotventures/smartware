@@ -1,6 +1,7 @@
 // HTTP gateway: the ORP HTTP binding (spec §8.2), MCP over Streamable HTTP (spec §8.1) as an OAuth 2.1 resource
 // server, health and metrics. Every request authenticates first; the principal comes from the token only.
-import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
+import { createServer, request as httpRequest, type IncomingMessage, type Server, type ServerResponse } from "node:http";
+import { request as httpsRequest } from "node:https";
 import { randomBytes, randomUUID } from "node:crypto";
 import { ORPError, type Principal, type Service } from "@orp/core";
 import { AuthError, type PrincipalSource } from "./auth.js";
@@ -248,6 +249,11 @@ export class Gateway {
         throw e;
       }
       if (!this.rateOk(pr)) { status = 429; return this.send(res, 429, { error: { code: "rate_limited", message: "slow down", details: {} } }, { "retry-after": "1" }); }
+      // several nodes on one shared store: each tenant is served by the node holding its lease
+      if (this.svc.store?.leases && (parts[0] === "mcp" || parts[0] === "mem0" || (parts[0] === "v1" && parts.length >= 3))) {
+        const r = await this.svc.route(pr.tenant);
+        if (!r.mine) { status = await this.forward(req, res, r.url, rid); return; }
+      }
       if (parts[0] === "mcp" && parts.length === 1) { status = await this.mcp(req, res, pr); return; }
       if (parts[0] === "v1") { const r = await this.v1(req, res, url, parts, pr); status = r; return; }
       if (parts[0] === "mem0" && (parts[1] === "v1" || parts[1] === "v2")) {
@@ -275,6 +281,39 @@ export class Gateway {
       this.metrics.observe(route, status, ms);
       this.log.info("request", { rid, method: req.method, route, status, ms: Math.round(ms), tenant: pr?.tenant, principal: pr?.id });
     }
+  }
+
+  /** Pass a request on to the node that serves its tenant, streaming both ways (MCP event streams included). The
+   * other node authenticates the request itself; the forwarding header only stops a second hop. */
+  private forward(req: IncomingMessage, res: ServerResponse, url: string | null, rid: string): Promise<number> {
+    const busy = (why: string) => {
+      this.send(res, 503, { error: { code: "unavailable", message: why, details: {} } }, { "retry-after": "1" });
+      return Promise.resolve(503);
+    };
+    if (req.headers["x-orp-forwarded"]) return busy("tenant is moving between nodes; retry");
+    if (!url) return busy("tenant is served by another node; retry (or route by tenant)");
+    let target: URL;
+    try { target = new URL(req.url ?? "/", url); } catch { return busy("bad node URL"); }
+    const node = this.svc.store!.leases!.node;
+    const headers = { ...req.headers, host: target.host, "x-orp-forwarded": node, "x-request-id": rid,
+      "x-forwarded-for": [req.headers["x-forwarded-for"], req.socket.remoteAddress].filter(Boolean).join(", ") };
+    return new Promise<number>((ok) => {
+      const up = (target.protocol === "https:" ? httpsRequest : httpRequest)(target, { method: req.method, headers }, (ur) => {
+        const h = { ...ur.headers };
+        delete h.connection; delete h["transfer-encoding"];
+        res.writeHead(ur.statusCode ?? 502, h);
+        ur.pipe(res);
+        ur.on("end", () => ok(ur.statusCode ?? 502));
+        ur.on("error", () => { res.destroy(); ok(502); });
+      });
+      up.on("error", () => {
+        if (!res.headersSent) this.send(res, 503, { error: { code: "unavailable", message: "the node serving this tenant did not answer; retry", details: {} } }, { "retry-after": "1" });
+        else res.destroy();
+        ok(503);
+      });
+      res.on("close", () => { if (!res.writableEnded) up.destroy(); }); // the caller went away
+      req.pipe(up);
+    });
   }
 
   // ------------------------------------------------------------ ORP HTTP binding

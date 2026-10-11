@@ -440,7 +440,15 @@ export class Service {
     for (const id of this.jJobs) { const j = this.jobs.get(id)!; d.jobs.push({ id, tenant: j.tenant, body: pyDumps(j, { sortKeys: true }) }); }
     for (const f of this.jFeedback) d.feedback.push({ tenant: f._tenant ?? "", body: pyDumps(stripUnderscore(f), { sortKeys: true }) });
     for (const t of J.tenants) d.counters.push({ tenant: t, tmut: E.tmut.get(t) ?? 0, tcount: E.tcount.get(t) ?? 0 });
-    await this.store.flush(d);
+    try {
+      await this.store.flush(d);
+    } catch (e) {
+      if ((e as any)?.leaseLost) { // another node took the tenant over: let go of it here; the caller retries there
+        for (const f of d.fence ?? []) { this.held.delete(f.tenant); if (this.loaded.has(f.tenant)) this.unloadTenant(f.tenant); }
+        throw new ORPError("unavailable", "this tenant moved to another node; retry", { tenant });
+      }
+      throw e;
+    }
     E.audit = [];
     E.auditTenant = [];
     this.clearJournal();
