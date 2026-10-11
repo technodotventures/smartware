@@ -15,6 +15,9 @@ export interface PgStoreOptions {
   /** This process's id for leases (default: hostname plus a random suffix) and the URL other nodes can reach it on. */
   nodeId?: string;
   nodeUrl?: string | null;
+  /** Use nodeId exactly, without the random per-process suffix. Only for tests and tools that deliberately open two
+   * services as one node; two live processes sharing a node id would share leases. */
+  exactNodeId?: boolean;
   /** Lease length; renewed every third of it. Default 30 s. */
   leaseMs?: number;
   /** Connections in the pool (default 4), and how long an idle one is kept (default 30 s). */
@@ -46,9 +49,15 @@ CREATE TABLE IF NOT EXISTS ${s}.orp_feedback (seq bigserial PRIMARY KEY, tenant 
 CREATE TABLE IF NOT EXISTS ${s}.orp_counters (tenant text PRIMARY KEY, tmut bigint NOT NULL, tcount bigint NOT NULL, max_wseq bigint NOT NULL DEFAULT 0);
 CREATE TABLE IF NOT EXISTS ${s}.orp_vectors (encoder text NOT NULL, text_sha text NOT NULL, vec bytea NOT NULL, PRIMARY KEY (encoder, text_sha));
 CREATE TABLE IF NOT EXISTS ${s}.orp_leases (tenant text PRIMARY KEY, node text NOT NULL, url text, epoch bigint NOT NULL, expires_at timestamptz NOT NULL);
-CREATE OR REPLACE FUNCTION ${s}.orp_fence(t text, n text, e bigint) RETURNS void LANGUAGE plpgsql AS $$
+DROP FUNCTION IF EXISTS ${s}.orp_fence(text, text, bigint);
+-- The fence: the write's own transaction locks the lease row and extends it, so a takeover waits for the commit, and
+-- a writer whose lease changed hands (another node, or a newer epoch) is refused. A lease that merely ran out while
+-- nobody else took it is still this writer's: no other node can have served the tenant in between.
+CREATE OR REPLACE FUNCTION ${s}.orp_fence(t text, n text, e bigint, ttl_ms bigint) RETURNS void LANGUAGE plpgsql AS $$
 BEGIN
-  IF NOT EXISTS (SELECT 1 FROM ${s}.orp_leases WHERE tenant = t AND node = n AND epoch = e AND expires_at > now()) THEN
+  UPDATE ${s}.orp_leases SET expires_at = GREATEST(expires_at, clock_timestamp() + ttl_ms * interval '1 millisecond')
+    WHERE tenant = t AND node = n AND epoch = e;
+  IF NOT FOUND THEN
     RAISE EXCEPTION 'orp: lease for tenant % is no longer held by %', t, n USING ERRCODE = 'P0001', HINT = 'orp_lease_lost';
   END IF;
 END $$;
@@ -77,7 +86,12 @@ export class PgStore implements Store {
     this.s = `"${schema}"`;
     this.location = redactPgUrl(url);
     this.pool = new PgPool(parsePgUrl(url), opts.poolSize ?? 4, opts.poolIdleMs ?? 30_000);
-    this.leases = new PgLeases(this, opts.nodeId ?? `${hostname()}-${randomBytes(4).toString("hex")}`, opts.nodeUrl ?? null, opts.leaseMs ?? 30_000);
+    const leaseMs = opts.leaseMs ?? 30_000;
+    if (!(leaseMs >= 3000)) throw new Error("leases must last at least 3 seconds");
+    // the node id names this process's leases: a random incarnation is appended, so two processes given the same
+    // --node-id (or one restarted quickly) never share a lease
+    const node = opts.exactNodeId && opts.nodeId ? opts.nodeId : `${opts.nodeId ?? hostname()}/${randomBytes(4).toString("hex")}`;
+    this.leases = new PgLeases(this, node, opts.nodeUrl ?? null, leaseMs);
   }
 
   /** Create the tables on first use (idempotent and safe to race: guarded by an advisory lock). */
@@ -147,7 +161,7 @@ export class PgStore implements Store {
     await this.init();
     const Q: PgQuery[] = [];
     const add = (text: string, params: any[]) => Q.push({ text, params });
-    for (const f of d.fence ?? []) add(`SELECT ${this.s}.orp_fence($1, $2, $3)`, [f.tenant, this.leases.node, f.epoch]);
+    for (const f of d.fence ?? []) add(`SELECT ${this.s}.orp_fence($1, $2, $3, $4)`, [f.tenant, this.leases.node, f.epoch, this.leases.ttlMs]);
     if (d.meta.secret) add(`INSERT INTO ${this.t("meta")} VALUES ('secret', $1) ON CONFLICT (key) DO NOTHING`, [d.meta.secret]);
     if (d.meta.encoder) add(`INSERT INTO ${this.t("meta")} VALUES ('encoder', $1) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`, [d.meta.encoder]);
     // global counters only ever move up, whichever process writes them; the next owner of a tenant also gets that
@@ -187,10 +201,13 @@ export class PgStore implements Store {
         max_wseq = GREATEST(${this.t("counters")}.max_wseq, EXCLUDED.max_wseq)`, [c.tenant, c.tmut, c.tcount, wseq]);
     }
     if (Q.length === (d.fence ?? []).length) return; // nothing to write
+    // fence again as the last statement: the lease then runs from (about) the commit, however long the write took
+    for (const f of d.fence ?? []) add(`SELECT ${this.s}.orp_fence($1, $2, $3, $4)`, [f.tenant, this.leases.node, f.epoch, this.leases.ttlMs]);
     try {
       await this.pool.batch(Q); // one round trip, one implicit transaction: all of it or none of it
     } catch (e) {
       if ((e as any)?.fields?.H === "orp_lease_lost") (e as any).leaseLost = true;
+      else if (!(e as any)?.fields) (e as any).unavailable = true; // the connection failed, not the statement: retryable
       throw e;
     }
   }
@@ -287,10 +304,10 @@ export class PgLeases implements TenantLeases {
     await this.store.init();
     const L = this.store.t("leases");
     const r = await this.store.pool.query(
-      `INSERT INTO ${L} (tenant, node, url, epoch, expires_at) VALUES ($1, $2, $3, 1, now() + $4 * interval '1 millisecond')
+      `INSERT INTO ${L} (tenant, node, url, epoch, expires_at) VALUES ($1, $2, $3, 1, clock_timestamp() + $4 * interval '1 millisecond')
        ON CONFLICT (tenant) DO UPDATE SET node = EXCLUDED.node, url = EXCLUDED.url, expires_at = EXCLUDED.expires_at,
-         epoch = CASE WHEN ${L}.node = EXCLUDED.node AND ${L}.expires_at > now() THEN ${L}.epoch ELSE ${L}.epoch + 1 END
-       WHERE ${L}.node = EXCLUDED.node OR ${L}.expires_at <= now()
+         epoch = CASE WHEN ${L}.node = EXCLUDED.node AND ${L}.expires_at > clock_timestamp() THEN ${L}.epoch ELSE ${L}.epoch + 1 END
+       WHERE ${L}.node = EXCLUDED.node OR ${L}.expires_at <= clock_timestamp() OR (EXCLUDED.url IS NOT NULL AND ${L}.url = EXCLUDED.url)
        RETURNING epoch`, [t, this.node, this.url, this.ttlMs]);
     if (r.rows.length) return { lease: { tenant: t, epoch: Number(r.rows[0]!.epoch) } };
     const o = await this.store.pool.query(`SELECT node, url FROM ${L} WHERE tenant = $1`, [t]);
@@ -302,8 +319,8 @@ export class PgLeases implements TenantLeases {
     if (!tenants.length) return [];
     await this.store.init();
     const r = await this.store.pool.query(
-      `UPDATE ${this.store.t("leases")} SET expires_at = now() + $3 * interval '1 millisecond'
-       WHERE node = $1 AND tenant = ANY($2::text[]) AND expires_at > now() RETURNING tenant`, [this.node, textArray(tenants), this.ttlMs]);
+      `UPDATE ${this.store.t("leases")} SET expires_at = clock_timestamp() + $3 * interval '1 millisecond'
+       WHERE node = $1 AND tenant = ANY($2::text[]) RETURNING tenant`, [this.node, textArray(tenants), this.ttlMs]);
     const ok = new Set(r.rows.map((x) => x.tenant));
     return tenants.filter((t) => !ok.has(t));
   }
@@ -312,7 +329,7 @@ export class PgLeases implements TenantLeases {
     if (!tenants.length) return;
     await this.store.init();
     // expire rather than delete, so the epoch keeps counting up and is never handed out twice
-    await this.store.pool.query(`UPDATE ${this.store.t("leases")} SET expires_at = now() - interval '1 millisecond'
+    await this.store.pool.query(`UPDATE ${this.store.t("leases")} SET expires_at = clock_timestamp() - interval '1 millisecond'
       WHERE node = $1 AND tenant = ANY($2::text[])`, [this.node, textArray(tenants)]);
   }
 }

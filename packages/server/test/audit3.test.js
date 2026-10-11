@@ -337,3 +337,92 @@ test("HTTP: repeated failed authentication from one address is rate limited", as
     await gw.close();
   }
 });
+
+// ------------------------------------------------------------ fourth audit (results/AUDIT4.md)
+test("NUL is refused in any string of a request", async () => {
+  const s = open(tmpdb()), a = P("alice");
+  for (const body of [{ memories: [{ id: "a\u0000b", content: "x" }] }, { memories: [{ content: "x\u0000y" }] }, { memories: [{ content: "x" }], idempotency_key: "k\u0000" }]) {
+    assert.equal(await code(s.remember(body, a)), "invalid_parameter");
+  }
+  assert.equal(await code(s.recall({ query: "a\u0000" }, a)), "invalid_parameter");
+  s.close();
+});
+
+test("a purged record takes its edges with it, so a re-used id does not inherit them", async () => {
+  const s = open(tmpdb()), r = star("t1");
+  await s.remember({ memories: [{ id: "ann", content: "Ann" }, { id: "bob", content: "Bob" }] }, r);
+  await s.link({ type: "relates", from: "ann", to: "bob" }, r);
+  await s.forget({ ids: ["bob"], mode: "purge" }, r);
+  await s.remember({ memories: [{ id: "bob", content: "a different Bob" }], allow_reingest: true }, r);
+  assert.deepEqual(await s.edges("ann", r), []);
+  assert.equal((await s.export(r))["edges.jsonl"], "");
+  s.close();
+});
+
+test("re-importing a bundle whose engine ids collide with another tenant's is idempotent", async () => {
+  const { exportBundle, importBundle } = await import("../dist/bundle.js");
+  const s = open(tmpdb());
+  const r = await s.remember({ memories: [{ content: "Alice moved to Lisbon in May" }, { content: "Bob likes tea" }, { content: "gone soon" }] }, P("alice", [], "src"));
+  await s.forget({ ids: [r.ids[2]], mode: "purge" }, P("alice", [], "src"));
+  const b = await exportBundle(s, "src");
+  const sw = (buf) => Buffer.from(buf.toString().split("\n").map((l) => (l.trim() ? JSON.stringify({ ...JSON.parse(l), tenant: "dst" }) : l)).join("\n"));
+  const mem = sw(b.get("memories.jsonl")), edges = sw(b.get("edges.jsonl"));
+  const man = JSON.parse(b.get("manifest.json"));
+  man.tenant = "dst";
+  const { createHash } = await import("node:crypto");
+  man.files = { "memories.jsonl": { sha256: createHash("sha256").update(mem).digest("hex") }, "edges.jsonl": { sha256: createHash("sha256").update(edges).digest("hex") } };
+  const files = new Map([["manifest.json", Buffer.from(JSON.stringify(man))], ["memories.jsonl", mem], ["edges.jsonl", edges]]);
+  const counts = [];
+  for (let i = 0; i < 3; i++) {
+    await importBundle(s, "dst", files);
+    const e = await exportBundle(s, "dst");
+    counts.push([e.get("memories.jsonl").toString().trim().split("\n").length, JSON.parse(e.get("manifest.json")).tombstones.length]);
+  }
+  assert.deepEqual(counts, [[2, 1], [2, 1], [2, 1]]);
+  s.close();
+});
+
+test("export, import, export is byte-equal for redacted records too", async () => {
+  const { exportBundle, importBundle } = await import("../dist/bundle.js");
+  const s = open(tmpdb()), a = P("alice", [], "src");
+  await s.remember({ memories: [{ content: "Alice moved to Lisbon in May", thread: "th" }, { id: "c1", kind: "fact", content: "Alice lives in Paris", claim: { subject: "alice", predicate: "city", object: "paris" } }] }, a);
+  await s.forget({ ids: ["c1"], mode: "redact" }, a);
+  const b1 = await exportBundle(s, "src");
+  const s2 = open(tmpdb());
+  await importBundle(s2, "src", b1);
+  const b2 = await exportBundle(s2, "src");
+  assert.equal(b2.get("memories.jsonl").toString(), b1.get("memories.jsonl").toString());
+  s.close(); s2.close();
+});
+
+test("HTTP: only path request targets are served (no absolute-form or //authority, which a forward could turn into SSRF)", async () => {
+  const s = open(null), alice = P("alice");
+  const gw = new Gateway(s, { resolve: async () => alice }, { host: "127.0.0.1", port: 0, mcp: { toolsets: ["safe"], defaultReaders: "self" } }, new Log("silent"));
+  await gw.listen();
+  const { connect } = await import("node:net");
+  const raw = (target) => new Promise((ok) => {
+    const c = connect(gw.server.address().port, "127.0.0.1", () => c.write(`GET ${target} HTTP/1.1\r\nhost: x\r\nauthorization: Bearer x\r\nconnection: close\r\n\r\n`));
+    let d = "";
+    c.on("data", (x) => (d += x));
+    c.on("end", () => ok(d.split("\r\n")[0]));
+  });
+  try {
+    assert.match(await raw("http://169.254.169.254/v1/t1/capabilities"), / 400 /);
+    assert.match(await raw("//169.254.169.254/v1/t1/capabilities"), / 400 /);
+    assert.match(await raw("/v1/t1/capabilities"), / 200 /);
+  } finally {
+    await gw.close();
+  }
+});
+
+test("bundles: entries may not overlap or run into the central directory, and the manifest must hash both data files", async () => {
+  const { readZip, writeZip, verifyBundle } = await import("../dist/bundle.js");
+  const z = writeZip(new Map([["a.txt", Buffer.from("hello hello hello")], ["b.txt", Buffer.from("world")]]));
+  // point b's central directory entry at a's local header: two names, one body
+  const cd = z.indexOf(Buffer.from([0x50, 0x4b, 0x01, 0x02]));
+  const second = z.indexOf(Buffer.from([0x50, 0x4b, 0x01, 0x02]), cd + 4);
+  const bad = Buffer.from(z);
+  bad.writeUInt32LE(0, second + 42);
+  assert.throws(() => readZip(bad), /overlap|corrupt|checksum/);
+  assert.throws(() => verifyBundle(new Map([["manifest.json", Buffer.from("{}")], ["memories.jsonl", Buffer.from("")]])), /must list memories.jsonl/);
+});

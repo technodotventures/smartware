@@ -224,6 +224,14 @@ export class Engine {
     }
   }
 
+  /** Forget everything held in memory for a tenant's index (its records are dropped by the caller). */
+  dropTenant(tenant: string, ids: string[]) {
+    this.parts.delete(tenant);
+    this.dirtyParts.delete(tenant);
+    for (const i of ids) this.hashOf.delete(i);
+    this.gen.set(tenant, (this.gen.get(tenant) ?? 0) + 1); // an index build in flight must not install itself
+  }
+
   /** Mark a partition for rebuild (content changed or a unit was removed). */
   invalidate(tenant: string) {
     this.dirtyParts.add(tenant);
@@ -496,7 +504,7 @@ export class Engine {
           this.enc.forgetTexts?.(this.textsFor(m));
           m.content = "[redacted]";
           delete m.meta.time_refs;
-          delete m.meta.entities;
+          m.meta.entities = []; // what the engine derives from "[redacted]", so an export round-trips
           if (m.claim) m.claim.subject = m.claim.predicate = m.claim.object = "[redacted]";
           for (const s of m.sources) { s.span = ""; s.hash = ""; }
           this.invalidate(m.tenant); // the index must not keep redacted text

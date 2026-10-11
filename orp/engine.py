@@ -330,8 +330,8 @@ class Engine:
                 if mode == "redact":
                     self._forget_cached_text(m.content)
                     m.content = "[redacted]"
-                    for k in ("time_refs", "entities"):
-                        m.meta.pop(k, None)
+                    m.meta.pop("time_refs", None)
+                    m.meta["entities"] = []  # what the engine derives from "[redacted]", so an export round-trips
                     if m.claim is not None:
                         m.claim.subject = m.claim.predicate = m.claim.object = "[redacted]"
                     for s in m.sources:

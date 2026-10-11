@@ -145,6 +145,35 @@ class Audit3(unittest.TestCase):
         self.assertEqual(err(s.remember, {"memories": [{"content": "x", "meta": {"d": deep}}]}, A), "invalid_parameter")
         self.assertEqual(err(s.remember, {"memories": [{"content": "x", "meta": {"d": {"e": [1, {"f": 2}]}}}]}, A), "ok")
 
+    # ------------------------------------------------------------ fourth audit (results/AUDIT4.md)
+    def test_nul_refused(self):
+        s = svc()
+        for body in ({"memories": [{"id": "a\x00b", "content": "x"}]}, {"memories": [{"content": "x\x00y"}]},
+                     {"memories": [{"content": "x"}], "idempotency_key": "k\x00"}):
+            self.assertEqual(err(s.remember, body, A), "invalid_parameter")
+        self.assertEqual(err(s.recall, {"query": "a\x00"}, A), "invalid_parameter")
+
+    def test_purge_takes_edges(self):
+        s = svc()
+        s.remember({"memories": [{"id": "ann", "content": "Ann"}, {"id": "bob", "content": "Bob"}]}, ROOT)
+        s.link({"type": "relates", "from": "ann", "to": "bob"}, ROOT)
+        s.forget({"ids": ["bob"], "mode": "purge"}, ROOT)
+        s.remember({"memories": [{"id": "bob", "content": "a different Bob"}], "allow_reingest": True}, ROOT)
+        self.assertEqual(s.edges("ann", ROOT), [])
+
+    def test_redacted_entities_round_trip(self):
+        s = svc()
+        s.remember({"memories": [{"id": "c1", "kind": "fact", "content": "Alice lives in Paris",
+                                  "claim": {"subject": "alice", "predicate": "city", "object": "paris"}}]}, A)
+        s.forget({"ids": ["c1"], "mode": "redact"}, A)
+        self.assertEqual(s.engine.mem["c1~t1"].meta.get("entities"), [])
+
+    def test_remap_is_deterministic(self):
+        from orp.api import _remap_id
+        self.assertEqual(_remap_id("t", "mem_" + "a" * 24), _remap_id("t", "mem_" + "a" * 24))
+        self.assertNotEqual(_remap_id("t", "mem_" + "a" * 24), _remap_id("u", "mem_" + "a" * 24))
+        self.assertRegex(_remap_id("t", "x"), r"^mem_[0-9a-f]{24}$")
+
 
 if __name__ == "__main__":
     unittest.main()

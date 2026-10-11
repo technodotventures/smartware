@@ -33,6 +33,10 @@ tenants spread across nodes as traffic comes in. Without `--node-url`, other nod
 holds: route by tenant at the load balancer instead (any stable hash of the tenant). MCP sessions live on one node;
 a client whose session moves gets 404 and starts a new session, as the MCP specification provides. Keys files and
 OIDC settings must be the same on every node: a forwarded request is authenticated again by the node that serves it.
+Give each node its own `--node-url` (each process also gets a random suffix on its node id, so two processes never
+share a lease); a node restarted at the same URL takes its old tenants back at once instead of waiting for the leases
+to run out. Keep node URLs on a private network: forwarding goes only to the URL a node registered, with the
+request's path and query.
 
 Backups: `orp backup --store postgres://... --out orp-2026-10-11.db` takes a consistent snapshot into a SQLite file
 that any `orp` (or the Python oracle) can open; for large stores use your Postgres backups (`pg_dump`, PITR) as
@@ -74,7 +78,7 @@ well. Restoring one tenant elsewhere: `orp export` / `orp import` (below).
 - Bundles move one tenant between engines losslessly (M62): `orp export --store orp.db --tenant acme --out acme.orp
   [--render]` writes a zip (or a directory, without the `.orp` suffix) with `manifest.json` (counts, sha256 of every
   file, capabilities), `memories.jsonl`, `edges.jsonl`, `audit.jsonl` and, with `--render`, a Markdown view per thread
-  and entity. `orp import acme.orp --store other.db --tenant acme` checks the hashes before writing anything. Over
+  and entity. `orp import acme.orp --store other.db --tenant acme` checks the file hashes before writing anything (they catch a damaged or truncated file; they are not a signature, so import only bundles you trust). Over
   HTTP: `GET /v1/<tenant>/export`, `POST /v1/<tenant>/import` as a tenant admin.
 - From other projects: `orp import-from mcp-memory memory.json|mem0 export.json|letta agent.af --tenant acme --as
   alice [--readers tenant]`. Records belong to `--as` and are readable by them only unless `--readers` widens it;

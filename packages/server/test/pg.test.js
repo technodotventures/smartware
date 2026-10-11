@@ -56,7 +56,10 @@ test("one node per tenant: another node is told who holds it, and a write after 
   const sc = fresh();
   const a = svc(sc, { node: "node-a", url: "http://a.internal:1" }), b = svc(sc, { node: "node-b", url: "http://b.internal:2" });
   await a.remember({ memories: [{ id: "k", content: "held by node a" }] }, A());
-  assert.deepEqual(await b.route("acme"), { mine: false, owner: "node-a", url: "http://a.internal:1" });
+  const who = await b.route("acme");
+  assert.equal(who.mine, false);
+  assert.match(who.owner, /^node-a\//, "the node id plus this process's incarnation");
+  assert.equal(who.url, "http://a.internal:1");
   assert.equal(await code(b.recall({ query: "held" }, A())), "unavailable");
   assert.deepEqual(await b.route("other"), { mine: true }, "a free tenant is taken");
   // node a stalls past its lease; node b takes the tenant over
@@ -145,4 +148,103 @@ test("TLS: verify-full accepts the server's certificate with its CA and refuses 
   const c = await PgConnection.connect(parsePgUrl(u.toString()));
   assert.deepEqual((await c.query("SELECT ssl FROM pg_stat_ssl WHERE pid = pg_backend_pid()")).rows, [{ ssl: true }]);
   await c.close();
+});
+
+// ------------------------------------------------------------ fourth audit (results/AUDIT4.md)
+test("a write in flight holds its tenant: a takeover waits for the commit, and the lease then runs from the commit", { skip }, async () => {
+  const sc = fresh();
+  const a = svc(sc, { node: "node-a", leaseMs: 3000 }), b = svc(sc, { node: "node-b", leaseMs: 3000 });
+  await a.remember({ memories: [{ id: "k1", content: "first fact by a" }] }, A());
+  const blocker = await PgConnection.connect(parsePgUrl(PG));
+  await blocker.exec(`BEGIN; SELECT * FROM "${sc}".orp_meta WHERE key = 'wseq' FOR UPDATE;`); // stalls a's flush after its fence
+  const pa = a.remember({ memories: [{ id: "k2", content: "second fact by a" }] }, A()).then(() => "ok", (e) => e.code);
+  await new Promise((r) => setTimeout(r, 3600)); // a's lease would have run out by now
+  let settled = false;
+  const pb = b.route("acme").finally(() => { settled = true; });
+  await new Promise((r) => setTimeout(r, 400));
+  assert.equal(settled, false, "the takeover waits for the write in flight");
+  await blocker.exec("COMMIT");
+  await blocker.close();
+  assert.equal(await pa, "ok");
+  assert.equal((await pb).mine, false, "after the commit the lease is fresh and still a's");
+  assert.equal(await code(b.get(["k2"], A())), "unavailable");
+  assert.equal((await a.get(["k1", "k2"], A())).memories.length, 2);
+  await a.close(); await b.close();
+});
+
+test("a verb longer than the lease still commits when no other node wants the tenant", { skip }, async () => {
+  const slow = new HashingEncoder();
+  let delay = 0;
+  slow.warm = async () => { if (delay) await new Promise((r) => setTimeout(r, delay)); };
+  const sc = fresh();
+  const s = new Service(slow, { secretScan: false, store: new PgStore(schemaUrl(sc), { leaseMs: 3000, nodeId: "n1", poolSize: 2 }) });
+  assert.equal(await code(s.remember({ memories: [{ content: "quick one" }] }, A())), "ok");
+  delay = 3500;
+  assert.equal(await code(s.remember({ memories: [{ content: "slow one" }] }, A())), "ok");
+  assert.deepEqual((await sql(`SELECT epoch FROM "${sc}".orp_leases`)).map((r) => Number(r.epoch)), [1]);
+  await s.close();
+});
+
+test("two processes given the same node id do not share a lease", { skip }, async () => {
+  const sc = fresh();
+  const a = svc(sc, { node: "same" }), b = svc(sc, { node: "same" });
+  await a.remember({ memories: [{ content: "from a" }] }, A());
+  assert.equal((await b.route("acme")).mine, false);
+  assert.equal(await code(b.remember({ memories: [{ content: "from b" }] }, A())), "unavailable");
+  await b.close(); // and b's close does not release a's lease
+  assert.equal(await code(a.remember({ memories: [{ content: "a again" }] }, A())), "ok");
+  await a.close();
+});
+
+test("idle release frees the tenant's index as well as its records", { skip }, async () => {
+  const sc = fresh();
+  const s = svc(sc, { node: "n1", leaseMs: 3000, svc: { idleTenantMs: 100 } });
+  await s.remember({ memories: Array.from({ length: 200 }, (_, i) => ({ content: `note ${i} about topic ${i % 7}` })) }, A());
+  await s.recall({ query: "topic 3" }, A());
+  assert.equal(s.engine.parts.size, 1);
+  await new Promise((r) => setTimeout(r, 1500));
+  assert.equal(s.engine.mem.size, 0);
+  assert.equal(s.engine.parts.size, 0);
+  assert.equal(s.engine.hashOf.size, 0);
+  assert.equal((await s.recall({ query: "topic 3" }, A())).items.length > 0, true, "and loads again on the next request");
+  await s.close();
+});
+
+test("store failures (a refused statement, a killed connection) leave memory equal to the store", { skip }, async () => {
+  const sc = fresh();
+  const s = new Service(enc, { secretScan: false, store: new PgStore(schemaUrl(sc), { nodeId: "n1", exactNodeId: true, poolSize: 2 }) });
+  await s.remember({ memories: [{ id: "x", content: "Alice moved to Lisbon" }, { id: "y", content: "Bob likes tea" }] }, A());
+  const root = new Principal("root", ["*", "auditor"], "acme");
+  const view = async (x) => { const ex = await x.export(root); return ex["memories.jsonl"] + ex["edges.jsonl"] + JSON.stringify((await x.changes(0, root, 1000)).cursor); };
+  const check = async () => {
+    const c = new Service(enc, { secretScan: false, releaseLeasesOnClose: false, store: new PgStore(schemaUrl(sc), { nodeId: "n1", exactNodeId: true, poolSize: 1 }) });
+    try { assert.equal(await view(s), await view(c)); } finally { await c.close(); }
+  };
+  await sql(`CREATE FUNCTION "${sc}".boom() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'injected'; END $$`);
+  await sql(`CREATE TRIGGER boom BEFORE INSERT ON "${sc}".orp_changes FOR EACH ROW EXECUTE FUNCTION "${sc}".boom()`);
+  assert.notEqual(await code(s.remember({ memories: [{ id: "z", content: "Carol in Rome" }] }, A())), "ok");
+  await check();
+  await sql(`DROP TRIGGER boom ON "${sc}".orp_changes`);
+  const blocker = await PgConnection.connect(parsePgUrl(PG));
+  await blocker.exec(`BEGIN; SELECT * FROM "${sc}".orp_meta WHERE key = 'wseq' FOR UPDATE;`);
+  const p = code(s.remember({ memories: [{ id: "k2", content: "second" }] }, A()));
+  await new Promise((r) => setTimeout(r, 400));
+  for (const v of await sql(`SELECT pid FROM pg_stat_activity WHERE state = 'active' AND query LIKE '%orp_meta%' AND pid <> pg_backend_pid() AND datname = current_database()`)) {
+    await sql(`SELECT pg_terminate_backend($1)`, [v.pid]);
+  }
+  await blocker.exec("ROLLBACK"); await blocker.close();
+  assert.equal(await p, "unavailable");
+  await check();
+  assert.equal(await code(s.remember({ memories: [{ id: "k3", content: "third" }] }, A())), "ok");
+  await check();
+  await s.close();
+});
+
+test("NUL in ids, keys or content is refused on Postgres as on SQLite", { skip }, async () => {
+  const s = svc(fresh(), { node: "n1" });
+  for (const body of [{ memories: [{ id: "a\u0000b", content: "x" }] }, { memories: [{ content: "x\u0000y" }] }, { memories: [{ content: "x" }], idempotency_key: "k\u0000" },
+    { memories: [{ kind: "fact", content: "x", claim: { subject: "a\u0000", predicate: "b", object: "c" } }] }]) {
+    assert.equal(await code(s.remember(body, A())), "invalid_parameter");
+  }
+  await s.close();
 });

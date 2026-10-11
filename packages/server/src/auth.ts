@@ -91,6 +91,9 @@ export class KeyStore {
 
   /** Add a key; returns the new token (shown once, never stored). */
   add(spec: PrincipalSpec & { label?: string }): string {
+    for (const v of [spec.id, spec.tenant ?? "default", ...(spec.groups ?? [])]) {
+      if (!v || /[\u0000-\u001f\u007f]/.test(v)) throw new Error(`invalid id, tenant or group ${JSON.stringify(v)}`);
+    }
     const token = newToken();
     const e: KeyEntry = { hash: hashToken(token), id: spec.id, groups: spec.groups ?? [], tenant: spec.tenant ?? "default",
       ...(spec.scopes?.length ? { scopes: spec.scopes } : {}), label: spec.label, created: new Date().toISOString() };
@@ -217,7 +220,9 @@ export class JwtVerifier {
     const scopes = new Set<string>(typeof claims.scope === "string" ? claims.scope.split(" ") : Array.isArray(claims.scp) ? claims.scp : []);
     const ws = claims[this.cfg.writeScopesClaim ?? "orp_write_scopes"];
     const writeScopes = Array.isArray(ws) ? ws.filter((x: unknown) => typeof x === "string") : null;
-    return { principal: new Principal(id, groups, String(tenant), writeScopes), scopes, claims };
+    // ids and tenants become store keys: control characters (NUL above all) are refused rather than stored
+    if (/[\u0000-\u001f\u007f]/.test(id) || /[\u0000-\u001f\u007f]/.test(String(tenant)) || !String(tenant)) throw new AuthError("token has an invalid principal or tenant");
+    return { principal: new Principal(id, groups.filter((x: string) => !/[\u0000-\u001f\u007f]/.test(x)), String(tenant), writeScopes), scopes, claims };
   }
 }
 

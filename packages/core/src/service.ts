@@ -52,6 +52,21 @@ function jsonDepth(v: unknown, d: number): number {
   return m;
 }
 
+/** The id an imported engine id takes when it collides with another tenant's: derived from the tenant and the old
+ * id, so importing the same bundle twice maps it the same way (and de-duplicates instead of copying). */
+function remapId(tenant: string, old: string): string {
+  return "mem_" + createHash("sha256").update(`${tenant}\0${old}`).digest("hex").slice(0, 24);
+}
+
+function hasNul(v: unknown, depth = 0): boolean {
+  if (typeof v === "string") return v.includes("\0");
+  if (depth > 64 || v === null || typeof v !== "object") return false;
+  if (Array.isArray(v)) return v.some((x) => hasNul(x, depth + 1));
+  return Object.entries(v as Json).some(([k, x]) => hasNul(k, depth + 1) || hasNul(x, depth + 1));
+}
+
+const NESTED = new Set(["memory", "claim", "source"]);
+
 function sortedKeys(o: Json): Json {
   const out: Json = {};
   for (const k of Object.keys(o).sort(pyCmp)) out[k] = o[k];
@@ -61,6 +76,10 @@ function sortedKeys(o: Json): Json {
 function checkKeys(body: unknown, allowed: Set<string>, where: string): asserts body is Json {
   if (body === null || typeof body !== "object" || Array.isArray(body)) {
     throw new ORPError("invalid_parameter", `${where}: expected an object`);
+  }
+  if (!NESTED.has(where) && hasNul(body)) {
+    // NUL is never meaningful in memory text or ids, and stores and keys cannot carry it safely
+    throw new ORPError("invalid_parameter", `${where}: strings may not contain the NUL character`);
   }
   const extra = Object.keys(body).filter((k) => !allowed.has(k)).sort(pyCmp);
   if (extra.length) {
@@ -203,6 +222,8 @@ export class Service {
   private held = new Map<string, { epoch: number; until: number }>();
   private lastUsed = new Map<string, number>();
   private leaseTimer: ReturnType<typeof setInterval> | null = null;
+  private tickP: Promise<void> | null = null;
+  private closing = false;
   private readonly idleTenantMs: number;
   private readonly releaseOnClose: boolean;
 
@@ -261,11 +282,15 @@ export class Service {
   // ------------------------------------------------------------ tenant leases (shared stores)
   /** Which process serves a tenant: this one (taking the lease if it is free), or another node at `url`. */
   async route(t: string): Promise<{ mine: true } | { mine: false; owner: string; url: string | null }> {
-    await this.ready();
-    const L = this.store?.leases;
-    if (!L || this.holds(t)) return { mine: true };
-    const r = await this.lock.run(() => this.acquire(t));
-    return r;
+    try {
+      await this.ready();
+      const L = this.store?.leases;
+      if (!L || this.holds(t)) return { mine: true };
+      return await this.lock.run(() => this.acquire(t));
+    } catch (e) {
+      if (!(e instanceof ORPError) && (e as any)?.unavailable) throw new ORPError("unavailable", "the store could not be reached; retry");
+      throw e;
+    }
   }
 
   /** Held, and not past the point where it may have expired without this process noticing. */
@@ -281,6 +306,7 @@ export class Service {
 
   private async acquire(t: string): Promise<{ mine: true } | { mine: false; owner: string; url: string | null }> {
     const L = this.store!.leases!;
+    if (this.closing) throw new ORPError("unavailable", "this node is shutting down; retry");
     if (this.holds(t)) return { mine: true };
     const before = this.held.get(t);
     const got = await L.acquire(t);
@@ -299,23 +325,35 @@ export class Service {
     if (this.leaseTimer) return;
     const L = this.store!.leases!;
     const tick = async () => {
+      if (this.closing) return;
+      // 1. idle tenants: let go of them and free their memory (under the lock: no verb is using them)
       const now = Date.now();
       const idle = [...this.held.keys()].filter((t) => now - (this.lastUsed.get(t) ?? 0) > this.idleTenantMs);
-      await this.lock.run(async () => {
-        if (idle.length) {
-          for (const t of idle) { this.held.delete(t); this.lastUsed.delete(t); if (this.loaded.has(t)) this.unloadTenant(t); }
-          await L.release(idle);
-        }
-        const asked = [...this.held.keys()];
-        const until = this.safeUntil();
-        const lost = new Set(await L.renew(asked));
-        for (const t of asked) {
-          if (lost.has(t)) { this.held.delete(t); if (this.loaded.has(t)) this.unloadTenant(t); }
-          else this.held.get(t)!.until = until;
-        }
-      }).catch(() => undefined); // a failed renewal is retried next tick; writes stay fenced meanwhile
+      if (idle.length) {
+        await this.lock.run(async () => {
+          const still = idle.filter((t) => this.held.has(t) && Date.now() - (this.lastUsed.get(t) ?? 0) > this.idleTenantMs);
+          for (const t of still) { this.held.delete(t); this.lastUsed.delete(t); if (this.loaded.has(t)) this.unloadTenant(t); }
+          if (still.length) await L.release(still);
+        });
+      }
+      // 2. renew the rest outside the lock, so a long verb cannot let its own lease run out
+      const asked = [...this.held.keys()];
+      if (!asked.length || this.closing) return;
+      const until = this.safeUntil();
+      const lost = new Set(await L.renew(asked));
+      const gone: string[] = [];
+      for (const t of asked) {
+        const h = this.held.get(t);
+        if (!h) continue;
+        if (lost.has(t)) { this.held.delete(t); gone.push(t); }
+        else h.until = until;
+      }
+      if (gone.length) await this.lock.run(() => { for (const t of gone) if (!this.held.has(t) && this.loaded.has(t)) this.unloadTenant(t); });
     };
-    this.leaseTimer = setInterval(() => void tick(), L.renewEveryMs);
+    this.leaseTimer = setInterval(() => {
+      if (this.tickP) return; // one tick at a time
+      this.tickP = tick().catch(() => undefined).finally(() => { this.tickP = null; }); // a failed renewal is retried next tick; writes stay fenced
+    }, L.renewEveryMs);
     this.leaseTimer.unref?.();
   }
 
@@ -453,6 +491,7 @@ export class Service {
         for (const f of d.fence ?? []) { this.held.delete(f.tenant); if (this.loaded.has(f.tenant)) this.unloadTenant(f.tenant); }
         throw new ORPError("unavailable", "this tenant moved to another node; retry", { tenant });
       }
+      if ((e as any)?.unavailable) throw new ORPError("unavailable", "the store could not be reached; retry");
       throw e;
     }
     E.audit = [];
@@ -464,25 +503,30 @@ export class Service {
   /** Run a verb under the lock, loading the caller's tenant and persisting what changed (or nothing, on error). */
   private async verb<T>(pr: Principal, write: boolean, fn: () => T | Promise<T>, extra: string[] = []): Promise<T> {
     return this.lock.run(async () => {
-      await this.ready();
-      await this.ensureTenant(pr.tenant);
-      await this.warm(this.engine.pendingTexts(pr.tenant)); // records must be embedded to be indexed
-      if (extra.length) {
-        try {
-          await this.warm(extra);
-        } catch (e) {
-          // the query alone could not be embedded: recall still answers from the lexical channels and reports
-          // degraded: ["dense_unavailable"] (spec §5.8) rather than failing
-          if (write) throw e;
-        }
-      }
-        const auditStart = this.engine.audit.length;
       try {
-        const out = await fn();
-        if (write) await this.flush(pr.tenant);
-        return out;
+        await this.ready();
+        await this.ensureTenant(pr.tenant);
+        await this.warm(this.engine.pendingTexts(pr.tenant)); // records must be embedded to be indexed
+        if (extra.length) {
+          try {
+            await this.warm(extra);
+          } catch (e) {
+            // the query alone could not be embedded: recall still answers from the lexical channels and reports
+            // degraded: ["dense_unavailable"] (spec §5.8) rather than failing
+            if (write) throw e;
+          }
+        }
+        const auditStart = this.engine.audit.length;
+        try {
+          const out = await fn();
+          if (write) await this.flush(pr.tenant);
+          return out;
+        } catch (e) {
+          if (write) await this.rollbackJournal(pr.tenant, auditStart).catch(() => undefined);
+          throw e;
+        }
       } catch (e) {
-        if (write) await this.rollbackJournal(pr.tenant, auditStart);
+        if (!(e instanceof ORPError) && (e as any)?.unavailable) throw new ORPError("unavailable", "the store could not be reached; retry");
         throw e;
       }
     });
@@ -513,7 +557,9 @@ export class Service {
 
   private unloadTenant(t: string) {
     const E = this.engine;
-    for (const i of E.order.get(t) ?? []) { E.mem.delete(i); E.ord.delete(i); }
+    const ids = E.order.get(t) ?? [];
+    E.dropTenant(t, ids);
+    for (const i of ids) { E.mem.delete(i); E.ord.delete(i); }
     E.order.delete(t);
     for (const k of [...E.claims.keys()]) if (k.startsWith(t + "\0")) E.claims.delete(k);
     for (const [h, i] of [...E.hash]) if (!E.mem.has(i)) E.hash.delete(h);
@@ -1154,6 +1200,12 @@ export class Service {
         }
         this.log(`forget:${mode}`, i, pr, { reason: String(body.reason ?? "") });
       }
+      if (mode === "purge") { // a purged record takes its edges with it (a re-used id must not inherit them)
+        const gone = new Set(done);
+        for (const [eid, e] of [...this.edgesMap]) {
+          if (gone.has(e.from) || gone.has(e.to)) { this.edgesMap.delete(eid); this.jEdges.delete(eid); this.jEdgeDel.add(eid); }
+        }
+      }
       return env({ dry_run: false, affected: visible });
     });
   }
@@ -1367,7 +1419,7 @@ export class Service {
           const o = E.mem.get(x);
           if (o === undefined && !foreign.has(x)) return x;
           if (o !== undefined && o.tenant === t) return x;
-          const n = newId();
+          const n = remapId(t, x);
           idMap.set(x, n);
           return n;
         }
@@ -1424,7 +1476,7 @@ export class Service {
       for (const x of tombRows as Json[]) {
         let iid = conv(x.id);
         if ((this.tombstones.has(iid) && this.tombstones.get(iid)!.tenant !== t) || (await this.storeOtherTenant("tombstones", iid, t))) {
-          if (!idMap.has(x.id)) idMap.set(x.id, newId());
+          if (!idMap.has(x.id)) idMap.set(x.id, remapId(t, x.id));
           iid = idMap.get(x.id)!;
         }
         this.tombstones.set(iid, { ...x, _iid: iid, tenant: t });
@@ -1448,6 +1500,7 @@ export class Service {
     const tenants = await this.store.tenantsByRecency();
     let n = 0;
     for (const tenant of tenants) {
+      if (this.closing) break;
       const t0 = performance.now();
       if (this.store.leases) {
         const r = await this.route(tenant); // with a shared store, warm only the tenants this node can take
@@ -1498,12 +1551,16 @@ export class Service {
 
   /** Stop lease renewal, release this process's tenants and close the store. */
   async close(): Promise<void> {
+    this.closing = true;
     if (this.leaseTimer) { clearInterval(this.leaseTimer); this.leaseTimer = null; }
     const L = this.store?.leases;
-    if (L && this.held.size && this.releaseOnClose) {
-      const ts = [...this.held.keys()];
-      this.held.clear();
-      await L.release(ts).catch(() => undefined);
+    if (L) {
+      await this.tickP; // a renewal in flight finishes first, so it cannot revive what is released below
+      await this.lock.run(async () => { // and no verb is mid-write when the leases go
+        const ts = [...this.held.keys()];
+        this.held.clear();
+        if (ts.length && this.releaseOnClose) await L.release(ts).catch(() => undefined);
+      });
     }
     await this.store?.close();
   }

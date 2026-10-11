@@ -45,9 +45,33 @@ class ORPError(Exception):
         return {"error": {"code": self.code, "message": self.message, "details": self.details}}
 
 
+def _has_nul(v, depth=0) -> bool:
+    if isinstance(v, str):
+        return "\x00" in v
+    if depth > 64:
+        return False
+    if isinstance(v, dict):
+        return any(_has_nul(k, depth + 1) or _has_nul(x, depth + 1) for k, x in v.items())
+    if isinstance(v, (list, tuple)):
+        return any(_has_nul(x, depth + 1) for x in v)
+    return False
+
+
+_NESTED = {"memory", "claim", "source"}
+
+
+def _remap_id(tenant: str, old: str) -> str:
+    """The id an imported engine id takes when it collides with another tenant's: derived from the tenant and the
+    old id, so importing the same bundle twice maps it the same way (and de-duplicates instead of copying)."""
+    return "mem_" + hashlib.sha256(f"{tenant}\x00{old}".encode()).hexdigest()[:24]
+
+
 def _check_keys(body: dict, allowed: set[str], where: str):
     if not isinstance(body, dict):
         raise ORPError("invalid_parameter", f"{where}: expected an object")
+    if where not in _NESTED and _has_nul(body):
+        # NUL is never meaningful in memory text or ids, and stores and keys cannot carry it safely
+        raise ORPError("invalid_parameter", f"{where}: strings may not contain the NUL character")
     extra = set(body) - allowed
     if extra:
         raise ORPError("unsupported_parameter", f"{where}: unsupported parameter(s) {sorted(extra)}",
@@ -678,6 +702,10 @@ class Service:
             if mode == "purge":
                 self._tombstones[i] = {"id": self._out(t, i), "_iid": i, "tenant": t, "at": _clock.now().isoformat()}
             self._log(f"forget:{mode}", i, principal, reason=str(body.get("reason", "")))
+        if mode == "purge":  # a purged record takes its edges with it (a re-used id must not inherit them)
+            gone = set(done)
+            for eid in [k for k, e in self._edges.items() if e.get("from") in gone or e.get("to") in gone]:
+                del self._edges[eid]
         return {"dry_run": False, "affected": visible}
 
     # ------------------------------------------------------------ feedback / approval
@@ -843,7 +871,7 @@ class Service:
                 return id_map[x]
             if _ENGINE_ID.match(x):
                 o = self.engine.mem.get(x)
-                return x if o is None or o.tenant == t else id_map.setdefault(x, new_id())
+                return x if o is None or o.tenant == t else id_map.setdefault(x, _remap_id(t, x))
             return f"{x}~{t}"
         for d in rows:
             if d.get("tenant", t) != t:
@@ -901,7 +929,7 @@ class Service:
         for x in tomb_rows:
             iid = conv(x["id"])
             if iid in self._tombstones and self._tombstones[iid].get("tenant") != t:
-                iid = id_map.setdefault(x["id"], new_id())
+                iid = id_map.setdefault(x["id"], _remap_id(t, x["id"]))
             self._tombstones[iid] = dict(x, _iid=iid, tenant=t)
         self.engine.touch(t)
         return {"imported": n, "id_map": {k: self._out(t, v) for k, v in id_map.items()}}

@@ -28,6 +28,10 @@ export interface HttpOptions {
 const ERR_STATUS: Record<string, number> = { unauthorized: 401, forbidden: 403, not_found: 404, version_conflict: 409,
   rate_limited: 429, payload_too_large: 413, unavailable: 503 };
 
+/** Headers that belong to one connection and are never passed on by the forwarding proxy. */
+const HOP_BY_HOP = new Set(["connection", "keep-alive", "proxy-authenticate", "proxy-authorization", "proxy-connection", "te", "trailer",
+  "transfer-encoding", "upgrade", "host", "content-length"]);
+
 /** A bounded label for metrics and logs: ids and other caller-chosen path segments become placeholders, so a caller
  * cannot grow the metrics table or put arbitrary text in log labels. */
 export function routeTemplate(method: string, parts: string[]): string {
@@ -53,13 +57,6 @@ class Bucket {
   tokens: number;
   at = Date.now();
   constructor(readonly rps: number, readonly burst: number) { this.tokens = burst; }
-  /** Refill without spending; true when at least one token is available. */
-  peek(): boolean {
-    const now = Date.now();
-    this.tokens = Math.min(this.burst, this.tokens + ((now - this.at) / 1000) * this.rps);
-    this.at = now;
-    return this.tokens >= 1;
-  }
   take(): boolean {
     const now = Date.now();
     this.tokens = Math.min(this.burst, this.tokens + ((now - this.at) / 1000) * this.rps);
@@ -194,7 +191,10 @@ export class Gateway {
     const ip = req.socket.remoteAddress ?? "?";
     let b = this.failBuckets.get(ip);
     if (!b) {
-      if (this.failBuckets.size > 50_000) this.failBuckets.clear(); // bounded; a reset only forgives
+      if (this.failBuckets.size >= 50_000) { // bounded: drop the oldest tenth, not everything
+        let n = 5_000;
+        for (const k of this.failBuckets.keys()) { this.failBuckets.delete(k); if (--n === 0) break; }
+      }
       this.failBuckets.set(ip, (b = new Bucket(r.rps, r.burst)));
     }
     return b;
@@ -205,8 +205,14 @@ export class Gateway {
     const rid = "req_" + randomBytes(8).toString("hex");
     let url: URL;
     let parts: string[];
+    const target = req.url ?? "/";
+    if (!target.startsWith("/") || target.startsWith("//")) { // origin-form only: never an absolute URL or //authority
+      this.send(res, 400, { error: { code: "invalid_parameter", message: "request target must be a path", details: {} } });
+      this.metrics.observe(`${req.method} other`, 400, performance.now() - t0);
+      return;
+    }
     try {
-      url = new URL(req.url ?? "/", "http://x");
+      url = new URL(target, "http://x");
       parts = url.pathname.split("/").filter(Boolean).map(decodeURIComponent);
     } catch {
       this.send(res, 400, { error: { code: "invalid_parameter", message: "malformed request path", details: {} } });
@@ -237,15 +243,19 @@ export class Gateway {
       const write = req.method === "POST" || req.method === "DELETE" || req.method === "PUT";
       let authz = req.headers.authorization;
       if (parts[0] === "mem0" && authz && /^Token\s+/i.test(authz)) authz = authz.replace(/^Token\s+/i, "Bearer "); // mem0 clients send "Token <key>"
-      const fb = this.authFailBucket(req);
-      if (!fb.peek()) {
-        status = 429;
-        return this.send(res, 429, { error: { code: "rate_limited", message: "too many failed authentications", details: {} } }, { "retry-after": "5" });
-      }
       try {
         pr = await this.auth.resolve(authz, write);
       } catch (e) {
-        if (e instanceof AuthError) { fb.take(); status = e.status; return this.authFail(res, e); }
+        if (e instanceof AuthError) {
+          // failures are limited per address; a valid token is never refused because others behind the same
+          // address failed
+          if (!this.authFailBucket(req).take()) {
+            status = 429;
+            return this.send(res, 429, { error: { code: "rate_limited", message: "too many failed authentications", details: {} } }, { "retry-after": "5" });
+          }
+          status = e.status;
+          return this.authFail(res, e);
+        }
         throw e;
       }
       if (!this.rateOk(pr)) { status = 429; return this.send(res, 429, { error: { code: "rate_limited", message: "slow down", details: {} } }, { "retry-after": "1" }); }
@@ -293,14 +303,28 @@ export class Gateway {
     if (req.headers["x-orp-forwarded"]) return busy("tenant is moving between nodes; retry");
     if (!url) return busy("tenant is served by another node; retry (or route by tenant)");
     let target: URL;
-    try { target = new URL(req.url ?? "/", url); } catch { return busy("bad node URL"); }
+    try {
+      // the node's own origin, with only this request's path and query: nothing the caller sends can change the host
+      target = new URL(url);
+      if (target.protocol !== "http:" && target.protocol !== "https:") return busy("bad node URL");
+      const here = new URL(req.url ?? "/", "http://x");
+      target.pathname = here.pathname;
+      target.search = here.search;
+      target.hash = "";
+      target.username = ""; target.password = "";
+    } catch { return busy("bad node URL"); }
     const node = this.svc.store!.leases!.node;
-    const headers = { ...req.headers, host: target.host, "x-orp-forwarded": node, "x-request-id": rid,
-      "x-forwarded-for": [req.headers["x-forwarded-for"], req.socket.remoteAddress].filter(Boolean).join(", ") };
+    const headers: Record<string, string | string[]> = {};
+    for (const [k, v] of Object.entries(req.headers)) {
+      if (v === undefined || HOP_BY_HOP.has(k)) continue;
+      headers[k] = v;
+    }
+    Object.assign(headers, { host: target.host, "x-orp-forwarded": node, "x-request-id": rid,
+      "x-forwarded-for": [req.headers["x-forwarded-for"], req.socket.remoteAddress].filter(Boolean).join(", ") });
     return new Promise<number>((ok) => {
       const up = (target.protocol === "https:" ? httpsRequest : httpRequest)(target, { method: req.method, headers }, (ur) => {
-        const h = { ...ur.headers };
-        delete h.connection; delete h["transfer-encoding"];
+        const h: Record<string, any> = {};
+        for (const [k, v] of Object.entries(ur.headers)) if (v !== undefined && !HOP_BY_HOP.has(k)) h[k] = v;
         res.writeHead(ur.statusCode ?? 502, h);
         ur.pipe(res);
         ur.on("end", () => ok(ur.statusCode ?? 502));

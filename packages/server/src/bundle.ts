@@ -10,8 +10,8 @@ import { Principal, type Service } from "@orp/core";
 type Json = Record<string, any>;
 export type BundleFiles = Map<string, Buffer>;
 
-/** Largest bundle read, uncompressed, and the largest single entry. */
-export const MAX_BUNDLE_BYTES = 2 ** 31 - 1;
+/** Largest bundle read, uncompressed (all entries together). Larger tenants move with `orp backup` or store tools. */
+export const MAX_BUNDLE_BYTES = 512 * 2 ** 20;
 const MAX_ENTRIES = 1_000_000;
 
 const sha256 = (b: Buffer | string) => createHash("sha256").update(b).digest("hex");
@@ -66,6 +66,7 @@ export function readZip(buf: Buffer, maxBytes = MAX_BUNDLE_BYTES): BundleFiles {
   const n = buf.readUInt16LE(eocd + 10), cdOff = buf.readUInt32LE(eocd + 16);
   if (n > MAX_ENTRIES) throw new Error("too many entries");
   const out: BundleFiles = new Map();
+  const spans: Array<[number, number]> = [];
   let p = cdOff, total = 0;
   for (let k = 0; k < n; k++) {
     if (p + 46 > buf.length || buf.readUInt32LE(p) !== 0x02014b50) throw new Error("corrupt zip central directory");
@@ -80,6 +81,9 @@ export function readZip(buf: Buffer, maxBytes = MAX_BUNDLE_BYTES): BundleFiles {
     if (usize > maxBytes || total > maxBytes) throw new Error(`bundle is over ${maxBytes} bytes uncompressed`);
     if (loff + 30 > buf.length || buf.readUInt32LE(loff) !== 0x04034b50) throw new Error("corrupt zip local header");
     const start = loff + 30 + buf.readUInt16LE(loff + 26) + buf.readUInt16LE(loff + 28);
+    if (start + csize > cdOff) throw new Error("corrupt zip: an entry runs into the central directory");
+    for (const [a, b] of spans) if (loff < b && start + csize > a) throw new Error("corrupt zip: entries overlap"); // no quoted-overlap bombs
+    spans.push([loff, start + csize]);
     const raw = buf.subarray(start, start + csize);
     let data: Buffer;
     if (method === 0) data = Buffer.from(raw);
@@ -176,10 +180,14 @@ export function verifyBundle(files: BundleFiles): Json {
   let manifest: Json;
   try { manifest = JSON.parse(raw.toString("utf8")); } catch { throw new Error("manifest.json is not valid JSON"); }
   if (!manifest || typeof manifest !== "object" || Array.isArray(manifest)) throw new Error("manifest.json is not an object");
-  for (const [name, want] of Object.entries((manifest.files ?? {}) as Json)) {
+  const listed = (manifest.files ?? {}) as Json;
+  for (const need of ["memories.jsonl", "edges.jsonl"]) {
+    if (typeof listed[need]?.sha256 !== "string") throw new Error(`manifest.json must list ${need} with its sha256`);
+  }
+  for (const [name, want] of Object.entries(listed)) {
     const b = files.get(name);
     if (!b) throw new Error(`manifest lists ${name}, which is missing`);
-    if (typeof want?.sha256 === "string" && sha256(b) !== want.sha256) throw new Error(`${name} does not match its manifest hash`);
+    if (typeof want?.sha256 !== "string" || sha256(b) !== want.sha256) throw new Error(`${name} does not match its manifest hash`);
   }
   return manifest;
 }

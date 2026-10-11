@@ -23,7 +23,7 @@ function storeFor(path) {
   if (path.startsWith("pg:")) {
     const u = new URL(PG);
     u.searchParams.set("schema", path.slice(3));
-    return new PgStore(u.toString(), { leaseMs: 60_000, nodeId: "fuzz-node" }); // live and reopened act as one node
+    return new PgStore(u.toString(), { leaseMs: 60_000, nodeId: "fuzz-node", exactNodeId: true }); // live and reopened act as one node
   }
   return new SqliteStore(path);
 }
