@@ -864,9 +864,9 @@ prompt = pack.<span class="f">render</span>()  <span class="c"># drop into conte
     function frame(now){
       var lt=now%LOOP, st=SEQ[0], loopN=Math.floor(now/LOOP);
       if(loopN!==lastLoop){lastLoop=loopN; if(loopN>0) reroll();}
-      if(now-lastFlick>120){ // tiles keep flickering while the picture is still rough
-        lastFlick=now; LV.forEach(function(b){if(b===1)return;var a=NOISE[b];for(var k=0;k<a.length;k++) if(rnd()<.07) a[k]=rnd()-.5;});
-        var r1=N; for(var q=0;q<3;q++){var kk=Math.floor(rnd()*r1*r1); if(COV[1][kk]>.5) spark[kk]=now;}
+      if(now-lastFlick>45){ // glitter: soft sparkles drifting across whatever tiles are showing
+        lastFlick=now; var bb=st.b, r=N/bb, n=r*r, want=Math.max(1,Math.round(n/60));
+        for(var q=0;q<want;q++){var kk=Math.floor(rnd()*n); if(on(bb,kk)) spark[bb+':'+kk]={t0:now,d:650+rnd()*700,p:.35+rnd()*.5};}
       } for(var i=0;i<SEQ.length;i++){if(lt>=SEQ[i].t0&&lt<SEQ[i].t0+SEQ[i].d){st=SEQ[i];break;}}
       var u=(lt-st.t0)/st.d;
       ctx.clearRect(0,0,W,W);
@@ -888,7 +888,7 @@ prompt = pack.<span class="f">render</span>()  <span class="c"># drop into conte
         if(dir){ // just-arrived tiles pop in and flash
           var age=Math.abs(f-p)/.14; if(age<1){k=1-age; sc=.7+.3*Math.min(1,age*1.4);}
         }
-        if(b===1 && spark[idx]){var sa=(now-spark[idx])/420; if(sa<1) k=Math.max(k,(1-sa)*.8); else delete spark[idx];}
+        var sp=spark[b+':'+idx]; if(sp){var su=(now-sp.t0)/sp.d; if(su<1) k=Math.max(k,Math.sin(Math.PI*su)*sp.p); else delete spark[b+':'+idx];}
         ctx.fillStyle=k>0?tint(k*.85):SIG;
         tile(b,bx,by,sc);
       }
