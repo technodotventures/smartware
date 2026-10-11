@@ -176,6 +176,7 @@ export class Engine {
   private hashOf = new Map<string, string[]>();
   readonly claims = new Map<string, string[]>();
   audit: Array<Record<string, any>> = [];
+  auditTenant: string[] = []; // tenant of each audit entry (for the store), parallel to audit
   mutations = 0;
   readonly tmut = new Map<string, number>();
   readonly tcount = new Map<string, number>();
@@ -306,7 +307,11 @@ export class Engine {
       if (ik && !this.hash.has(dedupKey(m, writer))) this.hashSet(dedupKey(m, writer), m.id);
       this.dirty(m.id);
       const part = this.parts.get(m.tenant);
-      if (part && !this.dirtyParts.has(m.tenant)) part.add(m, this.enc, this.p.seg_sentences);
+      if (part && !this.dirtyParts.has(m.tenant)) {
+        // a remote encoder without a vector for this text yet: rebuild later, after the service warms it
+        if (!this.enc.has || this.textsFor(m).every((x) => this.enc.has!(x))) part.add(m, this.enc, this.p.seg_sentences);
+        else this.invalidate(m.tenant);
+      }
       if (m.claim !== null && m.kind !== "event" && m.kind !== "document") {
         if (chainOnly) {
           const ck = m.tenant + "\0" + claimKey(m.claim);
@@ -319,6 +324,7 @@ export class Engine {
         }
       }
       this.audit.push({ op: "remember", id: m.id, by: principal.id, at: isoformat(nowMicros()) });
+      this.auditTenant.push(m.tenant);
       ids.push(m.id);
       touched.add(m.tenant);
     }
@@ -475,6 +481,7 @@ export class Engine {
         this.dirty(i);
       }
       this.audit.push({ op: `forget:${mode}`, id: i, by: principal.id, reason, at: isoformat(nowMicros()) });
+      this.auditTenant.push(m.tenant);
     }
     const keys = new Set<string>();
     for (const i of hit) {
@@ -525,19 +532,26 @@ export class Engine {
     return part;
   }
 
-  /** Texts the encoder must embed before the given tenant's index is (re)built (for remote encoders). */
-  pendingTexts(tenant: string, extra: Memory[] = []): string[] {
-    const out: string[] = [];
-    const add = (m: Memory) => {
-      out.push(`${m.actor}: ${m.content}`);
-      const ss = sentences(m.content);
-      const extraT = ((m.meta.time_refs ?? []) as Array<[string, string]>).map((x) => x[1]).join(" ");
-      if (ss.length <= this.p.seg_sentences) out.push(`${m.actor}: ${m.content} ${extraT}`.trim());
-      else for (let i = 0; i + this.p.seg_sentences <= ss.length; i++) out.push(`${m.actor}: ` + ss.slice(i, i + this.p.seg_sentences).join(" "));
-    };
-    if (!this.parts.has(tenant) || this.dirtyParts.has(tenant)) for (const i of this.order.get(tenant) ?? []) add(this.mem.get(i)!);
-    for (const m of extra) add(m);
+  /** Every text the encoder embeds for one memory: the unit vector and its segment vectors. */
+  textsFor(m: Memory): string[] {
+    let refs = m.meta.time_refs as Array<[string, string]> | undefined;
+    if (refs === undefined && this.p.resolve_dates && (m.kind === "event" || m.kind === "document")) {
+      const t0 = m.event_time ?? m.observed_at;
+      refs = t0 !== null ? resolveRelative(m.content, t0) : [];
+    }
+    const extra = (refs ?? []).map((x) => x[1]).join(" ");
+    const out = [`${m.actor}: ${m.content}`];
+    const ss = sentences(m.content);
+    const w = this.p.seg_sentences;
+    if (ss.length <= w) out.push(`${m.actor}: ${m.content} ${extra}`.trim());
+    else for (let i = 0; i + w <= ss.length; i++) out.push(`${m.actor}: ` + ss.slice(i, i + w).join(" "));
     return out;
+  }
+
+  /** Texts a remote encoder must embed before this tenant's index can be (re)built. */
+  pendingTexts(tenant: string): string[] {
+    if (this.parts.has(tenant) && !this.dirtyParts.has(tenant)) return [];
+    return (this.order.get(tenant) ?? []).flatMap((i) => this.textsFor(this.mem.get(i)!));
   }
 
   // ------------------------------------------------------------ access

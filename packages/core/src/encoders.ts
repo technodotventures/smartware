@@ -18,6 +18,14 @@ export interface Encoder {
   warm?(texts: string[]): Promise<void>;
   /** Drop cached embeddings of forgotten content. */
   forget?(content: string): void;
+  /** For encoders that must be warmed: whether a vector for this text is ready. */
+  has?(text: string): boolean;
+}
+
+/** Optional persistent vector cache (the store's vectors table), so restarts do not re-embed. */
+export interface VectorCache {
+  get(encoder: string, sha: string): Float32Array | null;
+  put(encoder: string, sha: string, v: Float32Array): void;
 }
 
 const enc = new TextEncoder();
@@ -49,6 +57,7 @@ export class HashingEncoder implements Encoder {
 }
 
 const MAGIC = "ORPENC1\n";
+const sha = (t: string) => createHash("sha256").update(t).digest("hex");
 
 export class SifEncoder implements Encoder {
   readonly name: string;
@@ -135,8 +144,21 @@ export class ApiEncoder implements Encoder {
     this.name = `api:${model}`;
   }
 
+  persist: VectorCache | null = null;
+
+  has(text: string): boolean {
+    return this.cache.has(text);
+  }
+
   async warm(texts: string[]): Promise<void> {
-    const need = [...new Set(texts.filter((t) => !this.cache.has(t)))];
+    let need = [...new Set(texts.filter((t) => !this.cache.has(t)))];
+    if (this.persist && need.length) {
+      need = need.filter((t) => {
+        const v = this.persist!.get(this.name, sha(t));
+        if (v) this.cache.set(t, v);
+        return !v;
+      });
+    }
     const key = process.env[this.keyEnv];
     for (let i = 0; i < need.length; i += 128) {
       const batch = need.slice(i, i + 128);
@@ -154,6 +176,7 @@ export class ApiEncoder implements Encoder {
         const n = Math.sqrt(ss);
         if (n) for (let j = 0; j < v.length; j++) v[j] = v[j]! / n;
         this.cache.set(batch[row.index]!, v);
+        this.persist?.put(this.name, sha(batch[row.index]!), v);
       }
     }
   }

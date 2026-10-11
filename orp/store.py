@@ -7,15 +7,15 @@ Tables
     orp_meta(key, value)                      schema, secret (hex), epoch, wseq, mutations
     memories(iid, tenant, ord, record)        record = the internal JSON form (Memory.to_json, engine meta kept)
     claims(tenant, key, pos, iid)             claim chains in registration order
-    dedup(hkey, iid)                          de-duplication keys (JSON array) -> internal id
+    dedup(hkey, tenant, iid)                  de-duplication keys (JSON array, Python json.dumps form) -> internal id
     idem(tenant, principal, key, ids)         verb-level idempotency keys -> ids (JSON array)
     blocked(tenant, chash, pos, iid)          re-ingest blocks after forget
     edges(id, tenant, body)                   typed links
     tombstones(iid, tenant, body)             purge tombstones
     changes(tenant, cursor, body)             per-tenant change feed
-    audit(seq, body)                          append-only audit log
+    audit(seq, tenant, body)                  append-only audit log
     jobs(id, tenant, body)                    reflect jobs
-    feedback(seq, body)                       feedback signals
+    feedback(seq, tenant, body)               feedback signals
     counters(tenant, tmut, tcount)            per-tenant snapshot counters
 """
 from __future__ import annotations
@@ -35,7 +35,8 @@ CREATE TABLE IF NOT EXISTS memories (iid TEXT PRIMARY KEY, tenant TEXT NOT NULL,
 CREATE INDEX IF NOT EXISTS memories_tenant_ord ON memories (tenant, ord);
 CREATE TABLE IF NOT EXISTS claims (tenant TEXT NOT NULL, key TEXT NOT NULL, pos INTEGER NOT NULL, iid TEXT NOT NULL,
                                    PRIMARY KEY (tenant, key, pos));
-CREATE TABLE IF NOT EXISTS dedup (hkey TEXT PRIMARY KEY, iid TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS dedup (hkey TEXT PRIMARY KEY, tenant TEXT NOT NULL, iid TEXT NOT NULL);
+CREATE INDEX IF NOT EXISTS dedup_tenant ON dedup (tenant);
 CREATE TABLE IF NOT EXISTS idem (tenant TEXT NOT NULL, principal TEXT NOT NULL, key TEXT NOT NULL, ids TEXT NOT NULL,
                                  PRIMARY KEY (tenant, principal, key));
 CREATE TABLE IF NOT EXISTS blocked (tenant TEXT NOT NULL, chash TEXT NOT NULL, pos INTEGER NOT NULL, iid TEXT NOT NULL,
@@ -44,9 +45,10 @@ CREATE TABLE IF NOT EXISTS edges (id TEXT PRIMARY KEY, tenant TEXT NOT NULL, bod
 CREATE TABLE IF NOT EXISTS tombstones (iid TEXT PRIMARY KEY, tenant TEXT NOT NULL, body TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS changes (tenant TEXT NOT NULL, cursor INTEGER NOT NULL, body TEXT NOT NULL,
                                     PRIMARY KEY (tenant, cursor));
-CREATE TABLE IF NOT EXISTS audit (seq INTEGER PRIMARY KEY, body TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS audit (seq INTEGER PRIMARY KEY, tenant TEXT NOT NULL, body TEXT NOT NULL);
+CREATE INDEX IF NOT EXISTS audit_tenant ON audit (tenant, seq);
 CREATE TABLE IF NOT EXISTS jobs (id TEXT PRIMARY KEY, tenant TEXT NOT NULL, body TEXT NOT NULL);
-CREATE TABLE IF NOT EXISTS feedback (seq INTEGER PRIMARY KEY, body TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS feedback (seq INTEGER PRIMARY KEY, tenant TEXT NOT NULL, body TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS counters (tenant TEXT PRIMARY KEY, tmut INTEGER NOT NULL, tcount INTEGER NOT NULL);
 """
 
@@ -97,7 +99,7 @@ def save(svc, path: str):
                             [(i, m.tenant, pos.get(i, len(pos)), _j(m.to_json())) for i, m in eng.mem.items()])
             con.executemany("INSERT INTO claims VALUES (?, ?, ?, ?)",
                             [(t, k, n, i) for (t, k), ids in eng._claims.items() for n, i in enumerate(ids)])
-            con.executemany("INSERT INTO dedup VALUES (?, ?)", [(_j(list(h)), i) for h, i in eng._hash.items()])
+            con.executemany("INSERT INTO dedup VALUES (?, ?, ?)", [(_j(list(h)), h[1], i) for h, i in eng._hash.items()])
             con.executemany("INSERT INTO idem VALUES (?, ?, ?, ?)",
                             [(t, p, k, _j(ids)) for (t, p, k), ids in svc._keys.items()])
             con.executemany("INSERT INTO blocked VALUES (?, ?, ?, ?)",
@@ -108,10 +110,17 @@ def save(svc, path: str):
                             [(i, d.get("tenant", ""), _j(d)) for i, d in svc._tombstones.items()])
             con.executemany("INSERT INTO changes VALUES (?, ?, ?)",
                             [(t, c["cursor"], _j(c)) for t, feed in svc._changes.items() for c in feed])
-            con.executemany("INSERT INTO audit VALUES (?, ?)", [(n, _j(a)) for n, a in enumerate(eng.audit)])
+            tomb = {i: d.get("tenant", "") for i, d in svc._tombstones.items()}
+
+            def tenant_of(i):
+                m = eng.mem.get(i)
+                return m.tenant if m is not None else tomb.get(i, "")
+            con.executemany("INSERT INTO audit VALUES (?, ?, ?)",
+                            [(n, tenant_of(a.get("id")), _j(a)) for n, a in enumerate(eng.audit)])
             con.executemany("INSERT INTO jobs VALUES (?, ?, ?)",
                             [(j, d.get("tenant", ""), _j(d)) for j, d in svc._jobs.items()])
-            con.executemany("INSERT INTO feedback VALUES (?, ?)", [(n, _j(f)) for n, f in enumerate(svc._feedback)])
+            con.executemany("INSERT INTO feedback VALUES (?, ?, ?)",
+                            [(n, tenant_of(f.get("target")), _j(f)) for n, f in enumerate(svc._feedback)])
             ts = set(eng.tmut) | set(eng.tcount)
             con.executemany("INSERT INTO counters VALUES (?, ?, ?)",
                             [(t, int(eng.tmut[t]), int(eng.tcount[t])) for t in sorted(ts)])
@@ -140,7 +149,7 @@ def load(svc, path: str):
         for t, k, _, i in con.execute("SELECT * FROM claims ORDER BY tenant, key, pos"):
             eng._claims[(t, k)].append(i)
         eng._hash = {}
-        for h, i in con.execute("SELECT hkey, iid FROM dedup"):
+        for h, _, i in con.execute("SELECT hkey, tenant, iid FROM dedup"):
             hk = json.loads(h)
             eng._hash[tuple(tuple(x) if isinstance(x, list) else x for x in hk)] = i
         eng.audit = [json.loads(b) for (b,) in con.execute("SELECT body FROM audit ORDER BY seq")]
