@@ -4,11 +4,24 @@
   "description": "orp: one binary for ORP memory. MCP (stdio and Streamable HTTP with OAuth), the HTTP binding, doctor and eval.",
   "license": "Apache-2.0",
   "type": "module",
-  "bin": { "orp": "bin/orp.js" },
+  "bin": {
+    "orp": "bin/orp.js"
+  },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "exports": { ".": "./dist/index.js" },
-  "files": ["bin", "dist", "README.md"],
-  "dependencies": { "@orp/core": "0.2.0" },
-  "engines": { "node": ">=22.13" }
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "files": [
+    "bin",
+    "dist",
+    "policy",
+    "README.md"
+  ],
+  "dependencies": {
+    "@orp/core": "0.2.0"
+  },
+  "engines": {
+    "node": ">=22.13"
+  }
 }

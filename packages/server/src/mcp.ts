@@ -7,7 +7,17 @@
 //   full        every verb with every field (trusted local use).
 //   mcp-memory  the reference MCP memory server's nine tools (entities, relations, observations), mapped onto ORP
 //               records and edges, so existing client configs keep working.
+import { readFileSync } from "node:fs";
 import { Principal, type Service, ORPError } from "@orp/core";
+
+let policyText: string | null = null;
+/** The memory policy pack (policy/memory-policy.md, shipped in this package), served as the MCP prompt memory_policy. */
+export function memoryPolicy(): string {
+  if (policyText === null) {
+    try { policyText = readFileSync(new URL("../policy/memory-policy.md", import.meta.url), "utf8"); } catch { policyText = INSTRUCTIONS; }
+  }
+  return policyText;
+}
 
 export const PROTOCOLS = ["2025-06-18", "2025-03-26", "2024-11-05"];
 export const LATEST = "2025-06-18";
@@ -140,7 +150,7 @@ export class McpSession {
         case "initialize":
           this.clientCaps = params.capabilities ?? {};
           this.protocol = PROTOCOLS.includes(params.protocolVersion) ? params.protocolVersion : LATEST;
-          res = { protocolVersion: this.protocol, capabilities: { tools: { listChanged: false }, resources: { subscribe: true, listChanged: false } },
+          res = { protocolVersion: this.protocol, capabilities: { tools: { listChanged: false }, resources: { subscribe: true, listChanged: false }, prompts: { listChanged: false } },
             serverInfo: { name: "orp", title: "ORP memory", version: "0.2.0" }, instructions: INSTRUCTIONS };
           break;
         case "notifications/initialized": case "notifications/cancelled": case "notifications/roots/list_changed":
@@ -148,6 +158,13 @@ export class McpSession {
         case "ping": res = {}; break;
         case "tools/list": res = { tools: this.tools.map(({ set: _s, ...t }) => t) }; break;
         case "tools/call": res = await this.call(params.name, params.arguments ?? {}); break;
+        case "prompts/list":
+          res = { prompts: [{ name: "memory_policy", title: "Memory policy", description: "When to recall, what to remember, what never to store." }] };
+          break;
+        case "prompts/get":
+          if (params.name !== "memory_policy") throw new ORPError("not_found", `prompt ${params.name}`);
+          res = { description: "Memory policy", messages: [{ role: "user", content: { type: "text", text: memoryPolicy() } }] };
+          break;
         case "resources/templates/list":
           res = { resourceTemplates: [
             { uriTemplate: "orp://{tenant}/mem/{id}", name: "memory", mimeType: "application/json" },

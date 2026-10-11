@@ -262,3 +262,38 @@ test("tenant-free whoami and server-enforced write scopes for connector keys", a
   const tricky = await call("POST", "/v1/acme/remember", tokConn, { memories: [{ content: "prefix trick", scope: "connectors/slack-evil" }] });
   assert.equal(tricky.status, 403);
 });
+
+test("mem0 REST shim: user_id is scope, never identity", async () => {
+  const H = (tok) => ({ authorization: `Token ${tok}` });
+  const add = await call("POST", "/mem0/v1/memories/", null, { messages: [{ role: "user", content: "I am vegetarian and allergic to nuts" }, { role: "system", content: "ignored" }],
+    user_id: "u-alice", metadata: { source: "chat" } }, H(tokA));
+  assert.equal(add.status, 200);
+  assert.equal(add.body.results.length, 1);
+  assert.deepEqual(add.body.degraded, ["mem0:infer_not_supported"]);
+  const id = add.body.results[0].id;
+  const s = await call("POST", "/mem0/v2/memories/search/", null, { query: "what food should I avoid?", filters: { AND: [{ user_id: "u-alice" }] } }, H(tokA));
+  assert.ok(s.body.some((x) => x.id === id && x.user_id === "u-alice"));
+  // bob names alice's user_id with his own key: finds nothing of hers
+  const spy = await call("POST", "/mem0/v1/memories/search/", null, { query: "allergic", user_id: "u-alice" }, H(tokB));
+  assert.equal(spy.body.results.length, 0);
+  const all = await call("GET", "/mem0/v1/memories/?user_id=u-alice", null, undefined, H(tokA));
+  assert.equal(all.body.results.length, 1);
+  const up = await call("PUT", `/mem0/v1/memories/${id}/`, null, { text: "I am vegan and allergic to nuts" }, H(tokA));
+  assert.equal(up.status, 200);
+  assert.equal((await call("GET", `/mem0/v1/memories/${id}/`, null, undefined, H(tokA))).body.memory, "I am vegan and allergic to nuts");
+  const hist = await call("GET", `/mem0/v1/memories/${id}/history/`, null, undefined, H(tokA));
+  assert.deepEqual(hist.body.map((h) => h.event), ["ADD", "UPDATE"]);
+  await call("DELETE", "/mem0/v1/memories/?user_id=u-alice", null, undefined, H(tokA));
+  assert.equal((await call("GET", "/mem0/v1/memories/?user_id=u-alice", null, undefined, H(tokA))).body.results.length, 0);
+});
+
+test("the shipped memory policy matches the policy pack and is served as an MCP prompt", async () => {
+  const { readFileSync } = await import("node:fs");
+  const pack = readFileSync(new URL("../../../policy/memory-policy.md", import.meta.url), "utf8");
+  assert.equal(readFileSync(new URL("../policy/memory-policy.md", import.meta.url), "utf8"), pack);
+  const { rpc } = await mcpSession(tokA);
+  const list = await rpc(2, "prompts/list", {});
+  assert.equal(list.result.prompts[0].name, "memory_policy");
+  const got = await rpc(3, "prompts/get", { name: "memory_policy" });
+  assert.equal(got.result.messages[0].content.text, pack);
+});

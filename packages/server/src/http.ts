@@ -6,6 +6,7 @@ import { ORPError, type Principal, type Service } from "@orp/core";
 import { AuthError, type PrincipalSource } from "./auth.js";
 import { McpSession, PROTOCOLS, type SessionOptions } from "./mcp.js";
 import { Log } from "./log.js";
+import { mem0Route } from "./mem0.js";
 
 type Json = Record<string, any>;
 
@@ -117,7 +118,7 @@ export class Gateway {
     res.setHeader("vary", "origin");
     res.setHeader("access-control-allow-headers", "authorization, content-type, if-match, mcp-session-id, mcp-protocol-version");
     res.setHeader("access-control-expose-headers", "etag, mcp-session-id");
-    res.setHeader("access-control-allow-methods", "GET, POST, DELETE, OPTIONS");
+    res.setHeader("access-control-allow-methods", "GET, POST, PUT, DELETE, OPTIONS");
     return true;
   }
 
@@ -182,9 +183,11 @@ export class Gateway {
         return this.send(res, 200, { resource: `${this.url}/mcp`, authorization_servers: this.opt.authorizationServers ?? [],
           bearer_methods_supported: ["header"], scopes_supported: ["orp:read", "orp:write"], resource_name: "ORP memory" });
       }
-      const write = req.method === "POST" || req.method === "DELETE";
+      const write = req.method === "POST" || req.method === "DELETE" || req.method === "PUT";
+      let authz = req.headers.authorization;
+      if (parts[0] === "mem0" && authz && /^Token\s+/i.test(authz)) authz = authz.replace(/^Token\s+/i, "Bearer "); // mem0 clients send "Token <key>"
       try {
-        pr = await this.auth.resolve(req.headers.authorization, write);
+        pr = await this.auth.resolve(authz, write);
       } catch (e) {
         if (e instanceof AuthError) { status = e.status; return this.authFail(res, e); }
         throw e;
@@ -192,6 +195,11 @@ export class Gateway {
       if (!this.rateOk(pr)) { status = 429; return this.send(res, 429, { error: { code: "rate_limited", message: "slow down", details: {} } }, { "retry-after": "1" }); }
       if (parts[0] === "mcp" && parts.length === 1) { route = "mcp"; status = await this.mcp(req, res, pr); return; }
       if (parts[0] === "v1") { const r = await this.v1(req, res, url, parts, pr); status = r; return; }
+      if (parts[0] === "mem0" && (parts[1] === "v1" || parts[1] === "v2")) {
+        route = "mem0";
+        status = await mem0Route(this.svc, pr, req, res, parts, url, () => this.body(req, this.opt.maxBody ?? 1 << 20), (st, b) => this.send(res, st, b));
+        return;
+      }
       status = 404;
       this.send(res, 404, { error: { code: "not_found", message: url.pathname, details: {} } });
     } catch (e) {
