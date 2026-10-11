@@ -1139,6 +1139,22 @@ export class Service {
     return Boolean(r && r.tenant !== t);
   }
 
+  /** Load every tenant in the store and build its index in the background, most recently written first, without
+   * holding the lock while building (requests keep being served). Returns the number of tenants warmed. */
+  async preload(onTenant?: (t: string, ms: number) => void): Promise<number> {
+    if (!this.store) return 0;
+    const tenants = this.store.db.prepare("SELECT tenant, MAX(ord) AS o FROM memories GROUP BY tenant ORDER BY o DESC").all() as Json[];
+    let n = 0;
+    for (const { tenant } of tenants) {
+      const t0 = performance.now();
+      await this.lock.run(() => this.ensureTenant(tenant));
+      if (this.enc.warm) await this.enc.warm(this.engine.pendingTexts(tenant));
+      if (await this.engine.warmPartition(tenant)) n++;
+      onTenant?.(tenant, Math.round(performance.now() - t0));
+    }
+    return n;
+  }
+
   /** A full snapshot of the service state into a new store file (backups, and moving an in-memory service to disk).
    * With a store attached, SQLite's online backup copies the file consistently. */
   async saveTo(path: string): Promise<void> {

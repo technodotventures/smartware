@@ -40,7 +40,38 @@ export function mean32(a: ArrayLike<number>, off = 0, n = a.length - off): numbe
 /** A float32 dot product. BLAS accumulation order is not specified, so this accumulates in float64 and rounds
  * once; it agrees with numpy to within an ulp, which matters only for scores that are already near-ties. */
 export function dot32(a: Float32Array, ao: number, b: Float32Array, bo: number, n: number): number {
-  let s = 0;
-  for (let i = 0; i < n; i++) s += a[ao + i]! * b[bo + i]!;
-  return f(s);
+  // four float64 partial sums: float32 products are exact in float64, and the sum differs from a sequential one only
+  // at the 1e-16 level, far below the single float32 rounding at the end
+  let s0 = 0, s1 = 0, s2 = 0, s3 = 0, i = 0;
+  for (; i + 3 < n; i += 4) {
+    s0 += a[ao + i]! * b[bo + i]!;
+    s1 += a[ao + i + 1]! * b[bo + i + 1]!;
+    s2 += a[ao + i + 2]! * b[bo + i + 2]!;
+    s3 += a[ao + i + 3]! * b[bo + i + 3]!;
+  }
+  for (; i < n; i++) s0 += a[ao + i]! * b[bo + i]!;
+  return f((s0 + s1) + (s2 + s3));
+}
+
+/** Non-zero coordinates of a query vector, for sparse dot products (hashing vectors are mostly zeros). */
+export function nonZero(v: Float32Array): Int32Array | null {
+  let n = 0;
+  for (let i = 0; i < v.length; i++) if (v[i] !== 0) n++;
+  if (n * 4 > v.length) return null; // dense enough: the plain loop is faster
+  const out = new Int32Array(n);
+  let k = 0;
+  for (let i = 0; i < v.length; i++) if (v[i] !== 0) out[k++] = i;
+  return out;
+}
+
+/** dot32 over the query's non-zero coordinates only, with each term in the same partial sum (index mod 4) and the
+ * same order as dot32, so the result is bit-identical (the skipped terms add exact zeros). */
+export function dot32Sparse(a: Float32Array, ao: number, q: Float32Array, nz: Int32Array): number {
+  let s0 = 0, s1 = 0, s2 = 0, s3 = 0;
+  for (let k = 0; k < nz.length; k++) {
+    const i = nz[k]!;
+    const t = a[ao + i]! * q[i]!;
+    switch (i & 3) { case 0: s0 += t; break; case 1: s1 += t; break; case 2: s2 += t; break; default: s3 += t; }
+  }
+  return f((s0 + s1) + (s2 + s3));
 }

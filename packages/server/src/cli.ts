@@ -129,6 +129,10 @@ async function serveHttp(svc: Service, f: Flags, log: Log) {
       defaultReaders: (s(f, "default-readers", "self") === "tenant" ? "tenant" : s(f, "default-readers", "self") === "self" ? "self" : list(f, "default-readers")) as any },
   }, log);
   await gw.listen();
+  if (f["no-preload"] !== true) {
+    // warm every tenant's index in the background so the first recall after a restart is fast
+    void svc.preload((t, ms) => log.info("tenant warmed", { tenant: t, ms })).catch((e) => log.warn("preload failed", { err: String(e) }));
+  }
   log.info("orp http ready", { url: gw.url, mcp: `${gw.url}/mcp`, store: svc.store?.path ?? "(memory)", auth: [keys.size ? "keys" : "", jwt ? "oidc" : "", dev ? "dev" : ""].filter(Boolean) });
   const stop = async () => { log.info("shutting down"); await gw.close(); svc.close(); process.exit(0); };
   process.on("SIGTERM", stop);

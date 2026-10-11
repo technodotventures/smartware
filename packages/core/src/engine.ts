@@ -11,7 +11,7 @@
 import { createHmac, randomBytes } from "node:crypto";
 import { BM25, type Mask } from "./bm25.js";
 import type { Encoder } from "./encoders.js";
-import { dot32, f, mean32, pairwiseSum32 } from "./f32.js";
+import { dot32, dot32Sparse, f, mean32, nonZero, pairwiseSum32 } from "./f32.js";
 import { claimKey, dedupKey, idemDedupKey, type ContextItem, type ContextPack, type Memory, Principal,
   type RecallRequest, SYSTEM } from "./model.js";
 import { FEATURES, type GbdtModel, type Params, defaultParams } from "./params.js";
@@ -55,6 +55,8 @@ class Partition {
   bm = new BM25();
   bmSeg = new BM25();
   segUnit: number[] = [];
+  /** segment j's text equals its unit's embedded text, so its vector (and score) is the unit's: no copy stored */
+  segSame: boolean[] = [];
   E: Float32Array;
   ES: Float32Array;
   threadIndex = new Map<string, number>();
@@ -71,6 +73,9 @@ class Partition {
   hasPlace: boolean[] = [];
   isQ: boolean[] = [];
   actorL: string[] = [];
+  /** float32 pairwise dot products between units, keyed a*2^26+b: vectors never change once added, so the
+   * dense-window channel's neighbour terms are computed once per pair instead of on every recall. */
+  pairDot = new Map<number, number>();
 
   constructor(readonly tenant: string, readonly dim: number) {
     this.E = new Float32Array(dim * 64);
@@ -83,7 +88,7 @@ class Partition {
 
   private grow(a: Float32Array, rows: number): Float32Array {
     if (rows * this.dim <= a.length) return a;
-    const b = new Float32Array(Math.max(rows * this.dim, a.length * 2));
+    const b = new Float32Array(Math.max(rows * this.dim, Math.ceil(a.length * 1.5 / this.dim) * this.dim));
     b.set(a);
     return b;
   }
@@ -103,12 +108,15 @@ class Partition {
     const segs: string[] = [];
     if (ss.length <= segSentences) segs.push(ut);
     else for (let i = 0; i + segSentences <= ss.length; i++) segs.push(`${m.actor}: ` + ss.slice(i, i + segSentences).join(" "));
+    const unitEmb = `${m.actor}: ${m.content}`;
     for (const s of segs) {
       const j = this.segUnit.length;
       this.segUnit.push(k);
       this.bmSeg.add(s);
+      const same = s === unitEmb;
+      this.segSame.push(same);
       this.ES = this.grow(this.ES, j + 1);
-      this.ES.set(enc.embed(s), j * this.dim);
+      if (!same) this.ES.set(enc.embed(s), j * this.dim);
     }
     // thread order: (seq, observed_at), stable, so a new unit goes after every unit with an equal key
     let ti = this.threadIndex.get(m.thread);
@@ -534,6 +542,27 @@ export class Engine {
     return part;
   }
 
+  /** Build a tenant's index in the background, in chunks, yielding to the event loop between chunks so a server
+   * keeps answering. Installed only if nothing in the tenant changed meanwhile (otherwise the next recall rebuilds). */
+  async warmPartition(tenant: string, chunk = 400): Promise<boolean> {
+    if (this.parts.has(tenant) && !this.dirtyParts.has(tenant)) return true;
+    const before = `${this.tmut.get(tenant) ?? 0}|${this.epoch}`;
+    const ids = [...(this.order.get(tenant) ?? [])];
+    const part = new Partition(tenant, this.enc.dim);
+    for (let i = 0; i < ids.length; i += chunk) {
+      for (const id of ids.slice(i, i + chunk)) {
+        const m = this.mem.get(id);
+        if (m) part.add(m, this.enc, this.p.seg_sentences);
+      }
+      await new Promise((r) => setImmediate(r));
+      if (`${this.tmut.get(tenant) ?? 0}|${this.epoch}` !== before) return false;
+    }
+    if (`${this.tmut.get(tenant) ?? 0}|${this.epoch}` !== before) return false;
+    this.parts.set(tenant, part);
+    this.dirtyParts.delete(tenant);
+    return true;
+  }
+
   /** Every text the encoder embeds for one memory: the unit vector and its segment vectors. */
   textsFor(m: Memory): string[] {
     let refs = m.meta.time_refs as Array<[string, string]> | undefined;
@@ -699,15 +728,23 @@ export class Engine {
     const sWin = new Float32Array(n);
     for (const k of adm) sWin[k] = f(sBm[k]! + f(0.5 * f(nb(sBm, pm, k) + nb(sBm, nm, k))));
     chans.set("bm25_win", { w: p.w_bm25_win, ranks: topranks(sWin) });
+    const nz = nonZero(qvec);
+    const qdot = (M: Float32Array, row: number) => (nz ? dot32Sparse(M, row * D, qvec, nz) : dot32(M, row * D, qvec, 0, D));
     const sDense = new Float32Array(n);
-    for (const k of adm) sDense[k] = dot32(P.E, k * D, qvec, 0, D);
+    for (const k of adm) sDense[k] = qdot(P.E, k);
     const tmp = new Float32Array(n);
     for (const k of adm) tmp[k] = f(sDense[k]! + 1.0);
     chans.set("dense", { w: p.w_dense, ranks: topranks(tmp) });
     const prod = new Float32Array(D);
     const rowDot = (a: number, b: number) => {
-      for (let j = 0; j < D; j++) prod[j] = P.E[a * D + j]! * P.E[b * D + j]!;
-      return pairwiseSum32(prod, 0, D);
+      const key = a * 67108864 + b;
+      let v = P.pairDot.get(key);
+      if (v === undefined) {
+        for (let j = 0; j < D; j++) prod[j] = P.E[a * D + j]! * P.E[b * D + j]!;
+        v = pairwiseSum32(prod, 0, D);
+        if (P.pairDot.size < 4_000_000) P.pairDot.set(key, v);
+      }
+      return v;
     };
     const sWinD = new Float64Array(n);
     for (const k of adm) {
@@ -732,7 +769,7 @@ export class Engine {
       if (!mask[k]) continue;
       const b = segmask[j] ? segScore[j]! : 0;
       if (b > ub[k]!) ub[k] = b;
-      const d = dot32(P.ES, j * D, qvec, 0, D);
+      const d = P.segSame[j] ? sDense[k]! : qdot(P.ES, j);
       if (d > ud[k]!) ud[k] = d;
     }
     chans.set("bm25_seg", { w: p.w_bm25_seg, ranks: topranks(ub) });

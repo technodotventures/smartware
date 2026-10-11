@@ -68,3 +68,20 @@ test("secret scan labels credentials", async () => {
   const r = await s.recall({ query: "deploy token" }, A);
   assert.ok(!r.items.some((i) => i.text.includes("ghp_")));
 });
+
+test("preload warms tenants in the background and a concurrent write is never lost", async () => {
+  const path = join(mkdtempSync(join(tmpdir(), "orp-core-")), "orp.db");
+  const enc = new HashingEncoder();
+  const a = new Service(enc, { store: new SqliteStore(path) });
+  const B = new Principal("bob", [], "beta");
+  await a.remember({ memories: Array.from({ length: 1200 }, (_, i) => ({ content: `note ${i} about the roadmap`, thread: `t${i % 7}`, seq: i })) }, A);
+  await a.remember({ memories: [{ content: "beta tenant note" }] }, B);
+  a.close();
+  const s = new Service(enc, { store: new SqliteStore(path) });
+  const warming = s.preload();
+  await s.remember({ memories: [{ content: "written during preload: the zeppelin launch moved to May" }] }, A); // interleaves
+  assert.ok((await warming) >= 1);
+  const r = await s.recall({ query: "when is the zeppelin launch" }, A);
+  assert.ok(r.items.some((i) => i.text.includes("moved to May")));
+  s.close();
+});

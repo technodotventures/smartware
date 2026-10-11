@@ -36,18 +36,40 @@ export class HashingEncoder implements Encoder {
     this.name = `hashing-${dim}`;
   }
 
+  // token -> signed bucket (bucket + 1, negated for -1). Vocabulary-bounded, so it stays small; it removes repeated
+  // BLAKE2b work when the index is rebuilt or the same words recur.
+  private tokCache = new Map<string, number>();
+
+  private bucket(tok: string): number {
+    let b = this.tokCache.get(tok);
+    if (b === undefined) {
+      const d = blake2b(enc.encode(tok), 8);
+      let idx: number;
+      if ((this.dim & (this.dim - 1)) === 0 && this.dim <= 1 << 24) {
+        // power-of-two dim: h % dim is the low bits of the big-endian integer
+        idx = ((d[4]! << 24) | (d[5]! << 16) | (d[6]! << 8) | d[7]!) >>> 0;
+        idx = idx & (this.dim - 1);
+      } else {
+        let h = 0n;
+        for (const x of d) h = (h << 8n) | BigInt(x); // int(hexdigest, 16): big-endian
+        idx = Number(h % BigInt(this.dim));
+      }
+      b = (d[0]! & 0x80) ? idx + 1 : -(idx + 1);
+      if (this.tokCache.size > 2_000_000) this.tokCache.clear();
+      this.tokCache.set(tok, b);
+    }
+    return b;
+  }
+
   embed(text: string): Float32Array {
     const ws = words(text);
     const v = new Float32Array(this.dim);
-    const toks = [...ws];
-    for (let i = 0; i + 1 < ws.length; i++) toks.push(ws[i] + "_" + ws[i + 1]);
-    const dim = BigInt(this.dim);
-    for (const tok of toks) {
-      const d = blake2b(enc.encode(tok), 8);
-      let h = 0n;
-      for (const b of d) h = (h << 8n) | BigInt(b); // int(hexdigest, 16): big-endian
-      v[Number(h % dim)]! += (d[0]! & 0x80) ? 1.0 : -1.0;
-    }
+    const add = (tok: string) => {
+      const b = this.bucket(tok);
+      if (b > 0) v[b - 1]! += 1.0; else v[-b - 1]! -= 1.0;
+    };
+    for (const w of ws) add(w);
+    for (let i = 0; i + 1 < ws.length; i++) add(ws[i] + "_" + ws[i + 1]);
     let ss = 0;
     for (const x of v) ss += x * x;
     const n = f(Math.sqrt(f(ss)));
@@ -68,6 +90,19 @@ export class SifEncoder implements Encoder {
   private pc: Float32Array;
   private a: number;
   private cache = new Map<string, Float32Array>();
+  private wrows: Array<Float32Array | undefined> = [];
+
+  private weighted(i: number): Float32Array {
+    let w = this.wrows[i];
+    if (!w) {
+      const D = this.dim, o = i * D;
+      const wt = f(this.a / f(this.a + this.pw[i]!));
+      w = new Float32Array(D);
+      for (let j = 0; j < D; j++) w[j] = this.vecs[o + j]! * wt; // stored as float32: f(vec * wt)
+      this.wrows[i] = w;
+    }
+    return w;
+  }
 
   constructor(path: string) {
     const data = readFileSync(path);
@@ -100,11 +135,11 @@ export class SifEncoder implements Encoder {
     }
     let r = new Float32Array(D);
     if (ids.length) {
-      // (vecs[ids] * wts[:, None]).sum(0) / len(ids): float32, rows accumulated in order
+      // (vecs[ids] * wts[:, None]).sum(0) / len(ids): float32, rows accumulated in order. The weighted rows
+      // f(vecs[i] * wt_i) depend only on the word, so they are computed once per word and reused.
       for (const i of ids) {
-        const wt = f(this.a / f(this.a + this.pw[i]!));
-        const o = i * D;
-        for (let j = 0; j < D; j++) r[j] = r[j]! + f(this.vecs[o + j]! * wt);
+        const w = this.weighted(i);
+        for (let j = 0; j < D; j++) r[j] = r[j]! + w[j]!;
       }
       for (let j = 0; j < D; j++) r[j] = r[j]! / ids.length;
       let d = 0;
@@ -118,7 +153,10 @@ export class SifEncoder implements Encoder {
     } else {
       r = new Float32Array(D);
     }
-    if (this.cache.size < 500_000) this.cache.set(text, r);
+    // a small bounded cache: indexes keep their own copy of every vector, so this only saves recomputation of
+    // recently seen texts (queries, segment windows shared by neighbouring units)
+    if (this.cache.size >= 20_000) this.cache.delete(this.cache.keys().next().value!);
+    this.cache.set(text, r);
     return r;
   }
 
