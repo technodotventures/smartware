@@ -1,0 +1,35 @@
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ["22", "24"]
+        python: ["3.11", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+        with: { persist-credentials: false }
+      - uses: actions/setup-node@v4
+        with: { node-version: "${{ matrix.node }}" }
+      - uses: actions/setup-python@v5
+        with: { python-version: "${{ matrix.python }}" }
+      # explicit flag for this install, never repo-level config (the project has no native modules to build)
+      - run: npm ci --ignore-scripts --no-audit --no-fund || npm install --ignore-scripts --no-audit --no-fund
+      - run: pip install numpy scipy jsonschema
+      - name: release gate (lifecycle scripts, dependency allowlist, payload signatures, credentials)
+        run: node tools/release-check.mjs
+      - run: npm run build
+      - run: node tools/gen-schemas.mjs --check
+      - run: npm test
+      - name: oracle suite, oracle suite against the TypeScript engine, Python client
+        run: npm run test:py
+      - name: conformance doctor reaches L4
+        run: node packages/server/bin/orp.js doctor --self

@@ -1,0 +1,5 @@
+#!/bin/sh
+# Pre-push gate: refuse to push if any payload signature, over-long line, lifecycle script or credential is present.
+# Enable once per clone:  git config core.hooksPath tools/hooks
+# Agent and codex branches are where every infected commit arrived in 2026, so this runs on every push.
+exec node "$(git rev-parse --show-toplevel)/tools/release-check.mjs"

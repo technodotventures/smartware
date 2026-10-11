@@ -1,0 +1,31 @@
+# Publishes from tags only, through npm trusted publishing with provenance (no long-lived npm token anywhere).
+# Configure each package on npmjs.com: Trusted publisher = this repository, workflow release.yml, environment release.
+# The "release" environment requires a reviewer, so a tag alone cannot publish.
+name: release
+on:
+  push:
+    tags: ["v*"]
+permissions:
+  contents: read
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with: { persist-credentials: false }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", registry-url: "https://registry.npmjs.org" }
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: node tools/release-check.mjs
+      - run: npm run build && npm test
+      - name: publish every package with provenance
+        run: |
+          for p in packages/core packages/server packages/client packages/connectors packages/adapters/*; do
+            (cd "$p" && npm publish --provenance --access public --ignore-scripts)
+          done
+      - uses: actions/upload-artifact@v4
+        with: { name: sbom-and-checksums, path: dist-release/ }
