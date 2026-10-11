@@ -1983,6 +1983,49 @@
     }
    }
   },
+  "/v1/{tenant}/whoami": {
+   "parameters": [
+    {
+     "name": "tenant",
+     "in": "path",
+     "required": true,
+     "schema": {
+      "type": "string"
+     },
+     "description": "must equal the token's tenant"
+    }
+   ],
+   "get": {
+    "summary": "The principal this token resolves to (extension x-whoami)",
+    "security": [
+     {
+      "bearer": []
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Generic"
+        }
+       }
+      }
+     },
+     "default": {
+      "description": "error",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/Error"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
   "/v1/{tenant}/remember": {
    "parameters": [
     {

@@ -12,7 +12,7 @@ import { Authenticator, Gateway, JwtVerifier, KeyStore, Log } from "../dist/inde
 
 const dir = mkdtempSync(join(tmpdir(), "orp-srv-"));
 const keysPath = join(dir, "keys.json");
-let gw, base, svc, tokA, tokB, tokEve, tokAdmin, jwk, privKey;
+let gw, base, svc, tokA, tokB, tokEve, tokAdmin, tokStar, jwk, privKey;
 const ISS = "https://idp.example.com";
 
 function jwt(claims, { kid = "k1", alg = "RS256", key = privKey } = {}) {
@@ -28,6 +28,7 @@ before(async () => {
   tokB = ks.add({ id: "bob", tenant: "acme", groups: ["eng"] });
   tokEve = ks.add({ id: "eve", tenant: "other", groups: ["sales"] });
   tokAdmin = ks.add({ id: "root", tenant: "acme", groups: ["admin", "auditor"] });
+  tokStar = ks.add({ id: "ops", tenant: "acme", groups: ["*"] });
   const { publicKey, privateKey } = generateKeyPairSync("rsa", { modulusLength: 2048 });
   privKey = privateKey;
   jwk = { ...publicKey.export({ format: "jwk" }), kid: "k1", use: "sig", alg: "RS256" };
@@ -227,4 +228,23 @@ test("orp doctor --self reaches L4", async () => {
   const r = await selfTest({ memory: true });
   assert.deepEqual(r.checks.filter((c) => c.status !== "pass").map((c) => c.id), []);
   assert.equal(r.level, "L4");
+});
+
+test("orp doctor --principals: removal equivalence on real principals", async () => {
+  await call("POST", "/v1/acme/remember", tokA, { memories: [
+    { content: "Q4 pipeline review: Acme deal at risk over pricing", readers: ["group:sales"], thread: "int-1", seq: 1 },
+    { content: "Engineering capacity is tight for the Acme integration", readers: ["group:eng"], thread: "int-1", seq: 2 },
+    { content: "All-hands: everyone should read the Acme account plan", readers: null, thread: "int-2", seq: 1 }] });
+  const pfile = join(dir, "principals.json");
+  writeFileSync(pfile, JSON.stringify({ tenant: "acme", queries: ["what is happening with Acme?", "pricing risk", "integration capacity"],
+    principals: [{ name: "alice", token_env: "T_ALICE", id: "alice", groups: ["sales"] }, { name: "bob", token_env: "T_BOB", id: "bob", groups: ["eng"] }] }));
+  process.env.T_ALICE = tokA; process.env.T_BOB = tokB; process.env.T_ADMIN = tokStar;
+  const { doctor } = await import("../dist/doctor.js");
+  const lines = [];
+  const orig = process.stdout.write;
+  process.stdout.write = function (s) { if (String(s).includes("PASS") || String(s).includes("FAIL") || String(s).includes("equivalence")) { lines.push(String(s)); return true; } return orig.apply(this, arguments); };
+  let code;
+  try { code = await doctor([base], { principals: pfile, admin: "T_ADMIN", "as-of": "2030-01-01T00:00:00Z" }); } finally { process.stdout.write = orig; }
+  assert.equal(code, 0, lines.join(""));
+  assert.equal(lines.filter((l) => l.includes("PASS")).length, 6);
 });

@@ -26,6 +26,7 @@ const openapi = {
     schemas: { ...schema.SCHEMAS, Generic: generic } },
   paths: {
     "/v1/{tenant}/capabilities": { parameters: [tenant], ...p("Engine capabilities", "get", null, "Generic") },
+    "/v1/{tenant}/whoami": { parameters: [tenant], ...p("The principal this token resolves to (extension x-whoami)", "get", null, "Generic") },
     "/v1/{tenant}/remember": { parameters: [tenant], ...p("Write memories", "post", "RememberRequest", "RememberResponse", { parameters: [{ name: "If-Match", in: "header", schema: { type: "string" } }] }) },
     "/v1/{tenant}/recall": { parameters: [tenant], ...p("Recall a context pack", "post", "RecallRequest", "ContextPack") },
     "/v1/{tenant}/profile": { parameters: [tenant], ...p("Always-loaded context within a budget", "post", "ProfileRequest", "Generic") },

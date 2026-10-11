@@ -227,6 +227,9 @@ export class Gateway {
       return parseInt(q[k]!, 10);
     };
     if (m === "GET" && verb === "capabilities" && parts.length === 3) return ok(await s.capabilities(pr));
+    if (m === "GET" && verb === "whoami" && parts.length === 3) { // extension x-whoami: who the token resolves to
+      return ok({ id: pr.id, tenant: pr.tenant, groups: [...pr.groups].sort(), tokens: [...pr.tokens()].sort() });
+    }
     if (m === "POST" && parts.length === 3 && ["recall", "remember", "forget", "feedback", "reflect", "profile", "link", "import"].includes(verb)) {
       const body = await this.body(req, verb === "import" ? 64 << 20 : this.opt.maxBody ?? 1 << 20);
       if (req.headers["if-match"] !== undefined && verb === "remember" && body.if_version === undefined) {

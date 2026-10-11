@@ -491,7 +491,9 @@ async function integration(url: string, f: Record<string, any>): Promise<number>
   if (caps.encoder && caps.encoder !== enc.name) { process.stderr.write(`server encoder is ${caps.encoder}; pass --encoder for it (got ${enc.name})\n`); return 2; }
   const { params } = chooseRanker(caps.ranker?.name ?? "auto", enc.name);
   const exp = await get(adminTok, `/v1/${spec.tenant}/export`);
-  const all = String(exp["memories.jsonl"]).split("\n").filter(Boolean).map((l) => JSON.parse(l));
+  // rebuild in write order (ties between equal scores break by position, so order matters)
+  const all = String(exp["memories.jsonl"]).split("\n").filter(Boolean).map((l) => JSON.parse(l))
+    .sort((a, b) => (a.meta?._wseq ?? 0) - (b.meta?._wseq ?? 0) || String(a.observed_at).localeCompare(String(b.observed_at)));
   let fails = 0;
   for (const p of spec.principals) {
     const tok = process.env[p.token_env];
@@ -499,6 +501,19 @@ async function integration(url: string, f: Record<string, any>): Promise<number>
     const pr = new Principal(p.id, p.groups, spec.tenant);
     const clean = new Engine(enc, params);
     const visible = all.filter((d) => clean.readable(memoryFromJson(d), pr, ["secret"]));
+    // the export must hold everything this principal can see, or the comparison is meaningless
+    let seen = 0, cursor: number | null = 0;
+    while (cursor !== null) {
+      const page: any = await get(tok, `/v1/${spec.tenant}/memories?limit=1000&cursor=${cursor}`);
+      if (!Array.isArray(page.memories)) break; // binding without x-list: skip the coverage check
+      seen += page.memories.length;
+      cursor = page.cursor;
+    }
+    const visibleNow = visible.filter((d) => d.status === "active" || d.status === "superseded").length;
+    if (seen > visibleNow) {
+      process.stderr.write(`the admin export holds fewer records than ${p.name} can read (${visibleNow} < ${seen}): use a token in the "*" group\n`);
+      return 2;
+    }
     clean.remember(visible.map((d) => { const m = memoryFromJson(d); m.id = d.id.includes("~") || d.id.startsWith("mem_") ? d.id : `${d.id}~${spec.tenant}`; return m; }), pr, true);
     for (const q of spec.queries) {
       const server = await get(tok, `/v1/${spec.tenant}/recall`, { query: q, as_of: asOf, budget: { tokens: 2000 } });
