@@ -148,13 +148,18 @@ const HELP = `orp ${VERSION}: the ORP memory kit
   orp serve --http <port> [--host 127.0.0.1] [--keys <keys.json>] [--oidc-issuer <url> --oidc-audience <aud> --jwks <url|file>]
             [--public-url <url>] [--allowed-origin <origin>] [--rate rps:burst] [--dev]
             [--membership <connector-membership.json> [--membership-connector slack] [--membership-tenant <t>]]
+            [--no-preload] [--log-level debug|info|warn|error]   (metrics at /metrics with ORP_METRICS_TOKEN)
       ORP HTTP binding at /v1/<tenant>/... and MCP Streamable HTTP at /mcp, on one port.
 
   orp keys add --keys <keys.json> --id <principal> --tenant <tenant> [--groups a,b] [--write-scope <prefix>] [--label <name>]
   orp keys list|revoke|migrate --keys <keys.json> [--id <principal>]
   orp backup [--store <db>] --out <file>
-  orp doctor <url> --token-env <ENV> [--level L1..L4] [--principals <file.json>]
-  orp eval --data <questions.jsonl> [--reader ...]          (see docs/EVAL.md)
+  orp doctor --self                                   run every conformance check against a scratch in-process server
+  orp doctor <url> --tenant <t> --token alice=ENV_A --token bob=ENV_B --token admin=ENV_C --token auditor=ENV_D
+             [--token other=ENV_E@<other-tenant>] [--only L1,L2,...|<check ids>] [--json report.json]
+  orp doctor <url> --principals <principals.json> --admin <ENV> [--as-of <iso>] [--encoder <spec>]
+  orp eval --data <set.orpbench.jsonl> [--systems orp,bm25,dense] [--encoder ...] [--reader openai:<model>@<url>|anthropic:<model>]
+           [--reader-key-env ORP_EVAL_KEY] [--judge ...] [--qa-budget 2000] [--limit N] [--out <dir>]     (docs/EVAL.md)
 `;
 
 export async function main(argv: string[]) {
