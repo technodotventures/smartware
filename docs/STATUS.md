@@ -42,5 +42,7 @@ the conformance suite and both fuzzers on Postgres).
   once on a clean machine and commit it; CI then uses `npm ci`.
 - **Release day**: npm trusted publishers expire if unused for 2 days, so they are added on release day, stage-only,
   following "Releasing" in docs/OPERATIONS.md. New package names are claimed first with a local staged publish.
+- **npm org 2FA enforcement**: off for now, because one member does not have 2FA yet and turning enforcement on
+  would remove them. Both existing packages already refuse publishes without 2FA.
 - **LongMemEval v2**: not converted yet; its text-only questions can be converted to the eval format once the files
   are here.

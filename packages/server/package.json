@@ -3,6 +3,9 @@
   "version": "2.0.0",
   "description": "smartware: one binary for Smartware memory. MCP (stdio and Streamable HTTP with OAuth), the HTTP binding, doctor and eval.",
   "license": "Apache-2.0",
+  "repository": { "type": "git", "url": "git+https://github.com/technodotventures/smartware.git", "directory": "packages/server" },
+  "homepage": "https://smartware.software",
+  "bugs": { "url": "https://github.com/technodotventures/smartware/issues" },
   "type": "module",
   "bin": {
     "smartware": "bin/smartware.js"

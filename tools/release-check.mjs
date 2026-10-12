@@ -35,6 +35,7 @@ for (const dir of pkgDirs) {
   for (const d of Object.keys(p.devDependencies ?? {})) if (!DEV_ALLOW.has(d)) fail(`${dir}: dev dependency ${d} not in the allowlist`);
   if (!Array.isArray(p.files)) fail(`${dir}: no "files" allowlist`);
   if (p.license !== "Apache-2.0") fail(`${dir}: licence is ${p.license}`);
+  if (p.repository?.url !== "git+https://github.com/technodotventures/smartware.git" || p.repository?.directory !== dir) fail(`${dir}: repository must point at technodotventures/smartware with directory "${dir}" (npm provenance checks it)`);
   // the files npm would publish: package.json, README, LICENSE, plus the "files" allowlist
   const files = [];
   const walk = (rel) => {
