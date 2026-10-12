@@ -19,6 +19,8 @@ jobs:
         with: { persist-credentials: false }
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with: { node-version: "24", registry-url: "https://registry.npmjs.org" }
+      - name: npm 11.6 (trusted publishing needs 11.5.1 or later)
+        run: npm install --global --ignore-scripts npm@11.6.0 && npm --version
       - run: npm ci --ignore-scripts --no-audit --no-fund
       - run: node tools/release-check.mjs
       - run: npm run build && npm test
