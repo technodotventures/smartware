@@ -12,7 +12,7 @@ Report vulnerabilities privately to security@techno.ventures (placeholder addres
 
 ## Supply chain
 - No npm lifecycle scripts in any package, no third-party runtime dependencies, SQLite from the Node runtime (nothing compiles on install). `tools/release-check.mjs` enforces this, scans for the 2026 payload signatures and over-long lines, and writes an SBOM and checksums. CI runs it on every push; `tools/hooks/pre-push` runs it before every push.
-- Releases publish only from tags through npm trusted publishing with provenance, behind a reviewed `release` environment. There are no long-lived npm tokens.
+- Releases are staged only from tags through npm trusted publishing with provenance, behind a reviewed `release` environment, and each staged version stays private until a maintainer approves it with a security key. There are no long-lived npm tokens.
 - Install a pinned version and check its published checksum: `npm install smartware@2.0.0 --ignore-scripts`, then compare against `SHA256SUMS` from the release.
 
 ## Repository settings checklist (one-off, by an owner)

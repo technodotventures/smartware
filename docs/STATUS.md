@@ -40,7 +40,7 @@ the conformance suite and both fuzzers on Postgres).
   each adapter README says what to check.
 - **Lockfile**: `package-lock.json` could not be generated here (registry blocked). Run `npm install --ignore-scripts`
   once on a clean machine and commit it; CI then uses `npm ci`.
-- **Registry settings only you can make**: trusted publishing for each package on npmjs.com, the `release`
-  environment with a required reviewer, secret scanning and push protection on the repository.
+- **Release day**: npm trusted publishers expire if unused for 2 days, so they are added on release day, stage-only,
+  following "Releasing" in docs/OPERATIONS.md. New package names are claimed first with a local staged publish.
 - **LongMemEval v2**: not converted yet; its text-only questions can be converted to the eval format once the files
   are here.

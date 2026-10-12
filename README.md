@@ -103,7 +103,7 @@ data. Moving out: `smartware export --tenant <t> --out acme.smartware` writes a 
   reaches L4) and catches deliberate violations (global statistics, ignored parameters).
 - **Performance**: [results/PERFORMANCE.md](results/PERFORMANCE.md).
 - **Security and supply chain**: [SECURITY.md](SECURITY.md). No lifecycle scripts, no third-party runtime dependencies,
-  release gate in CI and as a pre-push hook, tag-only trusted publishing with provenance.
+  release gate in CI and as a pre-push hook, tag-only staged publishing with provenance, approved by a maintainer with 2FA.
 
 ## Develop
 

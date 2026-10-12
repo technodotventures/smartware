@@ -95,3 +95,27 @@ See [results/PERFORMANCE.md](../results/PERFORMANCE.md). Up to about 10,000 unit
 `Authorization: Token <smartware key>`. `user_id`, `agent_id` and `run_id` are scope, never identity: a key cannot read
 another key's memories by naming their user. Fact extraction (`infer`) is not supported and is reported in
 `degraded`.
+
+## Releasing
+
+Releases go out from a `v*` tag through `.github/workflows/release.yml`, with two human gates: a reviewer approves
+the `release` environment on GitHub, then a maintainer approves each staged version on npmjs.com with a security key.
+CI can only stage (npm "staged publishing"); it cannot make a version public by itself, and there is no npm token
+anywhere.
+
+Do these on the same day, because a new npm trusted publisher expires if it is not used within 2 days:
+
+1. Make sure `main` is green, including the committed `package-lock.json`.
+2. New package names only (the first release of each `@technodotventures/smartware-*` name): the name has to exist
+   before a trusted publisher can be attached. From a clean checkout, logged in with your own npm account, run
+   `npm stage publish <tarball> --access public` once per new package. This claims the name with a public
+   `0.0.0-stage` placeholder. Then reject that locally built staged version (`npm stage list`, then reject it on
+   npmjs.com under Staged Packages) so the real one comes from CI with provenance.
+3. For each package on npmjs.com, Settings > Trusted publishing: organisation `technodotventures`, repository
+   `smartware`, workflow `release.yml`, environment `release`. Leave "Allow npm publish" and "Allow npm dist-tag"
+   unticked.
+4. Push the tag (`git tag v2.0.0 && git push origin v2.0.0`) and approve the `release` environment in GitHub Actions.
+5. On npmjs.com, open each package's Staged Packages tab, check the version and provenance, and approve it with your
+   key (or `npm stage approve <stage-id>`).
+6. Check: `npm view smartware@2.0.0 dist.integrity` matches `INTEGRITY` in the workflow artefact, and
+   `npm audit signatures` passes in a project that installs it.

@@ -1,6 +1,8 @@
-# Publishes from tags only, through npm trusted publishing with provenance (no long-lived npm token anywhere).
-# Configure each package on npmjs.com: Trusted publisher = this repository, workflow release.yml, environment release.
-# The "release" environment requires a reviewer, so a tag alone cannot publish.
+# Stages releases from tags only, through npm trusted publishing with provenance (no long-lived npm token anywhere).
+# Configure each package on npmjs.com: Trusted publisher = this repository, workflow release.yml, environment release,
+# with "Allow npm publish" left unticked (stage-only).
+# Two human gates: the "release" environment needs a reviewer before this job runs, and each staged version
+# stays private until a maintainer approves it with 2FA (npmjs.com > package > Staged Packages, or `npm stage approve`).
 name: release
 on:
   push:
@@ -19,8 +21,8 @@ jobs:
         with: { persist-credentials: false }
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with: { node-version: "24", registry-url: "https://registry.npmjs.org" }
-      - name: npm 11.6 (trusted publishing needs 11.5.1 or later)
-        run: npm install --global --ignore-scripts npm@11.6.0 && npm --version
+      - name: npm 11.19 (staged publishing needs 11.15.0 or later)
+        run: npm install --global --ignore-scripts npm@11.19.1 && npm --version
       - run: npm ci --ignore-scripts --no-audit --no-fund
       - run: node tools/release-check.mjs
       - run: npm run build && npm test
@@ -34,8 +36,8 @@ jobs:
           node -e 'const fs=require("fs"),c=require("crypto");const d="dist-release/tarballs";
             fs.writeFileSync("dist-release/INTEGRITY",fs.readdirSync(d).sort().map(f=>"sha512-"+c.createHash("sha512").update(fs.readFileSync(d+"/"+f)).digest("base64")+"  "+f).join("\n")+"\n")'
           cat dist-release/INTEGRITY
-      - name: publish exactly those tarballs, with provenance
+      - name: stage exactly those tarballs, with provenance (a maintainer approves each one with 2FA)
         run: |
-          for t in dist-release/tarballs/*.tgz; do npm publish "$t" --provenance --access public --ignore-scripts; done
+          for t in dist-release/tarballs/*.tgz; do npm stage publish "$t" --provenance --access public --ignore-scripts; done
       - uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
         with: { name: sbom-and-checksums, path: dist-release/ }
