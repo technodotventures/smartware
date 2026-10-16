@@ -847,17 +847,17 @@ prompt = pack.<span class="f">render</span>()  <span class="c"># drop into conte
     var C={night:'#071316',ink:'#0E2125',deep:'#1D3135',deep2:'#2A4146',haze:'#8DAAB0',frost:'#F0F4F5',sig:'#FA502E',tint:'#FDB4A5',mint:'#9ED9C7',grid:'#0F2226'};
     var MEM=[
       {src:'SLACK',t:'Maya: "I moved to Lisbon"'},
-      {src:'CRM',t:'Acme upgraded to Pro'},
-      {src:'HR DM',t:'Salary review notes',lock:1},
-      {src:'DOCS',t:'Q3 roadmap v4'},
-      {src:'TOOL',t:'deploy #482 passed'},
-      {src:'EMAIL',t:'Invoice terms: net 30'}
+      {src:'SALESFORCE',t:'Acme upgraded to Pro'},
+      {src:'SLACK DM',t:'HR: salary review',lock:1},
+      {src:'NOTION',t:'Q3 roadmap v4'},
+      {src:'GITHUB',t:'deploy #482 passed'},
+      {src:'GMAIL',t:'Invoice terms: net 30'}
     ];
     var BACK=['AGENT B · CURSOR','APP C · SUPPORT DESK','APP D · YOUR SAAS'];
     var OUT=[
       {pill:'CURRENT',t:'Maya lives in Lisbon',m:'slack · 12 May'},
       {pill:'SUPERSEDED',t:'Maya lived in Paris',m:'valid until Apr',old:1},
-      {pill:'CURRENT',t:'Acme is on the Pro plan',m:'crm · today'}
+      {pill:'CURRENT',t:'Acme is on the Pro plan',m:'salesforce · today'}
     ];
     // one 10 s loop, no dead air: the mark and the orbit never stop
     var LOOP=10000, P1=3600, P2=5000, FADE=9300;
@@ -869,7 +869,7 @@ prompt = pack.<span class="f">render</span>()  <span class="c"># drop into conte
       if(m==='wide') return {W:1200,H:500,fs:1,
         steps:[{x:48,y:34,a:'start'},{x:650,y:34,a:'middle'},{x:820,y:34,a:'start'}],
         card:{x:48,y:60,w:400,h:340}, icon:{x:68,y:80,s:40}, lab:{x:122,y:94}, ttl:{x:122,y:114,s:16},
-        rows:{x:68,y:140,w:340,h:34,g:42,tag:12,tx:80,s:13,ts:10.5},
+        rows:{x:68,y:140,w:340,h:34,g:42,tag:12,tx:102,s:13,ts:10.5},
         back:{dx:16,dy:22,s:10.5},
         core:{x:650,y:240,r:72,ring:90}, logs:{y:80,g:22,s:12}, cyc:{s:10.5},
         pan:{x:820,y:92,w:332,h:292}, pt:{x:840,y:128,s:15}, pq:{y:152,s:11.5},
@@ -880,7 +880,7 @@ prompt = pack.<span class="f">render</span>()  <span class="c"># drop into conte
       return {W:560,H:1330,fs:1.3,
         steps:[{x:24,y:40,a:'start'},{x:24,y:600,a:'start'},{x:24,y:968,a:'start'}],
         card:{x:24,y:64,w:440,h:404}, icon:{x:42,y:84,s:48}, lab:{x:104,y:102}, ttl:{x:104,y:128,s:20},
-        rows:{x:42,y:152,w:380,h:42,g:50,tag:14,tx:100,s:16.5,ts:13},
+        rows:{x:42,y:152,w:380,h:42,g:50,tag:14,tx:122,s:16.5,ts:13},
         back:{dx:16,dy:24,s:13},
         core:{x:280,y:714,r:72,ring:90}, logs:{y:872,g:26,s:14.5}, cyc:{s:13},
         pan:{x:24,y:992,w:512,h:320}, pt:{x:44,y:1032,s:19}, pq:{y:1060,s:14},
