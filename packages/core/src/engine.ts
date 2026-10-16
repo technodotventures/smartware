@@ -11,12 +11,14 @@
 import { createHmac, randomBytes } from "node:crypto";
 import { BM25, type Mask } from "./bm25.js";
 import type { Encoder } from "./encoders.js";
-import { dot32, dot32Sparse, f, mean32, nonZero, pairwiseSum32 } from "./f32.js";
+import { dot32, dot32Sparse4, f, mean32, nonZero, nonZero4 } from "./f32.js";
 import { claimKey, dedupKey, idemDedupKey, type ContextItem, type ContextPack, type Memory, Principal,
   type RecallRequest, SYSTEM } from "./model.js";
 import { FEATURES, type GbdtModel, type Params, defaultParams } from "./params.js";
-import { countTokens, counter, sentences, STOPWORDS, terms } from "./text.js";
+import { countTokens, counter, sentences, STOPWORDS, terms, wordsAtMost } from "./text.js";
 import { epochSeconds, isoDate, isoformat, MIN_TIME, nowMicros, parseTime, strftime, type Micros } from "./time.js";
+import { PairDots } from "./pairdots.js";
+import { SparseCols } from "./sparse.js";
 import { parseQuery, resolveRelative, type TimeIntent } from "./timeparse.js";
 
 export const SENSITIVE = ["secret", "pii", "health", "legal"];
@@ -58,7 +60,10 @@ class Partition {
   /** segment j's text equals its unit's embedded text, so its vector (and score) is the unit's: no copy stored */
   segSame: boolean[] = [];
   E: Float32Array;
+  /** segment vectors, dense rows (dense encoders) */
   ES: Float32Array;
+  /** segment vectors, column-major non-zeros (sparse encoders such as feature hashing); ES stays empty then */
+  seg: SparseCols | null;
   threadIndex = new Map<string, number>();
   threadUnits: number[][] = [];
   threadNamed: boolean[] = [];
@@ -73,13 +78,14 @@ class Partition {
   hasPlace: boolean[] = [];
   isQ: boolean[] = [];
   actorL: string[] = [];
-  /** float32 pairwise dot products between units, keyed a*2^26+b: vectors never change once added, so the
-   * dense-window channel's neighbour terms are computed once per pair instead of on every recall. */
-  pairDot = new Map<number, number>();
+  /** float32 pairwise dot products between units: vectors never change once added, so the dense-window channel's
+   * neighbour terms are computed once per pair instead of on every recall. */
+  pairDot = new PairDots();
 
-  constructor(readonly tenant: string, readonly dim: number) {
+  constructor(readonly tenant: string, readonly dim: number, sparse = false) {
     this.E = new Float32Array(dim * 64);
-    this.ES = new Float32Array(dim * 64);
+    this.seg = sparse ? new SparseCols(dim) : null;
+    this.ES = new Float32Array(sparse ? 0 : dim * 64);
   }
 
   get n(): number {
@@ -115,8 +121,11 @@ class Partition {
       this.bmSeg.add(s);
       const same = s === unitEmb;
       this.segSame.push(same);
-      this.ES = this.grow(this.ES, j + 1);
-      if (!same) this.ES.set(enc.embed(s), j * this.dim);
+      if (this.seg) this.seg.add(same ? null : enc.embed(s));
+      else {
+        this.ES = this.grow(this.ES, j + 1);
+        if (!same) this.ES.set(enc.embed(s), j * this.dim);
+      }
     }
     // thread order: (seq, observed_at), stable, so a new unit goes after every unit with an equal key
     let ti = this.threadIndex.get(m.thread);
@@ -569,7 +578,7 @@ export class Engine {
   partition(tenant: string): Partition {
     let part = this.parts.get(tenant);
     if (!part || this.dirtyParts.has(tenant)) {
-      part = new Partition(tenant, this.enc.dim);
+      part = new Partition(tenant, this.enc.dim, Boolean(this.enc.sparse));
       for (const i of this.order.get(tenant) ?? []) {
         const m = this.mem.get(i);
         if (m) part.add(m, this.enc, this.p.seg_sentences);
@@ -586,7 +595,7 @@ export class Engine {
     if (this.parts.has(tenant) && !this.dirtyParts.has(tenant)) return true;
     const before = `${this.tmut.get(tenant) ?? 0}|${this.epoch}|${this.gen.get(tenant) ?? 0}`;
     const ids = [...(this.order.get(tenant) ?? [])];
-    const part = new Partition(tenant, this.enc.dim);
+    const part = new Partition(tenant, this.enc.dim, Boolean(this.enc.sparse));
     for (let i = 0; i < ids.length; i += chunk) {
       for (const id of ids.slice(i, i + chunk)) {
         const m = this.mem.get(id);
@@ -752,8 +761,7 @@ export class Engine {
     const topranks = (score: ArrayLike<number>, depth = p.depth): Map<number, number> => {
       let mx = -Infinity;
       for (const k of adm) if (score[k]! > mx) mx = score[k]!;
-      const cands = mx > 0 ? adm.filter((k) => score[k]! > 0) : adm;
-      const order = topK(cands, score, depth);
+      const order = topK(adm, score, depth, mx > 0);
       const out = new Map<number, number>();
       order.forEach((k, r) => out.set(k, r));
       return out;
@@ -767,23 +775,14 @@ export class Engine {
     for (const k of adm) sWin[k] = f(sBm[k]! + f(0.5 * f(nb(sBm, pm, k) + nb(sBm, nm, k))));
     chans.set("bm25_win", { w: p.w_bm25_win, ranks: topranks(sWin) });
     const nz = nonZero(qvec);
-    const qdot = (M: Float32Array, row: number) => (nz ? dot32Sparse(M, row * D, qvec, nz) : dot32(M, row * D, qvec, 0, D));
+    const nz4 = nonZero4(qvec);
+    const qdot = (M: Float32Array, row: number) => (nz4 ? dot32Sparse4(M, row * D, qvec, nz4) : dot32(M, row * D, qvec, 0, D));
     const sDense = new Float32Array(n);
     for (const k of adm) sDense[k] = qdot(P.E, k);
     const tmp = new Float32Array(n);
     for (const k of adm) tmp[k] = f(sDense[k]! + 1.0);
     chans.set("dense", { w: p.w_dense, ranks: topranks(tmp) });
-    const prod = new Float32Array(D);
-    const rowDot = (a: number, b: number) => {
-      const key = a * 67108864 + b;
-      let v = P.pairDot.get(key);
-      if (v === undefined) {
-        for (let j = 0; j < D; j++) prod[j] = P.E[a * D + j]! * P.E[b * D + j]!;
-        v = pairwiseSum32(prod, 0, D);
-        if (P.pairDot.size < 4_000_000) P.pairDot.set(key, v);
-      }
-      return v;
-    };
+    const rowDot = (a: number, b: number) => P.pairDot.get(P.E, D, a, b);
     const sWinD = new Float64Array(n);
     for (const k of adm) {
       const hp = pm[k]! >= 0 ? 1 : 0, hn = nm[k]! >= 0 ? 1 : 0;
@@ -802,12 +801,13 @@ export class Engine {
     const segScore = P.bmSeg.score(q, segmask);
     const ub = new Float64Array(n);
     const ud = new Float64Array(n).fill(-1);
+    const segDots = P.seg ? P.seg.dotAll(qvec, nz) : null;
     for (let j = 0; j < P.segUnit.length; j++) {
       const k = P.segUnit[j]!;
       if (!mask[k]) continue;
       const b = segmask[j] ? segScore[j]! : 0;
       if (b > ub[k]!) ub[k] = b;
-      const d = P.segSame[j] ? sDense[k]! : qdot(P.ES, j);
+      const d = P.segSame[j] ? sDense[k]! : segDots ? segDots[j]! : qdot(P.ES, j);
       if (d > ud[k]!) ud[k] = d;
     }
     chans.set("bm25_seg", { w: p.w_bm25_seg, ranks: topranks(ub) });
@@ -818,16 +818,30 @@ export class Engine {
     const T = P.threadUnits.length;
     const thB = new Float64Array(T), thD = new Float64Array(T).fill(-1), first = new Array<number>(T).fill(n);
     const lt: number[] = [];
+    let dbuf = new Float64Array(64);
     for (let t = 0; t < T; t++) {
-      const ks = P.threadUnits[t]!.filter((k) => mask[k]);
-      if (!ks.length) continue;
+      const tu = P.threadUnits[t]!;
+      if (tu.length > dbuf.length) dbuf = new Float64Array(tu.length * 2);
+      // admissible members: the three best BM25 scores (summed in ascending order), the dense scores (float32 mean)
+      // and the lowest unit index
+      let cnt = 0, m1 = -Infinity, m2 = -Infinity, m3 = -Infinity, mn = Infinity;
+      for (let i = 0; i < tu.length; i++) {
+        const k = tu[i]!;
+        if (!mask[k]) continue;
+        const v = sBm[k]!;
+        if (v > m1) { m3 = m2; m2 = m1; m1 = v; } else if (v > m2) { m3 = m2; m2 = v; } else if (v > m3) m3 = v;
+        dbuf[cnt++] = sDense[k]!;
+        if (k < mn) mn = k;
+      }
+      if (!cnt) continue;
       lt.push(t);
-      const vals = ks.map((k) => sBm[k]!).sort((a, b) => a - b).slice(-3);
-      let s = 0;
-      for (const v of vals) s = f(s + v);
-      thB[t] = s;
-      thD[t] = mean32(ks.map((k) => sDense[k]!));
-      first[t] = Math.min(...ks);
+      let sum = 0;
+      if (cnt >= 3) sum = f(f(f(sum + m3) + m2) + m1);
+      else if (cnt === 2) sum = f(f(sum + m2) + m1);
+      else sum = f(sum + m1);
+      thB[t] = sum;
+      thD[t] = mean32(dbuf, 0, cnt);
+      first[t] = mn;
     }
     const thRank = new Float64Array(T);
     const rb = [...lt].sort((a, b) => thB[b]! - thB[a]! || first[a]! - first[b]!);
@@ -1124,7 +1138,7 @@ export class Engine {
           const expandPrev = gran === "span" || p.expand_prev_q;
           const expandNext = gran === "span" || p.expand_next;
           if (pk >= 0 && !emitted.has(pk) && P.actorL[pk] !== P.actorL[k] &&
-            (m.content.split(/\s+/).filter(Boolean).length <= p.prompt_merge_words || (expandPrev && P.isQ[pk]))) {
+            (wordsAtMost(m.content, p.prompt_merge_words) || (expandPrev && P.isQ[pk]))) {
             members = [pk, k];
           }
           if (expandNext && nk >= 0 && !emitted.has(nk) && P.actorL[nk] !== P.actorL[k] &&
@@ -1249,33 +1263,43 @@ function setEq(a: ReadonlySet<string> | null, b: ReadonlySet<string> | null): bo
 }
 
 /** The first `depth` of `ks` ordered by (-score, k), as np.lexsort((k, -score))[:depth]. */
-export function topK(ks: number[], score: ArrayLike<number>, depth: number): number[] {
-  const cmp = (a: number, b: number) => score[b]! - score[a]! || a - b;
-  if (ks.length <= depth * 4 || depth >= ks.length) return [...ks].sort(cmp).slice(0, depth);
-  // bounded heap of the current best `depth` (worst at the root)
-  const heap: number[] = [];
-  const worse = (a: number, b: number) => cmp(a, b) > 0;
-  const up = (i: number) => {
-    while (i > 0) {
-      const pa = (i - 1) >> 1;
-      if (worse(heap[i]!, heap[pa]!)) { [heap[i], heap[pa]] = [heap[pa]!, heap[i]!]; i = pa; } else break;
+/** The `depth` best of `ks` by score (descending), ties broken by the lower index. With `positiveOnly`, entries whose
+ * score is not above zero are not considered. A bounded heap of the best so far (worst at the root) on typed arrays:
+ * one load and one comparison per rejected entry. */
+export function topK(ks: ArrayLike<number>, score: ArrayLike<number>, depth: number, positiveOnly = false): number[] {
+  const n = ks.length;
+  const cap = depth < n ? depth : n;
+  if (cap <= 0) return [];
+  const hi = new Int32Array(cap), hs = new Float64Array(cap);
+  let size = 0;
+  for (let t = 0; t < n; t++) {
+    const k = ks[t]!, s = score[k]!;
+    if (positiveOnly && !(s > 0)) continue;
+    if (size < cap) {
+      let i = size++;
+      while (i > 0) { // sift up while worse than the parent
+        const pa = (i - 1) >> 1;
+        if (((hs[pa]! - s) || (k - hi[pa]!)) > 0) { hi[i] = hi[pa]!; hs[i] = hs[pa]!; i = pa; } else break;
+      }
+      hi[i] = k;
+      hs[i] = s;
+    } else if (((hs[0]! - s) || (k - hi[0]!)) < 0) { // better than the current worst: replace the root
+      let i = 0;
+      for (;;) {
+        const l = 2 * i + 1, r = l + 1;
+        let w = -1, ws = s, wk = k; // the worst of the node being placed and its children
+        if (l < size && ((ws - hs[l]!) || (hi[l]! - wk)) > 0) { w = l; ws = hs[l]!; wk = hi[l]!; }
+        if (r < size && ((ws - hs[r]!) || (hi[r]! - wk)) > 0) { w = r; }
+        if (w < 0) break;
+        hi[i] = hi[w]!; hs[i] = hs[w]!;
+        i = w;
+      }
+      hi[i] = k;
+      hs[i] = s;
     }
-  };
-  const down = (i: number) => {
-    for (;;) {
-      const l = 2 * i + 1, r = l + 1;
-      let w = i;
-      if (l < heap.length && worse(heap[l]!, heap[w]!)) w = l;
-      if (r < heap.length && worse(heap[r]!, heap[w]!)) w = r;
-      if (w === i) break;
-      [heap[i], heap[w]] = [heap[w]!, heap[i]!];
-      i = w;
-    }
-  };
-  for (const k of ks) {
-    if (heap.length < depth) { heap.push(k); up(heap.length - 1); } else if (cmp(k, heap[0]!) < 0) { heap[0] = k; down(0); }
   }
-  return heap.sort(cmp);
+  const out = Array.from(hi.subarray(0, size));
+  return out.sort((a, b) => score[b]! - score[a]! || a - b);
 }
 
 function interleaveThreads(ranked: number[], threadOf: number[]): number[] {

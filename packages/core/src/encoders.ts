@@ -6,13 +6,16 @@
 // Recall itself is synchronous, so remote encoders are warmed asynchronously before the engine runs.
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
-import { blake2b } from "./blake2b.js";
+import { blake2b, blake2b8, digest8 } from "./blake2b.js";
 import { f } from "./f32.js";
 import { words } from "./text.js";
 
 export interface Encoder {
   readonly name: string;
   readonly dim: number;
+  /** True when vectors are mostly zeros (feature hashing): the engine then keeps segment vectors in a column-major
+   * sparse store and scores them with an identical-result batch dot product. Leave unset for dense embeddings. */
+  readonly sparse?: boolean;
   embed(text: string): Float32Array;
   /** Prepare embeddings for texts before a synchronous embed() (remote encoders). */
   warm?(texts: string[]): Promise<void>;
@@ -35,48 +38,128 @@ const enc = new TextEncoder();
 
 export class HashingEncoder implements Encoder {
   readonly name: string;
+  readonly sparse = true;
+  private readonly pow2: boolean;
+  private readonly mask: number;
   constructor(readonly dim = 512) {
     this.name = `hashing-${dim}`;
+    this.pow2 = (dim & (dim - 1)) === 0 && dim <= 1 << 24;
+    this.mask = dim - 1;
   }
 
-  // token -> signed bucket (bucket + 1, negated for -1). Vocabulary-bounded, so it stays small; it removes repeated
-  // BLAKE2b work when the index is rebuilt or the same words recur.
-  private tokCache = new Map<string, number>();
+  // Word ids and their signed buckets (bucket + 1, negated for -1). The vocabulary is bounded, so this stays small.
+  // Bigrams go through a fixed-size direct-mapped cache keyed by the pair of word ids: windows of neighbouring
+  // sentences and the unit itself share most of their bigrams, so one BLAKE2b serves about three embeddings, while
+  // the memory stays constant (an unbounded bigram map cost more memory and lookups than the hash it saved).
+  private wordId = new Map<string, number>();
+  private wordBucket = new Int32Array(1024);
+  private static readonly PAIR_BITS = 17;
+  private pairA = new Int32Array(1 << HashingEncoder.PAIR_BITS).fill(-1);
+  private pairB = new Int32Array(1 << HashingEncoder.PAIR_BITS);
+  private pairV = new Int32Array(1 << HashingEncoder.PAIR_BITS);
+  private readonly bytes = new Uint8Array(1024);
 
-  private bucket(tok: string): number {
-    let b = this.tokCache.get(tok);
-    if (b === undefined) {
-      const d = blake2b(enc.encode(tok), 8);
-      let idx: number;
-      if ((this.dim & (this.dim - 1)) === 0 && this.dim <= 1 << 24) {
-        // power-of-two dim: h % dim is the low bits of the big-endian integer
-        idx = ((d[4]! << 24) | (d[5]! << 16) | (d[6]! << 8) | d[7]!) >>> 0;
-        idx = idx & (this.dim - 1);
-      } else {
-        let h = 0n;
-        for (const x of d) h = (h << 8n) | BigInt(x); // int(hexdigest, 16): big-endian
-        idx = Number(h % BigInt(this.dim));
-      }
-      b = (d[0]! & 0x80) ? idx + 1 : -(idx + 1);
-      if (this.tokCache.size > 2_000_000) this.tokCache.clear();
-      this.tokCache.set(tok, b);
+  /** Signed bucket of the digest left in digest8 (Python: int(hexdigest, 16) % dim, sign from the first byte). */
+  private signed(): number {
+    const lo = digest8[0]!, hi = digest8[1]!;
+    let idx: number;
+    if (this.pow2) {
+      // power-of-two dim: h % dim is the low bits of the big-endian integer of bytes 4..7 (a byte swap of hi)
+      idx = ((((hi & 0xff) << 24) | ((hi & 0xff00) << 8) | ((hi >>> 8) & 0xff00) | (hi >>> 24)) >>> 0) & this.mask;
+    } else {
+      let h = 0n;
+      for (let i = 0; i < 8; i++) h = (h << 8n) | BigInt(i < 4 ? (lo >>> (8 * i)) & 0xff : (hi >>> (8 * (i - 4))) & 0xff);
+      idx = Number(h % BigInt(this.dim));
     }
-    return b;
+    return (lo & 0x80) ? idx + 1 : -(idx + 1);
+  }
+
+  /** Write the ASCII string a + sep + b into the byte buffer; the length, or -1 if it does not fit or is not ASCII. */
+  private put(a: string, sep: boolean, b: string): number {
+    const buf = this.bytes;
+    let n = 0;
+    if (a.length + b.length + 1 > buf.length) return -1;
+    for (let i = 0; i < a.length; i++) {
+      const c = a.charCodeAt(i);
+      if (c > 127) return -1;
+      buf[n++] = c;
+    }
+    if (sep) {
+      buf[n++] = 95; // "_"
+      for (let i = 0; i < b.length; i++) {
+        const c = b.charCodeAt(i);
+        if (c > 127) return -1;
+        buf[n++] = c;
+      }
+    }
+    return n;
+  }
+
+  private hashOf(a: string, sep: boolean, b: string): number {
+    const n = this.put(a, sep, b);
+    if (n >= 0) blake2b8(this.bytes, n);
+    else {
+      const d = blake2b(enc.encode(sep ? a + "_" + b : a), 8);
+      digest8[0] = d[0]! | (d[1]! << 8) | (d[2]! << 16) | (d[3]! << 24);
+      digest8[1] = d[4]! | (d[5]! << 8) | (d[6]! << 16) | (d[7]! << 24);
+    }
+    return this.signed();
+  }
+
+  private static readonly MAX_WORDS = 2_000_000;
+
+  private resetCache(): void {
+    this.wordId.clear();
+    this.pairA.fill(-1);
+  }
+
+  /** Id of a word, hashing it the first time it is seen. */
+  private idOf(tok: string): number {
+    let id = this.wordId.get(tok);
+    if (id === undefined) {
+      id = this.wordId.size;
+      if (id >= this.wordBucket.length) {
+        const g = new Int32Array(this.wordBucket.length * 2);
+        g.set(this.wordBucket);
+        this.wordBucket = g;
+      }
+      this.wordBucket[id] = this.hashOf(tok, false, "");
+      this.wordId.set(tok, id);
+    }
+    return id;
   }
 
   embed(text: string): Float32Array {
     const ws = words(text);
+    const n = ws.length;
+    if (this.wordId.size + n > HashingEncoder.MAX_WORDS) this.resetCache(); // never mid-text: ids stay consistent
     const v = new Float32Array(this.dim);
-    const add = (tok: string) => {
-      const b = this.bucket(tok);
+    const shift = 32 - HashingEncoder.PAIR_BITS;
+    let prev = -1;
+    // Unigram and bigram contributions are +-1 added to integer-valued float32 counters, which are exact in any
+    // order, so interleaving them gives the same vector as all unigrams followed by all bigrams.
+    for (let i = 0; i < n; i++) {
+      const id = this.idOf(ws[i]!);
+      const b = this.wordBucket[id]!;
       if (b > 0) v[b - 1]! += 1.0; else v[-b - 1]! -= 1.0;
-    };
-    for (const w of ws) add(w);
-    for (let i = 0; i + 1 < ws.length; i++) add(ws[i] + "_" + ws[i + 1]);
+      if (i > 0) {
+        const slot = (Math.imul(prev, 0x9e3779b1) ^ Math.imul(id, 0x85ebca6b)) >>> shift;
+        let pb: number;
+        if (this.pairA[slot] === prev && this.pairB[slot] === id) pb = this.pairV[slot]!;
+        else {
+          pb = this.hashOf(ws[i - 1]!, true, ws[i]!);
+          this.pairA[slot] = prev;
+          this.pairB[slot] = id;
+          this.pairV[slot] = pb;
+        }
+        if (pb > 0) v[pb - 1]! += 1.0; else v[-pb - 1]! -= 1.0;
+      }
+      prev = id;
+    }
     let ss = 0;
-    for (const x of v) ss += x * x;
-    const n = f(Math.sqrt(f(ss)));
-    if (n) for (let i = 0; i < v.length; i++) v[i] = f(v[i]! / n);
+    for (let i = 0; i < v.length; i++) ss += v[i]! * v[i]!;
+    const nn = f(Math.sqrt(f(ss)));
+    if (nn) for (let i = 0; i < v.length; i++) v[i] = f(v[i]! / nn);
     return v;
   }
 }

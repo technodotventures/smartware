@@ -48,3 +48,35 @@ whole transaction as one pipelined round trip).
 
 Over a network, add one round trip per write and per tenant load. Recall never touches the store once a tenant is
 loaded.
+
+## Second performance pass (16 October 2026)
+
+Every change below is exact: packs are identical to the build before the pass (a differential harness replays the same
+writes and recalls against both builds, both encoders, both rankers, with filters, time words and ACL slices: 0
+differences over several seeds), and the conformance suite, schema pack and release gate still pass. Measured on a
+synthetic corpus (the LongMemEval data and the real SIF encoder are not in the repository), same 2-core VM.
+
+| Case | Before | After |
+|---|---|---|
+| Hashing, 10,000 units, balanced recall p50 | 41.5 ms | 19 ms |
+| Hashing, 10,000 units, first recall (cold build) | 10.3 s | 4.6 s |
+| Hashing, 10,000 units, RSS | 528 MB | 376 MB |
+| Hashing, 1,000 units, recall p50 | 8.4 ms | 5.5 ms |
+| Hashing, 300 units, recall p50 | 5.6 ms | 3.3 ms |
+| SIF-style dense, 10,000 units, recall p50 | 56.6 ms | 43.9 ms |
+| remember p50 | 0.73 ms | 0.43 ms |
+| recall straight after a write p50 | 11 ms | 7.3 ms |
+
+What changed:
+- BLAKE2b is generated (tools/gen-blake2b.mjs, drift-checked in CI) with the state held in int32 locals: about 5x faster.
+- The hashing encoder is sparse end to end: a token and bigram hash cache, and segment vectors stored column-major
+  (sparse.ts) so one query scores every segment in a scatter pass, with the same four-partial-sum rounding as dot32.
+- Neighbour dot products for the dense-window channel come from a symmetric open-addressing cache (pairdots.ts).
+- Top-k selection uses a typed-array heap; BM25 scoring has an all-admissible fast path; token counting is a scan, not a regex.
+
+Not changed, on purpose: the SQLite write path (a flush is about 0.12 ms p50; pragma tuning gained about 10% of the
+mean). Dense-encoder recall is now dominated by the memory-bound 256-d dot over every row (about two thirds of the
+time); only an approximate index or parallelism would move it further.
+
+Known, unchanged by this pass: tools/fuzz persist_fuzz and diff_fuzz report one distinct claims-order divergence on
+both the original and the new build.

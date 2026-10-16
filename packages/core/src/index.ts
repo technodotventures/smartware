@@ -4,7 +4,7 @@ export * from "./timeparse.js";
 export * from "./f32.js";
 export * from "./bm25.js";
 export * from "./encoders.js";
-export * from "./blake2b.js";
+export { blake2b } from "./blake2b.js";
 export * from "./pyjson.js";
 export * from "./model.js";
 export * from "./params.js";

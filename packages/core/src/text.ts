@@ -2,8 +2,7 @@
 // A line-for-line port of smartware/_text.py. Any change here changes recall, so the oracle is the test.
 
 const WORD = /[a-z0-9]+(?:'[a-z]+)?/g;
-// Python's \w is Unicode-aware (letters, digits, underscore); JavaScript's is not, so spell it out.
-const TOKCOUNT = /[\p{L}\p{N}_]+|[^\p{L}\p{N}_\s]/gu;
+// Python's \w is Unicode-aware (letters, digits, underscore); JavaScript's is not, so countTokens spells the classes out.
 
 export const STOPWORDS: ReadonlySet<string> = new Set(
   `a about above after again against all am an and any are aren't as at be because been before being
@@ -67,10 +66,59 @@ export function terms(text: string): string[] {
   return out;
 }
 
-/** Approximate LLM token count (word pieces + punctuation), about 1.25 per English word. */
+const WORDCHAR = /^[\p{L}\p{N}_]$/u;
+const SPACECHAR = /^\s$/u;
+/** class of each BMP code unit, filled on first sight: 1 word character, 2 space, 3 other */
+const CLASS = new Uint8Array(65536);
+function classOf(ch: string): number {
+  return WORDCHAR.test(ch) ? 1 : SPACECHAR.test(ch) ? 2 : 3;
+}
+
+/** Approximate LLM token count (word pieces + punctuation), about 1.25 per English word. A scan that counts what
+ * TOKCOUNT matches (runs of letters, digits and underscores; every other non-space character on its own) without
+ * building the match array; ASCII is classified by code, other characters by the same Unicode classes as the regex. */
 export function countTokens(text: string): number {
-  const n = (text.match(TOKCOUNT) ?? []).length;
+  let n = 0, inWord = false;
+  const len = text.length;
+  for (let i = 0; i < len; i++) {
+    const c = text.charCodeAt(i);
+    if (c < 128) {
+      if ((c >= 97 && c <= 122) || (c >= 65 && c <= 90) || (c >= 48 && c <= 57) || c === 95) {
+        if (!inWord) { n++; inWord = true; }
+      } else {
+        inWord = false;
+        if (c !== 32 && (c < 9 || c > 13)) n++;
+      }
+      continue;
+    }
+    let k: number;
+    if (c >= 0xd800 && c <= 0xdbff && i + 1 < len && (text.charCodeAt(i + 1) & 0xfc00) === 0xdc00) {
+      k = classOf(text.slice(i, i + 2)); // an astral code point
+      i++;
+    } else k = CLASS[c]! || (CLASS[c] = classOf(text[i]!));
+    if (k === 1) {
+      if (!inWord) { n++; inWord = true; }
+    } else {
+      inWord = false;
+      if (k === 3) n++;
+    }
+  }
   return Math.max(1, Math.trunc(n * 1.1));
+}
+
+/** Whether text has at most `limit` whitespace-separated words (the JS \s classes), counting no further than needed. */
+export function wordsAtMost(text: string, limit: number): boolean {
+  let n = 0, inWord = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text.charCodeAt(i);
+    const sp = c < 128 ? c === 32 || (c >= 9 && c <= 13) : SPACECHAR.test(text[i]!);
+    if (sp) inWord = false;
+    else if (!inWord) {
+      inWord = true;
+      if (++n > limit) return false;
+    }
+  }
+  return true;
 }
 
 /** Python str.strip(): whitespace per str.isspace (close enough to JS trim for the separators we meet). */

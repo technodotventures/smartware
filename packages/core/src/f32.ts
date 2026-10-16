@@ -75,3 +75,29 @@ export function dot32Sparse(a: Float32Array, ao: number, q: Float32Array, nz: In
   }
   return f((s0 + s1) + (s2 + s3));
 }
+
+/** The query's non-zero coordinates split by index mod 4, each list ascending (null when the query is dense). With a
+ * list per partial sum, dot32Sparse4 has no data-dependent branch in its loop. */
+export function nonZero4(v: Float32Array): Int32Array[] | null {
+  let n = 0;
+  for (let i = 0; i < v.length; i++) if (v[i] !== 0) n++;
+  if (n * 4 > v.length) return null;
+  const c = [0, 0, 0, 0];
+  for (let i = 0; i < v.length; i++) if (v[i] !== 0) c[i & 3]!++;
+  const out = [new Int32Array(c[0]!), new Int32Array(c[1]!), new Int32Array(c[2]!), new Int32Array(c[3]!)];
+  const w = [0, 0, 0, 0];
+  for (let i = 0; i < v.length; i++) if (v[i] !== 0) out[i & 3]![w[i & 3]!++] = i;
+  return out;
+}
+
+/** dot32Sparse with the coordinates pre-split by residue: the same four partial sums, each accumulated over its own
+ * coordinates in ascending order, so the result is bit-identical. */
+export function dot32Sparse4(a: Float32Array, ao: number, q: Float32Array, z: Int32Array[]): number {
+  let s0 = 0, s1 = 0, s2 = 0, s3 = 0;
+  const z0 = z[0]!, z1 = z[1]!, z2 = z[2]!, z3 = z[3]!;
+  for (let k = 0; k < z0.length; k++) { const i = z0[k]!; s0 += a[ao + i]! * q[i]!; }
+  for (let k = 0; k < z1.length; k++) { const i = z1[k]!; s1 += a[ao + i]! * q[i]!; }
+  for (let k = 0; k < z2.length; k++) { const i = z2[k]!; s2 += a[ao + i]! * q[i]!; }
+  for (let k = 0; k < z3.length; k++) { const i = z3[k]!; s3 += a[ao + i]! * q[i]!; }
+  return f((s0 + s1) + (s2 + s3));
+}

@@ -40,6 +40,12 @@ export class BM25 {
     return k;
   }
 
+  // scratch reused across calls: per-document length normalisation (NaN = not computed yet) and the admissible lengths
+  private normBuf = new Float32Array(0);
+  private lenBuf = new Float32Array(0);
+  private allAvgN = -1;
+  private allAvg = 0;
+
   /** Score every document; documents outside the mask score 0. `weights` replaces the query's own term counts
    * (used by pseudo-relevance feedback), in the given insertion order. */
   score(q: string, mask: Mask, weights?: Map<string, number>): Float32Array {
@@ -47,32 +53,44 @@ export class BM25 {
     const out = new Float32Array(n);
     const qt = weights ?? counter(terms(q));
     let nm = 0;
-    const admLens: number[] = [];
-    for (let k = 0; k < n; k++) if (mask[k]) { nm++; admLens.push(this.lens[k]!); }
+    for (let k = 0; k < n; k++) nm += mask[k]!;
     if (nm === 0) return out;
-    const avg = mean32(admLens) || 1.0;
+    const all = nm === n; // every document admissible: no mask tests, document frequency is the posting length
+    let avg: number;
+    if (all) {
+      if (this.allAvgN !== n) { this.allAvg = mean32(this.lens) || 1.0; this.allAvgN = n; }
+      avg = this.allAvg;
+    } else {
+      if (this.lenBuf.length < nm) this.lenBuf = new Float32Array(nm + (nm >> 1));
+      let c = 0;
+      for (let k = 0; k < n; k++) if (mask[k]) this.lenBuf[c++] = this.lens[k]!;
+      avg = mean32(this.lenBuf, 0, nm) || 1.0;
+    }
     const avgDen = Math.max(avg, 1e-6);
-    const normCache = new Map<number, number>();
-    const norm = (k: number) => {
-      let v = normCache.get(k);
-      if (v === undefined) {
-        v = f(K1_32 * f(ONE_MINUS_B + f(f(B_32 * this.lens[k]!) / avgDen)));
-        normCache.set(k, v);
-      }
-      return v;
-    };
+    if (this.normBuf.length < n) this.normBuf = new Float32Array(n + (n >> 1));
+    const normBuf = this.normBuf, lens = this.lens;
+    normBuf.fill(NaN, 0, n);
     for (const [t, qn] of qt) {
       const j = this.vocab.get(t);
       if (j === undefined) continue;
       const docs = this.postDoc[j]!, tfs = this.postTf[j]!;
-      let df = 0;
-      for (let i = 0; i < docs.length; i++) if (mask[docs[i]!]) df++;
+      const m = docs.length;
+      let df = m;
+      if (!all) {
+        df = 0;
+        for (let i = 0; i < m; i++) if (mask[docs[i]!]) df++;
+      }
       const idf = Math.log(1 + (nm - df + 0.5) / (df + 0.5));
-      for (let i = 0; i < docs.length; i++) {
+      for (let i = 0; i < m; i++) {
         const k = docs[i]!;
-        if (!mask[k]) continue;
+        if (!all && !mask[k]) continue;
         const tf = tfs[i]!;
-        out[k] = out[k]! + idf * tf * (K1 + 1) / f(tf + norm(k)) * qn;
+        let nv = normBuf[k]!;
+        if (nv !== nv) {
+          nv = f(K1_32 * f(ONE_MINUS_B + f(f(B_32 * lens[k]!) / avgDen)));
+          normBuf[k] = nv;
+        }
+        out[k] = out[k]! + idf * tf * (K1 + 1) / f(tf + nv) * qn;
       }
     }
     return out;
