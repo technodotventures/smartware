@@ -1,6 +1,6 @@
 # Smartware Bench results, v0.1.2
 
-Held-out test splits only. The 15 projects are **LLM-free re-implementations of each project's recall path** (see `reports/` and `baselines/`), run with the same shared encoders as Smartware, each with its best dev-tuned configuration; they are not the products themselves. Methodology, tuning budgets and limitations: `results/METHODOLOGY.md`.
+Held-out test splits only. The 15 projects are **LLM-free re-implementations of each project's recall path** (see `baselines/`; the per-project review notes cited in the spec's Appendix C are not yet published), run with the same shared encoders as Smartware, each with its best dev-tuned configuration; they are not the products themselves. Methodology, tuning budgets and limitations: `results/METHODOLOGY.md`.
 
 **R@B**: share of gold evidence turns inside the first B tokens of the returned context (characters/4 tokens, greedy packing). **E@B**: the same, but a turn counts only if the context carries at least half of its content words. **Ans@B**: share of the gold answer's content words in the context. **SessAll@5**: LongMemEval's session metric. Verdicts use a paired bootstrap 95% CI against the best of the 15 on that metric (chosen after the fact, which favours the baselines).
 

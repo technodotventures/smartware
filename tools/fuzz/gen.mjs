@@ -47,7 +47,7 @@ export function makeGen(seed, nIds = 8, idProb = 0.6) {
     if (r.chance(0.05)) m.expires_at = r.pick(["2020-01-01T00:00:00", "2099-01-01T00:00:00"]);
     if (r.chance(0.2)) m.actor = r.pick(["alice", "bob", "user"]);
     if (r.chance(0.15)) m.role = r.pick(["user", "assistant"]);
-    if (r.chance(0.1)) m.load = "always";
+    if (r.chance(0.2)) m.load = r.pick(["always", "on_scope"]);
     if (r.chance(0.08)) m.scope = r.pick(["a", "a/b", "c"]);
     if (kind !== "event" && kind !== "document" && r.chance(0.6)) {
       m.claim = { subject: r.pick(["alice", "Alice ", "bob"]), predicate: r.pick(["city", "job"]), object: r.pick(["paris", "rome", "Paris", "oslo"]) };
@@ -99,7 +99,8 @@ export function makeGen(seed, nIds = 8, idProb = 0.6) {
       if (x < 0.67) return { verb: "import", pr: { id: "admin", groups: ["admin"], tenant: p.tenant === "t1" ? "t2" : "t1" }, args: [null] }; // bundle = export of the other tenant
       // reads
       if (x < 0.78) return { verb: "recall", pr: p, args: [{ query: r.pick(QUERIES), as_of: r.pick(AS_OF), ...(r.chance(0.3) ? { include: { history: true } } : {}),
-        ...(r.chance(0.2) ? { kinds: ["fact", "preference"] } : {}), ...(r.chance(0.15) ? { mode: "fast" } : {}), ...(r.chance(0.15) ? { known_at: r.pick(AS_OF) } : {}) }] };
+        ...(r.chance(0.2) ? { kinds: ["fact", "preference"] } : {}), ...(r.chance(0.15) ? { mode: "fast" } : {}), ...(r.chance(0.15) ? { known_at: r.pick(AS_OF) } : {}),
+        ...(r.chance(0.2) ? { budget: { tokens: r.pick([60, 300, 2000]), standing: r.pick([0, 40, 300]) } } : {}) }] };
       if (x < 0.83) return { verb: "get", pr: p, args: [r.some(ids, 0.3), r.chance(0.3) ? ["secret"] : []] };
       if (x < 0.86) return { verb: "history", pr: p, args: [r.pick(["alice", "bob"]), r.pick(["city", "job"])] };
       if (x < 0.88) return { verb: "neighbours", pr: p, args: [r.pick(ids), r.i(3), r.i(3)] };

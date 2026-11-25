@@ -133,6 +133,37 @@ class L1Core(unittest.TestCase):
         self.assertIn("tokenizer", c)
         self.assertIn("L3", c["conformance"]["claimed"])
 
+    def test_M78_optional_recall_parameters_rejected_and_declared(self):  # §4.2
+        c = self.s.capabilities()
+        for k in ("queries", "cursor", "time"):
+            if k in c["rejected_parameters"]:
+                with self.assertRaises(SmartwareError) as e:
+                    self.s.recall({"query": "x", k: [] if k == "queries" else None}, ALICE)
+                self.assertEqual(e.exception.code, "unsupported_parameter")
+            else:
+                self.assertIn(k, c["recall_parameters"])
+
+    def test_M79_standing_budget_default_declared_and_zero_turns_it_off(self):  # §4.2, §5.12
+        self.assertIn("budget.standing", self.s.capabilities()["defaults"])
+        self.s.remember({"memories": [{"kind": "procedure", "content": "Invoices go out only on Mondays.",
+                                       "load": "on_scope"}]}, ALICE)
+        self.s.remember({"memories": [ev(f"chat {i} about the garden party menu", thread="c", seq=i + 1)
+                                      for i in range(20)]}, ALICE)
+        on = self.s.recall({"query": "send the March invoice to Acme", "budget": {"tokens": 300}}, ALICE)
+        self.assertTrue(any(i.get("standing") and "Mondays" in i["text"] for i in on["items"]))
+        self.assertEqual(on["items"][0].get("standing"), True)
+        off = self.s.recall({"query": "garden party", "budget": {"tokens": 300, "standing": 0}}, ALICE)
+        self.assertFalse(any(i.get("standing") for i in off["items"]))
+        with self.assertRaises(SmartwareError):
+            self.s.recall({"query": "x", "budget": {"tokens": 100, "standing": 101}}, ALICE)
+
+    def test_positioned_units_with_the_same_words_stay_distinct(self):  # §4.1, P1
+        a = self.s.remember({"memories": [ev("ok", thread="t", seq=1)]}, ALICE)["ids"]
+        b = self.s.remember({"memories": [ev("ok", thread="t", seq=2)]}, ALICE)["ids"]
+        c = self.s.remember({"memories": [ev("ok", thread="t", seq=1)]}, ALICE)["ids"]
+        self.assertNotEqual(a, b)
+        self.assertEqual(a, c)
+
     def test_cross_tenant_isolation(self):  # §2 tenant
         self.s.remember({"memories": [ev("acme launch date is March 3", thread="t")]}, ALICE)
         p = self.s.recall({"query": "launch date", "budget": {"tokens": 300}}, EVE)
@@ -224,6 +255,26 @@ class L2Temporal(unittest.TestCase):
 class L3Governed(unittest.TestCase):
     def setUp(self):
         self.s = make_service()
+
+    def test_M80_standing_context_is_admissible_first(self):  # §5.12, §5.1
+        self.s.remember({"memories": [{"kind": "procedure", "content": "Exec bonus figures never leave the exec channel.",
+                                       "load": "on_scope", "readers": ["group:exec"]},
+                                      {"kind": "procedure", "content": "Sales decks always use the 2026 template.",
+                                       "load": "on_scope", "readers": ["group:sales"]}]}, ADMIN)
+        self.s.remember({"memories": [ev(f"note {i} on the regional pipeline", thread="n", seq=i + 1,
+                                         readers=["group:sales"]) for i in range(10)]}, ADMIN)
+        p = self.s.recall({"query": "prepare the Q3 review", "budget": {"tokens": 400}}, ALICE)
+        st = [i["text"] for i in p["items"] if i.get("standing")]
+        self.assertTrue(any("2026 template" in t for t in st))
+        self.assertNotIn("bonus", texts(p))
+        # equivalence (M67): the same pack as over a store without the record Alice cannot read
+        s2 = make_service()
+        s2.remember({"memories": [{"kind": "procedure", "content": "Sales decks always use the 2026 template.",
+                                   "load": "on_scope", "readers": ["group:sales"]}]}, ADMIN)
+        s2.remember({"memories": [ev(f"note {i} on the regional pipeline", thread="n", seq=i + 1,
+                                     readers=["group:sales"]) for i in range(10)]}, ADMIN)
+        q = s2.recall({"query": "prepare the Q3 review", "budget": {"tokens": 400}}, ALICE)
+        self.assertEqual([i["text"] for i in p["items"]], [i["text"] for i in q["items"]])
 
     def test_pre_ranking_admissibility_preserves_recall(self):  # §5.1
         priv = [ev(f"Project Falcon pricing discussion round {i}: discount tiers", readers=["group:exec"],

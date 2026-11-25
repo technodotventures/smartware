@@ -274,8 +274,11 @@ class Service:
             "modes": {"fast": "no pseudo-relevance feedback, rrf ranker", "balanced": "full pipeline",
                       "deep": "same as balanced in this engine (no model-based reranking)"},
             "dedup": {"idempotency_key": "per (tenant, writer, key), unbounded window",
-                      "content": "per (tenant, writer, readers, labels, thread, actor, content), unbounded window"},
-            "defaults": {"budget.tokens": DEFAULT_RECALL_BUDGET, "budget.items": 50},
+                      "content": "per (tenant, writer, readers, labels, thread, actor, content, seq when set), unbounded window"},
+            "defaults": {"budget.tokens": DEFAULT_RECALL_BUDGET, "budget.items": 50,
+                         "budget.standing": "budget.tokens // 4"},
+            "standing_context": "load: on_scope memories, admissible-first, ranked against the query, packed first "
+                                "within budget.standing (§5.12)",
             "limits": {"max_items": MAX_ITEMS, "max_budget_tokens": MAX_BUDGET},
         }
 
@@ -475,7 +478,7 @@ class Service:
         if rejected:  # honoured-or-rejected (P5)
             raise SmartwareError("unsupported_parameter", f"not supported by this engine: {rejected}", parameters=rejected)
         budget = body.get("budget", {"tokens": DEFAULT_RECALL_BUDGET})
-        _check_keys(budget, {"tokens", "items"}, "budget")
+        _check_keys(budget, {"tokens", "items", "standing"}, "budget")
         inc = body.get("include", {})
         _check_keys(inc, {"history", "drafts", "neighbours", "explain", "labels"}, "include")
         scope = body.get("scope", {})
@@ -500,6 +503,7 @@ class Service:
         if tokens < 50:
             raise SmartwareError("budget_too_small", "budget.tokens must be >= 50")
         items_max = _int(budget.get("items", 50), "budget.items", 1, MAX_ITEMS)
+        standing = _int(budget.get("standing", tokens // 4), "budget.standing", 0, tokens)
         nbh = inc.get("neighbours", 0)
         if nbh not in (0, None, "auto") and (isinstance(nbh, bool) or not isinstance(nbh, int) or not 0 <= nbh <= 10):
             raise SmartwareError("invalid_parameter", "include.neighbours must be an integer 0..10 or 'auto'")
@@ -514,34 +518,48 @@ class Service:
                             scope=scope.get("within", ""), kinds=kinds, budget_tokens=tokens,
                             max_items=items_max, include_history=bool(inc.get("history")), filters=filters)
         p = self.engine.p
+        t = principal.tenant
+        items, used, taken = [], 0, set()
+
+        def emit(pack, is_standing: bool):
+            nonlocal used
+            view_sup = dict(self.engine._view_sup)  # the claim view of the recall that produced this pack
+            for it in pack.items:
+                if used + it.tokens > tokens or len(items) >= items_max:
+                    continue
+                if any(i in taken for i in it.memory_ids):  # already in the pack as standing context
+                    continue
+                used += it.tokens
+                taken.update(it.memory_ids)
+                m0 = self.engine.mem.get(it.memory_ids[0])
+                sup = []
+                for i in it.memory_ids:
+                    mi = self.engine.mem.get(i)
+                    nxt = view_sup.get(i) if mi is not None and self.engine.in_chain(mi) else (mi.superseded_by if mi
+                                                                                              else None)
+                    if nxt and self._readable_id(nxt, principal):
+                        sup.append(self._out(t, nxt))
+                items.append({
+                    "ref": f"smartware://{t}/mem/{self._out(t, it.memory_ids[0])}",
+                    "memory_ids": self._outl(t, it.memory_ids),
+                    "kind": m0.kind if m0 else "event", "scope": m0.scope if m0 else "", "text": it.text,
+                    "tokens": it.tokens, "score": it.score, "why": it.why if inc.get("explain", True) else {},
+                    "validity": it.valid, "citations": [self._out(t, c) for c in it.citations], "superseded": sup,
+                    **({"standing": True} if is_standing else {}),
+                })
+
         if mode == "fast":  # declared: no second pass, no learned ranker
             self.engine.p = replace(p, w_prf=0.0, ranker="rrf")
         try:
-            pack = self.engine.recall(req)
+            # standing context first (§5.12): admissible load: on_scope memories, ranked against the query, in their
+            # own share of the budget, whether or not the query names them
+            if standing > 0:
+                emit(self.engine.recall(replace(req, budget_tokens=standing, filters={
+                    **filters, "load": ("on_scope",), "granularity": "unit"})), True)
+            pack = self.engine.recall(replace(req, budget_tokens=max(1, tokens - used)))  # 0 would mean "no cap"
+            emit(pack, False)
         finally:
             self.engine.p = p
-        t = principal.tenant
-        view_sup = dict(self.engine._view_sup)
-        items, used = [], 0
-        for it in pack.items:
-            if used + it.tokens > tokens:  # engine already packs within budget; defensive
-                continue
-            used += it.tokens
-            m0 = self.engine.mem.get(it.memory_ids[0])
-            sup = []
-            for i in it.memory_ids:
-                mi = self.engine.mem.get(i)
-                nxt = view_sup.get(i) if mi is not None and self.engine.in_chain(mi) else (mi.superseded_by if mi
-                                                                                          else None)
-                if nxt and self._readable_id(nxt, principal):
-                    sup.append(self._out(t, nxt))
-            items.append({
-                "ref": f"smartware://{t}/mem/{self._out(t, it.memory_ids[0])}",
-                "memory_ids": self._outl(t, it.memory_ids),
-                "kind": m0.kind if m0 else "event", "scope": m0.scope if m0 else "", "text": it.text,
-                "tokens": it.tokens, "score": it.score, "why": it.why if inc.get("explain", True) else {},
-                "validity": it.valid, "citations": [self._out(t, c) for c in it.citations], "superseded": sup,
-            })
         cov = pack.coverage
         abstain = min_cov is not None and cov < min_cov
         if abstain:
@@ -662,8 +680,10 @@ class Service:
     def edges(self, mem_id: str, principal: Principal) -> list[dict]:
         iid = self._in(principal.tenant, mem_id)
         t = principal.tenant
-        return [dict(e, **{"from": self._out(t, e["from"]), "to": self._out(t, e["to"])})
-                for e in self._edges.values() if iid in (e["from"], e["to"]) and self._edge_visible(e, principal)]
+        # ordered by (from, to, type), not insertion order: an import inserts in its own order
+        out = [dict(e, **{"from": self._out(t, e["from"]), "to": self._out(t, e["to"])})
+               for e in self._edges.values() if iid in (e["from"], e["to"]) and self._edge_visible(e, principal)]
+        return sorted(out, key=lambda e: (str(e["from"]), str(e["to"]), str(e["type"])))
 
     # ------------------------------------------------------------ forget
     @_enveloped

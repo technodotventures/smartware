@@ -7,7 +7,7 @@
 import { createHash, randomBytes } from "node:crypto";
 import { Engine, newJournal } from "./engine.js";
 import type { Encoder } from "./encoders.js";
-import { claimKey, contentHash, KINDS, makeMemory, memoryFromJson, memoryToJson, newId, ORIGINS, Principal,
+import { claimKey, contentHash, type ContextPack, KINDS, makeMemory, memoryFromJson, memoryToJson, newId, ORIGINS, Principal,
   pyCmp, recallRequest, type Claim, type Memory, type Source } from "./model.js";
 import type { Params } from "./params.js";
 import { FEATURES } from "./params.js";
@@ -678,9 +678,10 @@ export class Service {
       modes: { fast: "no pseudo-relevance feedback, rrf ranker", balanced: "full pipeline",
         deep: "same as balanced in this engine (no model-based reranking)" },
       dedup: { idempotency_key: "per (tenant, writer, key), unbounded window",
-        content: "per (tenant, writer, readers, labels, thread, actor, content), unbounded window" },
+        content: "per (tenant, writer, readers, labels, thread, actor, content, seq when set), unbounded window" },
       secret_scan: this.secretScan ? "content that looks like a credential is labelled secret on remember" : "off",
-      defaults: { "budget.tokens": DEFAULT_RECALL_BUDGET, "budget.items": 50 },
+      defaults: { "budget.tokens": DEFAULT_RECALL_BUDGET, "budget.items": 50, "budget.standing": "budget.tokens // 4" },
+      standing_context: "load: on_scope memories, admissible-first, ranked against the query, packed first within budget.standing (§5.12)",
       limits: { max_items: MAX_ITEMS, max_budget_tokens: MAX_BUDGET },
     });
   }
@@ -914,7 +915,7 @@ export class Service {
     const rejected = ["queries", "cursor", "time"].filter((k) => k in body);
     if (rejected.length) throw new SmartwareError("unsupported_parameter", `not supported by this engine: ${pyList(rejected)}`, { parameters: rejected });
     const budget = body.budget ?? { tokens: DEFAULT_RECALL_BUDGET };
-    checkKeys(budget, new Set(["tokens", "items"]), "budget");
+    checkKeys(budget, new Set(["tokens", "items", "standing"]), "budget");
     const inc = body.include ?? {};
     checkKeys(inc, new Set(["history", "drafts", "neighbours", "explain", "labels"]), "include");
     let scope = body.scope ?? {};
@@ -938,6 +939,7 @@ export class Service {
     const tokens = int(budget.tokens ?? DEFAULT_RECALL_BUDGET, "budget.tokens", undefined, MAX_BUDGET);
     if (tokens < 50) throw new SmartwareError("budget_too_small", "budget.tokens must be >= 50");
     const itemsMax = int(budget.items ?? 50, "budget.items", 1, MAX_ITEMS);
+    const standing = int(budget.standing ?? Math.floor(tokens / 4), "budget.standing", 0, tokens);
     const nbh = inc.neighbours ?? 0;
     if (!(nbh === 0 || nbh === null || nbh === "auto") && (typeof nbh !== "number" || !Number.isInteger(nbh) || nbh < 0 || nbh > 10)) {
       throw new SmartwareError("invalid_parameter", "include.neighbours must be an integer 0..10 or 'auto'");
@@ -954,33 +956,44 @@ export class Service {
       });
       const E = this.engine;
       const p = E.p;
-      if (mode === "fast") E.p = { ...p, w_prf: 0, ranker: "rrf" }; // declared: no second pass, no learned ranker
-      let pack;
-      try {
-        pack = E.recall(req);
-      } finally {
-        E.p = p;
-      }
       const t = pr.tenant;
-      const viewSup = new Map(E.viewSup);
       const items: Json[] = [];
       let used = 0;
-      for (const it of pack.items) {
-        if (used + it.tokens > tokens) continue;
-        used += it.tokens;
-        const m0 = E.mem.get(it.memory_ids[0]!);
-        const sup: string[] = [];
-        for (const i of it.memory_ids) {
-          const mi = E.mem.get(i);
-          const nxt = mi && Engine.inChain(mi) ? viewSup.get(i) : mi?.superseded_by ?? null;
-          if (nxt && this.readableId(nxt, pr)) sup.push(this.out(t, nxt));
+      const taken = new Set<string>();
+      const emit = (pack: ContextPack, isStanding: boolean) => {
+        const viewSup = new Map(E.viewSup); // the claim view of the recall that produced this pack
+        for (const it of pack.items) {
+          if (used + it.tokens > tokens || items.length >= itemsMax) continue;
+          if (it.memory_ids.some((i) => taken.has(i))) continue; // already in the pack as standing context
+          used += it.tokens;
+          for (const i of it.memory_ids) taken.add(i);
+          const m0 = E.mem.get(it.memory_ids[0]!);
+          const sup: string[] = [];
+          for (const i of it.memory_ids) {
+            const mi = E.mem.get(i);
+            const nxt = mi && Engine.inChain(mi) ? viewSup.get(i) : mi?.superseded_by ?? null;
+            if (nxt && this.readableId(nxt, pr)) sup.push(this.out(t, nxt));
+          }
+          items.push({
+            ref: `smartware://${t}/mem/${this.out(t, it.memory_ids[0]!)}`, memory_ids: this.outl(t, it.memory_ids),
+            kind: m0 ? m0.kind : "event", scope: m0 ? m0.scope : "", text: it.text, tokens: it.tokens, score: it.score,
+            why: (inc.explain ?? true) ? it.why : {}, validity: it.valid,
+            citations: it.citations.map((c) => this.out(t, c)), superseded: sup, ...(isStanding ? { standing: true } : {}),
+          });
         }
-        items.push({
-          ref: `smartware://${t}/mem/${this.out(t, it.memory_ids[0]!)}`, memory_ids: this.outl(t, it.memory_ids),
-          kind: m0 ? m0.kind : "event", scope: m0 ? m0.scope : "", text: it.text, tokens: it.tokens, score: it.score,
-          why: (inc.explain ?? true) ? it.why : {}, validity: it.valid,
-          citations: it.citations.map((c) => this.out(t, c)), superseded: sup,
-        });
+      };
+      if (mode === "fast") E.p = { ...p, w_prf: 0, ranker: "rrf" }; // declared: no second pass, no learned ranker
+      let pack: ContextPack;
+      try {
+        // standing context first (§5.12): admissible load: on_scope memories, ranked against the query, in their own
+        // share of the budget, whether or not the query names them
+        if (standing > 0) {
+          emit(E.recall({ ...req, budget_tokens: standing, filters: { ...req.filters, load: ["on_scope"], granularity: "unit" } }), true);
+        }
+        pack = E.recall({ ...req, budget_tokens: Math.max(1, tokens - used) }); // 0 would mean "no cap" to the engine
+        emit(pack, false);
+      } finally {
+        E.p = p;
       }
       const cov = pack.coverage;
       const abstain = minCov !== null && cov < minCov;
@@ -1150,8 +1163,11 @@ export class Service {
     return this.verb(pr, false, () => {
       const iid = this.in_(pr.tenant, memId);
       const t = pr.tenant;
+      // ordered by (from, to, type), not insertion order: an import inserts in its own order
+      const key = (e: Json) => [String(e.from), String(e.to), String(e.type)];
       return [...this.edgesMap.values()].filter((e) => (e.from === iid || e.to === iid) && this.edgeVisible(e, pr))
-        .map((e) => ({ ...stripUnderscore(e), from: this.out(t, e.from), to: this.out(t, e.to) }));
+        .map((e) => ({ ...stripUnderscore(e), from: this.out(t, e.from), to: this.out(t, e.to) }))
+        .sort((a, b) => { const x = key(a), y = key(b); return pyCmp(x[0]!, y[0]!) || pyCmp(x[1]!, y[1]!) || pyCmp(x[2]!, y[2]!); });
     });
   }
 

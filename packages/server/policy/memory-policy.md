@@ -16,7 +16,8 @@ Paste this into an agent's instructions, or let the MCP client load it: `smartwa
 ## What to remember
 - Durable facts, decisions, preferences, commitments, deadlines and who owns what.
 - When a fact replaces an earlier one (a new address, a changed owner, a moved date), store it as `kind: fact` with a `claim` (subject, predicate, object) so the old one is superseded explicitly instead of both being "true".
-- Standing rules and how-tos ("always cite sources", "send invoices on the 1st") are `procedure`s. They are stored as drafts until a person approves them.
+- Standing rules and how-tos ("always cite sources", "send invoices on the 1st", "release notes only go to #eng-releases") are `procedure`s; lasting likes and dislikes are `preference`s. Both come back with every recall they apply to, marked `standing`, even when the request does not mention them, so check what you are about to do against them. A rule becomes active when the user confirms it (your client may ask them), or, where the server allows it, when you pass `source_id`: the id of the user's own message that stated it. A rule you inferred yourself stays a draft until a person approves it.
+- Store a rule or preference in the user's words and scope, including its conditions and exceptions ("until the deploy is green", "except for the board").
 - Write in plain, self-contained sentences that will make sense months later without this conversation: name people and things, give dates as dates.
 
 ## What never to store

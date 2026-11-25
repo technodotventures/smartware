@@ -103,6 +103,11 @@
     "items": {
      "type": "integer",
      "minimum": 1
+    },
+    "standing": {
+     "type": "integer",
+     "minimum": 0,
+     "description": "tokens reserved for standing context (load: on_scope); default a quarter of tokens"
     }
    },
    "required": [],
