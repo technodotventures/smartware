@@ -7,6 +7,10 @@ Run from the DolphinBench checkout, with this directory on PYTHONPATH:
         --config <run.yaml> --persona morgan [--tests 50] --confirm-paid-calls
 
 It never looks at test content: it only takes the first N entries of the persona's test list.
+
+Without an Azure account, --judge-model <openrouter model id> grades with DolphinBench's own OpenAI-compatible judge
+backend on OpenRouter instead of the fixed Azure gpt-5.6-sol. Deterministic checks are unchanged; only the checks that
+need a judge differ. Such a score is unofficial and not comparable digit for digit with the leaderboard.
 """
 from __future__ import annotations
 
@@ -16,11 +20,9 @@ import json
 import sys
 from pathlib import Path
 
-import yaml
+import os
 
-from harness.adapter import load_adapter
-from harness.runner import ROOT, Runner, run_lock
-from harness.submission import load_json, read_release
+import yaml
 
 
 def main(argv=None) -> int:
@@ -31,10 +33,18 @@ def main(argv=None) -> int:
     ap.add_argument("--sessions", type=int, default=None,
                     help="only the first N history messages (smoke runs only: later tests then lack their history)")
     ap.add_argument("--stage", choices=("ingest", "evaluate", "both"), default="both")
+    ap.add_argument("--judge-model", default=None,
+                    help="unofficial: grade judge checks with this OpenRouter model (key in OPENROUTER_API_KEY)")
     ap.add_argument("--confirm-paid-calls", action="store_true")
     a = ap.parse_args(argv)
+    if a.judge_model:  # read by graders.llm_judge at import, so set before importing the runner
+        os.environ["DOLPHINBENCH_JUDGE_BACKEND"] = "openai"
+        os.environ["DOLPHINBENCH_JUDGE_MODEL"] = a.judge_model
+    from harness.adapter import load_adapter
+    from harness.runner import ROOT, Runner, run_lock
+    from harness.submission import load_json, read_release
     if not a.confirm_paid_calls:
-        print("This calls the agent model, the extraction model and the Azure grader: add --confirm-paid-calls.", file=sys.stderr)
+        print("This calls the agent model, the extraction model and the grader: add --confirm-paid-calls.", file=sys.stderr)
         return 2
     config = yaml.safe_load(a.config.read_text())
     base = a.config.resolve().parent
@@ -49,10 +59,13 @@ def main(argv=None) -> int:
     release = {a.persona: part}
     with run_lock(output):
         adapter = load_adapter(config["adapter"], config["options"], output)
-        identity = {"config": config, "trial": {"persona": a.persona, "tests": a.tests, "sessions": a.sessions},
+        identity = {"config": config, "trial": {"persona": a.persona, "tests": a.tests, "sessions": a.sessions,
+                                                 "judge": a.judge_model or "azure:gpt-5.6-sol (official)"},
                     "adapter": adapter.identity(),
                     "runner_sha256": hashlib.sha256((ROOT / "harness/runner.py").read_bytes()).hexdigest()}
-        runner = Runner(release, output, adapter, identity=identity, release_root=release_root, allow_paid=True)
+        # the runner insists on the official Azure judge for paid runs; an unofficial judge is enabled after that check
+        runner = Runner(release, output, adapter, identity=identity, release_root=release_root, allow_paid=not a.judge_model)
+        runner.allow_paid = True
         if a.stage in ("ingest", "both"):
             runner.ingest()
         if a.stage in ("evaluate", "both"):
@@ -64,7 +77,7 @@ def main(argv=None) -> int:
                 passed += all(c["passed"] for c in g["checks"])
             costs = {p: load_json((output / "costs" / f"{p}.json").read_bytes())["total_cost_usd"]
                      for p in ("ingestion", "tests") if (output / "costs" / f"{p}.json").exists()}
-            print(json.dumps({"persona": a.persona, "passed": passed, "tests": total,
+            print(json.dumps({"persona": a.persona, "judge": a.judge_model or "azure:gpt-5.6-sol", "passed": passed, "tests": total,
                               "accuracy": round(passed / max(1, total), 4), "cost_usd": costs}, indent=2))
     return 0
 

@@ -49,7 +49,7 @@ pip install -r requirements.txt
 cp <smartware>/tools/dolphinbench/run.yaml.example run.yaml        # then edit the model names
 export PYTHONPATH=<smartware>/tools/dolphinbench
 export OPENROUTER_API_KEY=...                                       # agent and extraction
-export AZURE_OPENAI_ENDPOINT=... AZURE_OPENAI_API_KEY=...           # the fixed grader (gpt-5.6-sol, medium)
+export AZURE_OPENAI_ENDPOINT=... AZURE_OPENAI_API_KEY=...           # official grader only (gpt-5.6-sol, medium)
 python -m harness.runner prepare                                    # local checks, no model calls
 ```
 
@@ -59,7 +59,11 @@ A trial on one persona, which reports accuracy and cost:
 python <smartware>/tools/dolphinbench/trial.py --config run.yaml --persona morgan --tests 50 --confirm-paid-calls
 ```
 
-A full run and submission, all three personas and 600 tests:
+Without an Azure account, add `--judge-model <OpenRouter model id>`. The run then uses DolphinBench's own
+OpenRouter judge backend for the checks that need a judge. The deterministic checks (tool, target, exact values) are
+unchanged. The score is unofficial: good for comparing our own configurations, not for the leaderboard.
+
+A full run and submission, all three personas and 600 tests. This needs the official Azure judge:
 
 ```bash
 python -m harness.runner ingest --confirm-paid-calls
