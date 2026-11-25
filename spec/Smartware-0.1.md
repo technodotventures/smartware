@@ -245,6 +245,8 @@ Returns `load: always` memories for a subject (user, agent, team) within a token
 
 Starts an async job that produces derived memories (`observation`, `summary`, `profile`, rule candidates). Requirements: idempotent per `(scope, cursor)`; outputs carry `derived_from` and `origin: extracted|inferred`; outputs inherit closed ACLs (§6.3); a job MUST NOT delete or rewrite `observed` evidence; results are versioned, so a re-run supersedes the previous version rather than overwriting it. [M31] Engines MAY use the client's model through MCP sampling (§8.1), so a server needs no model key.
 
+Extraction is a reflect job over named messages (`kinds` any of `fact`, `preference`, `procedure`; `ids` the source events): for each message the engine recalls the related memories as they stood at the message's time, asks the model what should be remembered, and writes each result with `origin: extracted`, `derived_from` the message (so its audience is closed over the message's, §6.3) and, for a change to an existing memory, `mode: supersede` of that memory. Rules and preferences are taken only from messages whose role is `user` or `human`, and are written `load: on_scope`. The job reports what it created and replaced, and its model usage. An engine without a model rejects these kinds (P5).
+
 ### 4.7 changes and subscriptions
 
 `changes(cursor)` returns an ordered, gap-free feed `{cursor, op, id, version, status}` per tenant. Subscriptions are per session, fire only on real change, and never deliver records the subscriber cannot read.
@@ -312,7 +314,7 @@ Credentials bind to a principal server-side. Access tokens have the form `princi
 
 ### 6.2 Read and write are separate
 
-`readers` controls recall, get, neighbours, profile, export. `writers` controls upsert, supersede, forget, approve. Get-by-id, neighbours and history MUST check `readers` exactly like recall. [M58] Responses MUST NOT contain ids of records the caller cannot read, including links (`supersedes`, `superseded_by`, `derived_from`), `forget` results and change feeds. [M74]
+`readers` controls recall, get, neighbours, profile, export. `writers` controls upsert, supersede, forget, approve. A read-only credential (an empty write-scope list) is refused by every verb that changes state. Get-by-id, neighbours and history MUST check `readers` exactly like recall. [M58] Responses MUST NOT contain ids of records the caller cannot read, including links (`supersedes`, `superseded_by`, `derived_from`), `forget` results and change feeds. [M74]
 
 ### 6.3 Provenance-closed access (the laundering rule)
 

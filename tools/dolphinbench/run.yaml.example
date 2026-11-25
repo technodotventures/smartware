@@ -1,0 +1,14 @@
+# Copy to the DolphinBench checkout as run.yaml. Paths are relative to this file. Credentials only in the
+# environment (OPENROUTER_API_KEY, AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_API_KEY), never here.
+release: .
+output: tmp/smartware-trial-1
+adapter: smartware_harness:BenchmarkHarness
+options:
+  agent_model: deepseek/deepseek-chat          # any OpenRouter model id with tool calling
+  agent_base_url: https://openrouter.ai/api/v1
+  agent_key_env: OPENROUTER_API_KEY
+  extract_model: deepseek/deepseek-chat        # may be a cheaper model than the agent
+  ingest_app_tools: false                      # cheaper ingestion; set true to answer history with the app tools
+  max_steps: 12
+  recall_tokens: 1600
+  standing_tokens: 500

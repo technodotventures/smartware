@@ -9,7 +9,7 @@ import { homedir } from "node:os";
 import { join, resolve } from "node:path";
 import { createInterface } from "node:readline";
 import { existsSync } from "node:fs";
-import { chooseRanker, loadEncoder, PgStore, Principal, Service, SqliteStore, type Store } from "@technodotventures/smartware-core";
+import { chatModelFrom, chooseRanker, loadEncoder, PgStore, Principal, Service, SqliteStore, type Store } from "@technodotventures/smartware-core";
 import { Authenticator, JwtVerifier, KeyStore } from "./auth.js";
 import { Gateway } from "./http.js";
 import { McpSession, stdioPrincipal } from "./mcp.js";
@@ -51,8 +51,12 @@ export function buildService(f: Flags, log: Log): Service {
   const enc = loadEncoder(encSpec);
   const { name, params, notes } = chooseRanker(s(f, "ranker", process.env.SMARTWARE_RANKER ?? "auto"), enc.name);
   for (const n of notes) log.warn(n);
+  // the Model port for extraction: the key comes from an environment variable, never a flag (flags show in ps)
+  const spec = s(f, "extract-model");
+  const keyEnv = s(f, "extract-key-env", "SMARTWARE_MODEL_KEY")!;
+  const model = spec ? chatModelFrom(spec, process.env[keyEnv]) : undefined;
   return new Service(enc, { params, store: openStore(f), rankerName: name, notes, secretScan: f["no-secret-scan"] !== true,
-    idleTenantMs: f["idle-tenant-s"] !== undefined ? Number(f["idle-tenant-s"]) * 1000 : undefined });
+    idleTenantMs: f["idle-tenant-s"] !== undefined ? Number(f["idle-tenant-s"]) * 1000 : undefined, ...(model ? { model } : {}) });
 }
 
 /** --store is a SQLite file path (default ~/.smartware/smartware.db) or a postgres:// URL (several nodes may share it). The
@@ -166,6 +170,7 @@ const HELP = `smartware ${VERSION}: the Smartware memory kit
 
   smartware serve [--store <db>] [--encoder hashing|sif:<file.swenc>|openai:<model>:<dim>] [--ranker auto|smartware-linear-1|smartware-rrf-1]
             [--tools safe|full|mcp-memory,...] [--default-readers self|tenant|<tokens>] [--rules draft|user-stated]
+            [--extract-model openai:<model>@<base-url> [--extract-key-env SMARTWARE_MODEL_KEY]]
       MCP over stdio. Principal from SMARTWARE_PRINCIPAL / SMARTWARE_GROUPS / SMARTWARE_TENANT.
 
   smartware serve --http <port> [--host 127.0.0.1] [--keys <keys.json>] [--oidc-issuer <url> --oidc-audience <aud> --jwks <url|file>]
@@ -178,7 +183,7 @@ const HELP = `smartware ${VERSION}: the Smartware memory kit
       [--lease-s 30] [--idle-tenant-s 600] [--pool 4] [--preload]
       Smartware HTTP binding at /v1/<tenant>/... and MCP Streamable HTTP at /mcp, on one port.
 
-  smartware keys add --keys <keys.json> --id <principal> --tenant <tenant> [--groups a,b] [--write-scope <prefix>] [--label <name>]
+  smartware keys add --keys <keys.json> --id <principal> --tenant <tenant> [--groups a,b] [--write-scope <prefix> | --read-only] [--label <name>]
   smartware keys list|revoke|migrate --keys <keys.json> [--id <principal>]
   smartware backup [--store <db>|postgres://...] --out <file.db>      a consistent SQLite copy (also from Postgres)
   smartware export [--store <db>] --tenant <t> --out <bundle.smartware|dir> [--render] [--no-audit]
@@ -218,7 +223,8 @@ export async function main(argv: string[]) {
     if (sub === "add") {
       const id = s(f, "id");
       if (!id) throw new Error("--id is required");
-      const token = ks.add({ id, tenant: s(f, "tenant", "default"), groups: list(f, "groups"), scopes: list(f, "write-scope"), label: s(f, "label") });
+      if (f["read-only"] === true && list(f, "write-scope").length) throw new Error("--read-only and --write-scope exclude each other");
+      const token = ks.add({ id, tenant: s(f, "tenant", "default"), groups: list(f, "groups"), scopes: list(f, "write-scope"), readOnly: f["read-only"] === true, label: s(f, "label") });
       process.stdout.write(`${token}\n`);
       process.stderr.write("This token is shown once. Only its hash is stored. Keep it in a secret manager, not in code.\n");
     } else if (sub === "list") {

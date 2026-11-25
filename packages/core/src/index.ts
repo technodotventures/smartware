@@ -10,6 +10,8 @@ export * from "./model.js";
 export * from "./params.js";
 export { Engine, entities, gbdtPredict, topK, newJournal, SENSITIVE, type Journal, type Channel } from "./engine.js";
 export * from "./service.js";
+export * from "./llm.js";
+export * from "./extract.js";
 export * from "./store.js";
 export * from "./secrets.js";
 export * as schema from "./schema.js";

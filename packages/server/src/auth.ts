@@ -12,7 +12,8 @@ export class AuthError extends Error {
   }
 }
 
-export interface PrincipalSpec { id: string; groups?: string[]; tenant?: string; scopes?: string[] }
+/** scopes: the scope prefixes the key may write under (absent: anywhere); readOnly: it may write nowhere. */
+export interface PrincipalSpec { id: string; groups?: string[]; tenant?: string; scopes?: string[]; readOnly?: boolean }
 
 // ------------------------------------------------------------ API keys
 export interface KeyEntry extends PrincipalSpec { hash: string; label?: string; created?: string }
@@ -84,7 +85,7 @@ export class KeyStore {
     const h = hashToken(token);
     for (const [k, v] of this.byHash) {
       // constant-time comparison over the hash text
-      if (k.length === h.length && timingSafeEqual(Buffer.from(k), Buffer.from(h))) return new Principal(v.id, v.groups ?? [], v.tenant ?? "default", v.scopes ?? null);
+      if (k.length === h.length && timingSafeEqual(Buffer.from(k), Buffer.from(h))) return new Principal(v.id, v.groups ?? [], v.tenant ?? "default", v.readOnly ? [] : v.scopes ?? null);
     }
     return null;
   }
@@ -96,7 +97,7 @@ export class KeyStore {
     }
     const token = newToken();
     const e: KeyEntry = { hash: hashToken(token), id: spec.id, groups: spec.groups ?? [], tenant: spec.tenant ?? "default",
-      ...(spec.scopes?.length ? { scopes: spec.scopes } : {}), label: spec.label, created: new Date().toISOString() };
+      ...(spec.scopes?.length ? { scopes: spec.scopes } : {}), ...(spec.readOnly ? { readOnly: true } : {}), label: spec.label, created: new Date().toISOString() };
     this.byHash.set(e.hash, e);
     this.save();
     return token;

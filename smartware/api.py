@@ -277,6 +277,7 @@ class Service:
                       "content": "per (tenant, writer, readers, labels, thread, actor, content, seq when set), unbounded window"},
             "defaults": {"budget.tokens": DEFAULT_RECALL_BUDGET, "budget.items": 50,
                          "budget.standing": "budget.tokens // 4"},
+            "reflect": {"kinds": ["summary"]},
             "standing_context": "load: on_scope memories, admissible-first, ranked against the query, packed first "
                                 "within budget.standing (§5.12)",
             "limits": {"max_items": MAX_ITEMS, "max_budget_tokens": MAX_BUDGET},
@@ -768,10 +769,12 @@ class Service:
     # ------------------------------------------------------------ reflect (deterministic consolidation)
     @_enveloped
     def reflect(self, body: dict, principal: Principal) -> dict:
-        _check_keys(body, {"scope", "threads", "kinds"}, "reflect")
+        _check_keys(body, {"scope", "threads", "kinds", "ids"}, "reflect")
         kinds = _strs(body.get("kinds", ["summary"]), "kinds")
-        if set(kinds) != {"summary"}:
+        if set(kinds) != {"summary"}:  # no Model port in the reference engine: extraction kinds are rejected (P5)
             raise SmartwareError("unsupported_parameter", "this engine's reflect produces summaries only", parameters=["kinds"])
+        if "ids" in body:
+            raise SmartwareError("invalid_parameter", "ids selects the messages to extract from (extraction kinds only)")
         sc = body.get("scope", "")
         if not isinstance(sc, str):
             raise SmartwareError("invalid_parameter", "scope must be a string")
