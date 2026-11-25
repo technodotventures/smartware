@@ -54,7 +54,13 @@ export function buildService(f: Flags, log: Log): Service {
   // the Model port for extraction: the key comes from an environment variable, never a flag (flags show in ps)
   const spec = s(f, "extract-model");
   const keyEnv = s(f, "extract-key-env", "SMARTWARE_MODEL_KEY")!;
-  const model = spec ? chatModelFrom(spec, process.env[keyEnv]) : undefined;
+  const extra = s(f, "extract-body");
+  let extraBody: Record<string, unknown> | undefined;
+  if (extra) {
+    try { extraBody = JSON.parse(extra); } catch { throw new Error("--extract-body must be a JSON object"); }
+    if (!extraBody || typeof extraBody !== "object" || Array.isArray(extraBody)) throw new Error("--extract-body must be a JSON object");
+  }
+  const model = spec ? chatModelFrom(spec, process.env[keyEnv], extraBody) : undefined;
   return new Service(enc, { params, store: openStore(f), rankerName: name, notes, secretScan: f["no-secret-scan"] !== true,
     idleTenantMs: f["idle-tenant-s"] !== undefined ? Number(f["idle-tenant-s"]) * 1000 : undefined, ...(model ? { model } : {}) });
 }
@@ -170,7 +176,7 @@ const HELP = `smartware ${VERSION}: the Smartware memory kit
 
   smartware serve [--store <db>] [--encoder hashing|sif:<file.swenc>|openai:<model>:<dim>] [--ranker auto|smartware-linear-1|smartware-rrf-1]
             [--tools safe|full|mcp-memory,...] [--default-readers self|tenant|<tokens>] [--rules draft|user-stated]
-            [--extract-model openai:<model>@<base-url> [--extract-key-env SMARTWARE_MODEL_KEY]]
+            [--extract-model openai:<model>@<base-url> [--extract-key-env SMARTWARE_MODEL_KEY] [--extract-body '<json>']]
       MCP over stdio. Principal from SMARTWARE_PRINCIPAL / SMARTWARE_GROUPS / SMARTWARE_TENANT.
 
   smartware serve --http <port> [--host 127.0.0.1] [--keys <keys.json>] [--oidc-issuer <url> --oidc-audience <aud> --jwks <url|file>]

@@ -1347,7 +1347,7 @@ export class Service {
     }
     const job = "job_" + randomBytes(6).toString("hex");
     const rec: Json = { status: "running", kinds, sources: ids.length, created: [], replaced: [], skipped: 0, model: model.name,
-      usage: { input_tokens: 0, output_tokens: 0, cost_usd: 0, calls: 0, unpriced_calls: 0 }, tenant: pr.tenant };
+      usage: { input_tokens: 0, cached_input_tokens: 0, output_tokens: 0, cost_usd: 0, calls: 0, unpriced_calls: 0 }, tenant: pr.tenant };
     await this.verb(pr, true, () => { this.jobs.set(job, rec); this.jJobs.add(job); });
     void (async () => {
       try {
@@ -1359,6 +1359,7 @@ export class Service {
           for (const u of r.usage) {
             rec.usage.calls++;
             rec.usage.input_tokens += u.input_tokens;
+            rec.usage.cached_input_tokens += u.cached_input_tokens;
             rec.usage.output_tokens += u.output_tokens;
             if (u.cost_usd === null) rec.usage.unpriced_calls++;
             else rec.usage.cost_usd += u.cost_usd;

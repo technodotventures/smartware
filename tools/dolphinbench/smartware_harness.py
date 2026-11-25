@@ -71,7 +71,8 @@ class _Http:
 class _Chat:
     """OpenAI-compatible chat completions with tools; usage and cost exactly as the API reports them."""
 
-    def __init__(self, base_url: str, model: str, key_env: str, max_tokens: int):
+    def __init__(self, base_url: str, model: str, key_env: str, max_tokens: int, extra_body: dict | None = None):
+        self.extra_body = dict(extra_body or {})
         self.base = base_url.rstrip("/")
         self.model, self.key_env, self.max_tokens = model, key_env, max_tokens
         self.openrouter = "openrouter.ai" in self.base
@@ -83,7 +84,7 @@ class _Chat:
         key = os.environ.get(self.key_env)
         if not key:
             raise RuntimeError(f"set {self.key_env} for {self.model}")
-        body = {"model": self.model, "messages": messages, "temperature": 0, "max_tokens": self.max_tokens}
+        body = {**self.extra_body, "model": self.model, "messages": messages, "temperature": 0, "max_tokens": self.max_tokens}
         if tools:
             body["tools"] = tools
             if tool_choice:
@@ -128,7 +129,12 @@ class SmartwareHarness:
     agent_model, agent_base_url (default https://openrouter.ai/api/v1), agent_key_env (default OPENROUTER_API_KEY),
     agent_max_tokens (1500), max_steps (12);
     extract_model, extract_base_url, extract_key_env (default: the agent's), extraction (true);
-    prices: {"<model id>": [usd per 1M input tokens, usd per 1M output tokens]} for providers that do not report cost;
+    agent_extra_body / extract_extra_body: extra request fields (DeepSeek: {"thinking": {"type": "disabled"}});
+    prices: for providers that do not report cost, per model id, USD per 1M tokens:
+        {"input": miss rate, "cached_input": cache-hit rate, "output": rate,
+         "peak_multiplier": 2, "peak_utc_hours": [[1, 4], [6, 10]]}   (peak on Monday to Friday, UTC)
+      or the short form [input, output];
+    budget_usd: stop (resumably) once the ledger total for this output directory passes this;
     recall_tokens (1600), standing_tokens (500), encoder ("hashing" or "sif:<file>"), node ("node");
     ingest_app_tools (true): false answers history messages without the app tools (much cheaper: no tool
     definitions in every prompt). It is declared in identity() either way.
@@ -142,12 +148,16 @@ class SmartwareHarness:
         self.work_dir = Path(work_dir)
         self.dir = self.work_dir / "smartware"
         self.agent = _Chat(o.get("agent_base_url", "https://openrouter.ai/api/v1"), o["agent_model"],
-                           o.get("agent_key_env", "OPENROUTER_API_KEY"), int(o.get("agent_max_tokens", 1500)))
+                           o.get("agent_key_env", "OPENROUTER_API_KEY"), int(o.get("agent_max_tokens", 1500)),
+                           o.get("agent_extra_body"))
+        self.extract_extra_body = o.get("extract_extra_body", o.get("agent_extra_body"))
+        self.budget_usd = float(o["budget_usd"]) if o.get("budget_usd") is not None else None
         self.extraction = bool(o.get("extraction", True))
         self.extract_model = o.get("extract_model", o["agent_model"])
         self.extract_base = o.get("extract_base_url", o.get("agent_base_url", "https://openrouter.ai/api/v1"))
         self.extract_key_env = o.get("extract_key_env", o.get("agent_key_env", "OPENROUTER_API_KEY"))
-        self.prices = {k: tuple(v) for k, v in (o.get("prices") or {}).items()}
+        self.prices = {k: (v if isinstance(v, dict) else {"input": v[0], "output": v[1]})
+                       for k, v in (o.get("prices") or {}).items()}
         self.max_steps = int(o.get("max_steps", 12))
         self.recall_tokens = int(o.get("recall_tokens", 1600))
         self.standing_tokens = int(o.get("standing_tokens", 500))
@@ -176,7 +186,8 @@ class SmartwareHarness:
             "agent": {**self.agent.settings(), "base_url": self.agent.base, "max_steps": self.max_steps,
                       "system_prompt_sha256": _sha(SYSTEM), "ingest_app_tools": self.ingest_app_tools},
             "harness_sha256": _sha(Path(__file__).read_text()),
-            "prices": {k: list(v) for k, v in self.prices.items()},
+            "prices": self.prices, "budget_usd": self.budget_usd,
+            "extra_body": {"agent": self.agent.extra_body, "extraction": self.extract_extra_body},
             "internal_model_calls": "extraction runs inside Smartware (one call per ingested message); its usage and "
                                     "cost are in the ledger and the ingestion total, not in the recorded conversations",
         }
@@ -196,6 +207,8 @@ class SmartwareHarness:
             if self.extraction:
                 cmd += ["--extract-model", f"openai:{self.extract_model}@{self.extract_base}",
                         "--extract-key-env", self.extract_key_env]
+                if self.extract_extra_body:
+                    cmd += ["--extract-body", json.dumps(self.extract_extra_body)]
             log = open(self.dir / "server.log", "a")
             self._proc = subprocess.Popen(cmd, stdout=log, stderr=log)
             atexit.register(self._stop)
@@ -248,14 +261,33 @@ class SmartwareHarness:
             f.flush()
             os.fsync(f.fileno())
 
-    def _cost(self, model: str, usage: dict) -> float | None:
+    def _cost(self, model: str, usage: dict, at: float | None = None) -> float | None:
+        """Provider-reported cost when there is one, else the configured price (cache hits at the cache rate, peak
+        hours at the peak multiplier), else None (total_cost_usd then refuses to report a total)."""
         if isinstance(usage.get("cost"), (int, float)):
             return float(usage["cost"])
-        price = self.prices.get(model)
-        if price is None:
+        p = self.prices.get(model)
+        if p is None:
             return None
-        return (usage.get("prompt_tokens", usage.get("input_tokens", 0)) * price[0]
-                + usage.get("completion_tokens", usage.get("output_tokens", 0)) * price[1]) / 1e6
+        inp = int(usage.get("prompt_tokens", usage.get("input_tokens", 0)) or 0)
+        cached = int(usage.get("prompt_cache_hit_tokens") or (usage.get("prompt_tokens_details") or {}).get("cached_tokens")
+                     or usage.get("cached_input_tokens") or 0)
+        out = int(usage.get("completion_tokens", usage.get("output_tokens", 0)) or 0)
+        usd = ((inp - cached) * p["input"] + cached * p.get("cached_input", p["input"]) + out * p["output"]) / 1e6
+        t = time.gmtime(at if at is not None else time.time())
+        if t.tm_wday < 5 and any(lo <= t.tm_hour < hi for lo, hi in p.get("peak_utc_hours", [])):
+            usd *= float(p.get("peak_multiplier", 1))
+        return usd
+
+    def _spent(self) -> float:
+        path = self.dir / "ledger.jsonl"
+        if not path.exists():
+            return 0.0
+        return sum(json.loads(l)["cost_usd"] or 0.0 for l in path.read_text().splitlines())
+
+    def _check_budget(self):
+        if self.budget_usd is not None and self._spent() >= self.budget_usd:
+            raise RuntimeError(f"budget_usd {self.budget_usd} reached (ledger {self._spent():.2f}); raise it to resume")
 
     # ------------------------------------------------------------ one interaction
     def run_interaction(self, request):
@@ -269,6 +301,7 @@ class SmartwareHarness:
             return await self.run_agent(request, tools, apps.call_tool)
 
     async def run_agent(self, request, tools, call_app) -> InteractionRecord:
+        self._check_budget()  # before any paid call; the runner can resume from here later
         persona, phase = request.persona, request.phase
         ingest = phase == "ingestion"
         sw = self._sw(persona, writable=ingest)
@@ -362,7 +395,7 @@ class SmartwareHarness:
         if j["status"] != "completed":
             raise RuntimeError(f"extraction failed: {j.get('error')}")
         u = j["usage"]
-        cost = u["cost_usd"] if not u["unpriced_calls"] else self._cost(self.extract_model, u)
+        cost = u["cost_usd"] if not u["unpriced_calls"] else self._cost(self.extract_model, u)  # priced at completion
         self._ledger({"phase": "ingestion", "persona": persona, "id": item, "kind": "extraction", "model": self.extract_model,
                       "usage": {"input_tokens": u["input_tokens"], "output_tokens": u["output_tokens"], "calls": u["calls"]},
                       "cost_usd": cost, "created": len(j["created"]), "replaced": len(j["replaced"])})

@@ -4,6 +4,8 @@
 export interface ModelUsage {
   model: string;
   input_tokens: number;
+  /** Of input_tokens, those served from the provider's prompt cache (billed at the cache rate), when reported. */
+  cached_input_tokens: number;
   output_tokens: number;
   /** Provider-reported cost in USD when the provider reports it (OpenRouter does), otherwise null. */
   cost_usd: number | null;
@@ -26,6 +28,8 @@ export interface OpenAiCompatibleOptions {
   /** Attempts on 429 and 5xx before giving up (default 5). */
   attempts?: number;
   fetchImpl?: typeof fetch;
+  /** Extra request fields the provider needs, for example {"thinking": {"type": "disabled"}} for DeepSeek. */
+  extraBody?: Record<string, unknown>;
 }
 
 /** A ChatModel over an OpenAI-compatible /chat/completions endpoint, temperature 0. */
@@ -36,7 +40,7 @@ export function openAiCompatible(o: OpenAiCompatibleOptions): ChatModel {
   return {
     name: `openai-compatible:${o.model}@${base}`,
     async complete(messages, opts = {}) {
-      const body: Record<string, unknown> = { model: o.model, temperature: 0, messages, max_tokens: opts.maxTokens ?? 1200 };
+      const body: Record<string, unknown> = { ...(o.extraBody ?? {}), model: o.model, temperature: 0, messages, max_tokens: opts.maxTokens ?? 1200 };
       if (opts.json) body.response_format = { type: "json_object" };
       if (openRouter) body.usage = { include: true }; // OpenRouter then reports the charged cost
       const attempts = o.attempts ?? 5;
@@ -58,7 +62,9 @@ export function openAiCompatible(o: OpenAiCompatibleOptions): ChatModel {
           const u = b.usage ?? {};
           return {
             text: String(b.choices?.[0]?.message?.content ?? ""),
-            usage: { model: String(b.model ?? o.model), input_tokens: Number(u.prompt_tokens ?? 0), output_tokens: Number(u.completion_tokens ?? 0),
+            usage: { model: String(b.model ?? o.model), input_tokens: Number(u.prompt_tokens ?? 0),
+              cached_input_tokens: Number(u.prompt_tokens_details?.cached_tokens ?? u.prompt_cache_hit_tokens ?? 0),
+              output_tokens: Number(u.completion_tokens ?? 0),
               cost_usd: typeof u.cost === "number" ? u.cost : null },
           };
         }
@@ -75,12 +81,12 @@ export function openAiCompatible(o: OpenAiCompatibleOptions): ChatModel {
 const backoff = (a: number) => new Promise((ok) => setTimeout(ok, 2 ** a * 500 * (0.5 + Math.random())));
 
 /** Parse "openai:<model>@<base-url>" (the same form as smartware eval --reader). */
-export function chatModelFrom(spec: string, apiKey: string | undefined): ChatModel {
+export function chatModelFrom(spec: string, apiKey: string | undefined, extraBody?: Record<string, unknown>): ChatModel {
   if (!spec.startsWith("openai:")) throw new Error(`unknown model ${spec}: use openai:<model>@<base-url>`);
   const rest = spec.slice(7);
   const at = rest.lastIndexOf("@");
   const model = at < 0 ? rest : rest.slice(0, at);
   const baseUrl = at < 0 ? "https://api.openai.com/v1" : rest.slice(at + 1);
   if (!model) throw new Error(`no model name in ${spec}`);
-  return openAiCompatible({ baseUrl, model, apiKey });
+  return openAiCompatible({ baseUrl, model, apiKey, ...(extraBody ? { extraBody } : {}) });
 }

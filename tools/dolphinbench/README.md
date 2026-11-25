@@ -47,7 +47,7 @@ Run everything from a DolphinBench checkout at a reviewed commit (Python 3.12+ a
 ```bash
 pip install -r requirements.txt
 cp <smartware>/tools/dolphinbench/run.yaml.example run.yaml        # then edit the model names
-export PYTHONPATH=<smartware>/tools/dolphinbench
+export PYTHONPATH=<smartware>/tools/dolphinbench:$PWD                # the harness, and the DolphinBench checkout itself
 export OPENROUTER_API_KEY=...                                       # agent and extraction
 export AZURE_OPENAI_ENDPOINT=... AZURE_OPENAI_API_KEY=...           # official grader only (gpt-5.6-sol, medium)
 python -m harness.runner prepare                                    # local checks, no model calls

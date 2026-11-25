@@ -3,7 +3,7 @@
 
 Run from the DolphinBench checkout, with this directory on PYTHONPATH:
 
-    PYTHONPATH=<smartware>/tools/dolphinbench python <smartware>/tools/dolphinbench/trial.py \\
+    PYTHONPATH=<smartware>/tools/dolphinbench:. python <smartware>/tools/dolphinbench/trial.py \\
         --config <run.yaml> --persona morgan [--tests 50] --confirm-paid-calls
 
 It never looks at test content: it only takes the first N entries of the persona's test list.

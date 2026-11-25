@@ -17,7 +17,7 @@ function scripted(replies) {
       seen.push(input);
       const r = replies.shift() ?? { memories: [] };
       return { text: JSON.stringify(typeof r === "function" ? r(input) : r),
-        usage: { model: "scripted-1", input_tokens: 100, output_tokens: 20, cost_usd: 0.001 } };
+        usage: { model: "scripted-1", input_tokens: 100, cached_input_tokens: 0, output_tokens: 20, cost_usd: 0.001 } };
     },
   };
 }
@@ -43,7 +43,7 @@ test("a rule the user states becomes active standing context, derived from the m
   const j = await finished(s, (await s.reflect({ kinds: ["procedure", "preference", "fact"], ids: [msg] }, A)).job);
   assert.equal(j.status, "completed");
   assert.equal(j.created.length, 1);
-  assert.deepEqual({ ...j.usage }, { input_tokens: 100, output_tokens: 20, cost_usd: 0.001, calls: 1, unpriced_calls: 0 });
+  assert.deepEqual({ ...j.usage }, { input_tokens: 100, cached_input_tokens: 0, output_tokens: 20, cost_usd: 0.001, calls: 1, unpriced_calls: 0 });
   const rule = (await s.get(j.created, A)).memories[0];
   assert.equal(rule.status, "active");
   assert.equal(rule.origin, "extracted");
@@ -90,7 +90,7 @@ test("from an assistant's message only facts are kept, never rules or preference
 test("unknown replace ids and non-JSON replies are dropped, not written", async () => {
   const model = scripted([{ memories: [{ op: "replace", replaces: "mem_not_shown", kind: "procedure", content: "x" },
     { op: "add", kind: "x-weird", content: "y" }] }]);
-  model.complete = ((orig) => async (m) => (model.seen.length === 1 ? { text: "not json", usage: { model: "s", input_tokens: 1, output_tokens: 1, cost_usd: null } } : orig(m)))(model.complete);
+  model.complete = ((orig) => async (m) => (model.seen.length === 1 ? { text: "not json", usage: { model: "s", input_tokens: 1, cached_input_tokens: 0, output_tokens: 1, cost_usd: null } } : orig(m)))(model.complete);
   const s = new Service(new HashingEncoder(), { model });
   const a = await say(s, "hello", 1), b = await say(s, "thanks", 2);
   const j = await finished(s, (await s.reflect({ kinds: ["procedure"], ids: [a, b] }, A)).job);
@@ -124,17 +124,18 @@ test("openAiCompatible: JSON mode, provider-reported cost, retry on 5xx, refusal
       if (calls === 1) { res.writeHead(503); return res.end("{}"); }
       res.writeHead(200, { "content-type": "application/json" });
       res.end(JSON.stringify({ model: "m-1", choices: [{ message: { content: "{\"memories\": []}" } }],
-        usage: { prompt_tokens: 12, completion_tokens: 3, cost: 0.0002 } }));
+        usage: { prompt_tokens: 12, completion_tokens: 3, prompt_tokens_details: { cached_tokens: 4 }, cost: 0.0002 } }));
     });
   });
   await new Promise((ok) => srv.listen(0, "127.0.0.1", ok));
   const url = `http://127.0.0.1:${srv.address().port}/v1`;
   try {
-    const m = openAiCompatible({ baseUrl: url, model: "m", apiKey: "k" });
+    const m = openAiCompatible({ baseUrl: url, model: "m", apiKey: "k", extraBody: { thinking: { type: "disabled" } } });
     const out = await m.complete([{ role: "user", content: "hi" }], { json: true });
     assert.equal(out.text, "{\"memories\": []}");
-    assert.deepEqual(out.usage, { model: "m-1", input_tokens: 12, output_tokens: 3, cost_usd: 0.0002 });
+    assert.deepEqual(out.usage, { model: "m-1", input_tokens: 12, cached_input_tokens: 4, output_tokens: 3, cost_usd: 0.0002 });
     assert.deepEqual(lastBody.response_format, { type: "json_object" });
+    assert.deepEqual(lastBody.thinking, { type: "disabled" });
     assert.equal(calls, 2);
     await assert.rejects(openAiCompatible({ baseUrl: url, model: "m", apiKey: "bad" }).complete([{ role: "user", content: "x" }]), /refused/);
   } finally {
