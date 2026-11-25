@@ -12,7 +12,9 @@ from datetime import datetime, timedelta
 
 import numpy as np
 
+from smartware import clock
 from smartware.api import SmartwareError, Service
+from smartware.engine import Params
 from smartware.model import Principal
 
 T0 = datetime(2026, 1, 1)
@@ -45,7 +47,10 @@ class RandomEmbedder(HashEmbedder):
 
 
 def make_service(embedder=None) -> Service:
-    return Service(embedder or HashEmbedder())
+    # exact_dot: dense scores that do not depend on a row's position in the matrix, as the product engine scores.
+    # Without it, BLAS builds that block rows by matrix size (Apple Accelerate) round near-ties differently when
+    # inadmissible rows are present, and the M67 equivalence checks fail on macOS while passing on Linux.
+    return Service(embedder or HashEmbedder(), Params(exact_dot=True))
 
 
 ALICE = Principal("alice", frozenset({"sales"}), tenant="acme")
@@ -191,7 +196,7 @@ class L2Temporal(unittest.TestCase):
 
     def test_known_at(self):  # §4.2
         self.s.remember({"memories": [ev("Budget approved at 2M", thread="t")]}, ALICE)
-        cut = datetime.now() - timedelta(seconds=1)
+        cut = clock.now() - timedelta(seconds=1)  # the engine's clock (naive UTC), not local time
         p = self.s.recall({"query": "budget approved", "known_at": cut.isoformat(), "budget": {"tokens": 300}},
                           ALICE)
         self.assertEqual(p["items"], [])
