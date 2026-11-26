@@ -35,6 +35,11 @@ export function parseFlags(argv: string[]): { pos: string[]; f: Flags } {
 }
 
 const s = (f: Flags, k: string, d?: string): string | undefined => (typeof f[k] === "string" ? (f[k] as string) : d);
+const rulesFlag = (f: Flags): "draft" | "user-stated" => {
+  const v = s(f, "rules", "draft");
+  if (v !== "draft" && v !== "user-stated") throw new Error("--rules must be draft or user-stated");
+  return v;
+};
 const list = (f: Flags, k: string): string[] => ([] as any[]).concat(f[k] ?? []).flatMap((x: any) => String(x).split(",")).filter(Boolean);
 
 function defaultStore(): string {
@@ -70,6 +75,7 @@ async function serveStdio(svc: Service, f: Flags, log: Log) {
   const session = new McpSession(svc, pr, {
     toolsets: list(f, "tools").length ? list(f, "tools") : ["safe"],
     defaultReaders: (s(f, "default-readers", "self") as any) === "tenant" ? "tenant" : s(f, "default-readers", "self") === "self" ? "self" : list(f, "default-readers"),
+    rules: rulesFlag(f),
     notify: out,
     elicit: (message) => new Promise((ok) => {
       const id = nextId++;
@@ -137,7 +143,8 @@ async function serveHttp(svc: Service, f: Flags, log: Log) {
     host, port, publicUrl, authorizationServers: issuer ? [issuer] : [], rate: { rps: rate[0]!, burst: rate[1]! },
     allowedOrigins: list(f, "allowed-origin"), metricsToken: process.env[s(f, "metrics-token-env", "SMARTWARE_METRICS_TOKEN")!],
     mcp: { toolsets: list(f, "tools").length ? list(f, "tools") : ["safe"],
-      defaultReaders: (s(f, "default-readers", "self") === "tenant" ? "tenant" : s(f, "default-readers", "self") === "self" ? "self" : list(f, "default-readers")) as any },
+      defaultReaders: (s(f, "default-readers", "self") === "tenant" ? "tenant" : s(f, "default-readers", "self") === "self" ? "self" : list(f, "default-readers")) as any,
+      rules: rulesFlag(f) },
   }, log);
   await gw.listen();
   const shared = svc.store?.leases;
@@ -158,7 +165,7 @@ async function serveHttp(svc: Service, f: Flags, log: Log) {
 const HELP = `smartware ${VERSION}: the Smartware memory kit
 
   smartware serve [--store <db>] [--encoder hashing|sif:<file.swenc>|openai:<model>:<dim>] [--ranker auto|smartware-linear-1|smartware-rrf-1]
-            [--tools safe|full|mcp-memory,...] [--default-readers self|tenant|<tokens>]
+            [--tools safe|full|mcp-memory,...] [--default-readers self|tenant|<tokens>] [--rules draft|user-stated]
       MCP over stdio. Principal from SMARTWARE_PRINCIPAL / SMARTWARE_GROUPS / SMARTWARE_TENANT.
 
   smartware serve --http <port> [--host 127.0.0.1] [--keys <keys.json>] [--oidc-issuer <url> --oidc-audience <aud> --jwks <url|file>]

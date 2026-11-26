@@ -101,6 +101,10 @@
      },
      "idempotency_key": {
       "type": "string"
+     },
+     "source_id": {
+      "type": "string",
+      "description": "For a rule or preference: the id of the user's own message it was stated in"
      }
     },
     "required": [

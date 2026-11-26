@@ -3,7 +3,9 @@
 // from tool arguments. Toolsets:
 //   safe        recall, remember, forget, profile, history: no identity, audience or provenance fields, so a prompt
 //               injection cannot widen who sees a memory or read someone else's. Writes default to the caller's
-//               audience; standing rules (procedures) always go in as drafts that need approval.
+//               audience. Standing rules (procedures) become active only when a person confirms them (MCP
+//               elicitation) or, with rules: "user-stated", when they cite the user's own message they were stated
+//               in; otherwise they go in as drafts that need approval. Rules and preferences load on_scope.
 //   full        every verb with every field (trusted local use).
 //   mcp-memory  the reference MCP memory server's nine tools (entities, relations, observations), mapped onto Smartware
 //               records and edges, so existing client configs keep working.
@@ -54,7 +56,8 @@ export const TOOLS: Tool[] = [
     description: "Store a durable fact, preference, decision or event. Use kind=fact with a claim when it replaces an earlier fact.",
     inputSchema: obj({ content: str, kind: { type: "string", enum: ["fact", "preference", "event", "procedure"] },
       claim: obj({ subject: str, predicate: str, object: str }, ["subject", "predicate", "object"]),
-      event_time: str, thread: str, actor: str, idempotency_key: str }, ["content"]),
+      event_time: str, thread: str, actor: str, idempotency_key: str,
+      source_id: { type: "string", description: "For a rule or preference: the id of the user's own message it was stated in" } }, ["content"]),
     annotations: { readOnlyHint: false, idempotentHint: true, destructiveHint: false } },
   { name: "smartware_remember", title: "Remember", set: ["full"],
     description: "Store one or more memories. Use idempotency_key to make retries safe.",
@@ -112,6 +115,11 @@ export interface SessionOptions {
   /** Audience for writes through the safe toolset: "self" (principal only), "tenant" (everyone in the tenant), or
    * an explicit token list. Default "self": fail closed. */
   defaultReaders: "self" | "tenant" | string[];
+  /** Standing rules written through the safe toolset: "draft" (default) stores them for a person to approve unless
+   * the person confirms them in the client (elicitation); "user-stated" also activates a rule that cites, as
+   * source_id, a message the user wrote (role user or human) that this principal can read. An agent's own inference
+   * is a draft either way. */
+  rules?: "draft" | "user-stated";
   elicit?: (message: string) => Promise<boolean>;
   notify?: (msg: Json) => void;
 }
@@ -302,8 +310,26 @@ export class McpSession {
           const kind = a.kind ?? (a.claim ? "fact" : "event");
           const m: Json = { content: a.content, kind, readers: this.readers(), meta: { via: "mcp" } };
           for (const k of ["claim", "event_time", "thread", "actor"]) if (k in a) m[k] = a[k];
-          out = await s.remember({ memories: [m], mode: kind === "procedure" ? "propose" : "append", ...(a.idempotency_key ? { idempotency_key: a.idempotency_key } : {}) }, pr);
-          if (kind === "procedure") out.note = "standing rules are stored as drafts; a person approves them before they apply";
+          if (kind === "procedure" || kind === "preference") m.load = "on_scope"; // standing context (§5.12)
+          if ("source_id" in a) {
+            if (kind !== "procedure" && kind !== "preference") throw new SmartwareError("invalid_parameter", "source_id is for rules and preferences");
+            m.origin = "extracted";
+            m.derived_from = [a.source_id]; // also narrows the audience to the source's (closure, §6.3)
+          }
+          const key = a.idempotency_key ? { idempotency_key: a.idempotency_key } : {};
+          let mode = "append";
+          if (kind === "procedure") {
+            if (this.opt.elicit && "elicitation" in this.clientCaps) {
+              if (!(await this.opt.elicit(`Save this standing rule? It will apply from now on: "${String(a.content).slice(0, 300)}"`))) {
+                return this.result({ cancelled: true }, "Not saved: the user declined the rule.");
+              }
+              if (!("source_id" in a)) m.origin = "human"; // a person approved it as written
+            } else if (!(this.opt.rules === "user-stated" && "source_id" in a && (await this.userStated(a.source_id)))) {
+              mode = "propose";
+            }
+          }
+          out = await s.remember({ memories: [m], mode, ...key }, pr);
+          if (mode === "propose") out.note = "stored as a draft: a person approves it before it applies";
         }
         break;
       case "smartware_forget": {
@@ -328,6 +354,16 @@ export class McpSession {
     }
     if (["smartware_remember", "smartware_forget", "smartware_feedback", "smartware_reflect"].includes(tool.name)) await this.notifyChanges();
     return this.result(out);
+  }
+
+  /** Whether id names a message the user wrote (an event or document with role user or human) that this principal
+   * can read. */
+  private async userStated(id: unknown): Promise<boolean> {
+    if (typeof id !== "string") return false;
+    const got = await this.svc.get([id], this.pr);
+    const src = (got.memories as Json[])[0];
+    return Boolean(src && (src.kind === "event" || src.kind === "document") && (src.role === "user" || src.role === "human") &&
+      src.status === "active");
   }
 
   // ------------------------------------------------------------ reference memory server compatibility

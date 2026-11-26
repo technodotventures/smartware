@@ -69,6 +69,10 @@
    "items": {
     "type": "string"
    }
+  },
+  "standing": {
+   "type": "boolean",
+   "description": "standing context (load: on_scope), returned whether or not the query matched it"
   }
  },
  "required": [

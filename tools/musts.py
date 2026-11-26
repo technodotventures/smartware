@@ -17,7 +17,8 @@ for ids, lvl in (("02 03 04 05 06 07 08 09 12 13 14 15 16 17 18 21 22 23 24 25 2
 META = {"M65"}
 RETIRED = {"M01": "described the document, not engines", "M63": "folded into M65", "M64": "folded into M65"}
 LEVEL.update({"M66": "L3", "M67": "L3", "M68": "L2", "M69": "L3", "M70": "L1", "M71": "L4", "M72": "L3",
-              "M73": "L3", "M74": "L3", "M75": "L2", "M76": "L2", "M77": "L3"})
+              "M73": "L3", "M74": "L3", "M75": "L2", "M76": "L2", "M77": "L3",
+              "M78": "L1", "M79": "L1", "M80": "L3"})
 NA = {"M57": "no connectors ship with the reference engine"}
 
 
@@ -32,7 +33,9 @@ def musts():
         if "RFC 2119" in line:
             continue
         for sent in re.split(r"(?<=[.;\]])\s+(?=[A-Z`(])", line):
-            if re.search(r"\bMUST\b|\bREQUIRED\b", sent):
+            # a tagged sentence is a requirement even when it is phrased without MUST ("changes only when", "is
+            # never returned"), so tags count as well as the keywords
+            if re.search(r"\bMUST\b|\bREQUIRED\b|\[M\d{2}\]", sent):
                 ids = re.findall(r"\[(M\d{2})\]", sent)
                 text = re.sub(r"\s*\[M\d{2}\]", "", sent).strip().lstrip("-| ").strip()
                 if not ids:

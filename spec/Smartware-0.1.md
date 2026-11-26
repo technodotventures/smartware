@@ -78,7 +78,7 @@ Smartware turns the best mechanisms we found into requirements, and turns each f
 | `support` | int | MAY | Count of independent sources agreeing. |
 | `confidence` | number 0..1 | MAY | Engine's or author's confidence. Declared scale. |
 | `labels` | string[] | MAY | Sensitivity (`pii`, `secret`, `health`, `legal`) and topical labels. |
-| `load` | enum | MAY | `always \| on_scope \| on_query` (default). Profiles, standing rules and identity are `always`. |
+| `load` | enum | MAY | `always \| on_scope \| on_query` (default). `always`: returned by `profile` (§4.3). `on_scope`: standing context, returned by every recall that may read it, whether or not the query matches (§5.12); standing rules and preferences. `on_query`: returned when the query matches. |
 | `meta` | object | MAY | Free-form, namespaced keys (`x-acme-...`). Engines MUST round-trip it. [M14] Keys starting with `_` and the engine-derived keys `entities` and `time_refs` are reserved; an engine MAY reject meta nested deeper than 32 levels (`invalid_parameter`). |
 
 Embeddings and index structures are **not** part of the record. They are engine internals and MUST be rebuildable from records. [M15]
@@ -150,7 +150,7 @@ All verbs take a `principal` (bound server-side from credentials, never from mod
 ```
 
 - `mode`: `append` (default) · `upsert` (by client id, requires `if_version` when the record exists) · `supersede` (explicitly replaces `supersedes[]`) · `propose` (creates `draft` for approval).
-- Engines MUST be idempotent on `idempotency_key` (or, absent one, on content) and MUST return the original ids on replay. [M17] Idempotency and content de-duplication MUST be scoped to the tenant and the authenticated writer, and content de-duplication also to the record's `readers` and `labels`: a write never resolves to, replaces or reveals a record another principal wrote, and never crosses tenants; the window MUST be declared in `capabilities.dedup`. [M70]
+- Engines MUST be idempotent on `idempotency_key` (or, absent one, on content) and MUST return the original ids on replay. [M17] Content de-duplication of a positioned unit (`seq` set) includes its position, so the same words said twice in one thread are two events. Idempotency and content de-duplication MUST be scoped to the tenant and the authenticated writer, and content de-duplication also to the record's `readers` and `labels`: a write never resolves to, replaces or reveals a record another principal wrote, and never crosses tenants; the window MUST be declared in `capabilities.dedup`. [M70]
 - Engines MUST reject unknown fields and unsupported enum values, at every nesting level, with `unsupported_parameter`, and values of the wrong type with `invalid_parameter`; they never ignore or coerce them (P5). [M18]
 - `wait`: `accepted \| stored \| indexed`. The response states which stage was reached, so clients get read-your-writes when they need it.
 - Engines SHOULD resolve relative time expressions against `observed_at` at write time and store the absolute value (e.g. "last month" observed on 2026-05-12 → `event_time ≈ 2026-04`), keeping the original text.
@@ -168,7 +168,7 @@ Request:
   "known_at": null,
   "scope": {"prefer": ["org/acme/team/growth"], "within": "org/acme"},
   "kinds": {"fact": 10, "event": 30, "observation": 5},
-  "budget": {"tokens": 1500, "items": 50},
+  "budget": {"tokens": 1500, "items": 50, "standing": 375},
   "granularity": "auto",
   "include": {"history": false, "drafts": false, "neighbours": "auto", "explain": true},
   "mode": "balanced",
@@ -181,6 +181,8 @@ Request:
 - `known_at` answers "what did we know then?": records observed after it are inadmissible, and which version of a claim is current is decided among the remaining records only, so a correction learned later does not hide what was known then. [M76] A request without `as_of` is evaluated at the engine's clock; the resolved `as_of` is part of the request's identity for determinism (§5.9).
 - `scope.within` narrows admissibility by path segment (`org/acme` covers `org/acme/...`, not `org/acme-x`); `scope.prefer` is a soft prior that MUST NOT filter. [M21]
 - `kinds` is a list (restrict to these kinds) or a per-kind quota map (restrict to the listed kinds, at most N items of each). Engines MUST honour both forms or reject them. [M22]
+- `queries` (extra weighted queries), `cursor` and `time` are optional: an engine that does not support them MUST reject them with `unsupported_parameter` (P5) and say so in `capabilities`. [M78]
+- `budget.standing` is the share of `budget.tokens` reserved for standing context (§5.12); the engine's default MUST be declared in `capabilities.defaults`, and `0` turns standing context off. [M79]
 - `budget.tokens` is a hard cap on the rendered pack. Engines MUST report the tokeniser they count with. [M23] If omitted, the engine's default budget applies and MUST be declared in `capabilities.defaults`. [M24]
 - `granularity`: `unit \| span \| thread \| auto`. `auto` lets the engine return dialogue spans (§5.5).
 - `mode`: `fast` (no second pass), `balanced` (default), `deep` (may use model-based reranking or query decomposition; MUST declare it in `explain`). [M25]
@@ -200,7 +202,8 @@ Response (ContextPack):
     "validity": "current",
     "event_time": {"start": "2026-04-01", "end": "2026-04-30", "granularity": "month"},
     "citations": ["slack://C07/p1712345000041"],
-    "superseded": []
+    "superseded": [],
+    "standing": false
   }],
   "tokens": 1432,
   "budget": {"tokens": 1500},
@@ -297,6 +300,10 @@ If an engine uses a learned or model-based ranker, `capabilities` MUST name it w
 
 A single recall MAY span several scopes the principal can read (organisation, team, channel, user, agent). Engines MUST rank all admissible candidates on one scale rather than merging per-scope result lists by raw score, MUST return each item's `scope`, and SHOULD honour `scope.prefer` as a soft prior. [M55] Per-scope quotas, when needed, are expressed with `kinds`-style quota maps on scopes.
 
+### 5.12 Standing context
+
+A memory with `load: on_scope` is standing context: rules, preferences and constraints that should shape every action in their scope, including requests that never mention them ("post the changelog" must still meet "release notes go only to #eng-releases"). For every recall, the engine MUST select standing context only from the admissible set (§5.1, so access, validity, claim view, `known_at`, `scope.within` and `kinds` all apply first) restricted to `load: on_scope` [M80], ranks it against the query with the same channels, and packs it first within `budget.standing` tokens; the rest of the budget goes to the query results, which never repeat a standing item. Standing items are marked `standing: true`. The claim view is decided before the restriction, so a newer version of a standing preference supersedes an older one whatever its `load`.
+
 ## 6. Access control and governance
 
 ### 6.1 Principals and tokens
@@ -331,7 +338,7 @@ Every write, forget, approval and ACL change is appended to a tenant audit log `
 - **Consolidation** runs as `reflect` jobs with declared triggers (`every N units`, `on thread close`, `nightly`, `on compaction`), never inline in `remember` unless `wait: indexed` asks for it.
 - **Forgetting** is explicit (`forget`), time-based (`expires_at`) or policy-based (declared per scope). Silent FIFO or LFU deletion is non-conformant. Reads MUST NOT mutate state (no heat counters on read); usage signals go through `feedback(used)`. [M61]
 - **Retention** is enforced in real time: a record past its `expires_at` is never returned, whatever the request's `as_of`. Time travel is a view over validity, not a way round retention. [M75] (This is the one place an engine reads its clock during recall; it changes the snapshot, §5.9.)
-- **Procedures** (standing rules, skills) are versioned memories with `load: always|on_scope`, created through `propose` and activated by approval.
+- **Procedures** (standing rules, skills) are versioned memories with `load: always|on_scope`. A rule a person wrote or approved (`origin: human`) is active when written. A rule an agent writes is created through `propose` and activated by approval, with two exceptions a binding MAY offer: the person confirms it in the client before it is written (MCP elicitation, §8.1), or the deployment opts in to activating a rule that cites, in `derived_from`, a message the user wrote (an `event` or `document` with role `user` or `human` the writer can read). A rule an agent inferred on its own is always a draft.
 
 ## 8. Bindings
 
@@ -406,7 +413,7 @@ Rules: pinned dataset versions; dev/test splits with all tuning on dev for every
 
 ## Appendix C. Evidence for the claims in §0
 
-Each claim about another project is sourced in `reports/<project>.md` (code-level citations): mem0 dropped supersession links (`mem0.md` §4, §12); Cognee writes validity tags no retriever reads (`cognee.md` §12); Letta tag filters run after the result limit (`letta.md` §12); Hindsight's graph arm filters tags after its cut (`hindsight.md` §12); mem0 REST checks the key but not the user (`mem0.md` §12); MemOS `/product` has no ownership checks (`memos.md` §12); MemoryOS shares the assistant store across users (`memoryos.md` §12); Onyx `hybrid_alpha` is ignored (`onyx.md` §5); MemOS `reference_time`, `visibility` and MCP `filter` are ignored (`memos.md` §12).
+Each claim about another project comes from a code-level review of that project. The review notes (`reports/<project>.md`) are not yet published in this repository; until they are, treat these claims as unverified. The LLM-free re-implementations of each project's recall path are in `baselines/`. Claims: mem0 dropped supersession links (`mem0.md` §4, §12); Cognee writes validity tags no retriever reads (`cognee.md` §12); Letta tag filters run after the result limit (`letta.md` §12); Hindsight's graph arm filters tags after its cut (`hindsight.md` §12); mem0 REST checks the key but not the user (`mem0.md` §12); MemOS `/product` has no ownership checks (`memos.md` §12); MemoryOS shares the assistant store across users (`memoryos.md` §12); Onyx `hybrid_alpha` is ignored (`onyx.md` §5); MemOS `reference_time`, `visibility` and MCP `filter` are ignored (`memos.md` §12).
 
 ## Appendix B. Reference engine recall algorithm
 

@@ -61,7 +61,7 @@ What the developer sets in options: `scope` (for example a host user id as a sco
 and labels writes but never grants access), `thread`, `audience` (`"self"` by default, or `"tenant"`), budgets and
 `confirmForget` (called with the affected ids before a real forget; return false to cancel).
 
-Procedures are stored as drafts that a person approves. Writes carry `meta.via: "tool"`, and the gateway records the
+Procedures are stored as drafts that a person approves, unless you pass `confirmRule` and the user confirms the rule. Procedures and preferences are written with `load: "on_scope"`, so recall returns them as standing context. Writes carry `meta.via: "tool"`, and the gateway records the
 authenticated writer as `written_by`.
 
 ## Smartware level
