@@ -58,7 +58,8 @@ export const RecallRequest: S = obj({
   as_of: nullable(ts), known_at: nullable(ts),
   scope: { anyOf: [str, obj({ within: str, prefer: strs })] },
   kinds: { anyOf: [strs, { type: "object", additionalProperties: { type: "integer", minimum: 0 } }, { type: "null" }] },
-  budget: obj({ tokens: { type: "integer", minimum: 50 }, items: { type: "integer", minimum: 1 } }),
+  budget: obj({ tokens: { type: "integer", minimum: 50 }, items: { type: "integer", minimum: 1 },
+    standing: { type: "integer", minimum: 0, description: "tokens reserved for standing context (load: on_scope); default a quarter of tokens" } }),
   granularity: { enum: ["unit", "span", "thread", "auto"] },
   include: obj({ history: { type: "boolean" }, drafts: { type: "boolean" }, neighbours: { anyOf: [{ type: "integer", minimum: 0, maximum: 10 }, { const: "auto" }, { type: "null" }] },
     explain: { type: "boolean" }, labels: strs }),
@@ -69,6 +70,7 @@ export const RecallRequest: S = obj({
 export const ContextItem: S = obj({
   ref: str, memory_ids: strs, kind: KIND, scope: str, text: str, tokens: { type: "integer" }, score: { type: "number" },
   why: { type: "object" }, validity: { enum: ["current", "superseded", "historical"] }, event_time: {}, citations: strs, superseded: strs,
+  standing: { type: "boolean", description: "standing context (load: on_scope), returned whether or not the query matched it" },
 }, ["memory_ids", "text", "tokens", "score", "why", "validity", "citations"]);
 
 export const ContextPack: S = obj({

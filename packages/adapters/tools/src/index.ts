@@ -39,6 +39,10 @@ export interface ToolOptions {
   /** Called before a real (not dry-run) forget with the affected ids; return false to cancel. Without it, the
    * tool description tells the model to confirm with the user first. */
   confirmForget?: (affected: string[]) => Promise<boolean> | boolean;
+  /** Called before a standing rule (kind procedure) is saved, with its text; return true when the user confirms it,
+   * and it is stored active, as approved by a person. Without it (or on false) a rule is stored as a draft that a
+   * person approves before it applies. */
+  confirmRule?: (content: string) => Promise<boolean> | boolean;
 }
 
 export interface RecallResult {
@@ -79,7 +83,7 @@ export function createMemoryTools(client: MemoryApi, opts: ToolOptions = {}): Me
 
   const rememberSchema = obj({
     content: { type: "string", maxLength: 8000, description: "The fact, preference or rule, stated on its own." },
-    kind: { type: "string", enum: KINDS_FOR_REMEMBER, default: "fact", description: "fact (default), preference, or procedure (a standing rule; stored as a draft a person must approve)." },
+    kind: { type: "string", enum: KINDS_FOR_REMEMBER, default: "fact", description: "fact (default), preference, or procedure (a standing rule; the user confirms it, or it is stored as a draft a person must approve)." },
     claim: obj({ subject: str(), predicate: str(), object: str() }, ["subject", "predicate", "object"]),
     event_time: str("ISO 8601 time the fact became true, when known."),
     idempotency_key: str("Reuse the same key when retrying the same write."),
@@ -116,12 +120,16 @@ export function createMemoryTools(client: MemoryApi, opts: ToolOptions = {}): Me
     remember: tool("remember", "Store a durable fact, preference or standing rule. Use a claim when it replaces an earlier fact (a new address, a new owner). Never store secrets, credentials, payment or ID numbers.",
       rememberSchema, { readOnlyHint: false, destructiveHint: false, idempotentHint: true }, async (a) => {
         const kind = a.kind ?? "fact";
+        // a rule the user confirmed is stored active, as approved by a person; any other rule is a draft
+        const confirmed = kind === "procedure" && opts.confirmRule ? Boolean(await opts.confirmRule(a.content)) : false;
+        const draft = kind === "procedure" && !confirmed;
         const r = await client.remember({ content: a.content, kind, ...(a.claim ? { claim: a.claim } : {}),
-          ...(a.event_time !== undefined ? { event_time: a.event_time } : {}), meta: { via: "tool" } },
+          ...(a.event_time !== undefined ? { event_time: a.event_time } : {}),
+          ...(kind === "procedure" || kind === "preference" ? { load: "on_scope" as const } : {}), meta: { via: "tool" } },
         { audience: opts.audience ?? "self", ...scoped, ...(opts.thread !== undefined ? { thread: opts.thread } : {}),
-          ...(a.idempotency_key !== undefined ? { idempotencyKey: a.idempotency_key } : {}) });
-        return { ids: r.ids, replayed: r.replayed, status: kind === "procedure" ? "draft" : "active",
-          ...(kind === "procedure" ? { note: "standing rules are stored as drafts; a person approves them before they apply" } : {}),
+          ...(a.idempotency_key !== undefined ? { idempotencyKey: a.idempotency_key } : {}), ...(confirmed ? { mode: "append" as const } : {}) });
+        return { ids: r.ids, replayed: r.replayed, status: draft ? "draft" : "active",
+          ...(draft ? { note: "stored as a draft: a person approves it before it applies" } : {}),
           degraded: r.degraded ?? [] };
       }),
     forget: tool("forget", "Retract memories and anything derived from them. Destructive: use dry_run first and confirm with the user.",

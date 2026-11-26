@@ -132,7 +132,10 @@ export function pyCmp(a: string, b: string): number {
 /** De-duplication key (spec §4.1, M17): scoped to tenant AND writer AND audience. JSON form, as the store keeps it. */
 export function dedupKey(m: Memory, writer: string): string {
   const rd = m.readers !== null ? sorted(m.readers) : null;
-  return pyDumps(["content", m.tenant, writer, rd, sorted(m.labels), contentHash(m)]);
+  // a positioned unit (seq > 0) also keys on its position: the same words said twice in one thread stay two events
+  const key: unknown[] = ["content", m.tenant, writer, rd, sorted(m.labels), contentHash(m)];
+  if (m.seq) key.push(m.seq);
+  return pyDumps(key);
 }
 
 export function idemDedupKey(tenant: string, writer: string, key: string): string {
@@ -206,7 +209,7 @@ export interface RecallRequest {
   mode: string;
   filters: {
     labels?: string[]; drafts?: boolean; granularity?: string; neighbours?: number;
-    quotas?: Record<string, number>; prefer?: string[];
+    quotas?: Record<string, number>; prefer?: string[]; load?: string[];
   };
 }
 

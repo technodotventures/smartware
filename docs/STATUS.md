@@ -29,6 +29,29 @@ suite on its own and against the product engine, the Python client, `smartware d
 check, the release gate, persistence and differential fuzzing, and a Postgres job (store, leases, forwarding, backup,
 the conformance suite and both fuzzers on Postgres).
 
+## Action-memory review (25 November 2026)
+A design review against action-grading benchmarks (DolphinBench: an agent must apply a rule stated months earlier
+to a request that never mentions it) found that standing rules were stored but never surfaced. Fixed:
+- **Standing context** (spec §5.12, M78-M80): `load: on_scope` now means something. Every recall returns the
+  admissible `on_scope` memories that best fit the query first, within `budget.standing` (default a quarter of the
+  budget), marked `standing: true`, whether or not the query mentions them. No `on_scope` memories, no change.
+- **Rules that apply**: over MCP (safe toolset) a rule is active when the person confirms it in the client
+  (elicitation), or, with `serve --rules user-stated`, when it cites the user's own message as `source_id`.
+  Otherwise it is a draft, as before. The tools adapter has the same confirmation hook (`confirmRule`). Rules and
+  preferences are written `load: on_scope`.
+- **Snippets** of long units always keep the unit's segment closest to the query, so a message found by meaning is
+  not cut down to its word-matching sentences.
+- **Repeated short turns** ("ok", "yes") at different positions in a thread are no longer merged by content
+  de-duplication.
+- **MUST checklist** now includes requirements tagged in sentences phrased without MUST (M69, M72, M75, M76).
+- **Edge listing** is ordered by (from, to, type) in both engines (an import no longer changes the order).
+
+Still open from that review: model-backed extraction from raw conversations (below); optional `condition` text on
+rules; entity matching for `#channels`, `@handles` and lowercase names; extra weighted `queries` (rejected, as the
+spec allows); `observed_at` for imported history is the import time, so `known_at` is not meaningful for it; the
+persistence fuzzer reports an empty claim chain that a reload drops (internal bookkeeping only, present before
+this work); the product is 2.0.0 while the spec document is still titled 0.1.
+
 ## Not done, and why
 - **Approximate dense index for very large tenants** (above about 50,000 units): recall is exact and linear; see
   results/PERFORMANCE.md. Split large tenants by scope meanwhile.

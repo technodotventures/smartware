@@ -204,6 +204,8 @@ export class Engine {
   private hasRolesQ = false;
   private asksAssistant = false;
   private nParts = 0;
+  /** per unit, the sentence offset of its segment closest to the query in the dense space (this recall) */
+  private bestSeg = new Map<number, number>();
   private qtext = "";
   collect = false;
   last: [number[], Float32Array[]] | null = null;
@@ -701,6 +703,10 @@ export class Engine {
         }
       });
     }
+    const loads = req.filters.load;
+    if (loads?.length) { // standing-context recall (§5.12): after the claim view, so a newer version of any load still wins
+      for (let k = 0; k < P.n; k++) if (ok[k] && !loads.includes(P.mems[k]!.load)) ok[k] = 0;
+    }
     return ok;
   }
 
@@ -802,13 +808,21 @@ export class Engine {
     const segScore = P.bmSeg.score(q, segmask);
     const ub = new Float64Array(n);
     const ud = new Float64Array(n).fill(-1);
+    this.bestSeg = new Map();
+    const bestD = new Map<number, number>();
+    let segStart = 0;
     for (let j = 0; j < P.segUnit.length; j++) {
       const k = P.segUnit[j]!;
+      if (j === 0 || P.segUnit[j - 1] !== k) segStart = j;
       if (!mask[k]) continue;
       const b = segmask[j] ? segScore[j]! : 0;
       if (b > ub[k]!) ub[k] = b;
       const d = P.segSame[j] ? sDense[k]! : qdot(P.ES, j);
       if (d > ud[k]!) ud[k] = d;
+      if (!this.bestSeg.has(k) || d > bestD.get(k)!) { // the unit's closest window (first maximum), kept by snippets
+        this.bestSeg.set(k, j - segStart);
+        bestD.set(k, d);
+      }
     }
     chans.set("bm25_seg", { w: p.w_bm25_seg, ranks: topranks(ub) });
     const ud1 = new Float64Array(n);
@@ -1211,10 +1225,13 @@ export class Engine {
     const sents = sentences(m.content);
     if (sents.length <= this.p.snippet_sentences) return [m.content, 1.0];
     const qs = new Set(qterms);
+    // the sentences of the unit's closest segment are always kept: a long message found by meaning, not by the
+    // query's words, must not be snippeted down to its word-matching sentences and lose the part that matched
+    const b = this.bestSeg.get(k) ?? -1, w = this.p.seg_sentences;
     const scored = sents.map((s, i) => {
       let h = 0;
       for (const t of new Set(terms(s))) if (qs.has(t)) h++;
-      return [h + (i === 0 ? 0.5 : 0), i] as [number, number];
+      return [h + (i === 0 ? 0.5 : 0) + (b >= 0 && i >= b && i < b + w ? 1000 : 0), i] as [number, number];
     });
     scored.sort((a, b) => b[0] - a[0] || b[1] - a[1]); // sorted(reverse=True) on (score, index)
     const keep = scored.slice(0, this.p.snippet_sentences).map((x) => x[1]).sort((a, b) => a - b);

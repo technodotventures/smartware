@@ -131,6 +131,7 @@ class Engine:
         self._wseq = 0
         self._secret = os.urandom(16)
         self._view_sup: dict[str, str] = {}
+        self._best_seg: dict[int, int] = {}
         self._has_expiry = False
 
     # ------------------------------------------------------------ write
@@ -431,6 +432,9 @@ class Engine:
                 seg_txt.append(f"{m.actor}: " + " ".join(ss[i:i + w]))
                 seg_unit.append(k)
         self.seg_unit = np.array(seg_unit, dtype=int)
+        self._seg_start = {}
+        for j, k in enumerate(seg_unit):
+            self._seg_start.setdefault(k, j)
         self.bm_seg = BM25(seg_txt)
         self.ES = self.emb.embed_many(seg_txt) if seg_txt else np.zeros((0, 1))
         self.bm = BM25(unit_txt)
@@ -553,6 +557,11 @@ class Engine:
                     self._view_sup[i] = succ
                     if not req.include_history:
                         ok[self.pos[i]] = False
+        loads = req.filters.get("load")
+        if loads:  # standing-context recall (§5.12): after the claim view, so a newer version of any load still wins
+            for k, i in enumerate(self.ids):
+                if ok[k] and self.mem[i].load not in loads:
+                    ok[k] = False
         return ok
 
     def admissible(self, req: RecallRequest) -> list[str]:
@@ -630,7 +639,14 @@ class Engine:
         np.maximum.at(ub, self.seg_unit, np.where(segmask, self.bm_seg.score(
             q, mask=segmask if p.admissible_stats else None, exact=True), 0.0))
         ud = np.full(n, -1.0)
-        np.maximum.at(ud, self.seg_unit, self._dot(self.ES, qvec))
+        seg_d = self._dot(self.ES, qvec)
+        np.maximum.at(ud, self.seg_unit, seg_d)
+        # per unit, the sentence offset of its segment closest to the query (first maximum), kept by snippets
+        self._best_seg, best_d = {}, {}
+        for j in np.flatnonzero(segmask):
+            k, d = int(self.seg_unit[j]), float(seg_d[j])
+            if k not in best_d or d > best_d[k]:
+                self._best_seg[k], best_d[k] = int(j - self._seg_start[k]), d
         chans["bm25_seg"] = (p.w_bm25_seg, topranks(ub))
         chans["dense_seg"] = (p.w_dense_seg, topranks(ud + 1.0))
         th_b = np.zeros(len(self.threads))
@@ -967,7 +983,11 @@ class Engine:
         if len(sents) <= self.p.snippet_sentences:
             return m.content, 1.0
         qs = set(qterms)
-        scored = [(len(set(terms(s)) & qs) + (0.5 if i == 0 else 0), i) for i, s in enumerate(sents)]
+        # the sentences of the unit's closest segment are always kept: a long message found by meaning, not by the
+        # query's words, must not be snippeted down to its word-matching sentences and lose the part that matched
+        b, w = self._best_seg.get(k, -1), self.p.seg_sentences
+        scored = [(len(set(terms(s)) & qs) + (0.5 if i == 0 else 0) + (1000 if b >= 0 and b <= i < b + w else 0), i)
+                  for i, s in enumerate(sents)]
         keep = sorted(i for _, i in sorted(scored, reverse=True)[: self.p.snippet_sentences])
         out, last = (["…"] if keep[0] > 0 else []), -1
         for i in keep:

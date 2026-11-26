@@ -103,9 +103,12 @@ class Memory:
 
     def dedup_key(self, writer: str) -> tuple:
         """Content de-duplication key (spec §4.1, M17): scoped to tenant AND writer AND access, so a write never
-        resolves to (or reveals) a record another principal wrote or one with a different audience."""
+        resolves to (or reveals) a record another principal wrote or one with a different audience. A positioned unit
+        (seq > 0) also keys on its position, so the same words said twice in one thread ("ok", "yes") stay two
+        events (P1: the raw tier is lossless); unpositioned writes keep the original key."""
         rd = tuple(sorted(self.readers)) if self.readers is not None else None
-        return ("content", self.tenant, writer, rd, tuple(sorted(self.labels)), self.content_hash())
+        key = ("content", self.tenant, writer, rd, tuple(sorted(self.labels)), self.content_hash())
+        return key + (self.seq,) if self.seq else key
 
     def to_json(self) -> dict:
         d = asdict(self)
