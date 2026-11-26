@@ -1,5 +1,6 @@
 // Differential bridge (audit copy of tools/bridge/server.mjs): the TypeScript Service over JSON lines, with a
-// controllable clock (op "clock" freezes Date.now at a given epoch-ms) and the TS-only verbs list/unlink.
+// controllable clock (op "clock" freezes Date.now and performance.now at a given epoch-ms) and the TS-only verbs
+// list/unlink.
 import { createInterface } from "node:readline";
 import { Service, SqliteStore, PgStore, Principal, HashingEncoder, defaultParams, withParams, SmartwareError } from "../../packages/core/dist/index.js";
 import { randomBytes } from "node:crypto";
@@ -11,6 +12,10 @@ const schemas = new Map();
 let frozen = null;
 const realNow = Date.now;
 Date.now = () => (frozen === null ? realNow() : frozen);
+// The engine stamps records from performance.timeOrigin + performance.now() (core/src/time.ts nowMicros), so the
+// frozen clock has to cover it too, or records carry today's date while the oracle's carry the frozen one.
+const realPerfNow = performance.now.bind(performance);
+performance.now = () => (frozen === null ? realPerfNow() : frozen - performance.timeOrigin);
 const svcs = new Map();
 let nextH = 1;
 const pr = (p) => new Principal(p.id, p.groups, p.tenant);

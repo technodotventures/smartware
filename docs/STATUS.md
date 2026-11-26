@@ -38,8 +38,8 @@ the conformance suite and both fuzzers on Postgres).
 - **Host-framework interfaces** (Mastra, LangGraph, AI SDK, OpenAI Agents SDK, Claude Agent SDK, mem0, Letta) were
   written from knowledge of their 2025 releases without installing them (the package registry was blocked here);
   each adapter README says what to check.
-- **Lockfile**: `package-lock.json` could not be generated here (registry blocked). Run `npm install --ignore-scripts`
-  once on a clean machine and commit it; CI then uses `npm ci`.
+- **Lockfile**: committed (`package-lock.json`, dev tools only: typescript, @types/node). CI and the release job use
+  `npm ci`.
 - **Release day**: npm trusted publishers expire if unused for 2 days, so they are added on release day, stage-only,
   following "Releasing" in docs/OPERATIONS.md. New package names are claimed first with a local staged publish.
 - **npm org 2FA enforcement**: off for now, because one member does not have 2FA yet and turning enforcement on
