@@ -92,7 +92,10 @@ class _Chat:
         if self.openrouter:
             body["usage"] = {"include": True}
         data = json.dumps(body).encode()
-        for attempt in range(6):
+        # HTTP failures get 6 attempts. A lost network (DNS, refused, laptop asleep) is waited out for up to 30 minutes
+        # instead, since giving up there kills a multi-hour run that would otherwise just continue.
+        attempt, offline_until = 0, None
+        while True:
             req = urllib.request.Request(f"{self.base}/chat/completions", data=data, method="POST",
                                          headers={"authorization": f"Bearer {key}", "content-type": "application/json"})
             try:
@@ -105,11 +108,21 @@ class _Chat:
                 if e.code in (400, 401, 402, 403, 404):
                     raise RuntimeError(f"{self.model}: HTTP {e.code} {e.read()[:300]!r}") from None
                 err = e
-            except (urllib.error.URLError, TimeoutError) as e:
+            except (urllib.error.URLError, TimeoutError, ConnectionError) as e:
+                offline_until = offline_until or time.monotonic() + NETWORK_PATIENCE_S
+                if time.monotonic() < offline_until:
+                    time.sleep(30)
+                    continue
                 err = e
+            else:
+                offline_until = None
+            attempt += 1
+            if attempt >= 6 or (offline_until and time.monotonic() >= offline_until):
+                raise RuntimeError(f"{self.model}: giving up after retries: {err}")
             time.sleep(min(60, 2 ** attempt))
-        raise RuntimeError(f"{self.model}: giving up after retries: {err}")
 
+
+NETWORK_PATIENCE_S = 1800
 
 def _usage(u: dict) -> dict:
     """The API's usage, in the OpenAI form the submission validator reads (cost is kept in the ledger)."""
@@ -384,14 +397,21 @@ class SmartwareHarness:
         return InteractionRecord(settings=settings, messages=record)
 
     def _extract(self, sw: _Http, persona: str, item: str, source: str):
-        job = sw.call("POST", "/reflect", {"kinds": ["fact", "preference", "procedure"], "ids": [source]})["job"]
-        for _ in range(3000):
-            j = sw.call("GET", f"/jobs/{job}")
-            if j["status"] != "running":
-                break
-            time.sleep(0.1)
-        else:
-            raise RuntimeError(f"extraction job {job} did not finish")
+        give_up = time.monotonic() + NETWORK_PATIENCE_S
+        while True:
+            job = sw.call("POST", "/reflect", {"kinds": ["fact", "preference", "procedure"], "ids": [source]})["job"]
+            for _ in range(3000):
+                j = sw.call("GET", f"/jobs/{job}")
+                if j["status"] != "running":
+                    break
+                time.sleep(0.1)
+            else:
+                raise RuntimeError(f"extraction job {job} did not finish")
+            # a job that failed because the model API was unreachable wrote nothing: run it again once the network is back
+            if j["status"] == "failed" and "unreachable" in str(j.get("error")) and time.monotonic() < give_up:
+                time.sleep(30)
+                continue
+            break
         if j["status"] != "completed":
             raise RuntimeError(f"extraction failed: {j.get('error')}")
         u = j["usage"]
