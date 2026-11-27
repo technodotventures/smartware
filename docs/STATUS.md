@@ -46,7 +46,11 @@ to a request that never mentions it) found that standing rules were stored but n
 - **MUST checklist** now includes requirements tagged in sentences phrased without MUST (M69, M72, M75, M76).
 - **Edge listing** is ordered by (from, to, type) in both engines (an import no longer changes the order).
 
-Still open from that review: model-backed extraction from raw conversations (below); optional `condition` text on
+Then: model-backed extraction (below), read-only credentials (`smartware keys add --read-only`), and a
+DolphinBench harness with a one-persona trial (`tools/dolphinbench/`), checked end to end against a fake model.
+No paid benchmark run yet.
+
+Still open from that review: optional `condition` text on
 rules; entity matching for `#channels`, `@handles` and lowercase names; extra weighted `queries` (rejected, as the
 spec allows); `observed_at` for imported history is the import time, so `known_at` is not meaningful for it; the
 persistence fuzzer reports an empty claim chain that a reload drops (internal bookkeeping only, present before
@@ -55,8 +59,10 @@ this work); the product is 2.0.0 while the spec document is still titled 0.1.
 ## Not done, and why
 - **Approximate dense index for very large tenants** (above about 50,000 units): recall is exact and linear; see
   results/PERFORMANCE.md. Split large tenants by scope meanwhile.
-- **Model-backed reflect and extraction** (the Model port, via MCP sampling or an injected completion function):
-  reflect is still deterministic and extractive.
+- **Model-backed reflect**: extraction is done (`reflect` with kinds fact/preference/procedure and `ids`, through
+  `serve --extract-model openai:<model>@<url>`; any OpenAI-compatible endpoint, key from an environment variable).
+  Model-backed summaries and MCP sampling as the model source are not done; summaries are still extractive.
+  The Python oracle has no model and rejects extraction kinds, as the spec allows.
 - **Per-tenant locking inside one process**: a node runs one verb at a time; it scales out across nodes, by tenant.
 - **Host-framework interfaces** (Mastra, LangGraph, AI SDK, OpenAI Agents SDK, Claude Agent SDK, mem0, Letta) were
   written from knowledge of their 2025 releases without installing them (the package registry was blocked here);

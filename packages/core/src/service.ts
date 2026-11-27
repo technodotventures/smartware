@@ -7,6 +7,8 @@
 import { createHash, randomBytes } from "node:crypto";
 import { Engine, newJournal } from "./engine.js";
 import type { Encoder } from "./encoders.js";
+import { EXTRACTION_KINDS, extractFrom, type ExtractionKind } from "./extract.js";
+import type { ChatModel } from "./llm.js";
 import { claimKey, contentHash, type ContextPack, KINDS, makeMemory, memoryFromJson, memoryToJson, newId, ORIGINS, Principal,
   pyCmp, recallRequest, type Claim, type Memory, type Source } from "./model.js";
 import type { Params } from "./params.js";
@@ -175,6 +177,8 @@ export interface ServiceOptions {
   notes?: string[];
   /** Persist remote-encoder vectors in the store so restarts do not re-embed. */
   cacheVectors?: boolean;
+  /** The Model port (spec §4.6): enables model-backed reflect (extraction of facts, preferences and rules). */
+  model?: ChatModel;
 }
 
 interface ChangeEntry extends Json { cursor: number; _iid: string; tenant: string }
@@ -227,6 +231,9 @@ export class Service {
   private readonly idleTenantMs: number;
   private readonly releaseOnClose: boolean;
 
+  /** The Model port, when model-backed reflect is enabled. */
+  readonly model: ChatModel | null;
+
   constructor(readonly enc: Encoder, opts: ServiceOptions = {}) {
     this.engine = new Engine(enc, opts.params);
     this.tokenizer = opts.tokenizer ?? "smartware-approx-1";
@@ -237,6 +244,7 @@ export class Service {
     this.notes = opts.notes ?? [];
     this.idleTenantMs = opts.idleTenantMs ?? 10 * 60_000;
     this.releaseOnClose = opts.releaseLeasesOnClose ?? true;
+    this.model = opts.model ?? null;
     if (this.store && opts.cacheVectors !== false && "persist" in enc) {
       const st = this.store;
       // reads and writes of cached vectors go straight to the store; deletions (purge, redact) join the verb's
@@ -502,6 +510,11 @@ export class Service {
 
   /** Run a verb under the lock, loading the caller's tenant and persisting what changed (or nothing, on error). */
   private async verb<T>(pr: Principal, write: boolean, fn: () => T | Promise<T>, extra: string[] = []): Promise<T> {
+    // a credential with an empty write-scope list may write nowhere: every changing verb is refused, not only
+    // remember (which checks the scope of each record)
+    if (write && pr.writeScopes !== null && pr.writeScopes.length === 0) {
+      throw new SmartwareError("forbidden", "this credential is read-only");
+    }
     return this.lock.run(async () => {
       try {
         await this.ready();
@@ -681,6 +694,7 @@ export class Service {
         content: "per (tenant, writer, readers, labels, thread, actor, content, seq when set), unbounded window" },
       secret_scan: this.secretScan ? "content that looks like a credential is labelled secret on remember" : "off",
       defaults: { "budget.tokens": DEFAULT_RECALL_BUDGET, "budget.items": 50, "budget.standing": "budget.tokens // 4" },
+      reflect: this.model ? { kinds: ["summary", ...EXTRACTION_KINDS], model: this.model.name } : { kinds: ["summary"] },
       standing_context: "load: on_scope memories, admissible-first, ranked against the query, packed first within budget.standing (§5.12)",
       limits: { max_items: MAX_ITEMS, max_budget_tokens: MAX_BUDGET },
     });
@@ -1269,12 +1283,20 @@ export class Service {
 
   // ------------------------------------------------------------ reflect (deterministic consolidation)
   async reflect(body: unknown, pr: Principal): Promise<Json> {
-    checkKeys(body, new Set(["scope", "threads", "kinds"]), "reflect");
+    checkKeys(body, new Set(["scope", "threads", "kinds", "ids"]), "reflect");
     const want = body.threads ? new Set(strs(body.threads, "threads")!) : null;
     const kinds = strs(body.kinds ?? ["summary"], "kinds")!;
-    if (kinds.length === 0 || kinds.some((k) => k !== "summary")) {
-      throw new SmartwareError("unsupported_parameter", "this engine's reflect produces summaries only", { parameters: ["kinds"] });
+    const model = this.model;
+    const extract = kinds.filter((k) => (EXTRACTION_KINDS as readonly string[]).includes(k)) as ExtractionKind[];
+    if (kinds.length === 0 || kinds.some((k) => k !== "summary" && !(model && extract.includes(k as ExtractionKind)))) {
+      throw new SmartwareError("unsupported_parameter", model ? "reflect kinds: summary, or any of fact, preference, procedure"
+        : "this engine's reflect produces summaries only", { parameters: ["kinds"] });
     }
+    if (extract.length) {
+      if (kinds.includes("summary")) throw new SmartwareError("invalid_parameter", "summaries and extraction run as separate jobs");
+      return this.extractJob(body, pr, extract, model!);
+    }
+    if ("ids" in body) throw new SmartwareError("invalid_parameter", "ids selects the messages to extract from (extraction kinds only)");
     if (body.scope !== undefined && typeof body.scope !== "string") throw new SmartwareError("invalid_parameter", "scope must be a string");
     const sc = String(body.scope ?? "").replace(/\/+$/, "");
     return this.verb(pr, true, () => {
@@ -1313,6 +1335,46 @@ export class Service {
       this.jJobs.add(job);
       return env({ job, status: "completed", created: made });
     });
+  }
+
+  /** Model-backed reflect: extract from the messages in ids, in order, in the background. The job reports what it
+   * created and replaced and the model usage, so a host can account for its cost. */
+  private async extractJob(body: Json, pr: Principal, kinds: ExtractionKind[], model: ChatModel): Promise<Json> {
+    const ids = strs(body.ids, "ids") ?? [];
+    if (!ids.length || ids.length > 200) throw new SmartwareError("invalid_parameter", "extraction needs ids: 1 to 200 message ids");
+    if (body.threads !== undefined || body.scope !== undefined) {
+      throw new SmartwareError("invalid_parameter", "extraction takes ids, not threads or scope");
+    }
+    const job = "job_" + randomBytes(6).toString("hex");
+    const rec: Json = { status: "running", kinds, sources: ids.length, created: [], replaced: [], skipped: 0, model: model.name,
+      usage: { input_tokens: 0, cached_input_tokens: 0, output_tokens: 0, cost_usd: 0, calls: 0, unpriced_calls: 0 }, tenant: pr.tenant };
+    await this.verb(pr, true, () => { this.jobs.set(job, rec); this.jJobs.add(job); });
+    void (async () => {
+      try {
+        for (const id of ids) {
+          const r = await extractFrom(this, pr, id, model, kinds);
+          rec.created.push(...r.created);
+          rec.replaced.push(...r.replaced);
+          if (r.skipped) rec.skipped++;
+          for (const u of r.usage) {
+            rec.usage.calls++;
+            rec.usage.input_tokens += u.input_tokens;
+            rec.usage.cached_input_tokens += u.cached_input_tokens;
+            rec.usage.output_tokens += u.output_tokens;
+            if (u.cost_usd === null) rec.usage.unpriced_calls++;
+            else rec.usage.cost_usd += u.cost_usd;
+          }
+        }
+        rec.status = "completed";
+      } catch (e) {
+        rec.status = "failed";
+        rec.error = String(e instanceof Error ? e.message : e);
+      }
+      try {
+        await this.verb(pr, true, () => { this.jJobs.add(job); });
+      } catch { /* the job record stays in memory; a later write persists it */ }
+    })();
+    return env({ job, status: "running", created: [] });
   }
 
   async job(jobId: unknown, pr: Principal): Promise<Json> {

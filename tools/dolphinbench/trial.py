@@ -1,0 +1,86 @@
+"""A cheaper DolphinBench trial: one persona, optionally the first N of its tests, through the official runner code
+(same apps, same grading, same evidence files). Not a submission: the package stage needs all three personas.
+
+Run from the DolphinBench checkout, with this directory on PYTHONPATH:
+
+    PYTHONPATH=<smartware>/tools/dolphinbench:. python <smartware>/tools/dolphinbench/trial.py \\
+        --config <run.yaml> --persona morgan [--tests 50] --confirm-paid-calls
+
+It never looks at test content: it only takes the first N entries of the persona's test list.
+
+Without an Azure account, --judge-model <openrouter model id> grades with DolphinBench's own OpenAI-compatible judge
+backend on OpenRouter instead of the fixed Azure gpt-5.6-sol. Deterministic checks are unchanged; only the checks that
+need a judge differ. Such a score is unofficial and not comparable digit for digit with the leaderboard.
+"""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import sys
+from pathlib import Path
+
+import os
+
+import yaml
+
+
+def main(argv=None) -> int:
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--config", type=Path, required=True)
+    ap.add_argument("--persona", choices=("morgan", "alex", "riley"), default="morgan")
+    ap.add_argument("--tests", type=int, default=None, help="only the first N tests of the persona (default: all 200)")
+    ap.add_argument("--sessions", type=int, default=None,
+                    help="only the first N history messages (smoke runs only: later tests then lack their history)")
+    ap.add_argument("--stage", choices=("ingest", "evaluate", "both"), default="both")
+    ap.add_argument("--judge-model", default=None,
+                    help="unofficial: grade judge checks with this OpenRouter model (key in OPENROUTER_API_KEY)")
+    ap.add_argument("--confirm-paid-calls", action="store_true")
+    a = ap.parse_args(argv)
+    if a.judge_model:  # read by graders.llm_judge at import, so set before importing the runner
+        os.environ["DOLPHINBENCH_JUDGE_BACKEND"] = "openai"
+        os.environ["DOLPHINBENCH_JUDGE_MODEL"] = a.judge_model
+    from harness.adapter import load_adapter
+    from harness.runner import ROOT, Runner, run_lock
+    from harness.submission import load_json, read_release
+    if not a.confirm_paid_calls:
+        print("This calls the agent model, the extraction model and the grader: add --confirm-paid-calls.", file=sys.stderr)
+        return 2
+    config = yaml.safe_load(a.config.read_text())
+    base = a.config.resolve().parent
+    release_root = (base / config["release"]).resolve()
+    output = (base / config["output"]).resolve()
+    full = read_release(release_root)
+    part = dict(full[a.persona])
+    if a.sessions is not None:
+        part["sessions"] = part["sessions"][: a.sessions]
+    if a.tests is not None:
+        part["tests"] = part["tests"][: a.tests]
+    release = {a.persona: part}
+    with run_lock(output):
+        adapter = load_adapter(config["adapter"], config["options"], output)
+        identity = {"config": config, "trial": {"persona": a.persona, "tests": a.tests, "sessions": a.sessions,
+                                                 "judge": a.judge_model or "azure:gpt-5.6-sol (official)"},
+                    "adapter": adapter.identity(),
+                    "runner_sha256": hashlib.sha256((ROOT / "harness/runner.py").read_bytes()).hexdigest()}
+        # the runner insists on the official Azure judge for paid runs; an unofficial judge is enabled after that check
+        runner = Runner(release, output, adapter, identity=identity, release_root=release_root, allow_paid=not a.judge_model)
+        runner.allow_paid = True
+        if a.stage in ("ingest", "both"):
+            runner.ingest()
+        if a.stage in ("evaluate", "both"):
+            runner.evaluate()
+            passed = total = 0
+            for spec in part["tests"]:
+                g = load_json(runner._path("grades", a.persona, str(spec["id"]).zfill(3)).read_bytes())
+                total += 1
+                passed += all(c["passed"] for c in g["checks"])
+            costs = {p: load_json((output / "costs" / f"{p}.json").read_bytes())["total_cost_usd"]
+                     for p in ("ingestion", "tests") if (output / "costs" / f"{p}.json").exists()}
+            print(json.dumps({"persona": a.persona, "judge": a.judge_model or "azure:gpt-5.6-sol", "passed": passed, "tests": total,
+                              "accuracy": round(passed / max(1, total), 4), "cost_usd": costs}, indent=2))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
