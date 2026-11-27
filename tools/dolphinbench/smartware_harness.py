@@ -124,6 +124,28 @@ class _Chat:
 
 NETWORK_PATIENCE_S = 1800
 
+
+def _app_calls(request, messages):
+    """The app server's log of this interaction, as the grader needs it (docs/DRIVER_CONTRACT.md section 2).
+
+    The app logs every parameter of a tool, filling the ones the model left out with null (send_email without a cc
+    is logged with "cc": null). The grader then finds no conversation call with those arguments. Each logged call is
+    paired, in order, with the model's call of the same tool, and nulls the model did not send are dropped. Nothing
+    else changes: tool, the other arguments and the app's result are the log's own."""
+    from graders.mechanical import load_tool_calls
+    logged = load_tool_calls(Path(request.apps["env"]["DOLPHINBENCH_LOG_PATH"]))
+    sent: dict[str, list[dict]] = {}
+    for m in messages:
+        for c in m.get("tool_calls") or []:
+            sent.setdefault(c["name"], []).append(c["arguments"])
+    out = []
+    for call in logged:
+        mine = sent.get(call["tool"], [])
+        model_args = mine.pop(0) if mine else {}
+        args = {k: v for k, v in call["args"].items() if v is not None or k in model_args}
+        out.append({"tool": call["tool"], "args": args, **({"result": call["result"]} if "result" in call else {})})
+    return out
+
 def _usage(u: dict) -> dict:
     """The API's usage, in the OpenAI form the submission validator reads (cost is kept in the ledger)."""
     out = {"prompt_tokens": int(u.get("prompt_tokens") or 0), "completion_tokens": int(u.get("completion_tokens") or 0)}
@@ -311,7 +333,9 @@ class SmartwareHarness:
         from examples.mcp_connection import connect_apps
         async with connect_apps(request.apps) as apps:
             tools = (await apps.list_tools()).tools
-            return await self.run_agent(request, tools, apps.call_tool)
+            out = await self.run_agent(request, tools, apps.call_tool)
+        out.app_calls = _app_calls(request, out.messages)
+        return out
 
     async def run_agent(self, request, tools, call_app) -> InteractionRecord:
         self._check_budget()  # before any paid call; the runner can resume from here later
