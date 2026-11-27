@@ -128,10 +128,12 @@ NETWORK_PATIENCE_S = 1800
 def _app_calls(request, messages):
     """The app server's log of this interaction, as the grader needs it (docs/DRIVER_CONTRACT.md section 2).
 
-    The app logs every parameter of a tool, filling the ones the model left out with null (send_email without a cc
-    is logged with "cc": null). The grader then finds no conversation call with those arguments. Each logged call is
-    paired, in order, with the model's call of the same tool, and nulls the model did not send are dropped. Nothing
-    else changes: tool, the other arguments and the app's result are the log's own."""
+    The app logs each call with its defaults filled in (send_email without cc is logged with "cc": null,
+    list_open_prs with "status": "open"), so its arguments no longer match the conversation and the grader stops.
+    Like the reference adapter, each logged call is reported with the arguments the model sent. It is paired with the
+    most specific unused model call of that tool whose arguments all appear, unchanged, in the logged ones (calls the app
+    rejected before running are not logged, so plain order does not work); the tool, the order and the app's result
+    are the log's own. A logged call with no such model call keeps its logged arguments."""
     from graders.mechanical import load_tool_calls
     logged = load_tool_calls(Path(request.apps["env"]["DOLPHINBENCH_LOG_PATH"]))
     sent: dict[str, list[dict]] = {}
@@ -141,8 +143,9 @@ def _app_calls(request, messages):
     out = []
     for call in logged:
         mine = sent.get(call["tool"], [])
-        model_args = mine.pop(0) if mine else {}
-        args = {k: v for k, v in call["args"].items() if v is not None or k in model_args}
+        fits = [i for i, a in enumerate(mine) if all(k in call["args"] and call["args"][k] == v for k, v in a.items())]
+        i = max(fits, key=lambda i: len(mine[i]), default=None)  # the most specific: {} fits every call
+        args = mine.pop(i) if i is not None else call["args"]
         out.append({"tool": call["tool"], "args": args, **({"result": call["result"]} if "result" in call else {})})
     return out
 
