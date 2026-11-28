@@ -21,7 +21,9 @@ const WORDS = ["paris", "rome", "budget", "contract", "friday", "meeting", "alic
   "launch", "project", "berlin", "agreed", "send", "the", "will", "in", "march"];
 const SENTS = ["Alice moved to Paris in March.", "Bob will send the contract on Friday.", "We agreed the budget is 40k.",
   "The launch meeting is in Berlin.", "Dinner with the project team on Friday.", "The office moved to Rome."];
-export const QUERIES = ["where does alice live", "when is the contract due", "budget", "launch meeting berlin", "friday dinner"];
+export const QUERIES = ["where does alice live", "when is the contract due", "budget", "launch meeting berlin", "friday dinner",
+  "send it to the launch room", "what happened at hq"];
+const ALIASES = ["the launch room", "hq", "the office", "Berlin", "project team"];
 export const AS_OF = ["2030-01-01T00:00:00", "2021-06-01T00:00:00", "2022-06-01T00:00:00"];
 
 export function makeGen(seed, nIds = 8, idProb = 0.6) {
@@ -34,7 +36,7 @@ export function makeGen(seed, nIds = 8, idProb = 0.6) {
   const pr = (tenant) => ({ ...(r.chance(0.35) ? PRINCIPALS[4] : r.chance(0.4) ? PRINCIPALS[0] : r.pick(PRINCIPALS)), tenant: tenant ?? (r.chance(0.8) ? "t1" : "t2") });
   const readers = () => r.pick([null, null, null, ["principal:alice"], ["group:team"], ["public"], ["principal:bob", "principal:alice"]]);
   const mem = (kind0) => {
-    const kind = kind0 ?? r.pick(["event", "event", "fact", "fact", "preference", "procedure", "document", "summary"]);
+    const kind = kind0 ?? r.pick(["event", "event", "fact", "fact", "preference", "procedure", "document", "summary", "entity"]);
     const m = { content: content(), kind };
     if (r.chance(idProb)) m.id = r.pick(ids);
     const rd = readers(); if (rd !== null || r.chance(0.2)) m.readers = rd;
@@ -55,6 +57,7 @@ export function makeGen(seed, nIds = 8, idProb = 0.6) {
     }
     if (r.chance(0.2)) { m.derived_from = r.some(ids, 0.15).slice(0, 3); if (m.derived_from.length) m.origin = r.pick(["extracted", "inferred"]); }
     if (r.chance(0.05)) m.meta = { note: "n" + r.i(3) };
+    if (kind === "entity" && r.chance(0.7)) m.meta = { ...m.meta, aliases: r.chance(0.05) ? [""] : r.some(ALIASES, 0.4) };
     return m;
   };
   return {
@@ -68,6 +71,7 @@ export function makeGen(seed, nIds = 8, idProb = 0.6) {
         const n = 1 + (r.chance(0.25) ? r.i(3) : 0);
         const memories = Array.from({ length: n }, () => mem(mode === "supersede" ? r.pick(["fact", "preference", "summary"]) : undefined));
         if (mode === "supersede") for (const m of memories) m.supersedes = r.some(ids, 0.12).slice(0, 2);
+        if (mode === "propose") for (const m of memories) if (r.chance(0.5)) m.supersedes = r.some(ids, 0.2).slice(0, 2);
         if (mode === "upsert") for (const m of memories) m.id = m.id ?? r.pick(ids);
         const body = { memories, mode };
         if (r.chance(0.25)) body.idempotency_key = "k" + r.i(6);

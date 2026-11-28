@@ -399,7 +399,7 @@ class Engine:
         self.pos = {i: k for k, i in enumerate(ids)}
         unit_txt = []
         for m in ms:
-            extra = " ".join(r for _, r in m.meta.get("time_refs", []))
+            extra = " ".join([r for _, r in m.meta.get("time_refs", [])] + aliases_of(m))
             unit_txt.append(f"{m.actor}: {m.content} {extra}".strip())
         self.unit_txt = unit_txt
         self.prev = np.full(n, -1)
@@ -924,6 +924,9 @@ class Engine:
                 body, frac = (mj.content, 1.0) if gran == "thread" else self._body(j, qterms)
                 if p.resolve_dates and mj.meta.get("time_refs"):
                     body += " (" + "; ".join(f"{a} = {b}" for a, b in mj.meta["time_refs"][:2]) + ")"
+                als = aliases_of(mj)
+                if als:
+                    body += " (also: " + "; ".join(als) + ")"
                 line = f"{mj.actor}: {body}" if mj.actor else body
                 if p.render == "clean":
                     dj = mj.event_time or mj.observed_at
@@ -1069,6 +1072,12 @@ def _interleave_threads(ranked: list[int], thread_of: np.ndarray) -> list[int]:
 
 
 _ENT = re.compile(r"(?<![.!?]\s)(?<!^)\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\b")
+
+
+def aliases_of(m) -> list[str]:
+    """The names an entity record is also known by (spec §3.4): meta.aliases on kind entity, as written."""
+    a = m.meta.get("aliases") if m.kind == "entity" else None
+    return [x for x in a if isinstance(x, str)] if isinstance(a, list) else []
 
 
 def _entities(text: str) -> list[str]:

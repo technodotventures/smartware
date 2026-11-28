@@ -105,7 +105,7 @@ draft ──approve──► active ──newer valid claim──► superseded
 
 ### 3.4 Entities and edges
 
-Entities are memories of kind `entity` with `aliases[]` in `meta.aliases` and a normalised match key. Typed edges are lightweight records `{id, type, from, to, valid_from, valid_to, sources}` with `type ∈ {about, mentions, part_of, follows, causes, supports, contradicts, supersedes, derived_from, relates}` plus `x-` extensions. Edges carry their own validity and ACL (closure rule in §6.3 applies: an edge is readable only if both endpoints are).
+Entities are memories of kind `entity` with `aliases[]` in `meta.aliases` (up to 32 non-empty strings of at most 200 characters) and a normalised match key. When a recall query names an entity by its name (its `content`) or one of its aliases, as a whole phrase, the engine searches for every name that entity is known by, so "the shipping room" also finds what is written about `#eng-releases`; it finds such entities only among the asker's admissible records (§5.1), so an entity the asker cannot read never changes what they recall. [M82] A recalled entity is rendered with its aliases. Typed edges are lightweight records `{id, type, from, to, valid_from, valid_to, sources}` with `type ∈ {about, mentions, part_of, follows, causes, supports, contradicts, supersedes, derived_from, relates}` plus `x-` extensions. Edges carry their own validity and ACL (closure rule in §6.3 applies: an edge is readable only if both endpoints are).
 
 ### 3.5 Threads
 
@@ -149,7 +149,7 @@ All verbs take a `principal` (bound server-side from credentials, never from mod
 }
 ```
 
-- `mode`: `append` (default) · `upsert` (by client id, requires `if_version` when the record exists) · `supersede` (explicitly replaces `supersedes[]`) · `propose` (creates `draft` for approval).
+- `mode`: `append` (default) · `upsert` (by client id, requires `if_version` when the record exists) · `supersede` (explicitly replaces `supersedes[]`) · `propose` (creates `draft` for approval; a proposal MAY name `supersedes[]`, checked as for `supersede`, and the records it names change only when the draft is approved, at which point those still `active` are superseded [M83]).
 - Engines MUST be idempotent on `idempotency_key` (or, absent one, on content) and MUST return the original ids on replay. [M17] Content de-duplication of a positioned unit (`seq` set) includes its position, so the same words said twice in one thread are two events. Idempotency and content de-duplication MUST be scoped to the tenant and the authenticated writer, and content de-duplication also to the record's `readers` and `labels`: a write never resolves to, replaces or reveals a record another principal wrote, and never crosses tenants; the window MUST be declared in `capabilities.dedup`. [M70]
 - Engines MUST reject unknown fields and unsupported enum values, at every nesting level, with `unsupported_parameter`, and values of the wrong type with `invalid_parameter`; they never ignore or coerce them (P5). [M18]
 - `wait`: `accepted \| stored \| indexed`. The response states which stage was reached, so clients get read-your-writes when they need it.
@@ -208,6 +208,7 @@ Response (ContextPack):
   "tokens": 1432,
   "budget": {"tokens": 1500},
   "coverage": 0.71,
+  "uncovered": [],
   "abstain_hint": false,
   "snapshot": "snap_7c1e..",
   "degraded": [],
@@ -245,7 +246,7 @@ Returns `load: always` memories for a subject (user, agent, team) within a token
 
 Starts an async job that produces derived memories (`observation`, `summary`, `profile`, rule candidates). Requirements: idempotent per `(scope, cursor)`; outputs carry `derived_from` and `origin: extracted|inferred`; outputs inherit closed ACLs (§6.3); a job MUST NOT delete or rewrite `observed` evidence; results are versioned, so a re-run supersedes the previous version rather than overwriting it. [M31] Engines MAY use the client's model through MCP sampling (§8.1), so a server needs no model key.
 
-Extraction is a reflect job over named messages (`kinds` any of `fact`, `preference`, `procedure`; `ids` the source events): for each message the engine recalls the related memories as they stood at the message's time, asks the model what should be remembered, and writes each result with `origin: extracted`, `derived_from` the message (so its audience is closed over the message's, §6.3) and, for a change to an existing memory, `mode: supersede` of that memory. Rules and preferences are taken only from messages whose role is `user` or `human`, and are written `load: on_scope`. The job reports what it created and replaced, and its model usage. An engine without a model rejects these kinds (P5).
+Extraction is a reflect job over named messages (`kinds` any of `fact`, `preference`, `procedure`; `ids` the source events): for each message the engine recalls the related memories as they stood at the message's time, asks the model what should be remembered, and writes each result with `origin: extracted`, `derived_from` the message (so its audience is closed over the message's, §6.3) and, for a change to an existing memory, `mode: supersede` of that memory. Rules and preferences are taken only from messages whose role is `user` or `human`, and are written `load: on_scope`. A change to a memory a person wrote or approved (`origin: human`) is never applied by the model alone: it is written as a proposal (`mode: propose` with `supersedes`) and takes effect on approval. The job reports what it created, replaced and proposed, and its model usage. An engine without a model rejects these kinds (P5).
 
 ### 4.7 changes and subscriptions
 
@@ -285,6 +286,8 @@ When two `fact` or `preference` memories share a claim key `(subject, predicate)
 ### 5.7 Coverage and abstention
 
 Every pack carries `coverage` (0..1, declared method) estimating whether memory contains an answer. Clients MAY set `min_coverage`; below it the engine returns an empty pack with `abstain_hint: true` rather than padding with noise.
+
+Every pack also carries `uncovered`: the content words of the query (stopwords removed, one per stem, in query order) that no returned item contains, where a word naming an entity (§3.4) counts as covered when an item contains every word of one of that entity's names; it is computed over the returned items only, so a memory the asker cannot read never covers a word. [M81] `coverage` says how likely the pack holds an answer; `uncovered` says which part of the question it does not speak to, so an agent can ask about that part ("this data has no ad spend") instead of guessing.
 
 ### 5.8 Degradation
 

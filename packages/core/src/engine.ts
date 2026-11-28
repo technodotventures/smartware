@@ -26,6 +26,17 @@ const CAP_RX = /\b[A-Z][a-zA-Z'\-]+\b/g;
 const ENT_RX = /(?<![.!?]\s)(?<!^)\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\b/g;
 const SPLIT_RX = /\bbetween\b|\band\b|\bor\b|\bversus\b|\bvs\.?\b|,|;|\bafter\b|\bbefore\b|\bthan\b|\bsince\b|\bwhen\b|\bwhile\b/;
 
+/** The names an entity record is also known by (spec §3.4): meta.aliases on kind entity, as written. */
+export function aliasesOf(m: { kind: string; meta: Record<string, any> }): string[] {
+  const a = m.kind === "entity" ? m.meta.aliases : undefined;
+  return Array.isArray(a) ? a.filter((x): x is string => typeof x === "string") : [];
+}
+
+/** Text indexed for a unit beyond its content: resolved dates, and an entity's aliases. */
+function unitExtra(m: Memory): string {
+  return [...((m.meta.time_refs ?? []) as Array<[string, string]>).map((x) => x[1]), ...aliasesOf(m)].join(" ");
+}
+
 export function entities(text: string): string[] {
   const out: string[] = [];
   for (const m of text.matchAll(ENT_RX)) {
@@ -98,8 +109,7 @@ class Partition {
     this.ids.push(m.id);
     this.pos.set(m.id, k);
     this.mems.push(m);
-    const extra = ((m.meta.time_refs ?? []) as Array<[string, string]>).map((x) => x[1]).join(" ");
-    const ut = `${m.actor}: ${m.content} ${extra}`.trim();
+    const ut = `${m.actor}: ${m.content} ${unitExtra(m)}`.trim();
     this.unitTxt.push(ut);
     this.bm.add(ut);
     this.E = this.grow(this.E, k + 1);
@@ -610,7 +620,7 @@ export class Engine {
       const t0 = m.event_time ?? m.observed_at;
       refs = t0 !== null ? resolveRelative(m.content, t0) : [];
     }
-    const extra = (refs ?? []).map((x) => x[1]).join(" ");
+    const extra = [...(refs ?? []).map((x) => x[1]), ...aliasesOf(m)].join(" ");
     const out = [`${m.actor}: ${m.content}`];
     const ss = sentences(m.content);
     const w = this.p.seg_sentences;
@@ -1160,6 +1170,8 @@ export class Engine {
         let [body, frac] = gran === "thread" ? [mj.content, 1.0] as [string, number] : this.body(j, qterms);
         const refs = mj.meta.time_refs as Array<[string, string]> | undefined;
         if (p.resolve_dates && refs?.length) body += " (" + refs.slice(0, 2).map(([a, b]) => `${a} = ${b}`).join("; ") + ")";
+        const als = aliasesOf(mj);
+        if (als.length) body += " (also: " + als.join("; ") + ")";
         let line = mj.actor ? `${mj.actor}: ${body}` : body;
         if (p.render === "clean") {
           const dj = mj.event_time ?? mj.observed_at;

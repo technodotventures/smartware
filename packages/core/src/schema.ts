@@ -75,7 +75,9 @@ export const ContextItem: S = obj({
 
 export const ContextPack: S = obj({
   items: { type: "array", items: ContextItem }, tokens: { type: "integer" }, budget: obj({ tokens: { type: "integer" } }),
-  coverage: { type: "number" }, abstain_hint: { type: "boolean" }, snapshot: str, notes: strs, tokenizer: str, ...Envelope,
+  coverage: { type: "number" },
+  uncovered: { ...strs, description: "content words of the query that no returned item contains (spec §5.7)" },
+  abstain_hint: { type: "boolean" }, snapshot: str, notes: strs, tokenizer: str, ...Envelope,
 }, ["items", "tokens", "budget", "coverage", "snapshot", "degraded", "request_id"]);
 
 export const ProfileRequest: S = obj({ subject: nullable(str), budget: obj({ tokens: { type: "integer", minimum: 1 } }, ["tokens"]), as_of: nullable(ts) }, ["budget"]);

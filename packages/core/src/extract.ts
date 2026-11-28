@@ -21,6 +21,8 @@ export interface ExtractionResult {
   source: string;
   created: string[];
   replaced: string[];
+  /** Drafts that would replace a memory a person wrote or approved: they wait for approval (spec §4.6). */
+  proposed: string[];
   usage: ModelUsage[];
   skipped?: string;
 }
@@ -55,13 +57,13 @@ export async function extractFrom(host: ExtractionHost, pr: Principal, sourceId:
   kinds: readonly ExtractionKind[] = EXTRACTION_KINDS): Promise<ExtractionResult> {
   const got = await host.get([sourceId], pr);
   const src = (got.memories as Json[])[0];
-  if (!src) return { source: sourceId, created: [], replaced: [], usage: [], skipped: "not_found" };
+  if (!src) return { source: sourceId, created: [], replaced: [], proposed: [], usage: [], skipped: "not_found" };
   if ((src.kind !== "event" && src.kind !== "document") || src.status !== "active") {
-    return { source: sourceId, created: [], replaced: [], usage: [], skipped: "not an active event or document" };
+    return { source: sourceId, created: [], replaced: [], proposed: [], usage: [], skipped: "not an active event or document" };
   }
   const userStated = src.role === "user" || src.role === "human";
   const allowed = new Set<string>(kinds.filter((k) => userStated || k === "fact"));
-  if (!allowed.size) return { source: sourceId, created: [], replaced: [], usage: [], skipped: "no kinds apply" };
+  if (!allowed.size) return { source: sourceId, created: [], replaced: [], proposed: [], usage: [], skipped: "no kinds apply" };
   const when = iso(src.event_time) ?? iso(src.valid_from) ?? iso(src.observed_at);
   const content = String(src.content);
 
@@ -72,6 +74,13 @@ export async function extractFrom(host: ExtractionHost, pr: Principal, sourceId:
   for (const it of rec.items as Json[]) {
     const id = it.memory_ids?.[0];
     if (typeof id === "string" && !existing.has(id)) existing.set(id, { id, kind: it.kind, text: it.text });
+  }
+  // a memory a person wrote or approved (origin: human) is never replaced by the model on its own: the change is
+  // written as a proposal that supersedes it once approved
+  const human = new Set<string>();
+  if (existing.size) {
+    const cur = await host.get([...existing.keys()], pr);
+    for (const m of (cur.memories ?? []) as Json[]) if (m?.origin === "human") human.add(String(m.id));
   }
   const speaker = String(src.actor || "the user");
   const system = EXTRACT_PROMPT.replaceAll("{{speaker}}", speaker);
@@ -85,9 +94,9 @@ export async function extractFrom(host: ExtractionHost, pr: Principal, sourceId:
     const parsed = JSON.parse(stripFence(out.text));
     if (Array.isArray(parsed?.memories)) ops = parsed.memories;
   } catch {
-    return { source: sourceId, created: [], replaced: [], usage, skipped: "model reply was not JSON" };
+    return { source: sourceId, created: [], replaced: [], proposed: [], usage, skipped: "model reply was not JSON" };
   }
-  const created: string[] = [], replaced: string[] = [];
+  const created: string[] = [], replaced: string[] = [], proposed: string[] = [];
   let n = 0;
   for (const op of ops) {
     if (n >= MAX_PER_MESSAGE) break;
@@ -105,16 +114,19 @@ export async function extractFrom(host: ExtractionHost, pr: Principal, sourceId:
     }
     if (isReplace) m.supersedes = [op.replaces];
     const key = "extract:" + createHash("sha256").update(`${sourceId}|${n}|${kind}|${text}`).digest("hex").slice(0, 24);
+    const propose = isReplace && human.has(op.replaces);
     try {
-      const r = await host.remember({ memories: [m], mode: isReplace ? "supersede" : "append", idempotency_key: key }, pr);
-      created.push(...(r.ids as string[]));
-      if (isReplace) replaced.push(op.replaces);
+      const r = await host.remember({ memories: [m], mode: propose ? "propose" : isReplace ? "supersede" : "append",
+        idempotency_key: key }, pr);
+      if (propose) proposed.push(...(r.ids as string[]));
+      else created.push(...(r.ids as string[]));
+      if (isReplace && !propose) replaced.push(op.replaces);
       n++;
     } catch {
       // one bad memory (for example a replace the caller may not write) never loses the others
     }
   }
-  return { source: sourceId, created, replaced, usage };
+  return { source: sourceId, created, replaced, proposed, usage };
 }
 
 function stripFence(s: string): string {

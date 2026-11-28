@@ -136,6 +136,8 @@ export interface ContextPack extends Envelope {
   tokens: number;
   budget: { tokens?: number };
   coverage: number;
+  /** Content words of the query that no returned item contains: ask about these rather than guess (spec §5.7). */
+  uncovered?: string[];
   abstain_hint?: boolean;
   snapshot: string;
   notes?: string[];

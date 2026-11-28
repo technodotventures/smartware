@@ -301,7 +301,8 @@ export class McpSession {
           include: { history: Boolean(a.include_history) } };
         for (const k of ["as_of", "kinds", "min_coverage"]) if (k in a) body[k] = a[k];
         out = await s.recall(body, pr);
-        const text = (out.items as Json[]).map((i) => i.text).join("\n\n") || "(no relevant memory)";
+        let text = (out.items as Json[]).map((i) => i.text).join("\n\n") || "(no relevant memory)";
+        if ((out.items as Json[]).length && out.uncovered?.length) text += `\n\n(nothing recalled mentions: ${out.uncovered.join(", ")})`;
         return { content: [{ type: "text", text, annotations: { audience: ["assistant"] } }], structuredContent: out, isError: false };
       }
       case "smartware_remember":

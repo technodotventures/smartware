@@ -18,7 +18,7 @@ META = {"M65"}
 RETIRED = {"M01": "described the document, not engines", "M63": "folded into M65", "M64": "folded into M65"}
 LEVEL.update({"M66": "L3", "M67": "L3", "M68": "L2", "M69": "L3", "M70": "L1", "M71": "L4", "M72": "L3",
               "M73": "L3", "M74": "L3", "M75": "L2", "M76": "L2", "M77": "L3",
-              "M78": "L1", "M79": "L1", "M80": "L3"})
+              "M78": "L1", "M79": "L1", "M80": "L3", "M81": "L1", "M82": "L3", "M83": "L4"})
 NA = {"M57": "no connectors ship with the reference engine"}
 
 

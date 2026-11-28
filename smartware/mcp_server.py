@@ -241,8 +241,10 @@ class Server:
                 if k in a:
                     body[k] = a[k]
             out = s.recall(body, pr)
-            content = [{"type": "text", "text": "\n\n".join(i["text"] for i in out["items"]) or "(no relevant memory)",
-                        "annotations": {"audience": ["assistant"]}}]
+            text = "\n\n".join(i["text"] for i in out["items"]) or "(no relevant memory)"
+            if out["items"] and out.get("uncovered"):
+                text += f"\n\n(nothing recalled mentions: {', '.join(out['uncovered'])})"
+            content = [{"type": "text", "text": text, "annotations": {"audience": ["assistant"]}}]
             return {"content": content, "structuredContent": out, "isError": False}
         if name == "smartware_remember":
             out = s.remember(a, pr)

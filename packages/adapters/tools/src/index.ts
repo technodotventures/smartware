@@ -49,6 +49,8 @@ export interface RecallResult {
   context: string;
   items: Array<{ ref?: string; text: string; validity: string; citations: string[]; superseded?: string[] }>;
   coverage: number;
+  /** Words of the query nothing recalled mentions: ask about these rather than guess. */
+  uncovered: string[];
   abstain_hint: boolean;
   snapshot: string;
   degraded: string[];
@@ -153,7 +155,7 @@ function recallResult(pack: ContextPack): RecallResult {
     context: formatContext(pack),
     items: pack.items.map((i) => ({ ref: i.ref, text: i.text, validity: i.validity, citations: i.citations,
       ...(i.superseded?.length ? { superseded: i.superseded } : {}) })),
-    coverage: pack.coverage, abstain_hint: Boolean(pack.abstain_hint), snapshot: pack.snapshot, degraded: pack.degraded ?? [],
+    coverage: pack.coverage, uncovered: pack.uncovered ?? [], abstain_hint: Boolean(pack.abstain_hint), snapshot: pack.snapshot, degraded: pack.degraded ?? [],
   };
 }
 
