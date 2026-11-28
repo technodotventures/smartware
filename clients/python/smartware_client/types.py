@@ -55,6 +55,8 @@ class ContextPack:
     request_id: str
     abstain_hint: bool = False
     notes: List[str] = field(default_factory=list)
+    #: content words of the query that no returned item contains: ask about these rather than guess (spec §5.7)
+    uncovered: List[str] = field(default_factory=list)
     tokenizer: str = ""
     raw: Json = field(default_factory=dict, repr=False)
 
@@ -64,7 +66,8 @@ class ContextPack:
                    budget=dict(d.get("budget") or {}), coverage=float(d.get("coverage", 0.0)),
                    snapshot=str(d.get("snapshot", "")), degraded=list(d.get("degraded") or []),
                    request_id=d.get("request_id", ""), abstain_hint=bool(d.get("abstain_hint", False)),
-                   notes=list(d.get("notes") or []), tokenizer=d.get("tokenizer", ""), raw=d)
+                   notes=list(d.get("notes") or []), tokenizer=d.get("tokenizer", ""),
+                   uncovered=list(d.get("uncovered") or []), raw=d)
 
     @property
     def ids(self) -> List[str]:

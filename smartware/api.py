@@ -22,8 +22,8 @@ from dataclasses import replace
 from datetime import datetime
 
 from . import __version__
-from ._text import count_tokens, sentences, terms
-from .engine import Engine, Params
+from ._text import STOPWORDS, count_tokens, sentences, stem, terms, words
+from .engine import Engine, Params, aliases_of
 from .model import KINDS, ORIGINS, SYSTEM, Claim, Memory, Principal, RecallRequest, Source, new_id
 from . import clock as _clock
 
@@ -147,6 +147,44 @@ _FORGET_KEYS = {"ids", "mode", "cascade", "dry_run", "reason", "allow_reingest"}
 
 _DERIVED_META = {"entities", "time_refs"}  # computed by the engine from content; never taken from a client
 META_MAX_DEPTH = 32  # client meta may nest this deep (it is stored, exported and serialised recursively)
+MAX_ALIASES = 32
+
+
+def _phrase_in(name: str, text: str) -> bool:
+    """Whether every word of `name` appears, in order and adjacent, among the words of `text`."""
+    n, w = words(name), words(text)
+    return bool(n) and any(w[i:i + len(n)] == n for i in range(len(w) - len(n) + 1))
+
+
+def uncovered_words(query: str, texts: list[str], named: list[list[str]]) -> list[str]:
+    """Content words of the query that no returned item contains (§5.7), in query order. A word that names an
+    entity (§3.4) counts as covered when an item contains every word of any name that entity is known by."""
+    have = {x for t in texts for x in terms(t)}
+
+    def covered_name(n: str) -> bool:
+        ts = terms(n)
+        return bool(ts) and all(x in have for x in ts)
+
+    resolved = {w for names in named if any(covered_name(n) for n in names) for n in names for w in words(n)}
+    out, seen = [], set()
+    for w in words(query):
+        if w in STOPWORDS:
+            continue
+        st = stem(w)
+        if st in seen:
+            continue
+        seen.add(st)
+        if st not in have and w not in resolved:
+            out.append(w)
+    return out
+
+
+def _check_aliases(a) -> None:
+    """An entity's meta.aliases (spec §3.4): a list of up to 32 non-empty strings of at most 200 characters."""
+    if not isinstance(a, list) or len(a) > MAX_ALIASES or \
+            not all(isinstance(x, str) and x.strip() and len(x) <= 200 for x in a):
+        raise SmartwareError("invalid_parameter", f"meta.aliases on an entity is a list of up to {MAX_ALIASES} "
+                             "non-empty strings of at most 200 characters")
 
 
 def _json_depth(v, d):
@@ -172,6 +210,7 @@ class Service:
         self.encoder_name = getattr(embedder, "name", "")
         self.ranker_notes: list[str] = []
         self._keys: dict[tuple, list[str]] = {}
+        self._alias_gate: dict[str, tuple[str, bool]] = {}  # per tenant: does any entity have aliases (by mutation)
         self._jobs: dict[str, dict] = {}
         self._feedback: list[dict] = []
         self._edges: dict[str, dict] = {}
@@ -318,6 +357,8 @@ class Service:
         if any(str(k).startswith("_") or k in _DERIVED_META for k in raw.get("meta", {})):
             raise SmartwareError("invalid_parameter", "meta keys starting with '_', and the engine-derived keys "
                            f"{sorted(_DERIVED_META)}, are reserved for the engine")
+        if kind == "entity" and "aliases" in raw.get("meta", {}):
+            _check_aliases(raw["meta"]["aliases"])
         readers = _strs(raw.get("readers"), "readers", nullable=True)
         writers = _strs(raw.get("writers"), "writers", nullable=True)
         labels = _strs(raw.get("labels", []), "labels")
@@ -419,7 +460,8 @@ class Service:
                 if _int(body["if_version"], "if_version") != existing.version:
                     raise SmartwareError("version_conflict", "version mismatch", current=existing.version)
             sup = []
-            if mode == "supersede":
+            if mode in ("supersede", "propose") and (mode == "supersede" or raw.get("supersedes")):
+                # a proposal may name what it would replace; nothing changes until it is approved (§4.1)
                 if m.kind in ("event", "document"):
                     raise SmartwareError("invalid_parameter", "evidence (event/document) is never superseded")
                 for old in _strs(raw.get("supersedes", []), "supersedes"):
@@ -448,6 +490,9 @@ class Service:
                 del self.engine.mem[m.id]
                 self.engine.order.remove(m.id)
                 self.engine.tcount[existing.tenant] -= 1
+            if mode == "propose":
+                m.supersedes.extend(sup)  # pending: applied on approval
+                sup = []
             for oi in sup:
                 om = self.engine.mem[oi]
                 om.status, om.superseded_by = "superseded", m.id
@@ -549,6 +594,11 @@ class Service:
                     **({"standing": True} if is_standing else {}),
                 })
 
+        # entities the query names by one of their names (§3.4): search for every name they are known by
+        named = self._named_entities(req, principal)
+        extra = list(dict.fromkeys(x for ns in named for x in ns if not _phrase_in(x, req.query)))
+        if extra:
+            req = replace(req, query=f"{req.query} {' '.join(extra)}")
         if mode == "fast":  # declared: no second pass, no learned ranker
             self.engine.p = replace(p, w_prf=0.0, ranker="rrf")
         try:
@@ -566,9 +616,37 @@ class Service:
         if abstain:
             items, used = [], 0
         degraded = [n.split(":", 1)[1] for n in pack.notes if n.startswith("degraded:")]
-        return {"items": items, "tokens": used, "budget": {"tokens": tokens}, "coverage": cov, "abstain_hint": abstain,
+        uncovered = uncovered_words(body["query"], [i["text"] for i in items], named)
+        return {"items": items, "tokens": used, "budget": {"tokens": tokens}, "coverage": cov, "uncovered": uncovered,
+                "abstain_hint": abstain,
                 "snapshot": pack.snapshot, "degraded": degraded,
                 "notes": [n for n in pack.notes if not n.startswith("degraded:")], "tokenizer": self.tokenizer}
+
+    def _named_entities(self, req: RecallRequest, principal: Principal) -> list[list[str]]:
+        """Admissible entity records (§3.4) that the query names by their name or an alias, as lists of every name
+        each one is known by. Found with the request's own admissibility (access, as_of, known_at, scope), so a name
+        the asker cannot read never changes their recall."""
+        e, t = self.engine, principal.tenant
+        key = f"{e.tmut[t]}|{e.tcount[t]}"
+        has = self._alias_gate.get(t)
+        if has is None or has[0] != key:
+            has = (key, any(m.tenant == t and aliases_of(m) for m in e.mem.values()))
+            self._alias_gate[t] = has
+        if not has[1]:
+            return []
+        sub = e.recall(replace(req, kinds=("entity",), budget_tokens=2000, max_items=20,
+                               filters={**req.filters, "granularity": "unit", "neighbours": 0, "quotas": {}}))
+        out = []
+        for it in sub.items:
+            m = e.mem.get(it.memory_ids[0])
+            if m is None or m.kind != "entity":
+                continue
+            names = [x for x in [m.content.strip()] + [a.strip() for a in aliases_of(m)] if x]
+            if any(_phrase_in(x, req.query) for x in names):
+                out.append(list(dict.fromkeys(names)))
+            if len(out) >= 8:
+                break
+        return out
 
     # ------------------------------------------------------------ profile (load: always)
     @_enveloped
@@ -760,6 +838,18 @@ class Service:
             raise SmartwareError("forbidden", "approval requires write access or the approver role")
         m.status = "active"
         m.version += 1
+        pending, m.supersedes = list(m.supersedes), []
+        for oi in pending:  # what the proposal named (§4.1), if it is still current and the approver may write it
+            om = self.engine.mem.get(oi)
+            if om is None or om.status != "active" or not self._can_read(om, principal, ("secret",)) or \
+                    not (self._can_write(om, principal) or "approver" in principal.groups):
+                continue
+            om.status, om.superseded_by = "superseded", m.id
+            om.valid_to = m.valid_from or m.event_time or _clock.now()
+            om.meta["_explicit_superseded"] = True
+            om.version += 1
+            m.supersedes.append(oi)
+            self._log("supersede", oi, principal)
         if m.claim is not None and m.kind not in ("event", "document"):
             self.engine._supersede(m, principal)  # an approved claim supersedes like any other (M48)
         self.engine.touch(m.tenant)

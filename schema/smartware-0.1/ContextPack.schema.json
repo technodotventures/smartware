@@ -108,6 +108,13 @@
   "coverage": {
    "type": "number"
   },
+  "uncovered": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   },
+   "description": "content words of the query that no returned item contains (spec §5.7)"
+  },
   "abstain_hint": {
    "type": "boolean"
   },

@@ -142,3 +142,22 @@ test("openAiCompatible: JSON mode, provider-reported cost, retry on 5xx, refusal
     srv.close();
   }
 });
+
+test("a change to a rule a person wrote is proposed, not applied, until someone approves it", async () => {
+  const model = scripted([(input) => ({ memories: [{ op: "replace", replaces: input.existing[0].id, kind: "procedure",
+    content: "Morgan's release notes now go to #product-updates." }] })]);
+  const s = new Service(new HashingEncoder(), { model });
+  const [rule] = (await s.remember({ memories: [{ kind: "procedure", content: "Morgan's release notes go only to #eng-releases.",
+    load: "on_scope", readers: ["principal:alice"], valid_from: "2026-01-05T09:00:00Z" }] }, A)).ids;
+  assert.equal((await s.get([rule], A)).memories[0].origin, "human");
+  const msg = await say(s, "release notes go to #product-updates now", 1, "user", "2026-06-01T09:00:00Z");
+  const j = await finished(s, (await s.reflect({ kinds: ["procedure"], ids: [msg] }, A)).job);
+  assert.deepEqual([j.created, j.replaced], [[], []]);
+  assert.equal(j.proposed.length, 1);
+  const [draft] = (await s.get(j.proposed, A)).memories;
+  assert.deepEqual([draft.status, draft.supersedes], ["draft", [rule]]);
+  assert.equal((await s.get([rule], A)).memories[0].status, "active", "the person's rule stands until approval");
+  await s.approve(draft.id, A);
+  const [old] = (await s.get([rule], A)).memories;
+  assert.deepEqual([old.status, old.superseded_by], ["superseded", draft.id]);
+});

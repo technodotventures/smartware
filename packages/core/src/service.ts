@@ -5,18 +5,18 @@
 // Every response carries request_id and degraded[]. Client-supplied ids are unique per tenant (M02): they are
 // stored as `<id>~<tenant>` and every response shows the client's own id.
 import { createHash, randomBytes } from "node:crypto";
-import { Engine, newJournal } from "./engine.js";
+import { aliasesOf, Engine, newJournal } from "./engine.js";
 import type { Encoder } from "./encoders.js";
 import { EXTRACTION_KINDS, extractFrom, type ExtractionKind } from "./extract.js";
 import type { ChatModel } from "./llm.js";
 import { claimKey, contentHash, type ContextPack, KINDS, makeMemory, memoryFromJson, memoryToJson, newId, ORIGINS, Principal,
-  pyCmp, recallRequest, type Claim, type Memory, type Source } from "./model.js";
+  pyCmp, recallRequest, type Claim, type Memory, type RecallRequest, type Source } from "./model.js";
 import type { Params } from "./params.js";
 import { FEATURES } from "./params.js";
 import { pyDumps } from "./pyjson.js";
 import { scanSecrets } from "./secrets.js";
 import { emptyDelta, SqliteStore, type Store, type StoreDelta } from "./store.js";
-import { countTokens, sentences, terms } from "./text.js";
+import { countTokens, sentences, stem, STOPWORDS, terms, words } from "./text.js";
 import { epochSeconds, isoformat, MIN_TIME, nowMicros, parseTime, type Micros } from "./time.js";
 
 export const SPEC_VERSION = "0.1";
@@ -203,6 +203,8 @@ export class Service {
   notes: string[];
   keys = new Map<string, string[]>();
   jobs = new Map<string, Json>();
+  /** Per tenant: whether any entity record has aliases, as of a mutation count (recall skips alias lookup if not). */
+  private aliasGate = new Map<string, [string, boolean]>();
   feedbackLog: Json[] = [];
   edgesMap = new Map<string, Json>();
   tombstones = new Map<string, Json>();
@@ -735,6 +737,7 @@ export class Service {
     if (Object.keys(raw.meta ?? {}).some((k) => k.startsWith("_") || DERIVED_META.has(k))) {
       throw new SmartwareError("invalid_parameter", `meta keys starting with '_', and the engine-derived keys ${pyList([...DERIVED_META].sort())}, are reserved for the engine`);
     }
+    if (kind === "entity" && raw.meta?.aliases !== undefined) checkAliases(raw.meta.aliases);
     const readers = strs(raw.readers, "readers", true);
     const writers = strs(raw.writers, "writers", true);
     let labels = strs(raw.labels ?? [], "labels")!;
@@ -868,7 +871,8 @@ export class Service {
         }
       }
       const sup: string[] = [];
-      if (mode === "supersede") {
+      if (mode === "supersede" || (mode === "propose" && raw.supersedes?.length)) {
+        // a proposal may name what it would replace; nothing changes until it is approved (§4.1)
         if (m.kind === "event" || m.kind === "document") throw new SmartwareError("invalid_parameter", "evidence (event/document) is never superseded");
         for (const old of strs(raw.supersedes ?? [], "supersedes")!) {
           const oi = this.in_(t, old);
@@ -894,6 +898,7 @@ export class Service {
         E.removeOrder(m.id, existing.tenant);
         E.tcount.set(existing.tenant, (E.tcount.get(existing.tenant) ?? 0) - 1);
       }
+      if (mode === "propose") { m.supersedes.push(...sup); sup.length = 0; } // pending: applied on approval
       for (const oi of sup) {
         const om = E.mem.get(oi)!;
         om.status = "superseded"; om.superseded_by = m.id;
@@ -962,7 +967,7 @@ export class Service {
     if (body.min_coverage !== undefined && body.min_coverage !== null) minCov = num(body.min_coverage, "min_coverage", 0, 1);
     const labels = strs(inc.labels ?? [], "include.labels")!;
     const asOf = ts(body.as_of), knownAt = ts(body.known_at);
-    return this.verb(pr, false, () => {
+    return this.verb(pr, false, async () => {
       const req = recallRequest({
         query: body.query, principal: pr, tenant: pr.tenant, as_of: asOf ?? nowMicros(), known_at: knownAt,
         scope: scope.within ?? "", kinds, budget_tokens: tokens, max_items: itemsMax, include_history: Boolean(inc.history),
@@ -996,6 +1001,13 @@ export class Service {
           });
         }
       };
+      // entities the query names by one of their names (§3.4): search for every name they are known by
+      const named = this.namedEntities(req, pr);
+      const extra = [...new Set(named.flat().filter((x) => !this.phraseIn(x, req.query)))];
+      if (extra.length) {
+        req.query = `${req.query} ${extra.join(" ")}`;
+        try { await this.warm([req.query]); } catch { /* lexical channels still answer; dense reports degraded */ }
+      }
       if (mode === "fast") E.p = { ...p, w_prf: 0, ranker: "rrf" }; // declared: no second pass, no learned ranker
       let pack: ContextPack;
       try {
@@ -1013,9 +1025,43 @@ export class Service {
       const abstain = minCov !== null && cov < minCov;
       const outItems = abstain ? [] : items;
       const degraded = pack.notes.filter((n) => n.startsWith("degraded:")).map((n) => n.split(":").slice(1).join(":"));
-      return env({ items: outItems, tokens: abstain ? 0 : used, budget: { tokens }, coverage: cov, abstain_hint: abstain,
+      const uncovered = uncoveredWords(String(body.query), outItems.map((i) => i.text as string), named);
+      return env({ items: outItems, tokens: abstain ? 0 : used, budget: { tokens }, coverage: cov, uncovered, abstain_hint: abstain,
         snapshot: pack.snapshot, degraded, notes: pack.notes.filter((n) => !n.startsWith("degraded:")), tokenizer: this.tokenizer });
     }, [body.query]);
+  }
+
+  /** Admissible entity records (§3.4) that the query names by their name or an alias, as lists of every name each
+   * one is known by. Found with the request's own admissibility (access, as_of, known_at, scope), so a name the
+   * asker cannot read never changes their recall. */
+  private namedEntities(req: RecallRequest, pr: Principal): string[][] {
+    const E = this.engine, t = pr.tenant;
+    const key = `${E.tmut.get(t) ?? 0}|${E.tcount.get(t) ?? 0}`;
+    let has = this.aliasGate.get(t);
+    if (!has || has[0] !== key) {
+      has = [key, (E.order.get(t) ?? []).some((i) => { const m = E.mem.get(i); return m !== undefined && aliasesOf(m).length > 0; })];
+      this.aliasGate.set(t, has);
+    }
+    if (!has[1]) return [];
+    const sub = E.recall({ ...req, kinds: ["entity"], budget_tokens: 2000, max_items: 20,
+      filters: { ...req.filters, granularity: "unit", neighbours: 0, quotas: {} } });
+    const out: string[][] = [];
+    for (const it of sub.items) {
+      const m = E.mem.get(it.memory_ids[0]!);
+      if (!m || m.kind !== "entity") continue;
+      const names = [m.content.trim(), ...aliasesOf(m).map((x) => x.trim())].filter(Boolean);
+      if (names.some((x) => this.phraseIn(x, req.query))) out.push([...new Set(names)]);
+      if (out.length >= 8) break;
+    }
+    return out;
+  }
+
+  /** Whether every word of `name` appears, in order and adjacent, among the words of `text`. */
+  private phraseIn(name: string, text: string): boolean {
+    const n = words(name), w = words(text);
+    if (!n.length) return false;
+    for (let i = 0; i + n.length <= w.length; i++) if (n.every((x, j) => w[i + j] === x)) return true;
+    return false;
   }
 
   // ------------------------------------------------------------ profile (load: always)
@@ -1274,6 +1320,19 @@ export class Service {
       m.status = "active";
       m.version++;
       E.dirty(iid);
+      const pending = m.supersedes;
+      m.supersedes = [];
+      for (const oi of pending) { // what the proposal named (§4.1), if it is still current and the approver may write it
+        const om = E.mem.get(oi);
+        if (!om || om.status !== "active" || !this.canRead(om, pr, ["secret"]) || !(this.canWrite(om, pr) || pr.groups.has("approver"))) continue;
+        om.status = "superseded"; om.superseded_by = m.id;
+        om.valid_to = m.valid_from ?? m.event_time ?? nowMicros();
+        om.meta._explicit_superseded = true;
+        om.version++;
+        E.dirty(oi);
+        m.supersedes.push(oi);
+        this.log("supersede", oi, pr);
+      }
       if (m.claim && m.kind !== "event" && m.kind !== "document") E.supersede(m, pr); // an approved claim supersedes (M48)
       E.touch(m.tenant);
       this.log("approve", iid, pr);
@@ -1346,7 +1405,7 @@ export class Service {
       throw new SmartwareError("invalid_parameter", "extraction takes ids, not threads or scope");
     }
     const job = "job_" + randomBytes(6).toString("hex");
-    const rec: Json = { status: "running", kinds, sources: ids.length, created: [], replaced: [], skipped: 0, model: model.name,
+    const rec: Json = { status: "running", kinds, sources: ids.length, created: [], replaced: [], proposed: [], skipped: 0, model: model.name,
       usage: { input_tokens: 0, cached_input_tokens: 0, output_tokens: 0, cost_usd: 0, calls: 0, unpriced_calls: 0 }, tenant: pr.tenant };
     await this.verb(pr, true, () => { this.jobs.set(job, rec); this.jJobs.add(job); });
     void (async () => {
@@ -1355,6 +1414,7 @@ export class Service {
           const r = await extractFrom(this, pr, id, model, kinds);
           rec.created.push(...r.created);
           rec.replaced.push(...r.replaced);
+          rec.proposed.push(...r.proposed);
           if (r.skipped) rec.skipped++;
           for (const u of r.usage) {
             rec.usage.calls++;
@@ -1686,6 +1746,34 @@ export function extractiveSummary(ms: Memory[], k = 5): string {
   scored.sort((a, b) => b[0] - a[0] || b[1] - a[1]);
   const keep = scored.slice(0, k).map((x) => x[1]).sort((a, b) => a - b);
   return keep.map((i) => sents[i]![1]).join(" ");
+}
+
+export const MAX_ALIASES = 32;
+
+/** Content words of the query that no returned item contains (§5.7), in query order. A word that names an entity
+ * (§3.4) counts as covered when an item contains every word of any name that entity is known by. */
+export function uncoveredWords(query: string, texts: string[], named: string[][]): string[] {
+  const have = new Set<string>();
+  for (const t of texts) for (const x of terms(t)) have.add(x);
+  const coveredName = (n: string) => { const ts = terms(n); return ts.length > 0 && ts.every((x) => have.has(x)); };
+  const resolved = new Set<string>();
+  for (const names of named) if (names.some(coveredName)) for (const n of names) for (const w of words(n)) resolved.add(w);
+  const out: string[] = [], seen = new Set<string>();
+  for (const w of words(query)) {
+    if (STOPWORDS.has(w)) continue;
+    const st = stem(w);
+    if (seen.has(st)) continue;
+    seen.add(st);
+    if (!have.has(st) && !resolved.has(w)) out.push(w);
+  }
+  return out;
+}
+
+/** An entity's meta.aliases (spec §3.4): a list of up to 32 non-empty strings of at most 200 characters. */
+function checkAliases(a: unknown): void {
+  if (!Array.isArray(a) || a.length > MAX_ALIASES || !a.every((x) => typeof x === "string" && x.trim() && x.length <= 200)) {
+    throw new SmartwareError("invalid_parameter", `meta.aliases on an entity is a list of up to ${MAX_ALIASES} non-empty strings of at most 200 characters`);
+  }
 }
 
 export function ruleFromDiff(draft: string, final: string): string | null {
